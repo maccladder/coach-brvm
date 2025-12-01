@@ -14,7 +14,7 @@ return new class extends Migration
             $table->string('stored_path')->nullable();
             $table->longText('interpreted_markdown')->nullable();
             // $table->string('avatar_video_url')->nullable();
-            $table->string('audio_path')->nullable();
+            // $table->string('audio_path')->nullable();
         });
     }
 
