@@ -8,7 +8,7 @@ return new class extends Migration {
     {
         Schema::table('client_bocs', function (Blueprint $table) {
             $table->integer('amount')->default(0);
-            $table->string('status')->default('pending'); // pending / paid / failed
+            // $table->string('status')->default('pending'); // pending / paid / failed
             $table->string('transaction_id')->nullable()->unique();
         });
     }
