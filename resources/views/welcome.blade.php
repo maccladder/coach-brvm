@@ -237,7 +237,7 @@
                     </ul>
 
                     {{-- Tu pourras remplacer # par une vraie route ou lien Udemy --}}
-                    <a href="#formations" class="btn btn-success">
+                    <a href="{{ route('formations.brvm') }}" class="btn btn-success">
                         🎓 Voir les formations BRVM
                     </a>
                 </div>

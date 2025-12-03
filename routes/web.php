@@ -95,3 +95,8 @@ Route::get('/client-bocs/{clientBoc}/status', [ClientBocController::class, 'stat
     Route::get('/client-bocs/{clientBoc}/bubbles', [ClientBocController::class, 'bubbles'])
     ->name('client-bocs.bubbles');
 
+// formation brvm
+
+Route::get('/formations-brvm', function () {
+    return view('sections.formations-brvm');
+})->name('formations.brvm');
