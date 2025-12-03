@@ -10,7 +10,9 @@ use App\Services\AiInterpreter;
 use App\Services\AvatarService;
 use App\Services\AiVoiceService;
 use App\Services\CinetpayService;
+use App\Services\BrvmBubbleService;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Http\JsonResponse;
 
 class ClientBocController extends Controller
 {
@@ -251,6 +253,30 @@ public function status(ClientBoc $clientBoc)
         'ready' => !empty($clientBoc->interpreted_markdown),
     ]);
 }
+
+public function bubbles(ClientBoc $clientBoc, BrvmBubbleService $bubbles)
+{
+    // 1️⃣ Vérifier qu’un PDF est bien stocké
+    if (!$clientBoc->stored_path) {
+        return response()->json([
+            'status'  => 'error',
+            'message' => 'Aucun fichier PDF associé à ce BOC.',
+            'count'   => 0,
+            'data'    => [],
+        ], 404);
+    }
+
+    // 2️⃣ Appeler le service qui utilise GPT-4.1
+    $results = $bubbles->extractFromBoc($clientBoc->stored_path);
+
+    // 3️⃣ Retour propre vers ton front D3.js
+    return response()->json([
+        'status' => 'success',
+        'count'  => count($results),
+        'data'   => $results,
+    ]);
+}
+
 
 
 

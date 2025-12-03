@@ -88,3 +88,10 @@ Route::get('/client-bocs/{clientBoc}/status', [ClientBocController::class, 'stat
     Route::get('/{clientFinancial}', [ClientFinancialController::class, 'show'])
         ->name('show');
 });
+
+
+// route des bubbles
+
+    Route::get('/client-bocs/{clientBoc}/bubbles', [ClientBocController::class, 'bubbles'])
+    ->name('client-bocs.bubbles');
+
