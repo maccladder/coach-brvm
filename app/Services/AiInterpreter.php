@@ -61,40 +61,57 @@ class AiInterpreter
 
         $promptSystem = <<<SYS
 Tu es un coach d’investissement spécialisé sur la BRVM.
-Tu t’adresses à un investisseur particulier ivoirien qui connaît les bases (action, dividende, rendement)
-mais veut des conseils concrets et compréhensibles.
+Tu t’adresses à un investisseur particulier ivoirien qui connaît les bases
+(action, dividende, rendement) et veut un débrief TRÈS CONCIS de la séance.
 
 OBJECTIF :
-- À partir du résumé brut de la séance (analyses importées, statistiques de marché, états financiers),
-  tu dois :
-  - résumer les infos clés,
-  - expliquer clairement ce que cela peut signifier pour un investisseur à court, moyen et long terme,
-  - proposer des pistes d’actions possibles (ex : « renforcer progressivement », « alléger », « attendre
-    une meilleure fenêtre », « rester en observation »), en restant prudent.
+À partir du résumé brut de la séance (analyses importées, statistiques de marché,
+éventuels tableaux de variations, états financiers), tu dois surtout faire ressortir :
+
+1) Le **Top des fortes hausses**
+2) Le **Top des fortes baisses**
+3) Des **commentaires synthétiques** sur ces hausses et baisses
+   (secteurs concernés, explications possibles, points de vigilance).
 
 CONTRAINTES :
 - Ne donne jamais de certitudes ni de promesses de gains.
-- Parle toujours en termes de scénarios possibles et de probabilité.
-- N’invente pas de chiffres ; si une info n’apparaît pas dans les extraits, dis-le simplement.
-- Ajoute toujours un rappel en fin de texte du type :
-  « Ceci n’est pas un conseil d’investissement personnalisé ; faites vos propres vérifications. »
+- N’invente pas de chiffres précis (cours, %…) :
+  - Si la variation exacte apparaît dans les documents, tu peux la reprendre.
+  - Sinon, parle de manière qualitative (« légère hausse », « forte baisse », etc.).
+- Si tu n’as pas assez d’informations pour identifier un top hausses/baisses fiable,
+  dis-le clairement au lieu d’inventer.
+- Réponse courte : vise environ **250 à 400 mots** maximum.
+- Pas de bla-bla inutile ni de redites.
 
 STRUCTURE ATTENDUE (en Markdown) :
-1. **Résumé rapide du marché** (3 à 5 puces)
-2. **Lecture pour l’investisseur**
-   - Court terme (0–3 mois)
-   - Moyen terme (3–12 mois)
-   - Long terme (12+ mois)
-3. **Idées d’actions possibles**
-   Liste numérotée de 3 à 6 idées concrètes mais prudentes.
-4. **Points de vigilance / risques**
-5. **Rappel**
+
+1. **Top des fortes hausses**
+   - Liste 3 à 5 valeurs maximum.
+   - Format conseillé : `- TICKER – Nom : commentaire très court (+X % si l’info existe).`
+   - Si tu n’as pas d’information fiable, écris :
+     « Aucune liste fiable des plus fortes hausses n’est disponible dans les documents fournis. »
+
+2. **Top des fortes baisses**
+   - Même principe que pour les hausses.
+   - Si tu n’as pas d’information fiable, écris :
+     « Aucune liste fiable des plus fortes baisses n’est disponible dans les documents fournis. »
+
+3. **Commentaires sur les mouvements du jour**
+   - 3 à 6 puces maximum qui expliquent :
+     - Ce que montrent ces hausses/baisses (secteurs, tendance du marché…)
+     - Ce qu’un investisseur doit surveiller (risques, volatilité, niveaux élevés, etc.)
+     - Éventuellement des idées générales d’attitude (rester patient, observer, éviter de paniquer…),
+       sans donner d’ordre d’achat ou de vente personnalisé.
+
+4. **Rappel**
+   - Termine toujours par une ligne du style :
+     « Ceci n’est pas un conseil d’investissement personnalisé ; faites vos propres vérifications. »
 SYS;
 
         $promptUser = <<<USR
 Date analysée : {$targetDate}
 
-Voici des extraits des documents importés (analyses & états financiers).
+Voici des extraits des documents importés (analyses, états financiers, tableaux éventuels du BOC).
 Utilise uniquement ces infos et ton expérience générale des marchés émergents pour produire le texte
 selon la structure demandée dans le message système.
 
@@ -112,10 +129,11 @@ USR;
                     'Content-Type'  => 'application/json',
                 ],
                 'json' => [
-                    // 👉 configurable via .env, par ex. gpt-4.1-mini
+                    // Modèle configurable via .env
+                    // (chez toi : OPENAI_MARKET_MODEL=gpt-4.1-mini)
                     'model'       => env('OPENAI_MARKET_MODEL', 'gpt-4.1-mini'),
                     'temperature' => 0.4,
-                    'max_tokens'  => 1500,
+                    'max_tokens'  => 900, // plus court qu’avant
                     'messages'    => [
                         ['role' => 'system', 'content' => $promptSystem],
                         ['role' => 'user',   'content' => $promptUser],
@@ -139,11 +157,11 @@ USR;
 
     public function interpretFinancial(array $meta): string
     {
-        return "### Analyse des états financiers de {$meta['company']} ({$meta['period']})\n\n".
-               "- Chiffre d’affaires : …\n".
-               "- Bénéfice net : …\n".
-               "- Capacité d’autofinancement : …\n".
-               "- Dettes : …\n".
+        return "### Analyse des états financiers de {$meta['company']} ({$meta['period']})\n\n" .
+               "- Chiffre d’affaires : …\n" .
+               "- Bénéfice net : …\n" .
+               "- Capacité d’autofinancement : …\n" .
+               "- Dettes : …\n" .
                "- Trésorerie : …\n";
     }
 
