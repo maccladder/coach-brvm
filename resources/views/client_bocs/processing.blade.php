@@ -7,6 +7,7 @@
         <div class="card-body text-center p-4">
 
             <div class="mb-3">
+                {{-- Mets un petit loader (gif ou svg) dans public/img/ --}}
                 <img src="{{ asset('img/loader-dots.gif') }}"
                      alt="Chargement…"
                      style="width:90px;height:auto;">
@@ -58,7 +59,6 @@
         // Animation "fake" du pourcentage pour rassurer visuellement
         let pct = 5;
         const fakeTimer = setInterval(() => {
-            // on monte doucement jusqu'à 90% max
             if (pct < 90) {
                 pct += Math.floor(Math.random() * 5) + 1; // +1 à +5
                 if (pct > 90) pct = 90;
@@ -82,24 +82,21 @@
                     bar.setAttribute('aria-valuenow', 100);
                     label.textContent = '100%';
 
-                    // petite pause pour laisser voir 100%
                     setTimeout(() => {
                         window.location.href = redirectUrl;
                     }, 800);
                     return;
                 }
             } catch (e) {
-                // en cas d'erreur réseau on retente plus tard
                 console.warn('Erreur status BOC', e);
             }
 
-            // si pas encore prêt, on recheck
             setTimeout(checkStatus, 5000);
         }
 
         checkStatus();
 
-        // Sécurité : même si on rate les réponses, on force l'ouverture du résultat après 3 minutes
+        // Sécurité : forcer la redirection après 3 min au cas où
         setTimeout(() => {
             window.location.href = redirectUrl;
         }, 180000);

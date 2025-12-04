@@ -156,42 +156,31 @@ TXT;
 
 public function paymentReturn(
     ClientBoc $clientBoc,
-    CinetpayService $cinetpay,
-    AiInterpreter $ai,
-    AiVoiceService $voice,
-    AvatarService $avatar
+    CinetpayService $cinetpay
 ) {
-    // Vérifier le statut chez CinetPay
+    // 1) Vérifier le statut chez CinetPay
     $status = $cinetpay->checkPayment($clientBoc->transaction_id);
 
     if ($status === 'ACCEPTED') {
 
-        // 1) S'assurer que le statut est bien "paid"
+        // 2) Marquer le BOC comme "paid" si ce n'est pas déjà fait
         if ($clientBoc->status !== 'paid') {
             $clientBoc->status = 'paid';
             $clientBoc->save();
         }
 
-        // 2) (Re)générer l’analyse si quelque chose manque
-        if (
-            empty($clientBoc->interpreted_markdown) ||
-            empty($clientBoc->avatar_video_url) ||
-            empty($clientBoc->audio_path)
-        ) {
-            $this->generateAnalysisForBoc($clientBoc, $ai, $voice, $avatar);
-        }
-
-        // 3) Revenir DIRECTEMENT sur la page de résultat, comme avant
+        // 3) 👉 Rediriger vers la page de transition /processing
         return redirect()
-            ->route('client-bocs.show', $clientBoc)
-            ->with('success', 'Paiement réussi, ton analyse est prête !');
+            ->route('client-bocs.processing', $clientBoc)
+            ->with('success', 'Paiement réussi, ton analyse est en cours.');
     }
 
-    // Refusé ou en attente
+    // Cas refusé / annulé
     return redirect()
         ->route('client-bocs.index')
         ->with('error', 'Paiement non validé ou annulé.');
 }
+
 
 
 
@@ -283,8 +272,26 @@ public function bubbles(ClientBoc $clientBoc, BrvmBubbleService $bubbles)
     /**
      * Afficher le résultat pour un BOC client.
      */
-    public function show(ClientBoc $clientBoc)
-    {
+     public function show(
+        ClientBoc $clientBoc,
+        AiInterpreter $ai,
+        AiVoiceService $voice,
+        AvatarService $avatar
+    ) {
+        // 🔁 Sécurité : si le paiement est OK mais qu'on n'a pas encore l'analyse,
+        // on (re)génère tout de suite.
+        if ($clientBoc->status === 'paid' && empty($clientBoc->interpreted_markdown)) {
+            try {
+                $this->generateAnalysisForBoc($clientBoc, $ai, $voice, $avatar);
+                $clientBoc->refresh(); // recharge les champs depuis la base
+            } catch (\Throwable $e) {
+                \Log::error(
+                    'Erreur génération analyse BOC '.$clientBoc->id.' : '.$e->getMessage(),
+                    ['exception' => $e]
+                );
+            }
+        }
+
         $audioPath = $clientBoc->audio_path;
 
         return view('client_bocs.show', [

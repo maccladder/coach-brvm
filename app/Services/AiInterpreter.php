@@ -16,6 +16,7 @@ class AiInterpreter
             'base_uri' => 'https://api.openai.com/v1/',
             'timeout'  => 60,
         ]);
+
         $this->pdfParser = $this->pdfParser ?: new Parser();
     }
 
@@ -39,11 +40,12 @@ class AiInterpreter
         foreach ($statements as $s) {
             $snippet = $this->extractTextFromStoragePdf($s['file_path']);
             $label = match ($s['statement_type']) {
-                'income'  => 'Compte de résultat',
-                'balance' => 'Bilan',
-                'cashflow'=> 'Flux de trésorerie',
-                default   => ucfirst($s['statement_type']),
+                'income'   => 'Compte de résultat',
+                'balance'  => 'Bilan',
+                'cashflow' => 'Flux de trésorerie',
+                default    => ucfirst($s['statement_type']),
             };
+
             $texts[] = "# État financier : {$s['issuer']} ({$s['period']}) – {$label}\n" .
                        ($snippet ? "Extrait:\n{$snippet}\n" : "");
         }
@@ -110,8 +112,10 @@ USR;
                     'Content-Type'  => 'application/json',
                 ],
                 'json' => [
-                    'model'       => 'gpt-4o-mini',
+                    // 👉 configurable via .env, par ex. gpt-4.1-mini
+                    'model'       => env('OPENAI_MARKET_MODEL', 'gpt-4.1-mini'),
                     'temperature' => 0.4,
+                    'max_tokens'  => 1500,
                     'messages'    => [
                         ['role' => 'system', 'content' => $promptSystem],
                         ['role' => 'user',   'content' => $promptUser],
@@ -134,28 +138,14 @@ USR;
     }
 
     public function interpretFinancial(array $meta): string
-{
-    // $meta['file'] = chemin du PDF/Excel
-    // $meta['company'], $meta['period']
-
-    // Ici tu fais :
-    // 1) lecture du fichier
-    // 2) prompt spécial qui demande :
-    //    - chiffre d’affaires
-    //    - bénéfice net
-    //    - capacité d’autofinancement
-    //    - dettes
-    //    - trésorerie
-    // 3) retour en markdown structuré
-
-    // Pour l’instant tu peux juste mettre un stub de test :
-    return "### Analyse des états financiers de {$meta['company']} ({$meta['period']})\n\n".
-           "- Chiffre d’affaires : …\n".
-           "- Bénéfice net : …\n".
-           "- Capacité d’autofinancement : …\n".
-           "- Dettes : …\n".
-           "- Trésorerie : …\n";
-}
+    {
+        return "### Analyse des états financiers de {$meta['company']} ({$meta['period']})\n\n".
+               "- Chiffre d’affaires : …\n".
+               "- Bénéfice net : …\n".
+               "- Capacité d’autofinancement : …\n".
+               "- Dettes : …\n".
+               "- Trésorerie : …\n";
+    }
 
     private function extractTextFromStoragePdf(?string $storagePath): ?string
     {
@@ -167,9 +157,9 @@ USR;
         try {
             $pdf  = $this->pdfParser->parseFile($full);
             $text = trim($pdf->getText());
-            // On normalise et on tronque (1 500 chars)
             $text = preg_replace('/[ \t]+/', ' ', $text);
 
+            // On tronque à ~1500 caractères
             return mb_substr($text, 0, 1500);
         } catch (\Throwable $e) {
             return null;

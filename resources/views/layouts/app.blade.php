@@ -75,7 +75,7 @@
 
                 {{-- Tu pourras activer / changer plus tard --}}
                 <li class="nav-item">
-                    <a class="nav-link" href="#formations">Formations BRVM</a>
+                    <a class="nav-link" href="{{ route('formations.brvm') }}">Formations BRVM</a>
                 </li>
             </ul>
 

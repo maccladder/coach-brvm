@@ -10,59 +10,59 @@ use Smalot\PdfParser\Parser;
 class BrvmBubbleService
 {
     public function extractFromBoc(?string $storagePath): array
-{
-    Log::info('BrvmBubbleService: storagePath = ' . ($storagePath ?? 'NULL'));
+    {
+        Log::info('BrvmBubbleService: storagePath = ' . ($storagePath ?? 'NULL'));
 
-    if (!$storagePath) {
-        Log::warning('BrvmBubbleService: aucun chemin de fichier fourni');
-        return [];
-    }
-
-    // 1️⃣ Récupérer le vrai chemin du PDF sur le disk "public"
-    try {
-        $fullPath = Storage::disk('public')->path($storagePath);
-    } catch (\Throwable $e) {
-        Log::error('BrvmBubbleService: erreur Storage::path : ' . $e->getMessage());
-        return [];
-    }
-
-    if (!is_file($fullPath)) {
-        Log::warning('BrvmBubbleService: fichier introuvable : ' . $fullPath);
-        return [];
-    }
-
-    // 2️⃣ Extraire le texte du PDF
-    try {
-        $parser = new Parser();
-        $pdf    = $parser->parseFile($fullPath);
-
-        // 👉 On essaie de ne garder que les pages 3 et 4 (index 2 et 3)
-        $pages        = $pdf->getPages();
-        $selectedText = '';
-
-        foreach ([2, 3] as $i) {
-            if (isset($pages[$i])) {
-                $selectedText .= $pages[$i]->getText() . "\n\n";
-            }
+        if (!$storagePath) {
+            Log::warning('BrvmBubbleService: aucun chemin de fichier fourni');
+            return [];
         }
 
-        // Si jamais on n'arrive pas à isoler, on retombe sur tout le texte
-        $text = $selectedText !== '' ? $selectedText : $pdf->getText();
+        // 1️⃣ Récupérer le vrai chemin du PDF sur le disk "public"
+        try {
+            $fullPath = Storage::disk('public')->path($storagePath);
+        } catch (\Throwable $e) {
+            Log::error('BrvmBubbleService: erreur Storage::path : ' . $e->getMessage());
+            return [];
+        }
 
-    } catch (\Throwable $e) {
-        Log::error('BrvmBubbleService: erreur parsing PDF : ' . $e->getMessage());
-        return [];
-    }
+        if (!is_file($fullPath)) {
+            Log::warning('BrvmBubbleService: fichier introuvable : ' . $fullPath);
+            return [];
+        }
 
-    // 3️⃣ Appel OpenAI (GPT-4.1) pour structurer le tableau
-    $apiKey = env('OPENAI_API_KEY');
+        // 2️⃣ Extraire le texte du PDF
+        try {
+            $parser = new Parser();
+            $pdf    = $parser->parseFile($fullPath);
 
-    if (!$apiKey) {
-        Log::error('BrvmBubbleService: pas de OPENAI_API_KEY dans .env');
-        return [];
-    }
+            // 👉 On essaie de ne garder que les pages 3 et 4 (index 2 et 3)
+            $pages        = $pdf->getPages();
+            $selectedText = '';
 
-    $systemPrompt = <<<SYS
+            foreach ([2, 3] as $i) {
+                if (isset($pages[$i])) {
+                    $selectedText .= $pages[$i]->getText() . "\n\n";
+                }
+            }
+
+            // Si jamais on n'arrive pas à isoler, on retombe sur tout le texte
+            $text = $selectedText !== '' ? $selectedText : $pdf->getText();
+
+        } catch (\Throwable $e) {
+            Log::error('BrvmBubbleService: erreur parsing PDF : ' . $e->getMessage());
+            return [];
+        }
+
+        // 3️⃣ Appel OpenAI pour structurer le tableau
+        $apiKey = env('OPENAI_API_KEY');
+
+        if (!$apiKey) {
+            Log::error('BrvmBubbleService: pas de OPENAI_API_KEY dans .env');
+            return [];
+        }
+
+        $systemPrompt = <<<SYS
 Tu es un parseur de Bulletins Officiels de la Cote (BRVM).
 
 On te fournit le texte (OCR) des pages 3 et 4 d'un BOC,
@@ -85,7 +85,8 @@ IMPORTANT :
   et les sous-titres comme "COMPARTIMENT PRESTIGE", "COMPARTIMENT PRINCIPAL".
 - Ne renvoie pas les obligations, indices, ou autres tableaux : uniquement les actions.
 
-Réponds uniquement avec un JSON valide de la forme :
+↪ TRÈS IMPORTANT :
+Réponds **uniquement** avec un JSON valide exactement de la forme :
 
 {
   "stocks": [
@@ -97,63 +98,65 @@ Réponds uniquement avec un JSON valide de la forme :
     }
   ]
 }
+
+Sans texte avant ni après.
 SYS;
 
-    $userPrompt = "Voici le texte brut des pages actions du BOC :\n\n" . $text;
+        $userPrompt = "Voici le texte brut des pages actions du BOC :\n\n" . $text;
 
-    try {
-        $response = Http::withToken($apiKey)
-            ->timeout(60) // pour éviter le timeout 30s que tu as vu
-            ->post('https://api.openai.com/v1/chat/completions', [
-                'model' => 'gpt-4.1',
-                'response_format' => ['type' => 'json_object'],
-                'messages' => [
-                    ['role' => 'system', 'content' => $systemPrompt],
-                    ['role' => 'user', 'content' => $userPrompt],
-                ],
-            ]);
+        try {
+            $response = Http::withToken($apiKey)
+                ->timeout(60)
+                ->post('https://api.openai.com/v1/chat/completions', [
+                    'model'       => env('OPENAI_BUBBLE_MODEL', 'gpt-4.1-mini'),
+                    'temperature' => 0.2,
+                    'messages'    => [
+                        ['role' => 'system', 'content' => $systemPrompt],
+                        ['role' => 'user',   'content' => $userPrompt],
+                    ],
+                ]);
 
-        if (!$response->ok()) {
-            Log::error('BrvmBubbleService: erreur HTTP OpenAI : '
-                . $response->status() . ' - ' . $response->body());
-            return [];
-        }
-
-        $body    = $response->json();
-        $content = $body['choices'][0]['message']['content'] ?? null;
-
-        if (!$content) {
-            Log::error('BrvmBubbleService: réponse OpenAI sans contenu');
-            return [];
-        }
-
-        $json = json_decode($content, true);
-        if (!is_array($json) || !isset($json['stocks']) || !is_array($json['stocks'])) {
-            Log::error('BrvmBubbleService: JSON retourné invalide : ' . $content);
-            return [];
-        }
-
-        $results = [];
-        foreach ($json['stocks'] as $row) {
-            if (empty($row['ticker']) || !array_key_exists('change', $row)) {
-                continue;
+            if (!$response->ok()) {
+                Log::error('BrvmBubbleService: erreur HTTP OpenAI : '
+                    . $response->status() . ' - ' . $response->body());
+                return [];
             }
 
-            $results[] = [
-                'ticker' => (string) $row['ticker'],
-                'name'   => (string) ($row['name'] ?? $row['ticker']),
-                'price'  => isset($row['price']) ? (float) $row['price'] : null,
-                'change' => (float) $row['change'],
-            ];
+            $body    = $response->json();
+            $content = $body['choices'][0]['message']['content'] ?? null;
+
+            if (!$content) {
+                Log::error('BrvmBubbleService: réponse OpenAI sans contenu');
+                return [];
+            }
+
+            $json = json_decode($content, true);
+            if (!is_array($json) || !isset($json['stocks']) || !is_array($json['stocks'])) {
+                Log::error('BrvmBubbleService: JSON retourné invalide : ' . $content);
+                return [];
+            }
+
+            $results = [];
+            foreach ($json['stocks'] as $row) {
+                if (empty($row['ticker']) || !array_key_exists('change', $row)) {
+                    continue;
+                }
+
+                $results[] = [
+                    'ticker' => (string) $row['ticker'],
+                    'name'   => (string) ($row['name'] ?? $row['ticker']),
+                    'price'  => isset($row['price']) ? (float) $row['price'] : null,
+                    'change' => (float) $row['change'],
+                ];
+            }
+
+            Log::info('BrvmBubbleService: actions extraites (GPT-x) = ' . count($results));
+
+            return $results;
+
+        } catch (\Throwable $e) {
+            Log::error('BrvmBubbleService: exception OpenAI : ' . $e->getMessage());
+            return [];
         }
-
-        Log::info('BrvmBubbleService: actions extraites (GPT-4.1) = ' . count($results));
-
-        return $results;
-
-    } catch (\Throwable $e) {
-        Log::error('BrvmBubbleService: exception OpenAI : ' . $e->getMessage());
-        return [];
     }
-}
 }
