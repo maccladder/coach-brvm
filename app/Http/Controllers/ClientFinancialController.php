@@ -15,7 +15,9 @@ class ClientFinancialController extends Controller
 {
     public function index()
     {
-        $financials = ClientFinancial::orderByDesc('created_at')->take(20)->get();
+        $financials = ClientFinancial::orderByDesc('created_at')
+            ->take(20)
+            ->get();
 
         return view('client_financials.index', compact('financials'));
     }
@@ -36,11 +38,12 @@ class ClientFinancialController extends Controller
         ]);
 
         $file = $request->file('file');
-        $storedPath = $file->store('uploads/client_financials');
+        // disk = "public"
+        $storedPath = $file->store('uploads/client_financials', 'public');
 
         $financial = new ClientFinancial();
         $financial->title             = $request->input('title')
-                                        ?: 'Etats financiers '.$request->company.' - '.$request->period;
+                                        ?: 'Etats financiers ' . $request->company . ' - ' . $request->period;
         $financial->company           = $request->company;
         $financial->period            = $request->period;
         $financial->financial_date    = $request->financial_date
@@ -51,11 +54,9 @@ class ClientFinancialController extends Controller
         $financial->amount            = (int) env('CINETPAY_TEST_AMOUNT', 100);
         $financial->status            = 'pending';
         $financial->transaction_id    = Str::uuid()->toString();
-
-        // dd($financial->transaction_id);
-
         $financial->save();
 
+        // URLs de retour / notify
         $returnUrl = route('client-financials.payment.return', $financial);
         $notifyUrl = route('client-financials.payment.notify');
 
@@ -80,39 +81,46 @@ class ClientFinancialController extends Controller
     /**
      * Analyse IA des états financiers + avatar + audio.
      */
-    private function generateAnalysisForFinancial(
-        ClientFinancial $financial,
-        AiInterpreter $ai,
-        AiVoiceService $voice,
-        AvatarService $avatar
-    ): void {
-        // 1) Construire la demande pour l’IA
-        $meta = [
-            'company' => $financial->company,
-            'period'  => $financial->period,
-            'file'    => $financial->stored_path,
-        ];
+   /**
+ * Analyse IA des états financiers + avatar + audio.
+ */
+private function generateAnalysisForFinancial(
+    ClientFinancial $financial,
+    AiInterpreter $ai,
+    AiVoiceService $voice,
+    AvatarService $avatar
+): void {
 
-        // 👉 tu adapteras l’implémentation dans AiInterpreter
-        // pour faire un prompt spécial "états financiers"
-        $markdown = $ai->interpretFinancial($meta);
+    // 🔥 1) Élargir le temps d'exécution PHP pour ce traitement
+    if (function_exists('set_time_limit')) {
+        @set_time_limit(300); // 300 secondes = 5 minutes
+    }
+    @ini_set('max_execution_time', '300');
 
-        $financial->interpreted_markdown = $markdown;
+    // 2) Construire la demande pour l’IA (interprétation complète)
+    $meta = [
+        'company'   => $financial->company,
+        'period'    => $financial->period,
+        'file_path' => $financial->stored_path,
+    ];
 
-        // 2) Nettoyer pour faire un texte court pour l’avatar
-        $plain = $markdown ?? '';
-        $plain = preg_replace('/^\s*#+\s*/m', '', $plain);
-        $plain = preg_replace('/^\s*[-*]\s+/m', '', $plain);
-        $plain = str_replace(['**', '*', '_', '`'], '', $plain);
-        $plain = preg_replace('/\[(.*?)\]\((.*?)\)/', '$1', $plain);
-        $plain = preg_replace("/\n{2,}/", "\n", $plain);
-        $plain = trim($plain);
+    $markdown = $ai->interpretFinancial($meta);
+    $financial->interpreted_markdown = $markdown;
 
-        $lines       = array_filter(array_map('trim', explode("\n", $plain)));
-        $mainLines   = array_slice($lines, 0, 4);
-        $mainSummary = implode(' ', $mainLines);
+    // 3) Préparer un texte court pour l’avatar IA
+    $plain = $markdown ?? '';
+    $plain = preg_replace('/^\s*#+\s*/m', '', $plain);
+    $plain = preg_replace('/^\s*[-*]\s+/m', '', $plain);
+    $plain = str_replace(['**', '*', '_', '`'], '', $plain);
+    $plain = preg_replace('/\[(.*?)\]\((.*?)\)/', '$1', $plain);
+    $plain = preg_replace("/\n{2,}/", "\n", $plain);
+    $plain = trim($plain);
 
-        $textForAvatar = <<<TXT
+    $lines       = array_filter(array_map('trim', explode("\n", $plain)));
+    $mainLines   = array_slice($lines, 0, 4);
+    $mainSummary = implode(' ', $mainLines);
+
+    $textForAvatar = <<<TXT
 Bonjour, je suis ton coach BRVM.
 
 Voici les points essentiels des états financiers de {$financial->company} ({$financial->period}) :
@@ -123,95 +131,51 @@ Rappelle-toi : ces informations ne sont pas un conseil d’investissement person
 Analyse toujours toi-même les entreprises avant d’investir.
 TXT;
 
-        $textForAvatar = mb_substr($textForAvatar, 0, 900);
+    // D-ID ne supporte pas trop long → on coupe à 900 chars
+    $textForAvatar = mb_substr($textForAvatar, 0, 900);
 
-        // 3) Avatar vidéo
-        $avatarUrl = $avatar->generateTalkingHead($textForAvatar);
-        if ($avatarUrl) {
-            $financial->avatar_video_url = $avatarUrl;
-        }
-
-        // 4) Audio
-        $audioPath = $voice->makeAudioFromMarkdown(
-            $financial->interpreted_markdown ?? '',
-            'clientfinancial-' . $financial->id
-        );
-        $financial->audio_path = $audioPath;
-
-        $financial->save();
+    // 4) Avatar IA (D-ID)
+    $avatarUrl = $avatar->generateTalkingHead($textForAvatar);
+    if ($avatarUrl) {
+        $financial->avatar_video_url = $avatarUrl;
     }
 
-    public function paymentReturn(
-    ClientFinancial $financial,
+    // 5) Audio IA (OpenAI TTS)
+    $audioPath = $voice->makeAudioFromMarkdown(
+        $financial->interpreted_markdown ?? '',
+        'clientfinancial-' . $financial->id
+    );
+    $financial->audio_path = $audioPath;
+
+    // 6) Save final
+    $financial->save();
+}
+
+
+
+   public function paymentReturn(
+    ClientFinancial $clientFinancial,
     CinetpayService $cinetpay,
     AiInterpreter $ai,
     AiVoiceService $voice,
     AvatarService $avatar
 ) {
-    // On recharge depuis la base pour être sûr d'avoir un vrai enregistrement
-    $financial = ClientFinancial::findOrFail($financial->id);
+    $financial = $clientFinancial;
 
-    // Vérifier le statut chez CinetPay en utilisant le transaction_id existant
+    // Vérifier le paiement
     $status = $cinetpay->checkPayment($financial->transaction_id);
 
     if ($status === 'ACCEPTED') {
 
-        // 1) Marquer comme payé avec un UPDATE explicite
+        // On marque "paid" si ce n'est pas déjà fait
         if ($financial->status !== 'paid') {
-            ClientFinancial::where('id', $financial->id)->update([
-                'status' => 'paid',
-            ]);
-            $financial->status = 'paid'; // garder l'instance en phase
+            $financial->status = 'paid';
+            $financial->save();
         }
 
-        // 2) (Re)générer l'analyse si quelque chose manque
-        if (
-            empty($financial->interpreted_markdown) ||
-            empty($financial->avatar_video_url) ||
-            empty($financial->audio_path)
-        ) {
-            $this->generateAnalysisForFinancial($financial, $ai, $voice, $avatar);
-        }
-
-        // 3) Redirection vers la page résultat (comme pour les BOC)
-        return redirect()
-            ->route('client-financials.show', $financial)
-            ->with('success', 'Paiement réussi, ton analyse est prête !');
-    }
-
-    // Paiement refusé / annulé
-    return redirect()
-        ->route('client-financials.index')
-        ->with('error', 'Paiement non validé ou annulé.');
-}
-
-    public function paymentNotify(
-        Request $request,
-        CinetpayService $cinetpay,
-        AiInterpreter $ai,
-        AiVoiceService $voice,
-        AvatarService $avatar
-    ) {
-        \Log::debug('PAYMENT NOTIFY payload', $request->all());
-        $transactionId = $request->input('transaction_id');
-          \Log::debug('PAYMENT NOTIFY transaction_id = ' . var_export($transactionId, true));
-
-        if (!$transactionId) {
-            return response()->json(['message' => 'no transaction_id'], 400);
-        }
-
-        $financial = ClientFinancial::where('transaction_id', $transactionId)->first();
-        if (!$financial) {
-            return response()->json(['message' => 'financial not found'], 404);
-        }
-
-        $status = $cinetpay->checkPayment($transactionId);
-
-        if ($status === 'ACCEPTED') {
-            if ($financial->status !== 'paid') {
-                $financial->status = 'paid';
-                $financial->save();
-            }
+        // 🟢 En LOCAL : CinetPay ne peut pas appeler /payment/notify,
+        // donc on fait le gros boulot ici pour que ça marche chez toi.
+        if (app()->environment('local')) {
 
             if (
                 empty($financial->interpreted_markdown) ||
@@ -220,33 +184,94 @@ TXT;
             ) {
                 $this->generateAnalysisForFinancial($financial, $ai, $voice, $avatar);
             }
+
+            // On envoie directement sur la page finale
+            return redirect()
+                ->route('client-financials.show', $financial)
+                ->with('success', 'Paiement réussi, ton analyse a été générée.');
         }
 
-        return response()->json(['message' => 'ok']);
+        // 🟣 En PROD (domaine public) : on laisse paymentNotify() faire le travail
+        return redirect()
+            ->route('client-financials.processing', $financial)
+            ->with('success', 'Paiement réussi, ton analyse est en cours de préparation.');
     }
 
-    // On branchera ici la même page "processing" que pour les BOC
-    public function processing(ClientFinancial $financial)
+    return redirect()
+        ->route('client-financials.index')
+        ->with('error', 'Paiement non validé ou annulé.');
+}
+
+
+
+   public function paymentNotify(
+    Request $request,
+    CinetpayService $cinetpay,
+    AiInterpreter $ai,
+    AiVoiceService $voice,
+    AvatarService $avatar
+) {
+    \Log::debug('PAYMENT NOTIFY payload', $request->all());
+    $transactionId = $request->input('transaction_id');
+    \Log::debug('PAYMENT NOTIFY transaction_id = ' . var_export($transactionId, true));
+
+    if (!$transactionId) {
+        return response()->json(['message' => 'no transaction_id'], 400);
+    }
+
+    $financial = ClientFinancial::where('transaction_id', $transactionId)->first();
+    if (!$financial) {
+        return response()->json(['message' => 'financial not found'], 404);
+    }
+
+    $status = $cinetpay->checkPayment($transactionId);
+
+    if ($status === 'ACCEPTED') {
+        if ($financial->status !== 'paid') {
+            $financial->status = 'paid';
+            $financial->save();
+        }
+
+        if (
+            empty($financial->interpreted_markdown) ||
+            empty($financial->avatar_video_url) ||
+            empty($financial->audio_path)
+        ) {
+            // Gros boulot côté serveur (en prod quand le site sera public)
+            $this->generateAnalysisForFinancial($financial, $ai, $voice, $avatar);
+        }
+    }
+
+    return response()->json(['message' => 'ok']);
+}
+
+
+    public function processing(ClientFinancial $clientFinancial)
     {
         return view('client_financials.processing', [
-            'financial'  => $financial,
-            'showUrl'    => route('client-financials.show', $financial),
-            'statusUrl'  => route('client-financials.status', $financial),
+            'financial' => $clientFinancial,
+            'showUrl'   => route('client-financials.show', $clientFinancial),
+            'statusUrl' => route('client-financials.status', $clientFinancial),
         ]);
     }
 
-    public function status(ClientFinancial $financial)
+    public function status(ClientFinancial $clientFinancial)
     {
+        $clientFinancial->refresh();
+
         return response()->json([
-            'ready' => !empty($financial->interpreted_markdown),
+            'ready' =>
+                !empty($clientFinancial->interpreted_markdown) &&
+                !empty($clientFinancial->avatar_video_url) &&
+                !empty($clientFinancial->audio_path),
         ]);
     }
 
-    public function show(ClientFinancial $financial)
+    public function show(ClientFinancial $clientFinancial)
     {
         return view('client_financials.show', [
-            'financial' => $financial,
-            'audioPath' => $financial->audio_path,
+            'financial' => $clientFinancial,
+            'audioPath' => $clientFinancial->audio_path,
         ]);
     }
 }

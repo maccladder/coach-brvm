@@ -5,7 +5,7 @@
     <div class="card shadow-sm border-0">
         <div class="card-body p-5 text-center">
 
-            {{-- Petites bulles animées en haut (tu peux les styliser avec CSS) --}}
+            {{-- Petites bulles animées --}}
             <div class="mb-4">
                 <span class="badge rounded-circle bg-primary" style="width:14px;height:14px;">&nbsp;</span>
                 <span class="badge rounded-circle bg-primary opacity-50 mx-2" style="width:10px;height:10px;">&nbsp;</span>
@@ -14,9 +14,7 @@
 
             <h2 class="mb-2">Paiement confirmé ✅</h2>
 
-            <p class="lead mb-2">
-                Merci ! Votre paiement a été accepté.
-            </p>
+            <p class="lead mb-2">Merci ! Votre paiement a été accepté.</p>
 
             <p class="text-muted mb-4">
                 L’IA est en train d’analyser vos états financiers
@@ -47,62 +45,73 @@
                 Cette étape peut prendre entre 1 et 2 minutes.<br>
                 Gardez cette page ouverte, vous serez automatiquement redirigé vers le résultat.
             </p>
+
         </div>
     </div>
 </div>
 
 <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const statusUrl   = @json($statusUrl);
-        const redirectUrl = @json($showUrl);
+document.addEventListener('DOMContentLoaded', () => {
 
-        const bar   = document.getElementById('progressBar');
-        const label = document.getElementById('progressPercent');
+    const statusUrl   = @json($statusUrl);
+    const redirectUrl = @json($showUrl);
 
-        let pct = 5;
+    const bar   = document.getElementById('progressBar');
+    const label = document.getElementById('progressPercent');
 
-        // Animation visuelle (fake) jusqu'à 90 %
-        const fakeTimer = setInterval(() => {
-            if (pct < 90) {
-                pct += Math.floor(Math.random() * 5) + 1; // +1 à +5
-                if (pct > 90) pct = 90;
-                bar.style.width = pct + '%';
-                bar.setAttribute('aria-valuenow', pct);
-                label.textContent = pct + '%';
+    let pct = 5;
+
+    // Fake progression jusqu'à 90%
+    const fakeTimer = setInterval(() => {
+        if (pct < 90) {
+            pct += Math.floor(Math.random() * 5) + 1;
+            if (pct > 90) pct = 90;
+            bar.style.width = pct + '%';
+            bar.setAttribute('aria-valuenow', pct);
+            label.textContent = pct + '%';
+        }
+    }, 2000);
+
+    // Timeout sécurité 3 minutes
+    const forceTimer = setTimeout(() => {
+        window.location.href = redirectUrl;
+    }, 180000);
+
+    async function checkStatus() {
+        try {
+            const resp = await fetch(statusUrl, {
+                headers: {'Accept': 'application/json'}
+            });
+            const data = await resp.json();
+
+            if (data.ready) {
+                // STOP timers
+                clearInterval(fakeTimer);
+                clearTimeout(forceTimer);
+
+                // Finir la barre
+                bar.style.width = '100%';
+                bar.setAttribute('aria-valuenow', 100);
+                label.textContent = '100%';
+
+                // Redirection
+                setTimeout(() => {
+                    window.location.href = redirectUrl;
+                }, 800);
+
+                return;
             }
-        }, 2000);
 
-        async function checkStatus() {
-            try {
-                const resp = await fetch(statusUrl, {
-                    headers: {'Accept': 'application/json'}
-                });
-                const data = await resp.json();
-
-                if (data.ready) {
-                    clearInterval(fakeTimer);
-                    bar.style.width = '100%';
-                    bar.setAttribute('aria-valuenow', 100);
-                    label.textContent = '100%';
-
-                    setTimeout(() => {
-                        window.location.href = redirectUrl;
-                    }, 800);
-                    return;
-                }
-            } catch (e) {
-                console.warn('Erreur status financial', e);
-            }
-
-            setTimeout(checkStatus, 5000);
+        } catch (e) {
+            console.warn('Erreur status financial', e);
         }
 
-        checkStatus();
+        setTimeout(checkStatus, 5000);
+    }
 
-        // Sécurité : au bout de 3 min on force le résultat
-        setTimeout(() => {
-            window.location.href = redirectUrl;
-        }, 180000);
-    });
+    checkStatus();
+
+});
 </script>
+
 @endsection

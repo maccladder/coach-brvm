@@ -32,10 +32,10 @@
                             📄 Analyser ma BOC (200&nbsp;FCFA)
                         </a>
 
-                        {{-- Bouton "état financier" – tu actives la route plus tard --}}
-                        <button class="btn btn-outline-secondary btn-lg" type="button" disabled>
-                            📊 Analyser un état financier (bientôt)
-                        </button>
+                        {{-- 🔥 Bouton état financier activé --}}
+                        <a href="{{ route('client-financials.create') }}" class="btn btn-outline-secondary btn-lg">
+                            📊 Analyser un état financier
+                        </a>
                     </div>
 
                     <div class="text-muted small">
@@ -191,9 +191,9 @@
 
                 {{-- État financier --}}
                 <div class="col-md-6">
-                    <div class="card h-100 border border-dashed shadow-sm">
+                    <div class="card h-100 border-0 shadow-sm">
                         <div class="card-body d-flex flex-column">
-                            <h5 class="fw-semibold mb-1">📊 Analyse d’un état financier (bientôt)</h5>
+                            <h5 class="fw-semibold mb-1">📊 Analyse d’un état financier</h5>
                             <p class="text-muted small mb-2">
                                 Pour comprendre en profondeur une entreprise cotée : compte de résultat,
                                 bilan, cash-flow…
@@ -207,11 +207,12 @@
                             <div class="mt-auto d-flex justify-content-between align-items-center">
                                 <div>
                                     <div class="fw-bold">~ 3 000&nbsp;FCFA</div>
-                                    <div class="text-muted small">par état financier (prochainement)</div>
+                                    <div class="text-muted small">par état financier (tarif indicatif)</div>
                                 </div>
-                                <button class="btn btn-outline-secondary" type="button" disabled>
-                                    Bientôt disponible
-                                </button>
+                                {{-- 🔥 Bouton actif vers le formulaire EF --}}
+                                <a href="{{ route('client-financials.create') }}" class="btn btn-outline-secondary">
+                                    Analyser un état financier
+                                </a>
                             </div>
                         </div>
                     </div>
@@ -236,7 +237,6 @@
                         <li>Adaptés aux débutants comme à ceux qui veulent aller plus loin</li>
                     </ul>
 
-                    {{-- Tu pourras remplacer # par une vraie route ou lien Udemy --}}
                     <a href="{{ route('formations.brvm') }}" class="btn btn-success">
                         🎓 Voir les formations BRVM
                     </a>

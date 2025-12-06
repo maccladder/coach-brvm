@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AdminController;
 use App\Http\Controllers\UploadController;
 use App\Http\Controllers\SummaryController;
 use App\Http\Controllers\ClientBocController;
@@ -116,7 +117,13 @@ Route::prefix('client-bocs')->name('client-bocs.')->group(function () {
 |--------------------------------------------------------------------------
 */
 
+
+
 Route::prefix('client-financials')->name('client-financials.')->group(function () {
+
+    // Liste des derniers états financiers
+    Route::get('/', [ClientFinancialController::class, 'index'])
+        ->name('index');
 
     // Formulaire d’upload
     Route::get('/create', [ClientFinancialController::class, 'create'])
@@ -126,8 +133,8 @@ Route::prefix('client-financials')->name('client-financials.')->group(function (
     Route::post('/', [ClientFinancialController::class, 'store'])
         ->name('store');
 
-    // Retour CinetPay (GET + POST)
-    Route::match(['GET', 'POST'], '/{clientFinancial}/payment-return', [
+    // 🔁 Retour CinetPay (GET + POST) – même pattern que BOC
+    Route::match(['GET', 'POST'], '/payment/return/{clientFinancial}', [
         ClientFinancialController::class,
         'paymentReturn',
     ])->name('payment.return');
@@ -167,3 +174,26 @@ Route::prefix('client-financials')->name('client-financials.')->group(function (
 Route::get('/formations-brvm', function () {
     return view('sections.formations-brvm');
 })->name('formations.brvm');
+
+
+// routes admin
+
+Route::prefix('admin')->name('admin.')->group(function () {
+
+    Route::get('/login', [AdminController::class, 'showLoginForm'])
+        ->name('login.form');
+
+    Route::post('/login', [AdminController::class, 'login'])
+        ->name('login');
+
+    Route::middleware('admin.code')->group(function () {
+
+        Route::post('/logout', [AdminController::class, 'logout'])
+            ->name('logout');
+
+        Route::get('/dashboard', [AdminController::class, 'dashboard'])
+            ->name('dashboard');
+    });
+
+});
+

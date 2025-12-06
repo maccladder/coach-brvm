@@ -15,19 +15,28 @@ return Application::configure(basePath: dirname(__DIR__))
         /**
          * Désactiver CSRF pour CinetPay
          * Laravel 11+ utilise une nouvelle méthode :
-         * on utilise skipWhen() pour ignorer CSRF sur certaines routes.
+         * on utilise validateCsrfTokens(except: [...])
          */
         $middleware->validateCsrfTokens(except: [
             'client-bocs/payment/notify',
             'client-bocs/payment/return/*',
 
-
-             // 🔽 nouveaux pour les états financiers
-    'client-financials/payment/notify',
-    'client-financials/*/payment-return',
+            // 🔽 nouveaux pour les états financiers
+            'client-financials/payment/notify',
+            'client-financials/payment/return/*',
         ]);
 
-        // SI tu veux ajouter un middleware custom un jour :
+        /**
+         * 🔐 Middleware Admin (code secret)
+         *
+         * Permet d'utiliser :
+         *   middleware('admin.code')
+         */
+        $middleware->alias([
+            'admin.code' => \App\Http\Middleware\AdminCodeMiddleware::class,
+        ]);
+
+        // Exemple si tu veux ajouter autre middleware plus tard :
         // $middleware->append(\App\Http\Middleware\TestMiddleware::class);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

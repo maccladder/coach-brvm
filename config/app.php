@@ -54,6 +54,9 @@ return [
 
     'url' => env('APP_URL', 'http://localhost'),
 
+    'coach_brvm_admin_code' => env('COACH_BRVM_ADMIN_CODE', 'Coach-brvm2025'),
+
+
     /*
     |--------------------------------------------------------------------------
     | Application Timezone

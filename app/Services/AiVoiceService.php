@@ -2,128 +2,93 @@
 
 namespace App\Services;
 
-use App\Models\DailySummary;
 use GuzzleHttp\Client;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 
 class AiVoiceService
 {
-    public function __construct(
-        private ?Client $http = null,
-    ) {
-        $this->http = $this->http ?: new Client([
+    private Client $http;
+
+    public function __construct(?Client $http = null)
+    {
+        $this->http = $http ?: new Client([
             'base_uri' => 'https://api.openai.com/v1/',
-            'timeout'  => 120,
+            'timeout'  => 120,   // on laisse large pour la synthèse vocale
         ]);
     }
 
     /**
-     * Génère (ou réutilise) un MP3 pour un résumé DailySummary donné.
-     * Retourne le chemin RELATIF dans storage/app/public.
-     */
-    public function makeAudioForSummary(DailySummary $summary): string
-    {
-        $markdown = $summary->summary_markdown ?? '';
-
-        // slug unique pour ce résumé
-        $slug = 'summary-' . $summary->id;
-
-        return $this->makeAudioFromMarkdown($markdown, $slug);
-    }
-
-    /**
-     * Génère (ou réutilise) un MP3 à partir d'un markdown arbitraire.
+     * Génère un MP3 à partir d’un texte (markdown possible).
      *
-     * @param string $markdown  Texte markdown à lire (sera nettoyé).
-     * @param string $slug      Suffixe unique, ex: "clientboc-12"
-     * @return string           Chemin relatif dans storage/app/public
+     * @param  string $markdown   Texte ou markdown à lire à voix haute
+     * @param  string $baseName   Préfixe du fichier (ex: 'clientfinancial-25')
+     * @return string|null        Chemin relatif sur le disk "public" (ex: tts/xxx.mp3)
      */
-    public function makeAudioFromMarkdown(string $markdown, string $slug): string
+    public function makeAudioFromMarkdown(string $markdown, string $baseName): ?string
     {
-        // version pour invalider les anciens fichiers si on change le nettoyage
-        $version      = 'v1';
-        $relativePath = "tts/{$version}-{$slug}.mp3";
-        $fullPath     = storage_path('app/public/' . $relativePath);
+        // 1) Nettoyage rapide du markdown → texte “lisible”
+        $text = $markdown;
 
-        // Si déjà généré avec cette version, on réutilise
-        if (is_file($fullPath)) {
-            return $relativePath;
-        }
-
-        // 1) Nettoyage "markdown" basique
-        $raw = $markdown ?? '';
-
-        // On ne garde que le texte après "Interprétation (IA)" s'il existe
-        if (preg_match('/###\s*Interprétation\s*\(IA\)(.*)$/si', $raw, $m)) {
-            $text = $m[1];
-        } else {
-            $text = $raw;
-        }
-
-        // **gras** ou __gras__
-        $text = preg_replace('/\*\*(.*?)\*\*/s', '$1', $text);
-        $text = preg_replace('/__(.*?)__/s', '$1', $text);
-
-        // *italique* ou _italique_
-        $text = preg_replace('/\*(.*?)\*/s', '$1', $text);
-        $text = preg_replace('/_(.*?)_/s', '$1', $text);
-
-        // Liens [texte](url) -> texte
-        $text = preg_replace('/\[(.*?)\]\((.*?)\)/', '$1', $text);
-
-        // Titres markdown "### Titre"
-        $text = preg_replace('/^#{1,6}\s*/m', '', $text);
-
-        // Puces "- " au début de ligne
-        $text = preg_replace('/^\-\s*/m', '', $text);
-
-        // Séparateurs "---"
-        $text = preg_replace('/^-{3,}\s*$/m', '', $text);
-
-        // Nettoyer le reste des symboles markdown (# * _ - ` > etc.)
-        $text = preg_replace('/[#\*\_\-\`\>]+/u', ' ', $text);
-
-        // Nettoyage final
-        $text = strip_tags($text);
-        $text = preg_replace('/\s+/', ' ', $text);
+        // On enlève les titres, puces, gras, etc.
+        $text = preg_replace('/^\s*#+\s*/m', '', $text);        // # Titre
+        $text = preg_replace('/^\s*[-*]\s+/m', '', $text);      // - liste
+        $text = str_replace(['**', '*', '_', '`'], '', $text);  // markdown simple
+        $text = preg_replace('/\[(.*?)\]\((.*?)\)/', '$1', $text); // liens [txt](url)
+        $text = strip_tags($text);                              // au cas où
+        $text = preg_replace("/\n{2,}/", "\n", $text);
         $text = trim($text);
 
-        if ($text === '') {
-            throw new \RuntimeException('Résumé vide, rien à lire.');
-        }
-
-        // Limiter la longueur
+        // Pour éviter d’envoyer un roman à l’API
         $text = mb_substr($text, 0, 4000);
 
-        // Choix de la voix
-        $voice = env('OPENAI_TTS_VOICE', 'alloy'); // ou 'verse', 'nova', etc.
+        if ($text === '') {
+            Log::warning('AiVoiceService: texte vide, audio non généré.');
+            return null;
+        }
 
         try {
+            Log::info('AiVoiceService: appel TTS OpenAI en cours…');
+
             $resp = $this->http->post('audio/speech', [
                 'headers' => [
                     'Authorization' => 'Bearer ' . env('OPENAI_API_KEY'),
                     'Content-Type'  => 'application/json',
                 ],
                 'json' => [
-                    'model'  => 'gpt-4o-mini-tts',
-                    'voice'  => $voice,
+                    // modèle & voix configurables via .env
+                    'model' => env('OPENAI_TTS_MODEL', 'gpt-4o-mini-tts'),
+                    'voice' => env('OPENAI_TTS_VOICE', 'alloy'),
+                    'input' => $text,
                     'format' => 'mp3',
-                    'input'  => $text,
                 ],
             ]);
 
             $audioBinary = (string) $resp->getBody();
 
-            if (!is_dir(dirname($fullPath))) {
-                mkdir(dirname($fullPath), 0775, true);
+            if ($audioBinary === '') {
+                Log::warning('AiVoiceService: réponse audio vide.');
+                return null;
             }
 
-            file_put_contents($fullPath, $audioBinary);
+            // 2) On enregistre le MP3 sur le disk "public"
+            $dir = 'tts';
+            if (!Storage::disk('public')->exists($dir)) {
+                Storage::disk('public')->makeDirectory($dir);
+            }
 
-            return $relativePath;
+            $filename = $dir . '/' . $baseName . '-' . time() . '.mp3';
+
+            Storage::disk('public')->put($filename, $audioBinary);
+
+            Log::info('AiVoiceService: audio généré avec succès', [
+                'path' => $filename,
+            ]);
+
+            return $filename;
         } catch (\Throwable $e) {
-            Log::warning('TTS error: '.$e->getMessage());
-            throw $e;
+            Log::warning('AiVoiceService: erreur TTS : ' . $e->getMessage());
+            return null;
         }
     }
 }

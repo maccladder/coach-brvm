@@ -29,6 +29,18 @@
             background: linear-gradient(135deg, #0d6efd, #20c997);
         }
     </style>
+
+
+<style>
+    table thead th {
+        white-space: nowrap;
+    }
+</style>
+
+
+
+
+
 </head>
 
 <body>
@@ -68,7 +80,7 @@
                 </li> --}}
 
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ route('summaries.generate.form') }}">
+                    <a class="nav-link" href="{{ route('client-financials.create') }}">
                         Analyser un état financier
                     </a>
                 </li>
