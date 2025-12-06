@@ -29,7 +29,7 @@
 
                     <div class="d-flex flex-wrap gap-3 mb-3">
                         <a href="{{ route('client-bocs.create') }}" class="btn btn-primary btn-lg">
-                            📄 Analyser ma BOC (200&nbsp;FCFA)
+                            📄 Analyser ma BOC (1&nbsp;000&nbsp;FCFA)
                         </a>
 
                         {{-- 🔥 Bouton état financier activé --}}
@@ -60,8 +60,8 @@
                                 </div>
                             </div>
 
+                            {{-- Mini mock vidéo (on peut garder) --}}
                             <div class="ratio ratio-16x9 rounded mb-3" style="background:#000;">
-                                {{-- Mini mock vidéo --}}
                                 <video
                                     src="{{ $exampleVideoUrl ?? '' }}"
                                     poster="{{ asset('img/mock-video-poster.png') }}"
@@ -70,9 +70,17 @@
                                 ></video>
                             </div>
 
+                            {{-- 🔎 Exemple de BOC analysé --}}
+                            <div class="border rounded-3 overflow-hidden mb-2">
+                                <img
+                                    src="{{ asset('img/boc-exemple.png') }}"
+                                    alt="Exemple de Bulletin Officiel de la Côte (BOC)"
+                                    class="img-fluid"
+                                    style="max-height:260px;object-fit:cover;width:100%;">
+                            </div>
                             <p class="small text-muted mb-2">
-                                « Aujourd’hui, plusieurs sociétés ont publié leurs états financiers.
-                                Voici ce qu’il faut retenir pour ton portefeuille… »
+                                Exemple de <strong>Bulletin Officiel de la Côte (BOC)</strong> tel que publié par la BRVM.
+                                Coach BRVM analyse précisément ce format de PDF (une BOC par jour).
                             </p>
 
                             <div class="d-flex align-items-center small text-muted">
@@ -130,7 +138,7 @@
                             <h5 class="fw-semibold mb-2">Payer par mobile money</h5>
                             <p class="text-muted small mb-0">
                                 Paiement sécurisé via CinetPay (Orange Money, MTN, Wave, cartes…).
-                                Pour la BOC, à partir de <strong>200 FCFA</strong>.
+                                Pour la BOC, à partir de <strong>1&nbsp;000 FCFA</strong>.
                             </p>
                         </div>
                     </div>
@@ -178,7 +186,7 @@
                             </ul>
                             <div class="mt-auto d-flex justify-content-between align-items-center">
                                 <div>
-                                    <div class="fw-bold">200&nbsp;FCFA</div>
+                                    <div class="fw-bold">1&nbsp;000&nbsp;FCFA</div>
                                     <div class="text-muted small">par BOC analysé</div>
                                 </div>
                                 <a href="{{ route('client-bocs.create') }}" class="btn btn-outline-primary">
@@ -206,7 +214,7 @@
                             </ul>
                             <div class="mt-auto d-flex justify-content-between align-items-center">
                                 <div>
-                                    <div class="fw-bold">~ 3 000&nbsp;FCFA</div>
+                                    <div class="fw-bold">~ 1&nbsp;000&nbsp;FCFA</div>
                                     <div class="text-muted small">par état financier (tarif indicatif)</div>
                                 </div>
                                 {{-- 🔥 Bouton actif vers le formulaire EF --}}
