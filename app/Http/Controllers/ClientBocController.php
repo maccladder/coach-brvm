@@ -13,6 +13,7 @@ use App\Services\CinetpayService;
 use App\Services\BrvmBubbleService;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\JsonResponse;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class ClientBocController extends Controller
 {
@@ -299,4 +300,42 @@ public function bubbles(ClientBoc $clientBoc, BrvmBubbleService $bubbles)
             'audioPath' => $audioPath,
         ]);
     }
+
+// pdf
+public function downloadPdf(Request $request, ClientBoc $clientBoc)
+{
+    // 1) Récupérer l’image base64 envoyée par le front
+    $chartBase64 = $request->input('chart_image');
+
+    $chartPath = null;
+
+    if ($chartBase64) {
+        // Nettoyer le prefix data:
+        $chartBase64 = preg_replace('#^data:image/\w+;base64,#i', '', $chartBase64);
+        $binary = base64_decode($chartBase64);
+
+        // 2) Sauver un PNG dans storage/app/public/boc_charts
+        $fileName = 'boc-bubbles-'.$clientBoc->id.'.png';
+        $relativePath = 'boc_charts/'.$fileName;
+
+        \Storage::disk('public')->put($relativePath, $binary);
+
+        $chartPath = storage_path('app/public/'.$relativePath);
+    }
+
+    // 3) Préparer le contenu texte
+    $markdown = $clientBoc->interpreted_markdown ?? 'Analyse non disponible.';
+
+    // 4) Générer le PDF à partir d’une vue Blade
+    $pdf = Pdf::loadView('client_bocs.pdf', [
+        'boc'       => $clientBoc,
+        'markdown'  => $markdown,
+        'chartPath' => $chartPath,
+    ])->setPaper('a4');
+
+    $filename = 'BOC-'.$clientBoc->id.'-'.$clientBoc->boc_date->format('Y-m-d').'.pdf';
+
+    return $pdf->download($filename);
+}
+
 }

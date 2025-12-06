@@ -197,3 +197,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
 });
 
+
+// Export PDF du résultat BOC
+Route::post('/{clientBoc}/pdf', [
+    ClientBocController::class,
+    'downloadPdf',
+])->name('client-bocs.pdf');
+

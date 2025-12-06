@@ -3,7 +3,7 @@
 @section('content')
 <div class="container py-4" style="max-width: 1100px;">
 
-  {{-- Bandeau haut : avatar + titre + bouton audio --}}
+  {{-- Bandeau haut : avatar + titre + boutons audio + PDF --}}
   <div class="card shadow-sm mb-4 border-0">
     <div class="card-body d-flex align-items-center flex-wrap gap-3">
 
@@ -21,13 +21,28 @@
         </div>
       </div>
 
-      {{-- Bouton audio --}}
-      @if(!empty($audioPath))
-        <button id="playAudioBtn" class="btn btn-primary ms-auto d-flex align-items-center gap-2">
-          <span>🔊</span>
-          <span>Me lire l’analyse</span>
-        </button>
-      @endif
+      {{-- Zone boutons à droite --}}
+      <div class="ms-auto d-flex align-items-center gap-2 flex-wrap">
+
+        {{-- Bouton audio --}}
+        @if(!empty($audioPath))
+          <button id="playAudioBtn" class="btn btn-primary d-flex align-items-center gap-2">
+            <span>🔊</span>
+            <span>Me lire l’analyse</span>
+          </button>
+        @endif
+
+        {{-- Bouton PDF --}}
+        <form id="pdfForm"
+              method="POST"
+              action="{{ route('client-bocs.pdf', $boc) }}">
+          @csrf
+          <input type="hidden" name="chart_image" id="chartImageInput">
+          <button type="button" id="btn-download-pdf" class="btn btn-outline-secondary">
+            📄 Télécharger le PDF
+          </button>
+        </form>
+      </div>
     </div>
   </div>
 
@@ -40,7 +55,7 @@
     </audio>
   @endif
 
-  {{-- L’analyse (on suppose qu’elle est prête grâce à la page /processing) --}}
+  {{-- L’analyse --}}
   <div class="row g-4">
 
     {{-- Colonne gauche : avatar vidéo --}}
@@ -60,12 +75,6 @@
               playsinline
               style="max-width: 100%; border-radius: 12px;">
             </video>
-
-            {{-- Bouton bulles --}}
-            <button id="btn-bubbles"
-                    class="btn btn-outline-primary w-100 mt-3">
-                👁️ Voir le marché en un coup d’œil
-            </button>
           </div>
         </div>
       </div>
@@ -91,8 +100,8 @@
     </div>
   </div>
 
-  {{-- SECTION : bulles BRVM --}}
-  <div class="mt-4" id="bubbles-wrapper" style="display:none;">
+  {{-- SECTION : bulles BRVM (toujours visible) --}}
+  <div class="mt-4" id="bubbles-wrapper">
     <div class="card shadow-sm border-0">
       <div class="card-header bg-white border-0 d-flex justify-content-between align-items-center">
         <div>
@@ -118,6 +127,7 @@
 {{-- Scripts --}}
 @if($boc->interpreted_markdown)
   <script src="https://d3js.org/d3.v7.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 @endif
 
 <script>
@@ -154,45 +164,33 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // === BULLES BRVM ===
-  const btnBubbles    = document.getElementById('btn-bubbles');
   const wrapper       = document.getElementById('bubbles-wrapper');
   const fullscreenBtn = document.getElementById('btn-bubbles-fullscreen');
   const bubblesDiv    = document.getElementById('brvm-bubbles');
 
-  let loaded   = false;
   let lastData = null;
 
-  if (btnBubbles && wrapper && window.d3) {
+  if (wrapper && bubblesDiv && window.d3) {
+    // Charger automatiquement les données au chargement de la page
+    fetch('{{ route('client-bocs.bubbles', $boc) }}')
+      .then(r => {
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        return r.json();
+      })
+      .then(payload => {
+        console.log('Bubbles payload:', payload);
+        const data = Array.isArray(payload) ? payload : (payload.data || []);
+        lastData = data;
+        drawBubbles(data);
+      })
+      .catch(err => {
+        console.error('Bubbles fetch error:', err);
+        bubblesDiv.innerHTML =
+          '<p class="text-white p-3">Impossible de charger les données du marché.</p>';
+      });
 
-    btnBubbles.addEventListener('click', () => {
-      if (!loaded) {
-        fetch('{{ route('client-bocs.bubbles', $boc) }}')
-          .then(r => {
-            if (!r.ok) throw new Error('HTTP ' + r.status);
-            return r.json();
-          })
-          .then(payload => {
-            console.log('Bubbles payload:', payload);
-
-            const data = Array.isArray(payload) ? payload : (payload.data || []);
-            lastData = data;
-            wrapper.style.display = 'block';
-            drawBubbles(data);
-            loaded = true;
-            btnBubbles.innerHTML = '🔁 Recharger la vue du marché';
-          })
-          .catch(err => {
-            console.error('Bubbles fetch error:', err);
-            alert('Impossible de charger les données du marché.');
-          });
-      } else {
-        wrapper.style.display =
-          (wrapper.style.display === 'none') ? 'block' : 'none';
-      }
-    });
-
-    // === FULLSCREEN ===
-    if (fullscreenBtn && bubblesDiv) {
+    // FULLSCREEN
+    if (fullscreenBtn) {
       fullscreenBtn.addEventListener('click', () => {
         if (!document.fullscreenElement) {
           if (bubblesDiv.requestFullscreen) {
@@ -217,13 +215,13 @@ document.addEventListener('DOMContentLoaded', () => {
       });
 
       window.addEventListener('resize', () => {
-        if (lastData && wrapper.style.display !== 'none') {
+        if (lastData) {
           drawBubbles(lastData);
         }
       });
     }
 
-    // === Fonction de dessin des bulles ===
+    // Fonction de dessin des bulles
     function drawBubbles(data) {
       const container = document.getElementById('brvm-bubbles');
       container.innerHTML = '';
@@ -331,6 +329,34 @@ document.addEventListener('DOMContentLoaded', () => {
         d.fy = null;
       }
     }
+  }
+
+  // === EXPORT PDF (capture des bulles) ===
+  const pdfBtn        = document.getElementById('btn-download-pdf');
+  const pdfForm       = document.getElementById('pdfForm');
+  const chartInput    = document.getElementById('chartImageInput');
+  const bubblesCanvas = document.getElementById('brvm-bubbles');
+
+  if (pdfBtn && pdfForm && chartInput && bubblesCanvas && window.html2canvas) {
+    pdfBtn.addEventListener('click', async () => {
+      try {
+        pdfBtn.disabled = true;
+        pdfBtn.textContent = '⏳ Génération du PDF...';
+
+        const canvas = await html2canvas(bubblesCanvas, {
+          backgroundColor: '#111'
+        });
+        const dataUrl = canvas.toDataURL('image/png');
+
+        chartInput.value = dataUrl;
+        pdfForm.submit();
+      } catch (e) {
+        console.error(e);
+        alert("Impossible de préparer le PDF. Réessaie.");
+        pdfBtn.disabled = false;
+        pdfBtn.textContent = '📄 Télécharger le PDF';
+      }
+    });
   }
 });
 </script>
