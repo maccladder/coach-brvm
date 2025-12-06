@@ -65,7 +65,7 @@
 
                 <div class="d-flex justify-content-between align-items-center">
                     <div class="text-muted small">
-                        Montant du test : {{ env('CINETPAY_TEST_AMOUNT', 100) }} FCFA
+                        Montant du test : {{ env('CINETPAY_TEST_AMOUNT', 1000) }} FCFA
                     </div>
                     <button type="submit" class="btn btn-primary">
                         Payer et lancer l’analyse

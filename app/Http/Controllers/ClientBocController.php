@@ -61,7 +61,7 @@ class ClientBocController extends Controller
     $clientBoc->original_filename = $file->getClientOriginalName();
     $clientBoc->stored_path       = $storedPath;
     $clientBoc->file_path         = $storedPath; // si tu gardes cette colonne
-    $clientBoc->amount            = (int) env('CINETPAY_TEST_AMOUNT', 100);
+    $clientBoc->amount            = (int) env('CINETPAY_TEST_AMOUNT', 1000);
     $clientBoc->status            = 'pending';
     $clientBoc->transaction_id    = Str::uuid()->toString(); // id unique pour CinetPay
     $clientBoc->save();

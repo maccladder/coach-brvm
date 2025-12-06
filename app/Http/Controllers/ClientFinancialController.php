@@ -51,7 +51,7 @@ class ClientFinancialController extends Controller
                                         : null;
         $financial->original_filename = $file->getClientOriginalName();
         $financial->stored_path       = $storedPath;
-        $financial->amount            = (int) env('CINETPAY_TEST_AMOUNT', 100);
+        $financial->amount            = (int) env('CINETPAY_TEST_AMOUNT', 1000);
         $financial->status            = 'pending';
         $financial->transaction_id    = Str::uuid()->toString();
         $financial->save();
