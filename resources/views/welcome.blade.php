@@ -29,7 +29,7 @@
 
                     <div class="d-flex flex-wrap gap-3 mb-3">
                         <a href="{{ route('client-bocs.create') }}" class="btn btn-primary btn-lg">
-                            📄 Analyser ma BOC (1&nbsp;000&nbsp;FCFA)
+                            📄 Analyser ma BOC (500&nbsp;FCFA)
                         </a>
 
                         {{-- 🔥 Bouton état financier activé --}}
@@ -186,7 +186,7 @@
                             </ul>
                             <div class="mt-auto d-flex justify-content-between align-items-center">
                                 <div>
-                                    <div class="fw-bold">1&nbsp;000&nbsp;FCFA</div>
+                                    <div class="fw-bold">500&nbsp;FCFA</div>
                                     <div class="text-muted small">par BOC analysé</div>
                                 </div>
                                 <a href="{{ route('client-bocs.create') }}" class="btn btn-outline-primary">

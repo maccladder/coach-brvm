@@ -8,7 +8,7 @@
       <h2 class="fw-bold">Analyse Automatique de Votre BOC 📊</h2>
       <p class="text-muted fs-5">
         Ne perdez plus des heures à lire ce document compliqué.<br>
-        Pour seulement <span class="fw-bold text-success">1000 FCFA</span>, notre IA lit, interprète et résume votre BOC.
+        Pour seulement <span class="fw-bold text-success">500 FCFA</span>, notre IA lit, interprète et résume votre BOC.
       </p>
     </div>
   </div>
@@ -36,7 +36,7 @@
           </div>
           <div>
             <h5 class="fw-bold">Paiement Mobile Money</h5>
-            <p class="mb-0 text-muted">Payez seulement <span class="fw-bold text-success">1000 FCFA</span> via MTN, Orange ou Wave.</p>
+            <p class="mb-0 text-muted">Payez seulement <span class="fw-bold text-success">500 FCFA</span> via MTN, Orange ou Wave.</p>
           </div>
 
         </div>
@@ -102,7 +102,7 @@
             </div>
 
             <button type="submit" class="btn btn-success btn-lg w-100 fw-bold">
-              🚀 Envoyer & Démarrer l’analyse (1000 FCFA)
+              🚀 Envoyer & Démarrer l’analyse (500 FCFA)
             </button>
           </form>
 
