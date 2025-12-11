@@ -6,6 +6,10 @@
 
     <title>{{ config('app.name', 'Coach BRVM') }}</title>
 
+    {{-- Favicon Coach BRVM --}}
+    <link rel="icon" type="image/png" href="{{ asset('favicon.png') }}">
+    <link rel="shortcut icon" href="{{ asset('favicon.ico') }}">
+
     {{-- Bootstrap 5 --}}
     <link
         href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
@@ -30,17 +34,11 @@
         }
     </style>
 
-
-<style>
-    table thead th {
-        white-space: nowrap;
-    }
-</style>
-
-
-
-
-
+    <style>
+        table thead th {
+            white-space: nowrap;
+        }
+    </style>
 </head>
 
 <body>
@@ -73,25 +71,22 @@
                     </a>
                 </li>
 
-                {{-- <li class="nav-item">
-                    <a class="nav-link" href="{{ url('/summaries/today') }}">
-                        Résumé du jour
-                    </a>
-                </li> --}}
-
                 <li class="nav-item">
                     <a class="nav-link" href="{{ route('client-financials.create') }}">
                         Analyser un état financier
                     </a>
                 </li>
 
-                {{-- Tu pourras activer / changer plus tard --}}
                 <li class="nav-item">
                     <a class="nav-link" href="{{ route('formations.brvm') }}">Formations BRVM</a>
                 </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ route('contact') }}">Contact</a>
+                </li>
             </ul>
 
-            {{-- Côté droit (badge beta / futur compte utilisateur) --}}
+            {{-- Côté droit --}}
             <div class="d-flex align-items-center gap-2">
                 <span class="badge text-bg-light border">
                     Beta privée
@@ -104,7 +99,7 @@
 {{-- Contenu des pages --}}
 @yield('content')
 
-{{-- Scripts dynamiques nécessaires pour le lecteur audio et Bootstrap --}}
+{{-- Scripts --}}
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 @stack('scripts')

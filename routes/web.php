@@ -204,3 +204,13 @@ Route::post('/{clientBoc}/pdf', [
     'downloadPdf',
 ])->name('client-bocs.pdf');
 
+// route contact
+
+Route::view('/contact', 'sections.contact')->name('contact');
+
+// sections autres
+
+Route::view('/conditions', 'sections.conditions')->name('conditions');
+Route::view('/confidentialite', 'sections.confidentialite')->name('confidentialite');
+Route::view('/notre-histoire', 'sections.notre-histoire')->name('notre.histoire');
+

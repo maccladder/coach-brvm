@@ -278,9 +278,10 @@
                     © {{ date('Y') }} Coach BRVM – Une solution de CHENGGONG SARL.
                 </div>
                 <div class="small text-muted d-flex gap-3">
-                    <a href="#" class="text-decoration-none text-muted">Conditions d’utilisation</a>
-                    <a href="#" class="text-decoration-none text-muted">Confidentialité</a>
-                    <a href="#" class="text-decoration-none text-muted">Contact</a>
+                    <a href="{{ route('notre.histoire') }}" class="text-decoration-none text-muted">Notre histoire</a>
+                    <a href="{{ route('conditions') }}" class="text-decoration-none text-muted">Conditions d’utilisation</a>
+                    <a href="{{ route('confidentialite') }}" class="text-decoration-none text-muted">Confidentialité</a>
+                    <a href="{{ route('contact') }}" class="text-decoration-none text-muted">Contact</a>
                 </div>
             </div>
         </div>
