@@ -1,21 +1,65 @@
-@extends('layouts.app')
+@extends('layouts.admin')
+
+@section('title', 'Dashboard Administrateur – Coach BRVM')
 
 @section('content')
 <div class="container py-5" style="max-width: 1200px;">
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="fw-bold">Dashboard Admin</h2>
-
-        <form action="{{ route('admin.logout') }}" method="POST">
-            @csrf
-            <button class="btn btn-outline-danger">Se déconnecter</button>
-        </form>
+    {{-- HEADER --}}
+    <div class="mb-4">
+        <h2 class="fw-bold">Dashboard Administrateur</h2>
+        <p class="text-muted">
+            Aperçu rapide des analyses effectuées par les utilisateurs.
+        </p>
     </div>
 
-    {{-- Section BOC --}}
+    {{-- 🔥 CARDS RAPIDES --}}
+    <div class="row g-3 mb-4">
+
+        {{-- Accès gestion BOC journalières --}}
+        <div class="col-md-4">
+            <a href="{{ route('admin.bocs.index') }}" class="text-decoration-none">
+                <div class="card shadow-sm border-0 h-100 bg-primary text-white">
+                    <div class="card-body d-flex flex-column justify-content-center">
+                        <h5 class="fw-bold mb-1">📊 Gestion BOC journalières</h5>
+                        <p class="small mb-0">
+                            Suivi journalier des BOC : uploads, retards, fichiers manquants.
+                        </p>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        {{-- Total BOC analysés --}}
+        <div class="col-md-4">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body">
+                    <h6 class="text-muted">BOC analysés</h6>
+                    <h3 class="fw-bold">{{ number_format($bocs->count(), 0, ',', ' ') }}</h3>
+                </div>
+            </div>
+        </div>
+
+        {{-- Total états financiers --}}
+        <div class="col-md-4">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body">
+                    <h6 class="text-muted">États financiers analysés</h6>
+                    <h3 class="fw-bold">{{ number_format($financials->count(), 0, ',', ' ') }}</h3>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+
+
+    {{-- SECTION BOC --}}
     <div class="card shadow-sm border-0 mb-5">
         <div class="card-body">
-            <h4 class="mb-3">Derniers BOC analysés</h4>
+            <div class="d-flex justify-content-between mb-3">
+                <h4 class="fw-semibold">Derniers BOC analysés</h4>
+            </div>
 
             @if($bocs->isEmpty())
                 <p class="text-muted">Aucun BOC analysé pour l’instant.</p>
@@ -59,10 +103,12 @@
         </div>
     </div>
 
-    {{-- Section États financiers --}}
+
+
+    {{-- SECTION ÉTATS FINANCIERS --}}
     <div class="card shadow-sm border-0">
         <div class="card-body">
-            <h4 class="mb-3">Derniers états financiers analysés</h4>
+            <h4 class="fw-semibold mb-3">Derniers états financiers analysés</h4>
 
             @if($financials->isEmpty())
                 <p class="text-muted">Aucun état financier analysé pour l’instant.</p>

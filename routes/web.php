@@ -193,8 +193,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         Route::get('/dashboard', [AdminController::class, 'dashboard'])
             ->name('dashboard');
-    });
 
+        // 👉 Nouveau : gestion des BOC journalières
+        Route::get('/bocs', [AdminController::class, 'dailyBocsIndex'])
+            ->name('bocs.index');
+        Route::post('/bocs', [AdminController::class, 'dailyBocsStore'])
+            ->name('bocs.store');
+    });
 });
 
 

@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use Carbon\Carbon;
+use App\Models\DailyBoc;
 use App\Models\ClientBoc;
-use App\Models\ClientFinancial;
 use Illuminate\Http\Request;
+use App\Models\ClientFinancial;
 
 class AdminController extends Controller
 {
@@ -50,4 +52,142 @@ class AdminController extends Controller
 
         return view('admin.dashboard', compact('bocs', 'financials'));
     }
+
+    // pour les jours férié
+
+        /**
+     * Jours fériés BRVM / Côte d'Ivoire
+     * Format : YYYY-MM-DD
+     */
+    private function getBrvmHolidays(): array
+    {
+        return [
+            // 🔹 2025 (à partir du 1er décembre)
+            '2025-12-25', // Noël
+
+            // 🔹 2026 (source : publicholidays.africa & calendriers CI) :contentReference[oaicite:0]{index=0}
+            '2026-01-01', // Jour de l'An
+            '2026-03-17', // Lendemain de la Nuit du Destin (Laylat al-Qadr)
+            '2026-03-20', // Aïd el-Fitr (Korité)
+            '2026-04-06', // Lundi de Pâques
+            '2026-05-01', // Fête du Travail
+            '2026-05-14', // Ascension
+            '2026-05-25', // Lundi de Pentecôte
+            '2026-05-27', // Tabaski (Aïd el-Adha)
+            '2026-08-07', // Fête de l’Indépendance
+            '2026-08-15', // Assomption
+            '2026-08-26', // Lendemain de la naissance du Prophète (Maouloud)
+            '2026-11-01', // Toussaint
+            '2026-11-15', // Journée Nationale de la Paix
+            '2026-12-25', // Noël
+        ];
+    }
+
+
+public function dailyBocsIndex()
+{
+    $startDate = Carbon::create(2025, 12, 1)->startOfDay();
+    $today     = Carbon::today();
+
+    // Jours fériés BRVM
+    $holidays = $this->getBrvmHolidays();
+
+    // Récupérer les BOC déjà enregistrées
+    $bocs = DailyBoc::whereBetween('date_boc', [$startDate, $today])
+        ->get()
+        ->keyBy(function ($boc) {
+            return Carbon::parse($boc->date_boc)->toDateString();
+        });
+
+    $days    = [];
+    $current = $startDate->copy();
+
+    while ($current->lte($today)) {
+
+        $key = $current->toDateString();
+
+        // 1️⃣ Sauter les samedis / dimanches
+        if ($current->isWeekend()) {
+            $current->addDay();
+            continue;
+        }
+
+        // 2️⃣ Sauter les jours fériés BRVM
+        if (in_array($key, $holidays, true)) {
+            $current->addDay();
+            continue;
+        }
+
+        $record  = $bocs->get($key);
+        $isToday = $current->isSameDay($today);
+
+        $days[] = [
+            'date'       => $current->copy(),
+            'record'     => $record,
+            'has_boc'    => (bool) $record,
+            'is_today'   => $isToday,
+            'is_missing' => !$record && !$isToday,
+        ];
+
+        $current->addDay();
+    }
+
+    // 🔢 Petites stats pour le résumé
+    $daysCollection = collect($days);
+
+    $stats = [
+        'total_days' => $daysCollection->count(),
+        'received'   => $daysCollection->where('has_boc', true)->count(),
+        'missing'    => $daysCollection->where('is_missing', true)->count(),
+    ];
+
+    return view('admin.daily_bocs', compact('days', 'today', 'stats'));
+}
+
+
+
+
+
+    /** 👉 Traitement de l’upload d’une BOC */
+  public function dailyBocsStore(Request $request)
+{
+    $request->validate([
+        'date_boc' => ['required', 'date', 'after_or_equal:2025-12-01', 'before_or_equal:today'],
+        'file'     => ['required', 'file', 'mimes:pdf', 'max:20480'],
+    ]);
+
+    $date = Carbon::parse($request->input('date_boc'));
+    $dateString = $date->toDateString();
+
+    // Jours fériés BRVM
+    $holidays = $this->getBrvmHolidays();
+
+    // 🚫 Pas de BOC le week-end
+    if ($date->isWeekend()) {
+        return back()->with('error', "Il n'y a pas de BOC les samedis et dimanches.");
+    }
+
+    // 🚫 Pas de BOC les jours fériés BRVM
+    if (in_array($dateString, $holidays, true)) {
+        return back()->with('error', "Il n'y a pas de BOC les jours fériés officiels (BRVM / Côte d'Ivoire).");
+    }
+
+    // Vérifier doublons
+    if (DailyBoc::where('date_boc', $dateString)->exists()) {
+        return back()->with('error', "Une BOC existe déjà pour la date {$dateString}.");
+    }
+
+    // Stockage sur le disque public
+    $path = $request->file('file')->store('bocs', 'public');
+
+    DailyBoc::create([
+        'date_boc'      => $dateString,
+        'file_path'     => $path,
+        'original_name' => $request->file('file')->getClientOriginalName(),
+    ]);
+
+    return back()->with('success', "BOC du {$dateString} enregistrée avec succès.");
+}
+
+
 }
