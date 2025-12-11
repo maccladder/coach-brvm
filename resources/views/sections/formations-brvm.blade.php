@@ -61,7 +61,7 @@
                             🎬 Ci-contre : <strong>aperçu d’environ 3 minutes</strong> du cours débutant.
                         </p>
 
-                        <a href="https://www.udemy.com/course/investir-a-la-brvm-le-guide-du-debutant/?couponCode=296C61F0DE9D77E3EC8B"
+                        <a href="https://www.udemy.com/course/investir-a-la-brvm-le-guide-du-debutant/?couponCode=E71A16F6B15F7654FC27"
                            target="_blank"
                            rel="noopener noreferrer"
                            class="btn btn-success">
