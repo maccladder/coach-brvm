@@ -138,7 +138,7 @@
                             <h5 class="fw-semibold mb-2">Payer par mobile money</h5>
                             <p class="text-muted small mb-0">
                                 Paiement sécurisé via CinetPay (Orange Money, MTN, Wave, cartes…).
-                                Pour la BOC, à partir de <strong>1&nbsp;000 FCFA</strong>.
+                                Pour la BOC, à partir de <strong>500 FCFA</strong>.
                             </p>
                         </div>
                     </div>
