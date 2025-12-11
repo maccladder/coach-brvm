@@ -97,7 +97,7 @@
             {{-- Bandeau BRVM / disclaimer --}}
             <div class="d-flex flex-wrap align-items-center gap-3 mt-4 pt-2 border-top">
                 <div class="d-flex align-items-center gap-2">
-                    <img src="{{ asset('img/brvm-logo.jpg') }}"
+                    <img src="{{ asset('img/coach-brvm-logo.png') }}"
                          alt="BRVM"
                          style="height:32px;width:auto;">
                     <span class="small text-muted">
