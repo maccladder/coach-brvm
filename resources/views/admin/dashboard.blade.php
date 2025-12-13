@@ -6,11 +6,19 @@
 <div class="container py-5" style="max-width: 1200px;">
 
     {{-- HEADER --}}
-    <div class="mb-4">
-        <h2 class="fw-bold">Dashboard Administrateur</h2>
-        <p class="text-muted">
-            Aperçu rapide des analyses effectuées par les utilisateurs.
-        </p>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-1">Dashboard Administrateur</h2>
+            <p class="text-muted mb-0">
+                Aperçu rapide des analyses effectuées par les utilisateurs.
+            </p>
+        </div>
+
+        {{-- 👉 Bouton Analytics --}}
+        <a href="{{ route('admin.analytics.index') }}"
+           class="btn btn-outline-primary fw-semibold">
+            📊 Analytics visiteurs
+        </a>
     </div>
 
     {{-- 🔥 CARDS RAPIDES --}}
@@ -47,7 +55,7 @@
             </a>
         </div>
 
-        {{-- Total --}}
+        {{-- Total BOC --}}
         <div class="col-md-4">
             <div class="card shadow-sm border-0 h-100">
                 <div class="card-body">
@@ -85,37 +93,26 @@
                             @foreach($bocs as $boc)
                                 <tr>
                                     <td>{{ $boc->title }}</td>
-
-                                    {{-- ✅ STATUS DYNAMIQUE --}}
                                     <td>
                                         @switch($boc->status)
                                             @case('paid')
                                                 <span class="badge bg-success">Payé</span>
                                                 @break
-
                                             @case('pending')
                                                 <span class="badge bg-warning text-dark">En attente</span>
                                                 @break
-
                                             @case('failed')
                                                 <span class="badge bg-danger">Échec</span>
                                                 @break
-
                                             @case('abandoned')
                                                 <span class="badge bg-secondary">Abandonné</span>
                                                 @break
-
                                             @default
                                                 <span class="badge bg-light text-dark">Inconnu</span>
                                         @endswitch
                                     </td>
-
-                                    <td>
-                                        {{ number_format($boc->amount, 0, ',', ' ') }} FCFA
-                                    </td>
-                                    <td>
-                                        {{ $boc->created_at->format('d/m/Y H:i') }}
-                                    </td>
+                                    <td>{{ number_format($boc->amount, 0, ',', ' ') }} FCFA</td>
+                                    <td>{{ $boc->created_at->format('d/m/Y H:i') }}</td>
                                     <td>
                                         <a href="{{ route('client-bocs.show', $boc->id) }}"
                                            class="btn btn-sm btn-primary">
@@ -160,37 +157,26 @@
                                     <td>{{ $f->title }}</td>
                                     <td>{{ $f->company }}</td>
                                     <td>{{ $f->period }}</td>
-
-                                    {{-- ✅ STATUS DYNAMIQUE --}}
                                     <td>
                                         @switch($f->status)
                                             @case('paid')
                                                 <span class="badge bg-success">Payé</span>
                                                 @break
-
                                             @case('pending')
                                                 <span class="badge bg-warning text-dark">En attente</span>
                                                 @break
-
                                             @case('failed')
                                                 <span class="badge bg-danger">Échec</span>
                                                 @break
-
                                             @case('abandoned')
                                                 <span class="badge bg-secondary">Abandonné</span>
                                                 @break
-
                                             @default
                                                 <span class="badge bg-light text-dark">Inconnu</span>
                                         @endswitch
                                     </td>
-
-                                    <td>
-                                        {{ number_format($f->amount, 0, ',', ' ') }} FCFA
-                                    </td>
-                                    <td>
-                                        {{ $f->created_at->format('d/m/Y H:i') }}
-                                    </td>
+                                    <td>{{ number_format($f->amount, 0, ',', ' ') }} FCFA</td>
+                                    <td>{{ $f->created_at->format('d/m/Y H:i') }}</td>
                                     <td>
                                         <a href="{{ route('client-financials.show', $f->id) }}"
                                            class="btn btn-sm btn-primary">

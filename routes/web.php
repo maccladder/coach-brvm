@@ -7,6 +7,8 @@ use App\Http\Controllers\SummaryController;
 use App\Http\Controllers\ClientBocController;
 use App\Http\Controllers\ClientFinancialController;
 use App\Http\Controllers\AdminPerformanceController;
+use App\Http\Controllers\AdminAnalyticsController;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -177,38 +179,33 @@ Route::get('/formations-brvm', function () {
 })->name('formations.brvm');
 
 
-// routes admin
 
+
+
+
+
+// routes admin
 Route::prefix('admin')->name('admin.')->group(function () {
 
-    Route::get('/login', [AdminController::class, 'showLoginForm'])
-        ->name('login.form');
-
-    Route::post('/login', [AdminController::class, 'login'])
-        ->name('login');
+    Route::get('/login', [AdminController::class, 'showLoginForm'])->name('login.form');
+    Route::post('/login', [AdminController::class, 'login'])->name('login');
 
     Route::middleware('admin.code')->group(function () {
 
-        Route::post('/logout', [AdminController::class, 'logout'])
-            ->name('logout');
+        Route::post('/logout', [AdminController::class, 'logout'])->name('logout');
+        Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
 
-        Route::get('/dashboard', [AdminController::class, 'dashboard'])
-            ->name('dashboard');
+        Route::get('/performances', [AdminPerformanceController::class, 'index'])->name('performances.index');
+        Route::get('/performances/data', [AdminPerformanceController::class, 'data'])->name('performances.data');
 
-             Route::get('/performances', [AdminPerformanceController::class, 'index'])
-        ->name('performances.index');
+        Route::get('/analytics', [AdminAnalyticsController::class, 'index'])->name('analytics.index');
+        Route::get('/analytics/data', [AdminAnalyticsController::class, 'data'])->name('analytics.data');
 
-    Route::get('/performances/data', [AdminPerformanceController::class, 'data'])
-        ->name('performances.data');
-
-
-        // 👉 Nouveau : gestion des BOC journalières
-        Route::get('/bocs', [AdminController::class, 'dailyBocsIndex'])
-            ->name('bocs.index');
-        Route::post('/bocs', [AdminController::class, 'dailyBocsStore'])
-            ->name('bocs.store');
+        Route::get('/bocs', [AdminController::class, 'dailyBocsIndex'])->name('bocs.index');
+        Route::post('/bocs', [AdminController::class, 'dailyBocsStore'])->name('bocs.store');
     });
 });
+
 
 
 // Export PDF du résultat BOC
@@ -226,4 +223,13 @@ Route::view('/contact', 'sections.contact')->name('contact');
 Route::view('/conditions', 'sections.conditions')->name('conditions');
 Route::view('/confidentialite', 'sections.confidentialite')->name('confidentialite');
 Route::view('/notre-histoire', 'sections.notre-histoire')->name('notre.histoire');
+
+
+Route::get('/ga-test', function (\App\Services\GoogleAnalyticsService $ga) {
+    return [
+        'todayUsers' => $ga->todayUsers(),
+        'realtimeUsers' => $ga->realtimeUsers(),
+        'topCountries' => $ga->topCountries(5),
+    ];
+});
 
