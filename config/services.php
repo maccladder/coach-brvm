@@ -14,6 +14,15 @@ return [
     |
     */
 
+    'openai' => [
+        'key' => env('OPENAI_API_KEY'),
+
+        // modèles séparés (comme ton .env)
+        'boc_model'    => env('OPENAI_BOC_MODEL', 'gpt-4.1-mini'),
+        'market_model' => env('OPENAI_MARKET_MODEL', 'gpt-4.1-mini'),
+        'bubble_model' => env('OPENAI_BUBBLE_MODEL', 'gpt-4.1-mini'),
+    ],
+
     'postmark' => [
         'token' => env('POSTMARK_TOKEN'),
     ],

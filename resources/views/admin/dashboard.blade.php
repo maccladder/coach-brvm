@@ -30,37 +30,24 @@
             </a>
         </div>
 
-        {{-- 📈 Performances 7 derniers jours --}}
+        {{-- Performances --}}
         <div class="col-md-4">
             <a href="{{ route('admin.performances.index') }}" class="text-decoration-none">
                 <div class="card shadow-sm border-0 h-100 bg-dark text-white position-relative overflow-hidden">
                     <div class="card-body d-flex flex-column justify-content-center">
                         <div class="d-flex align-items-center justify-content-between mb-2">
                             <h5 class="fw-bold mb-0">📈 Performances</h5>
-                            <span class="badge bg-warning text-dark fw-semibold">
-                                7 jours
-                            </span>
+                            <span class="badge bg-warning text-dark fw-semibold">7 jours</span>
                         </div>
                         <p class="small mb-0">
                             Courbes des variations (%) par société sur les 7 derniers jours de BOC.
                         </p>
                     </div>
-
-                    {{-- décoration --}}
-                    <div style="
-                        position:absolute;
-                        right:-30px;
-                        bottom:-30px;
-                        width:120px;
-                        height:120px;
-                        border-radius:50%;
-                        background: rgba(255,255,255,0.12);
-                    "></div>
                 </div>
             </a>
         </div>
 
-        {{-- Total BOC analysés --}}
+        {{-- Total --}}
         <div class="col-md-4">
             <div class="card shadow-sm border-0 h-100">
                 <div class="card-body">
@@ -77,9 +64,7 @@
     {{-- SECTION BOC --}}
     <div class="card shadow-sm border-0 mb-5">
         <div class="card-body">
-            <div class="d-flex justify-content-between mb-3">
-                <h4 class="fw-semibold">Derniers BOC analysés</h4>
-            </div>
+            <h4 class="fw-semibold mb-3">Derniers BOC analysés</h4>
 
             @if($bocs->isEmpty())
                 <p class="text-muted">Aucun BOC analysé pour l’instant.</p>
@@ -100,9 +85,31 @@
                             @foreach($bocs as $boc)
                                 <tr>
                                     <td>{{ $boc->title }}</td>
+
+                                    {{-- ✅ STATUS DYNAMIQUE --}}
                                     <td>
-                                        <span class="badge bg-success">Payé</span>
+                                        @switch($boc->status)
+                                            @case('paid')
+                                                <span class="badge bg-success">Payé</span>
+                                                @break
+
+                                            @case('pending')
+                                                <span class="badge bg-warning text-dark">En attente</span>
+                                                @break
+
+                                            @case('failed')
+                                                <span class="badge bg-danger">Échec</span>
+                                                @break
+
+                                            @case('abandoned')
+                                                <span class="badge bg-secondary">Abandonné</span>
+                                                @break
+
+                                            @default
+                                                <span class="badge bg-light text-dark">Inconnu</span>
+                                        @endswitch
                                     </td>
+
                                     <td>
                                         {{ number_format($boc->amount, 0, ',', ' ') }} FCFA
                                     </td>
@@ -128,14 +135,10 @@
     {{-- SECTION ÉTATS FINANCIERS --}}
     <div class="card shadow-sm border-0">
         <div class="card-body">
-            <h4 class="fw-semibold mb-3">
-                Derniers états financiers analysés
-            </h4>
+            <h4 class="fw-semibold mb-3">Derniers états financiers analysés</h4>
 
             @if($financials->isEmpty())
-                <p class="text-muted">
-                    Aucun état financier analysé pour l’instant.
-                </p>
+                <p class="text-muted">Aucun état financier analysé pour l’instant.</p>
             @else
                 <div class="table-responsive">
                     <table class="table table-hover align-middle">
@@ -157,9 +160,31 @@
                                     <td>{{ $f->title }}</td>
                                     <td>{{ $f->company }}</td>
                                     <td>{{ $f->period }}</td>
+
+                                    {{-- ✅ STATUS DYNAMIQUE --}}
                                     <td>
-                                        <span class="badge bg-success">Payé</span>
+                                        @switch($f->status)
+                                            @case('paid')
+                                                <span class="badge bg-success">Payé</span>
+                                                @break
+
+                                            @case('pending')
+                                                <span class="badge bg-warning text-dark">En attente</span>
+                                                @break
+
+                                            @case('failed')
+                                                <span class="badge bg-danger">Échec</span>
+                                                @break
+
+                                            @case('abandoned')
+                                                <span class="badge bg-secondary">Abandonné</span>
+                                                @break
+
+                                            @default
+                                                <span class="badge bg-light text-dark">Inconnu</span>
+                                        @endswitch
                                     </td>
+
                                     <td>
                                         {{ number_format($f->amount, 0, ',', ' ') }} FCFA
                                     </td>
