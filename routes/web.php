@@ -6,6 +6,7 @@ use App\Http\Controllers\UploadController;
 use App\Http\Controllers\SummaryController;
 use App\Http\Controllers\ClientBocController;
 use App\Http\Controllers\ClientFinancialController;
+use App\Http\Controllers\AdminPerformanceController;
 
 /*
 |--------------------------------------------------------------------------
@@ -193,6 +194,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         Route::get('/dashboard', [AdminController::class, 'dashboard'])
             ->name('dashboard');
+
+             Route::get('/performances', [AdminPerformanceController::class, 'index'])
+        ->name('performances.index');
+
+    Route::get('/performances/data', [AdminPerformanceController::class, 'data'])
+        ->name('performances.data');
+
 
         // 👉 Nouveau : gestion des BOC journalières
         Route::get('/bocs', [AdminController::class, 'dailyBocsIndex'])

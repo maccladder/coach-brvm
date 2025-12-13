@@ -16,7 +16,7 @@
     {{-- 🔥 CARDS RAPIDES --}}
     <div class="row g-3 mb-4">
 
-        {{-- Accès gestion BOC journalières --}}
+        {{-- Gestion BOC journalières --}}
         <div class="col-md-4">
             <a href="{{ route('admin.bocs.index') }}" class="text-decoration-none">
                 <div class="card shadow-sm border-0 h-100 bg-primary text-white">
@@ -30,29 +30,49 @@
             </a>
         </div>
 
+        {{-- 📈 Performances 7 derniers jours --}}
+        <div class="col-md-4">
+            <a href="{{ route('admin.performances.index') }}" class="text-decoration-none">
+                <div class="card shadow-sm border-0 h-100 bg-dark text-white position-relative overflow-hidden">
+                    <div class="card-body d-flex flex-column justify-content-center">
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <h5 class="fw-bold mb-0">📈 Performances</h5>
+                            <span class="badge bg-warning text-dark fw-semibold">
+                                7 jours
+                            </span>
+                        </div>
+                        <p class="small mb-0">
+                            Courbes des variations (%) par société sur les 7 derniers jours de BOC.
+                        </p>
+                    </div>
+
+                    {{-- décoration --}}
+                    <div style="
+                        position:absolute;
+                        right:-30px;
+                        bottom:-30px;
+                        width:120px;
+                        height:120px;
+                        border-radius:50%;
+                        background: rgba(255,255,255,0.12);
+                    "></div>
+                </div>
+            </a>
+        </div>
+
         {{-- Total BOC analysés --}}
         <div class="col-md-4">
             <div class="card shadow-sm border-0 h-100">
                 <div class="card-body">
                     <h6 class="text-muted">BOC analysés</h6>
-                    <h3 class="fw-bold">{{ number_format($bocs->count(), 0, ',', ' ') }}</h3>
-                </div>
-            </div>
-        </div>
-
-        {{-- Total états financiers --}}
-        <div class="col-md-4">
-            <div class="card shadow-sm border-0 h-100">
-                <div class="card-body">
-                    <h6 class="text-muted">États financiers analysés</h6>
-                    <h3 class="fw-bold">{{ number_format($financials->count(), 0, ',', ' ') }}</h3>
+                    <h3 class="fw-bold">
+                        {{ number_format($bocs->count(), 0, ',', ' ') }}
+                    </h3>
                 </div>
             </div>
         </div>
 
     </div>
-
-
 
     {{-- SECTION BOC --}}
     <div class="card shadow-sm border-0 mb-5">
@@ -83,9 +103,12 @@
                                     <td>
                                         <span class="badge bg-success">Payé</span>
                                     </td>
-                                    <td>{{ number_format($boc->amount, 0, ',', ' ') }} FCFA</td>
-                                    <td>{{ $boc->created_at->format('d/m/Y H:i') }}</td>
-
+                                    <td>
+                                        {{ number_format($boc->amount, 0, ',', ' ') }} FCFA
+                                    </td>
+                                    <td>
+                                        {{ $boc->created_at->format('d/m/Y H:i') }}
+                                    </td>
                                     <td>
                                         <a href="{{ route('client-bocs.show', $boc->id) }}"
                                            class="btn btn-sm btn-primary">
@@ -99,19 +122,20 @@
                     </table>
                 </div>
             @endif
-
         </div>
     </div>
-
-
 
     {{-- SECTION ÉTATS FINANCIERS --}}
     <div class="card shadow-sm border-0">
         <div class="card-body">
-            <h4 class="fw-semibold mb-3">Derniers états financiers analysés</h4>
+            <h4 class="fw-semibold mb-3">
+                Derniers états financiers analysés
+            </h4>
 
             @if($financials->isEmpty())
-                <p class="text-muted">Aucun état financier analysé pour l’instant.</p>
+                <p class="text-muted">
+                    Aucun état financier analysé pour l’instant.
+                </p>
             @else
                 <div class="table-responsive">
                     <table class="table table-hover align-middle">
@@ -136,10 +160,12 @@
                                     <td>
                                         <span class="badge bg-success">Payé</span>
                                     </td>
-
-                                    <td>{{ number_format($f->amount, 0, ',', ' ') }} FCFA</td>
-                                    <td>{{ $f->created_at->format('d/m/Y H:i') }}</td>
-
+                                    <td>
+                                        {{ number_format($f->amount, 0, ',', ' ') }} FCFA
+                                    </td>
+                                    <td>
+                                        {{ $f->created_at->format('d/m/Y H:i') }}
+                                    </td>
                                     <td>
                                         <a href="{{ route('client-financials.show', $f->id) }}"
                                            class="btn btn-sm btn-primary">
@@ -153,7 +179,6 @@
                     </table>
                 </div>
             @endif
-
         </div>
     </div>
 

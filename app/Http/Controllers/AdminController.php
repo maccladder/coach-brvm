@@ -3,10 +3,13 @@
 namespace App\Http\Controllers;
 
 use Carbon\Carbon;
+use App\Models\BocStock;
 use App\Models\DailyBoc;
 use App\Models\ClientBoc;
 use Illuminate\Http\Request;
 use App\Models\ClientFinancial;
+use Illuminate\Support\Facades\DB;
+use App\Services\BrvmBubbleService;
 
 class AdminController extends Controller
 {
@@ -149,7 +152,7 @@ public function dailyBocsIndex()
 
 
     /** 👉 Traitement de l’upload d’une BOC */
-  public function dailyBocsStore(Request $request)
+  public function dailyBocsStore(Request $request, BrvmBubbleService $bubble)
 {
     $request->validate([
         'date_boc' => ['required', 'date', 'after_or_equal:2025-12-01', 'before_or_equal:today'],
@@ -159,34 +162,67 @@ public function dailyBocsIndex()
     $date = Carbon::parse($request->input('date_boc'));
     $dateString = $date->toDateString();
 
-    // Jours fériés BRVM
     $holidays = $this->getBrvmHolidays();
 
-    // 🚫 Pas de BOC le week-end
     if ($date->isWeekend()) {
         return back()->with('error', "Il n'y a pas de BOC les samedis et dimanches.");
     }
 
-    // 🚫 Pas de BOC les jours fériés BRVM
     if (in_array($dateString, $holidays, true)) {
         return back()->with('error', "Il n'y a pas de BOC les jours fériés officiels (BRVM / Côte d'Ivoire).");
     }
 
-    // Vérifier doublons
     if (DailyBoc::where('date_boc', $dateString)->exists()) {
         return back()->with('error', "Une BOC existe déjà pour la date {$dateString}.");
     }
 
-    // Stockage sur le disque public
     $path = $request->file('file')->store('bocs', 'public');
 
-    DailyBoc::create([
+    // 1) On enregistre toujours la BOC
+    $dailyBoc = DailyBoc::create([
         'date_boc'      => $dateString,
         'file_path'     => $path,
         'original_name' => $request->file('file')->getClientOriginalName(),
     ]);
 
-    return back()->with('success', "BOC du {$dateString} enregistrée avec succès.");
+    // 2) Extraction + insert (si ça échoue, on ne bloque pas)
+    try {
+        $stocks = $bubble->extractFromBoc($dailyBoc->file_path);
+
+        DB::transaction(function () use ($dailyBoc, $stocks) {
+            BocStock::where('daily_boc_id', $dailyBoc->id)->delete();
+
+            $rows = [];
+            foreach ($stocks as $s) {
+                $ticker = strtoupper(trim($s['ticker'] ?? ''));
+                if ($ticker === '') continue;
+
+                $rows[] = [
+                    'daily_boc_id' => $dailyBoc->id,
+                    'date_boc'     => $dailyBoc->date_boc,
+                    'ticker'       => $ticker,
+                    'name'         => $s['name'] ?? null,
+                    'price'        => $s['price'] ?? null,
+                    'change'       => $s['change'] ?? null,
+                    'created_at'   => now(),
+                    'updated_at'   => now(),
+                ];
+            }
+
+            if (!empty($rows)) {
+                BocStock::insert($rows);
+            }
+        });
+
+        return back()->with('success', "BOC du {$dateString} enregistrée + variations extraites ✅");
+
+    } catch (\Throwable $e) {
+        Log::error("Extraction variations échouée (DailyBoc {$dailyBoc->id}) : ".$e->getMessage());
+
+        return back()->with('success',
+            "BOC du {$dateString} enregistrée ✅ (mais extraction variations a échoué — voir logs)"
+        );
+    }
 }
 
 
