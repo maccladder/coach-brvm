@@ -4,15 +4,16 @@ use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\UploadController;
+use App\Http\Controllers\LandingController;
 use App\Http\Controllers\SummaryController;
 use App\Http\Controllers\ClientBocController;
+use App\Http\Controllers\PerformanceController;
+use App\Http\Controllers\AnnouncementController;
+
 use App\Http\Controllers\AdminAnalyticsController;
 use App\Http\Controllers\ClientFinancialController;
 use App\Http\Controllers\AdminPerformanceController;
-
-use App\Http\Controllers\AnnouncementController;
 use App\Http\Controllers\AdminAnnouncementController;
-use App\Http\Controllers\LandingController;
 
 /*
 |--------------------------------------------------------------------------
@@ -192,3 +193,7 @@ Route::get('/ga-test', function (\App\Services\GoogleAnalyticsService $ga) {
         'topCountries' => $ga->topCountries(5),
     ];
 });
+
+
+Route::get('/radar-marche', [PerformanceController::class, 'index'])->name('radar.index');
+Route::get('/radar-marche/data', [PerformanceController::class, 'data'])->name('radar.data');

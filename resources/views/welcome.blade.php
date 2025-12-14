@@ -109,6 +109,27 @@
         </div>
     </section>
 
+    {{-- ✅ CALLOUT : Radar Marché gratuit --}}
+<section class="py-4 border-bottom bg-white">
+    <div class="container" style="max-width:1100px;">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body d-flex flex-wrap justify-content-between align-items-center gap-3">
+                <div>
+                    <div class="fw-semibold">🔥 Nouveau : Radar Marché gratuit</div>
+                    <div class="text-muted small">
+                        Performance sur 7 jours + comparaison des sociétés BRVM en un coup d’œil.
+                    </div>
+                </div>
+
+                <a href="{{ route('radar.index') }}" class="btn btn-primary fw-semibold">
+                    📡 Ouvrir le Radar Marché
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+
     {{-- ✅ ANN0NCES BRVM (NOUVEAU) --}}
     <section class="py-5">
         <div class="container" style="max-width: 1100px;">
