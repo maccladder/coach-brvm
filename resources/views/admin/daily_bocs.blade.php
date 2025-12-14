@@ -6,7 +6,7 @@
 <div class="bg-light py-5">
     <div class="container" style="max-width: 1100px;">
 
-        <h1 class="fw-bold mb-4">BOC journalières (à partir du 1er décembre 2025)</h1>
+        <h1 class="fw-bold mb-4">BOC journalières (à partir du 1er Janvier 2025)</h1>
 
         {{-- Messages flash --}}
         @if(session('success'))
@@ -41,8 +41,8 @@
                     <div class="col-md-4">
                         <label for="date_boc" class="form-label small">Date de la BOC</label>
                         <input type="date" name="date_boc" id="date_boc"
-                            class="form-control @error('date_boc') is-invalid @enderror"
-                            value="{{ old('date_boc', $default->toDateString()) }}">
+                               class="form-control @error('date_boc') is-invalid @enderror"
+                               value="{{ old('date_boc', $default->toDateString()) }}">
                         @error('date_boc')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
@@ -51,8 +51,8 @@
                     <div class="col-md-5">
                         <label for="file" class="form-label small">Fichier PDF</label>
                         <input type="file" name="file" id="file"
-                            class="form-control @error('file') is-invalid @enderror"
-                            accept="application/pdf">
+                               class="form-control @error('file') is-invalid @enderror"
+                               accept="application/pdf">
                         @error('file')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
@@ -79,14 +79,43 @@
         {{-- Tableau des dates --}}
         <div class="card border-0 shadow-sm">
             <div class="card-body">
-                <h5 class="fw-semibold mb-3">Suivi des BOC</h5>
+
+                <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+                    <div>
+                        <h5 class="fw-semibold mb-0">Suivi des BOC</h5>
+                        @if(method_exists($days, 'total'))
+                            <div class="text-muted small">
+                                Affichage
+                                <strong>{{ $days->firstItem() ?? 0 }}</strong>–
+                                <strong>{{ $days->lastItem() ?? 0 }}</strong>
+                                sur <strong>{{ $days->total() }}</strong>
+                            </div>
+                        @endif
+                    </div>
+
+                    {{-- Choix du nombre de lignes par page --}}
+                    <form method="GET" action="{{ url()->current() }}" class="d-flex align-items-center gap-2">
+                        @foreach(request()->query() as $k => $v)
+                            @if($k !== 'per_page' && $k !== 'page')
+                                <input type="hidden" name="{{ $k }}" value="{{ $v }}">
+                            @endif
+                        @endforeach
+
+                        <label class="small text-muted mb-0">Lignes / page</label>
+                        <select name="per_page" class="form-select form-select-sm" style="width: 120px;" onchange="this.form.submit()">
+                            @foreach([25,50,100,150,200] as $n)
+                                <option value="{{ $n }}" @selected(($perPage ?? 50) == $n)>{{ $n }}</option>
+                            @endforeach
+                        </select>
+                    </form>
+                </div>
 
                 <div class="table-responsive">
                     <table class="table table-sm align-middle">
-                        <thead>
+                        <thead class="table-light">
                             <tr>
-                                <th>Date</th>
-                                <th>Statut</th>
+                                <th style="width: 200px;">Date</th>
+                                <th style="width: 180px;">Statut</th>
                                 <th>Fichier</th>
                             </tr>
                         </thead>
@@ -96,7 +125,7 @@
                             @php $date = $day['date']; @endphp
 
                             <tr class="{{ $day['is_missing'] ? 'table-danger' : '' }}">
-                                <td>
+                                <td class="fw-semibold">
                                     {{ $date->translatedFormat('d/m/Y (D)') }}
                                     @if($day['is_today'])
                                         <span class="badge bg-secondary ms-1">Jour J</span>
@@ -107,7 +136,7 @@
                                     @if($day['has_boc'])
                                         <span class="badge bg-success">BOC disponible</span>
                                     @elseif($day['is_today'])
-                                        <span class="badge bg-warning text-dark">En attente (jour en cours)</span>
+                                        <span class="badge bg-warning text-dark">En attente</span>
                                     @else
                                         <span class="badge bg-danger">BOC manquante</span>
                                     @endif
@@ -127,6 +156,18 @@
                         @endforeach
                         </tbody>
                     </table>
+                </div>
+
+                {{-- Pagination (Bootstrap 5) --}}
+                <div class="d-flex flex-column align-items-center gap-2 mt-3">
+                    <div>
+                        {{ $days->onEachSide(1)->links('pagination::bootstrap-5') }}
+                    </div>
+                    @if(method_exists($days, 'total'))
+                        <div class="text-muted small">
+                            Page <strong>{{ $days->currentPage() }}</strong> / <strong>{{ $days->lastPage() }}</strong>
+                        </div>
+                    @endif
                 </div>
 
                 {{-- Résumé des stats --}}

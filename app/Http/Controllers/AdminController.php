@@ -10,6 +10,9 @@ use Illuminate\Http\Request;
 use App\Models\ClientFinancial;
 use Illuminate\Support\Facades\DB;
 use App\Services\BrvmBubbleService;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Collection;
 
 class AdminController extends Controller
 {
@@ -32,7 +35,6 @@ class AdminController extends Controller
                 ->with('error', 'Code incorrect.');
         }
 
-        // Auth admin simple via session
         session(['is_admin' => true]);
 
         return redirect()->route('admin.dashboard');
@@ -56,174 +58,188 @@ class AdminController extends Controller
         return view('admin.dashboard', compact('bocs', 'financials'));
     }
 
-    // pour les jours férié
-
-        /**
+    /**
      * Jours fériés BRVM / Côte d'Ivoire
      * Format : YYYY-MM-DD
      */
     private function getBrvmHolidays(): array
     {
         return [
-            // 🔹 2025 (à partir du 1er décembre)
+            // ✅ 2025 (Avis N°336-2024 / BRVM / DG)
+            '2025-01-01', // Jour de l'An
+            '2025-03-28', // Lendemain Nuit du Destin (*)
+            '2025-03-31', // Lendemain Ramadan (*)
+            '2025-04-21', // Lundi de Pâques
+            '2025-05-01', // Fête du Travail
+            '2025-05-29', // Ascension
+            '2025-06-06', // Tabaski (*)
+            '2025-06-09', // Lundi de Pentecôte
+            '2025-08-07', // Indépendance
+            '2025-08-15', // Assomption
+            '2025-09-05', // Maouloud (*)
             '2025-12-25', // Noël
 
-            // 🔹 2026 (source : publicholidays.africa & calendriers CI) :contentReference[oaicite:0]{index=0}
-            '2026-01-01', // Jour de l'An
-            '2026-03-17', // Lendemain de la Nuit du Destin (Laylat al-Qadr)
-            '2026-03-20', // Aïd el-Fitr (Korité)
-            '2026-04-06', // Lundi de Pâques
-            '2026-05-01', // Fête du Travail
-            '2026-05-14', // Ascension
-            '2026-05-25', // Lundi de Pentecôte
-            '2026-05-27', // Tabaski (Aïd el-Adha)
-            '2026-08-07', // Fête de l’Indépendance
-            '2026-08-15', // Assomption
-            '2026-08-26', // Lendemain de la naissance du Prophète (Maouloud)
-            '2026-11-01', // Toussaint
-            '2026-11-15', // Journée Nationale de la Paix
-            '2026-12-25', // Noël
+            // ✅ 2026 (ta liste actuelle)
+            '2026-01-01',
+            '2026-03-17',
+            '2026-03-20',
+            '2026-04-06',
+            '2026-05-01',
+            '2026-05-14',
+            '2026-05-25',
+            '2026-05-27',
+            '2026-08-07',
+            '2026-08-15',
+            '2026-08-26',
+            '2026-11-01',
+            '2026-11-15',
+            '2026-12-25',
         ];
     }
 
+    public function dailyBocsIndex(Request $request)
+    {
+        $startDate = Carbon::create(2025, 1, 1)->startOfDay();
+        $today     = Carbon::today();
 
-public function dailyBocsIndex()
-{
-    $startDate = Carbon::create(2025, 12, 1)->startOfDay();
-    $today     = Carbon::today();
+        $holidays = $this->getBrvmHolidays();
 
-    // Jours fériés BRVM
-    $holidays = $this->getBrvmHolidays();
+        // BOCs déjà en base
+        $bocs = DailyBoc::whereBetween('date_boc', [$startDate, $today])
+            ->get()
+            ->keyBy(fn ($boc) => Carbon::parse($boc->date_boc)->toDateString());
 
-    // Récupérer les BOC déjà enregistrées
-    $bocs = DailyBoc::whereBetween('date_boc', [$startDate, $today])
-        ->get()
-        ->keyBy(function ($boc) {
-            return Carbon::parse($boc->date_boc)->toDateString();
-        });
+        // Construire la liste complète des jours ouvrés suivis
+        $daysAll = [];
+        $current = $startDate->copy();
 
-    $days    = [];
-    $current = $startDate->copy();
+        while ($current->lte($today)) {
+            $key = $current->toDateString();
 
-    while ($current->lte($today)) {
+            // 1️⃣ Sauter samedis / dimanches
+            if ($current->isWeekend()) {
+                $current->addDay();
+                continue;
+            }
 
-        $key = $current->toDateString();
+            // 2️⃣ Sauter jours fériés BRVM
+            if (in_array($key, $holidays, true)) {
+                $current->addDay();
+                continue;
+            }
 
-        // 1️⃣ Sauter les samedis / dimanches
-        if ($current->isWeekend()) {
+            $record  = $bocs->get($key);
+            $isToday = $current->isSameDay($today);
+
+            $daysAll[] = [
+                'date'       => $current->copy(),
+                'record'     => $record,
+                'has_boc'    => (bool) $record,
+                'is_today'   => $isToday,
+                'is_missing' => !$record && !$isToday,
+            ];
+
             $current->addDay();
-            continue;
         }
 
-        // 2️⃣ Sauter les jours fériés BRVM
-        if (in_array($key, $holidays, true)) {
-            $current->addDay();
-            continue;
-        }
+        $daysCollection = collect($daysAll);
 
-        $record  = $bocs->get($key);
-        $isToday = $current->isSameDay($today);
-
-        $days[] = [
-            'date'       => $current->copy(),
-            'record'     => $record,
-            'has_boc'    => (bool) $record,
-            'is_today'   => $isToday,
-            'is_missing' => !$record && !$isToday,
+        // ✅ Stats sur TOUTE la période (pas seulement la page)
+        $stats = [
+            'total_days' => $daysCollection->count(),
+            'received'   => $daysCollection->where('has_boc', true)->count(),
+            'missing'    => $daysCollection->where('is_missing', true)->count(),
         ];
 
-        $current->addDay();
-    }
+        // ✅ Pagination
+        $perPage = (int) $request->query('per_page', 60); // ajuste 30/50/100 si tu veux
+        $page    = (int) $request->query('page', 1);
 
-    // 🔢 Petites stats pour le résumé
-    $daysCollection = collect($days);
+        $itemsForCurrentPage = $daysCollection->slice(($page - 1) * $perPage, $perPage)->values();
 
-    $stats = [
-        'total_days' => $daysCollection->count(),
-        'received'   => $daysCollection->where('has_boc', true)->count(),
-        'missing'    => $daysCollection->where('is_missing', true)->count(),
-    ];
-
-    return view('admin.daily_bocs', compact('days', 'today', 'stats'));
-}
-
-
-
-
-
-    /** 👉 Traitement de l’upload d’une BOC */
-  public function dailyBocsStore(Request $request, BrvmBubbleService $bubble)
-{
-    $request->validate([
-        'date_boc' => ['required', 'date', 'after_or_equal:2025-12-01', 'before_or_equal:today'],
-        'file'     => ['required', 'file', 'mimes:pdf', 'max:20480'],
-    ]);
-
-    $date = Carbon::parse($request->input('date_boc'));
-    $dateString = $date->toDateString();
-
-    $holidays = $this->getBrvmHolidays();
-
-    if ($date->isWeekend()) {
-        return back()->with('error', "Il n'y a pas de BOC les samedis et dimanches.");
-    }
-
-    if (in_array($dateString, $holidays, true)) {
-        return back()->with('error', "Il n'y a pas de BOC les jours fériés officiels (BRVM / Côte d'Ivoire).");
-    }
-
-    if (DailyBoc::where('date_boc', $dateString)->exists()) {
-        return back()->with('error', "Une BOC existe déjà pour la date {$dateString}.");
-    }
-
-    $path = $request->file('file')->store('bocs', 'public');
-
-    // 1) On enregistre toujours la BOC
-    $dailyBoc = DailyBoc::create([
-        'date_boc'      => $dateString,
-        'file_path'     => $path,
-        'original_name' => $request->file('file')->getClientOriginalName(),
-    ]);
-
-    // 2) Extraction + insert (si ça échoue, on ne bloque pas)
-    try {
-        $stocks = $bubble->extractFromBoc($dailyBoc->file_path);
-
-        DB::transaction(function () use ($dailyBoc, $stocks) {
-            BocStock::where('daily_boc_id', $dailyBoc->id)->delete();
-
-            $rows = [];
-            foreach ($stocks as $s) {
-                $ticker = strtoupper(trim($s['ticker'] ?? ''));
-                if ($ticker === '') continue;
-
-                $rows[] = [
-                    'daily_boc_id' => $dailyBoc->id,
-                    'date_boc'     => $dailyBoc->date_boc,
-                    'ticker'       => $ticker,
-                    'name'         => $s['name'] ?? null,
-                    'price'        => $s['price'] ?? null,
-                    'change'       => $s['change'] ?? null,
-                    'created_at'   => now(),
-                    'updated_at'   => now(),
-                ];
-            }
-
-            if (!empty($rows)) {
-                BocStock::insert($rows);
-            }
-        });
-
-        return back()->with('success', "BOC du {$dateString} enregistrée + variations extraites ✅");
-
-    } catch (\Throwable $e) {
-        Log::error("Extraction variations échouée (DailyBoc {$dailyBoc->id}) : ".$e->getMessage());
-
-        return back()->with('success',
-            "BOC du {$dateString} enregistrée ✅ (mais extraction variations a échoué — voir logs)"
+        $days = new LengthAwarePaginator(
+            $itemsForCurrentPage,
+            $daysCollection->count(),
+            $perPage,
+            $page,
+            [
+                'path'  => $request->url(),
+                'query' => $request->query(), // garde page/per_page dans l’URL
+            ]
         );
+
+        return view('admin.daily_bocs', compact('days', 'today', 'stats'));
     }
-}
 
+    /** 👉 Upload d’une BOC */
+    public function dailyBocsStore(Request $request, BrvmBubbleService $bubble)
+    {
+        $request->validate([
+            'date_boc' => ['required', 'date', 'after_or_equal:2025-01-01', 'before_or_equal:today'],
+            'file'     => ['required', 'file', 'mimes:pdf', 'max:20480'],
+        ]);
 
+        $date = Carbon::parse($request->input('date_boc'));
+        $dateString = $date->toDateString();
+
+        $holidays = $this->getBrvmHolidays();
+
+        if ($date->isWeekend()) {
+            return back()->with('error', "Il n'y a pas de BOC les samedis et dimanches.");
+        }
+
+        if (in_array($dateString, $holidays, true)) {
+            return back()->with('error', "Il n'y a pas de BOC les jours fériés officiels (BRVM / Côte d'Ivoire).");
+        }
+
+        if (DailyBoc::where('date_boc', $dateString)->exists()) {
+            return back()->with('error', "Une BOC existe déjà pour la date {$dateString}.");
+        }
+
+        $path = $request->file('file')->store('bocs', 'public');
+
+        $dailyBoc = DailyBoc::create([
+            'date_boc'      => $dateString,
+            'file_path'     => $path,
+            'original_name' => $request->file('file')->getClientOriginalName(),
+        ]);
+
+        try {
+            $stocks = $bubble->extractFromBoc($dailyBoc->file_path);
+
+            DB::transaction(function () use ($dailyBoc, $stocks) {
+                BocStock::where('daily_boc_id', $dailyBoc->id)->delete();
+
+                $rows = [];
+                foreach ($stocks as $s) {
+                    $ticker = strtoupper(trim($s['ticker'] ?? ''));
+                    if ($ticker === '') continue;
+
+                    $rows[] = [
+                        'daily_boc_id' => $dailyBoc->id,
+                        'date_boc'     => $dailyBoc->date_boc,
+                        'ticker'       => $ticker,
+                        'name'         => $s['name'] ?? null,
+                        'price'        => $s['price'] ?? null,
+                        'change'       => $s['change'] ?? null,
+                        'created_at'   => now(),
+                        'updated_at'   => now(),
+                    ];
+                }
+
+                if (!empty($rows)) {
+                    BocStock::insert($rows);
+                }
+            });
+
+            return back()->with('success', "BOC du {$dateString} enregistrée + variations extraites ✅");
+
+        } catch (\Throwable $e) {
+            Log::error("Extraction variations échouée (DailyBoc {$dailyBoc->id}) : " . $e->getMessage());
+
+            return back()->with('success',
+                "BOC du {$dateString} enregistrée ✅ (mais extraction variations a échoué — voir logs)"
+            );
+        }
+    }
 }
