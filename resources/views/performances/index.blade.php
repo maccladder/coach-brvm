@@ -5,7 +5,7 @@
 
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h2 class="fw-bold mb-0">Performances (7 derniers jours)</h2>
-        <a href="{{ route('landing') }}" class="btn btn-outline-secondary">← Retour BOC</a>
+        <a href="{{ route('landing') }}" class="btn btn-outline-secondary">← Retour à l'accueil</a>
     </div>
 
     <div class="card mb-3">
@@ -13,7 +13,7 @@
             <div class="row g-2 align-items-end">
                 <div class="col-md-9">
                     <label class="form-label fw-semibold">Choisir une ou plusieurs sociétés</label>
-                    <select id="tickers" class="form-select" multiple>
+                    <select id="tickers" class="form-select" multiple size="6">
                         @foreach($companies as $c)
                             <option value="{{ $c->ticker }}">
                                 {{ $c->ticker }} — {{ $c->name ?? '' }}
@@ -31,11 +31,33 @@
 
     <div class="card">
         <div class="card-body">
-            <canvas id="perfChart" height="110"></canvas>
+            {{-- ✅ Conteneur qui donne une vraie hauteur sur mobile --}}
+            <div class="chart-wrap">
+                <canvas id="perfChart"></canvas>
+            </div>
+
+            <div class="small text-muted mt-2">
+                Astuce : tu peux pincer/zoomer si besoin. (Mais normalement plus besoin de tourner le téléphone)
+            </div>
         </div>
     </div>
 
 </div>
+
+<style>
+    .chart-wrap{
+        position: relative;
+        width: 100%;
+        /* hauteur confortable mobile */
+        min-height: 320px;
+    }
+    @media (min-width: 992px){
+        .chart-wrap{ min-height: 420px; }
+    }
+
+    /* Sur mobile, le multi-select peut devenir trop haut */
+    #tickers{ max-height: 220px; }
+</style>
 @endsection
 
 @push('scripts')
@@ -43,10 +65,18 @@
 <script>
 let chart;
 
+function resizeChartSoon(){
+    // double tick pour laisser le layout finir (menu, fonts, etc.)
+    setTimeout(() => { if(chart) chart.resize(); }, 50);
+    setTimeout(() => { if(chart) chart.resize(); }, 250);
+}
+
 async function loadData() {
     const select = document.getElementById('tickers');
     const tickers = Array.from(select.selectedOptions).map(o => o.value);
 
+    // ⚠️ IMPORTANT : si tu crées un PerformanceController public,
+    // remplace cette route par route('performances.data')
     const url = new URL("{{ route('admin.performances.data') }}", window.location.origin);
     tickers.forEach(t => url.searchParams.append('tickers[]', t));
 
@@ -69,6 +99,9 @@ async function loadData() {
         },
         options: {
             responsive: true,
+            // ✅ clé du fix mobile (canvas suit la hauteur du conteneur)
+            maintainAspectRatio: false,
+
             plugins: {
                 legend: { position: 'bottom' },
                 tooltip: {
@@ -82,9 +115,15 @@ async function loadData() {
             }
         }
     });
+
+    resizeChartSoon();
 }
 
 document.getElementById('btnLoad').addEventListener('click', loadData);
+window.addEventListener('resize', resizeChartSoon);
+window.addEventListener('orientationchange', resizeChartSoon);
+document.addEventListener('visibilitychange', () => { if(!document.hidden) resizeChartSoon(); });
+
 loadData();
 </script>
 @endpush
