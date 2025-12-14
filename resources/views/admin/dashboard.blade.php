@@ -6,7 +6,7 @@
 <div class="container py-5" style="max-width: 1200px;">
 
     {{-- HEADER --}}
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
         <div>
             <h2 class="fw-bold mb-1">Dashboard Administrateur</h2>
             <p class="text-muted mb-0">
@@ -14,11 +14,19 @@
             </p>
         </div>
 
-        {{-- 👉 Bouton Analytics --}}
-        <a href="{{ route('admin.analytics.index') }}"
-           class="btn btn-outline-primary fw-semibold">
-            📊 Analytics visiteurs
-        </a>
+        <div class="d-flex gap-2">
+            {{-- 👉 Bouton Annonces
+            <a href="{{ route('admin.announcements.index') }}"
+               class="btn btn-outline-success fw-semibold">
+                📣 Annonces BRVM
+            </a> --}}
+
+            {{-- 👉 Bouton Analytics --}}
+            <a href="{{ route('admin.analytics.index') }}"
+               class="btn btn-outline-primary fw-semibold">
+                📊 Analytics visiteurs
+            </a>
+        </div>
     </div>
 
     {{-- 🔥 CARDS RAPIDES --}}
@@ -49,6 +57,20 @@
                         </div>
                         <p class="small mb-0">
                             Courbes des variations (%) par société sur les 7 derniers jours de BOC.
+                        </p>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        {{-- Annonces --}}
+        <div class="col-md-4">
+            <a href="{{ route('admin.announcements.index') }}" class="text-decoration-none">
+                <div class="card shadow-sm border-0 h-100 bg-success text-white">
+                    <div class="card-body d-flex flex-column justify-content-center">
+                        <h5 class="fw-bold mb-1">📣 Gestion des annonces</h5>
+                        <p class="small mb-0">
+                            Publier : calendrier AG, communiqués, infos BRVM, etc.
                         </p>
                     </div>
                 </div>

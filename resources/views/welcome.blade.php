@@ -2,6 +2,7 @@
 
 @section('content')
 <div class="bg-light">
+
     {{-- HERO --}}
     <section class="py-5 py-lg-6 border-bottom" style="background: radial-gradient(circle at top left, #0d6efd15, #ffffff);">
         <div class="container" style="max-width: 1100px;">
@@ -32,7 +33,6 @@
                             📄 Analyser ma BOC (500&nbsp;FCFA)
                         </a>
 
-                        {{-- 🔥 Bouton état financier activé --}}
                         <a href="{{ route('client-financials.create') }}" class="btn btn-outline-secondary btn-lg">
                             📊 Analyser un état financier
                         </a>
@@ -60,7 +60,7 @@
                                 </div>
                             </div>
 
-                            {{-- Mini mock vidéo (on peut garder) --}}
+                            {{-- Mini mock vidéo --}}
                             <div class="ratio ratio-16x9 rounded mb-3" style="background:#000;">
                                 <video
                                     src="{{ $exampleVideoUrl ?? '' }}"
@@ -70,7 +70,7 @@
                                 ></video>
                             </div>
 
-                            {{-- 🔎 Exemple de BOC analysé --}}
+                            {{-- Exemple de BOC --}}
                             <div class="border rounded-3 overflow-hidden mb-2">
                                 <img
                                     src="{{ asset('img/boc-exemple.png') }}"
@@ -78,6 +78,7 @@
                                     class="img-fluid"
                                     style="max-height:260px;object-fit:cover;width:100%;">
                             </div>
+
                             <p class="small text-muted mb-2">
                                 Exemple de <strong>Bulletin Officiel de la Côte (BOC)</strong> tel que publié par la BRVM.
                                 Coach BRVM analyse précisément ce format de PDF (une BOC par jour).
@@ -94,7 +95,7 @@
                 </div>
             </div>
 
-            {{-- Bandeau BRVM / disclaimer --}}
+            {{-- Bandeau disclaimer --}}
             <div class="d-flex flex-wrap align-items-center gap-3 mt-4 pt-2 border-top">
                 <div class="d-flex align-items-center gap-2">
                     <img src="{{ asset('img/coach-brvm-logo.png') }}"
@@ -108,8 +109,78 @@
         </div>
     </section>
 
-    {{-- COMMENT ÇA MARCHE --}}
+    {{-- ✅ ANN0NCES BRVM (NOUVEAU) --}}
     <section class="py-5">
+        <div class="container" style="max-width: 1100px;">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+                <div>
+                    <h2 class="fw-semibold mb-1">📢 Annonces BRVM</h2>
+                    <p class="text-muted mb-0">
+                        Calendrier des assemblées générales, communiqués, infos importantes.
+                    </p>
+                </div>
+
+                {{-- Lien vers page annonces si tu la crées --}}
+                <a href="{{ route('announcements.index') }}" class="btn btn-outline-primary">
+                    Voir toutes les annonces
+                </a>
+            </div>
+
+            <div class="row g-3">
+                @forelse(($annonces ?? []) as $a)
+                    <div class="col-md-6">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start gap-3">
+                                    <div>
+                                        <div class="fw-semibold">{{ $a->title ?? 'Annonce' }}</div>
+                                        <div class="small text-muted">
+                                            {{ optional($a->published_at ?? $a->created_at)->format('d/m/Y') }}
+                                        </div>
+                                    </div>
+                                    @if(!empty($a->tag))
+                                        <span class="badge text-bg-light border">{{ $a->tag }}</span>
+                                    @endif
+                                </div>
+
+                                @if(!empty($a->excerpt))
+                                    <p class="text-muted small mt-2 mb-0">
+                                        {{ $a->excerpt }}
+                                    </p>
+                                @elseif(!empty($a->content))
+                                    <p class="text-muted small mt-2 mb-0">
+                                        {{ \Illuminate\Support\Str::limit(strip_tags($a->content), 140) }}
+                                    </p>
+                                @endif
+
+                                <div class="mt-3 d-flex flex-wrap gap-2">
+                                    <a href="{{ route('announcements.show', $a->id) }}" class="btn btn-sm btn-primary">
+                                        Lire
+                                    </a>
+
+                                    @if(!empty($a->pdf_path))
+                                        <a href="{{ asset('storage/'.$a->pdf_path) }}" target="_blank" class="btn btn-sm btn-outline-secondary">
+                                            📄 PDF
+                                        </a>
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                @empty
+                    <div class="col-12">
+                        <div class="alert alert-light border shadow-sm mb-0">
+                            Aucune annonce pour le moment.
+                            <span class="text-muted">Les communiqués BRVM apparaîtront ici dès publication.</span>
+                        </div>
+                    </div>
+                @endforelse
+            </div>
+        </div>
+    </section>
+
+    {{-- COMMENT ÇA MARCHE --}}
+    <section class="py-5 bg-white border-top">
         <div class="container" style="max-width: 1100px;">
             <div class="text-center mb-4">
                 <h2 class="fw-semibold mb-2">Comment ça marche&nbsp;?</h2>
@@ -131,6 +202,7 @@
                         </div>
                     </div>
                 </div>
+
                 <div class="col-md-4">
                     <div class="card h-100 border-0 shadow-sm">
                         <div class="card-body text-center">
@@ -143,6 +215,7 @@
                         </div>
                     </div>
                 </div>
+
                 <div class="col-md-4">
                     <div class="card h-100 border-0 shadow-sm">
                         <div class="card-body text-center">
@@ -217,7 +290,6 @@
                                     <div class="fw-bold">~ 1&nbsp;000&nbsp;FCFA</div>
                                     <div class="text-muted small">par état financier (tarif indicatif)</div>
                                 </div>
-                                {{-- 🔥 Bouton actif vers le formulaire EF --}}
                                 <a href="{{ route('client-financials.create') }}" class="btn btn-outline-secondary">
                                     Analyser un état financier
                                 </a>
@@ -249,6 +321,7 @@
                         🎓 Voir les formations BRVM
                     </a>
                 </div>
+
                 <div class="col-lg-6">
                     <div class="card border-0 shadow-sm">
                         <div class="card-body">
@@ -286,5 +359,6 @@
             </div>
         </div>
     </footer>
+
 </div>
 @endsection
