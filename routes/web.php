@@ -195,5 +195,7 @@ Route::get('/ga-test', function (\App\Services\GoogleAnalyticsService $ga) {
 });
 
 
+// Route::get('/radar-marche', [PerformanceController::class, 'index'])->name('radar.index');
+// Route::get('/radar-marche/data', [PerformanceController::class, 'data'])->name('radar.data');
 Route::get('/radar-marche', [PerformanceController::class, 'index'])->name('radar.index');
 Route::get('/radar-marche/data', [PerformanceController::class, 'data'])->name('radar.data');

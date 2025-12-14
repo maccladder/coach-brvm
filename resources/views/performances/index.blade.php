@@ -77,7 +77,7 @@ async function loadData() {
 
     // ⚠️ IMPORTANT : si tu crées un PerformanceController public,
     // remplace cette route par route('performances.data')
-    const url = new URL("{{ route('admin.performances.data') }}", window.location.origin);
+    const url = new URL("{{ route('radar.data') }}", window.location.origin);
     tickers.forEach(t => url.searchParams.append('tickers[]', t));
 
     const res = await fetch(url);
