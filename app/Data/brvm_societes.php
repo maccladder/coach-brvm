@@ -182,6 +182,16 @@ return [
         'dirigeants' => [],
     ],
 
+    'oragroup-togo' => [
+    'ticker' => 'ORGT',
+    'name' => "ORAGROUP TOGO",
+    'logo' => 'img/logos/societes/orabank.jpg', // ou orabank.jpg si c’est ça ton fichier
+    'description' => "Holding bancaire régionale opérant via un réseau de banques dans plusieurs pays d’Afrique de l’Ouest, avec des services de financement et banque de détail.",
+    'telephone' => null,
+    'adresse' => null,
+    'dirigeants' => [],
+],
+
     'orange-ci' => [
         'ticker' => 'ORAC',
         'name' => "ORANGE CÔTE D’IVOIRE",
