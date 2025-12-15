@@ -2,14 +2,15 @@
 
 use Illuminate\Support\Facades\Route;
 
+use App\Http\Controllers\SGIController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\UploadController;
 use App\Http\Controllers\LandingController;
 use App\Http\Controllers\SocieteController;
 use App\Http\Controllers\SummaryController;
 use App\Http\Controllers\ClientBocController;
-use App\Http\Controllers\DividendeController;
 
+use App\Http\Controllers\DividendeController;
 use App\Http\Controllers\PerformanceController;
 use App\Http\Controllers\AnnouncementController;
 use App\Http\Controllers\AdminAnalyticsController;
@@ -212,3 +213,9 @@ Route::get('/societes/{slug}', [SocieteController::class, 'show'])->name('societ
 
 Route::get('/dividendes', [DividendeController::class, 'index'])
     ->name('dividendes.index');
+
+
+    //route des sgi
+
+Route::get('/sgis', [SGIController::class, 'index'])->name('sgis.index');
+Route::get('/sgis/{slug}', [SGIController::class, 'show'])->name('sgis.show');

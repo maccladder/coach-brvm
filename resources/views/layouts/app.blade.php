@@ -32,12 +32,10 @@
 
         table thead th { white-space: nowrap; }
 
-        /* dropdown un peu plus “pro” */
         .dropdown-menu {
             border-radius: 14px;
         }
 
-        /* si demain tu mets beaucoup d’items (ex: sociétés) */
         .dropdown-menu-scroll {
             max-height: 360px;
             overflow: auto;
@@ -46,7 +44,7 @@
         .nav-link { font-weight: 500; }
     </style>
 
-    {{-- ✅ Google Analytics (GA4) --}}
+    {{-- Google Analytics --}}
     @php
         $gaId = config('services.ga.measurement_id') ?? env('GA_MEASUREMENT_ID');
     @endphp
@@ -75,12 +73,10 @@
 
         {{-- Toggler mobile --}}
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
-                data-bs-target="#mainNavbar" aria-controls="mainNavbar"
-                aria-expanded="false" aria-label="Basculer la navigation">
+                data-bs-target="#mainNavbar">
             <span class="navbar-toggler-icon"></span>
         </button>
 
-        {{-- Liens --}}
         <div class="collapse navbar-collapse" id="mainNavbar">
             <ul class="navbar-nav me-auto mb-2 mb-lg-0">
 
@@ -89,10 +85,9 @@
                     <a class="nav-link" href="{{ route('landing') }}">Accueil</a>
                 </li>
 
-                {{-- Analyses (dropdown) --}}
+                {{-- Analyses --}}
                 <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" role="button"
-                       data-bs-toggle="dropdown" aria-expanded="false">
+                    <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
                         Analyses
                     </a>
                     <ul class="dropdown-menu">
@@ -107,25 +102,18 @@
                             </a>
                         </li>
                         <li><hr class="dropdown-divider"></li>
-
-                        {{-- placeholders routes futures --}}
                         <li>
-                            <a class="dropdown-item disabled" href="#" tabindex="-1" aria-disabled="true">
-                                🎧 Analyses audio (bientôt)
-                            </a>
+                            <a class="dropdown-item disabled">🎧 Analyses audio (bientôt)</a>
                         </li>
                         <li>
-                            <a class="dropdown-item disabled" href="#" tabindex="-1" aria-disabled="true">
-                                🎥 Analyses vidéo (bientôt)
-                            </a>
+                            <a class="dropdown-item disabled">🎥 Analyses vidéo (bientôt)</a>
                         </li>
                     </ul>
                 </li>
 
-                {{-- Marché (dropdown) --}}
+                {{-- Marché --}}
                 <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" role="button"
-                       data-bs-toggle="dropdown" aria-expanded="false">
+                    <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
                         Marché
                     </a>
                     <ul class="dropdown-menu">
@@ -134,64 +122,56 @@
                                 📡 Radar (7 jours)
                             </a>
                         </li>
-
                         <li>
                             <a class="dropdown-item" href="{{ route('announcements.index') }}">
                                 📢 Annonces
                             </a>
                         </li>
-
-                        {{-- placeholders --}}
                         <li>
-                            <a class="dropdown-item disabled" href="#" tabindex="-1" aria-disabled="true">
-                                📅 Calendrier AG (bientôt)
-                            </a>
+                            <a class="dropdown-item disabled">📅 Calendrier AG (bientôt)</a>
                         </li>
                         <li>
-                            <a class="dropdown-item disabled" href="#" tabindex="-1" aria-disabled="true">
-                                📈 Indices BRVM (bientôt)
-                            </a>
+                            <a class="dropdown-item disabled">📈 Indices BRVM (bientôt)</a>
                         </li>
                     </ul>
                 </li>
 
-                {{-- Sociétés (dropdown) --}}
+                {{-- Sociétés --}}
                 <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" role="button"
-                       data-bs-toggle="dropdown" aria-expanded="false">
+                    <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
                         Sociétés
                     </a>
                     <ul class="dropdown-menu dropdown-menu-scroll">
-                        {{-- quand tu crées la route, tu replaces # par route('societes.index') --}}
+
                         <li>
                             <a class="dropdown-item" href="{{ route('societes.index') }}">
-    🏢 Annuaire des sociétés
-</a>
+                                🏢 Annuaire des sociétés
+                            </a>
                         </li>
+
                         <li>
-                            <a class="dropdown-item disabled" href="#" tabindex="-1" aria-disabled="true">
+    <a class="dropdown-item" href="{{ route('sgis.index') }}">
+        🏦 Courtiers (SGI)
+    </a>
+</li>
+
+
+                        <li>
+                            <a class="dropdown-item disabled">
                                 🔍 Rechercher une société (bientôt)
                             </a>
                         </li>
 
                         <li><hr class="dropdown-divider"></li>
 
-                        {{-- Exemples (juste UI pour le moment) --}}
+                        {{-- 👉 AJOUT UNIQUE ICI --}}
                         <li>
-                            <a class="dropdown-item disabled" href="#" tabindex="-1" aria-disabled="true">
-                                AIR LIQUIDE CI (profil bientôt)
+                            <a class="dropdown-item fw-semibold"
+                               href="{{ route('dividendes.index', ['year' => 2025]) }}">
+                                🏆 Classement des sociétés par dividendes (2025)
                             </a>
                         </li>
-                        <li>
-                            <a class="dropdown-item disabled" href="#" tabindex="-1" aria-disabled="true">
-                                SONATEL SN (profil bientôt)
-                            </a>
-                        </li>
-                        <li>
-                            <a class="dropdown-item disabled" href="#" tabindex="-1" aria-disabled="true">
-                                SODECI CI (profil bientôt)
-                            </a>
-                        </li>
+
                     </ul>
                 </li>
 
@@ -204,25 +184,19 @@
                 <li class="nav-item">
                     <a class="nav-link" href="{{ route('contact') }}">Contact</a>
                 </li>
+
             </ul>
 
-            {{-- Côté droit --}}
             <div class="d-flex align-items-center gap-2">
                 <span class="badge text-bg-light border">Beta privée</span>
-
-                {{-- placeholder futur --}}
-                <a href="#" class="btn btn-sm btn-outline-primary disabled" tabindex="-1" aria-disabled="true">
-                    Se connecter (bientôt)
-                </a>
+                <a class="btn btn-sm btn-outline-primary disabled">Se connecter (bientôt)</a>
             </div>
         </div>
     </div>
 </nav>
 
-{{-- Contenu des pages --}}
 @yield('content')
 
-{{-- Scripts --}}
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 @stack('scripts')
 
