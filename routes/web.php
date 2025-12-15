@@ -8,8 +8,9 @@ use App\Http\Controllers\LandingController;
 use App\Http\Controllers\SocieteController;
 use App\Http\Controllers\SummaryController;
 use App\Http\Controllers\ClientBocController;
-use App\Http\Controllers\PerformanceController;
+use App\Http\Controllers\DividendeController;
 
+use App\Http\Controllers\PerformanceController;
 use App\Http\Controllers\AnnouncementController;
 use App\Http\Controllers\AdminAnalyticsController;
 use App\Http\Controllers\ClientFinancialController;
@@ -206,3 +207,8 @@ Route::get('/radar-marche/data', [PerformanceController::class, 'data'])->name('
 
 Route::get('/societes', [SocieteController::class, 'index'])->name('societes.index');
 Route::get('/societes/{slug}', [SocieteController::class, 'show'])->name('societes.show');
+
+// route de dividende
+
+Route::get('/dividendes', [DividendeController::class, 'index'])
+    ->name('dividendes.index');
