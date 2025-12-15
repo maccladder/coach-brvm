@@ -63,39 +63,43 @@ class AdminController extends Controller
      * Format : YYYY-MM-DD
      */
     private function getBrvmHolidays(): array
-    {
-        return [
-            // ✅ 2025 (Avis N°336-2024 / BRVM / DG)
-            '2025-01-01', // Jour de l'An
-            '2025-03-28', // Lendemain Nuit du Destin (*)
-            '2025-03-31', // Lendemain Ramadan (*)
-            '2025-04-21', // Lundi de Pâques
-            '2025-05-01', // Fête du Travail
-            '2025-05-29', // Ascension
-            '2025-06-06', // Tabaski (*)
-            '2025-06-09', // Lundi de Pentecôte
-            '2025-08-07', // Indépendance
-            '2025-08-15', // Assomption
-            '2025-09-05', // Maouloud (*)
-            '2025-12-25', // Noël
+{
+    return [
+        // ✅ 2025 (corrigé et vérifié)
+        '2025-01-01', // Jour de l'An
 
-            // ✅ 2026 (ta liste actuelle)
-            '2026-01-01',
-            '2026-03-17',
-            '2026-03-20',
-            '2026-04-06',
-            '2026-05-01',
-            '2026-05-14',
-            '2026-05-25',
-            '2026-05-27',
-            '2026-08-07',
-            '2026-08-15',
-            '2026-08-26',
-            '2026-11-01',
-            '2026-11-15',
-            '2026-12-25',
-        ];
-    }
+        '2025-03-27', // Nuit du Destin (Lailatou-Kadr) ✅
+        '2025-03-31', // Lendemain Ramadan / Aïd el-Fitr ✅
+
+        '2025-09-04', // fête de Maouloud
+        '2025-04-21', // Lundi de Pâques
+        '2025-05-01', // Fête du Travail
+        '2025-05-29', // Ascension
+        '2025-06-06', // Tabaski (Aïd el-Kébir)
+        '2025-06-09', // Lundi de Pentecôte
+        '2025-08-07', // Indépendance
+        '2025-08-15', // Assomption
+        '2025-09-05', // Maouloud (naissance du Prophète)
+        '2025-12-25', // Noël
+
+        // ✅ 2026 (inchangé)
+        '2026-01-01',
+        '2026-03-17',
+        '2026-03-20',
+        '2026-04-06',
+        '2026-05-01',
+        '2026-05-14',
+        '2026-05-25',
+        '2026-05-27',
+        '2026-08-07',
+        '2026-08-15',
+        '2026-08-26',
+        '2026-11-01',
+        '2026-11-15',
+        '2026-12-25',
+    ];
+}
+
 
     public function dailyBocsIndex(Request $request)
     {
