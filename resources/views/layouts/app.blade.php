@@ -174,7 +174,7 @@
                     <a class="nav-link" href="{{ route('formations.brvm') }}">Formations</a>
                 </li>
 
-                {{-- ✅ Aide (FAQ + Contact + Formation) --}}
+                {{-- ✅ Aide (FAQ + Glossaire + Contact + Formation) --}}
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
                         Aide
@@ -185,6 +185,14 @@
                                 ❓ Foire aux questions (FAQ)
                             </a>
                         </li>
+
+                        {{-- ✅ NOUVEAU : Glossaire --}}
+                        <li>
+                            <a class="dropdown-item" href="{{ route('aide.glossaire') }}">
+                                📘 Glossaire BRVM
+                            </a>
+                        </li>
+
                         <li>
                             <a class="dropdown-item" href="{{ route('contact') }}">
                                 📩 Contact

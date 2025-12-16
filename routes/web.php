@@ -12,6 +12,7 @@ use App\Http\Controllers\SummaryController;
 
 use App\Http\Controllers\ClientBocController;
 use App\Http\Controllers\DividendeController;
+use App\Http\Controllers\GlossaireController;
 use App\Http\Controllers\PerformanceController;
 use App\Http\Controllers\AnnouncementController;
 use App\Http\Controllers\AdminAnalyticsController;
@@ -229,3 +230,9 @@ Route::get('/faq', [FaqController::class, 'index'])->name('faq');
 // routes/web.php
 Route::get('/radar/bubbles-latest', [App\Http\Controllers\RadarController::class, 'bubblesLatest'])
     ->name('radar.bubblesLatest');
+
+    // Glossaire
+
+    Route::get('/aide/glossaire', [GlossaireController::class, 'index'])
+    ->name('aide.glossaire');
+
