@@ -2,14 +2,15 @@
 
 use Illuminate\Support\Facades\Route;
 
+use App\Http\Controllers\FaqController;
 use App\Http\Controllers\SGIController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\UploadController;
 use App\Http\Controllers\LandingController;
 use App\Http\Controllers\SocieteController;
 use App\Http\Controllers\SummaryController;
-use App\Http\Controllers\ClientBocController;
 
+use App\Http\Controllers\ClientBocController;
 use App\Http\Controllers\DividendeController;
 use App\Http\Controllers\PerformanceController;
 use App\Http\Controllers\AnnouncementController;
@@ -219,3 +220,12 @@ Route::get('/dividendes', [DividendeController::class, 'index'])
 
 Route::get('/sgis', [SGIController::class, 'index'])->name('sgis.index');
 Route::get('/sgis/{slug}', [SGIController::class, 'show'])->name('sgis.show');
+
+//faq
+Route::get('/faq', [FaqController::class, 'index'])->name('faq');
+
+//bulles du radar latest
+
+// routes/web.php
+Route::get('/radar/bubbles-latest', [App\Http\Controllers\RadarController::class, 'bubblesLatest'])
+    ->name('radar.bubblesLatest');

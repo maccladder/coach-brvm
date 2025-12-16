@@ -44,6 +44,9 @@
         .nav-link { font-weight: 500; }
     </style>
 
+    {{-- ✅ Styles spécifiques pages (optionnel mais utile) --}}
+    @stack('styles')
+
     {{-- Google Analytics --}}
     @php
         $gaId = config('services.ga.measurement_id') ?? env('GA_MEASUREMENT_ID');
@@ -102,12 +105,8 @@
                             </a>
                         </li>
                         <li><hr class="dropdown-divider"></li>
-                        <li>
-                            <a class="dropdown-item disabled">🎧 Analyses audio (bientôt)</a>
-                        </li>
-                        <li>
-                            <a class="dropdown-item disabled">🎥 Analyses vidéo (bientôt)</a>
-                        </li>
+                        <li><a class="dropdown-item disabled">🎧 Analyses audio (bientôt)</a></li>
+                        <li><a class="dropdown-item disabled">🎥 Analyses vidéo (bientôt)</a></li>
                     </ul>
                 </li>
 
@@ -127,12 +126,8 @@
                                 📢 Annonces
                             </a>
                         </li>
-                        <li>
-                            <a class="dropdown-item disabled">📅 Calendrier AG (bientôt)</a>
-                        </li>
-                        <li>
-                            <a class="dropdown-item disabled">📈 Indices BRVM (bientôt)</a>
-                        </li>
+                        <li><a class="dropdown-item disabled">📅 Calendrier AG (bientôt)</a></li>
+                        <li><a class="dropdown-item disabled">📈 Indices BRVM (bientôt)</a></li>
                     </ul>
                 </li>
 
@@ -150,11 +145,10 @@
                         </li>
 
                         <li>
-    <a class="dropdown-item" href="{{ route('sgis.index') }}">
-        🏦 Courtiers (SGI)
-    </a>
-</li>
-
+                            <a class="dropdown-item" href="{{ route('sgis.index') }}">
+                                🏦 Courtiers (SGI)
+                            </a>
+                        </li>
 
                         <li>
                             <a class="dropdown-item disabled">
@@ -180,9 +174,31 @@
                     <a class="nav-link" href="{{ route('formations.brvm') }}">Formations</a>
                 </li>
 
-                {{-- Contact --}}
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ route('contact') }}">Contact</a>
+                {{-- ✅ Aide (FAQ + Contact + Formation) --}}
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
+                        Aide
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li>
+                            <a class="dropdown-item" href="{{ route('faq') }}">
+                                ❓ Foire aux questions (FAQ)
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" href="{{ route('contact') }}">
+                                📩 Contact
+                            </a>
+                        </li>
+
+                        <li><hr class="dropdown-divider"></li>
+
+                        <li>
+                            <a class="dropdown-item" href="{{ route('formations.brvm') }}">
+                                🎓 Se former à la BRVM
+                            </a>
+                        </li>
+                    </ul>
                 </li>
 
             </ul>
@@ -198,6 +214,8 @@
 @yield('content')
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+{{-- ✅ Scripts spécifiques pages (FAQ utilise ça) --}}
 @stack('scripts')
 
 </body>

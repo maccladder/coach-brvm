@@ -6,9 +6,16 @@ return [
         'ticker' => 'ABJC',
         'name' => "SERVAIR ABIDJAN CÔTE D’IVOIRE",
         'logo' => 'img/logos/societes/servair.jpg',
-        'description' => "Entreprise spécialisée dans les services aéroportuaires, notamment l’assistance et la restauration/traiteur pour compagnies aériennes et activités liées aux opérations aéroportuaires.",
-        'telephone' => null,
-        'adresse' => null,
+        'description' => "SERVAIR ABIDJAN CÔTE D’IVOIRE est une entreprise ivoirienne spécialisée dans les services aéroportuaires et les prestations de restauration destinées au secteur aérien. Historiquement reconnue pour son expertise dans l’avitaillement des compagnies aériennes, la société intervient principalement dans la préparation et la fourniture de repas, ainsi que dans des services d’assistance liés aux opérations aéroportuaires.
+
+Au fil des années, SERVAIR ABIDJAN a su élargir son champ d’activité afin de répondre à l’évolution des besoins du marché local. En complément de ses services dédiés au transport aérien, l’entreprise s’est progressivement positionnée sur des segments hors aviation, notamment la restauration collective et les services traiteur à destination des entreprises, des établissements scolaires et des événements professionnels ou privés.
+
+Grâce à une organisation structurée, des normes de qualité strictes et une attention particulière portée à l’hygiène et à la sécurité alimentaire, SERVAIR ABIDJAN s’est imposée comme un acteur reconnu dans son domaine. Son développement s’inscrit dans une logique de diversification maîtrisée, visant à renforcer sa base de clientèle tout en accompagnant la croissance économique et le dynamisme du secteur des services en Côte d’Ivoire.
+
+Aujourd’hui, SERVAIR ABIDJAN combine savoir-faire historique et adaptation continue, avec l’objectif de consolider sa position sur le marché national et de poursuivre une croissance durable à long terme.",
+        'telephone' => ' (+225) 27 21 75 08 10/(+225) 27 21 75 08 13',
+        'adresse' => 'Aéroport International Félix Houphouet Boigny Abidjan'
+,
         'dirigeants' => [],
     ],
 
@@ -56,9 +63,15 @@ return [
         'ticker' => 'BOABF',
         'name' => "BANK OF AFRICA BURKINA FASO",
         'logo' => 'img/logos/societes/boa_bf.jpg',
-        'description' => "Banque commerciale au Burkina Faso.",
-        'telephone' => null,
-        'adresse' => null,
+        'description' => "BANK OF AFRICA BURKINA FASO est une banque commerciale opérant au Burkina Faso, membre du groupe panafricain BANK OF AFRICA, présent dans plusieurs pays d’Afrique. L’établissement intervient principalement dans les activités de banque de détail, de banque des entreprises et de services financiers destinés aussi bien aux particuliers qu’aux professionnels.
+
+La banque propose une gamme complète de produits et services bancaires, incluant la collecte de l’épargne, l’octroi de crédits, les opérations de paiement, ainsi que des solutions adaptées au financement des entreprises, des PME et des acteurs institutionnels. Elle joue un rôle actif dans l’accompagnement du tissu économique local, en soutenant les initiatives privées et les projets contribuant au développement du pays.
+
+Grâce à son appartenance au groupe BANK OF AFRICA, la banque bénéficie d’une expertise régionale, d’un savoir-faire éprouvé et de synergies internationales, lui permettant d’offrir des services conformes aux standards du secteur bancaire moderne. Elle s’appuie sur un réseau d’agences et des outils digitaux en constante évolution afin d’améliorer l’accessibilité et la qualité de l’expérience client.
+
+BANK OF AFRICA BURKINA FASO s’inscrit dans une démarche de croissance durable, en mettant l’accent sur la solidité financière, la maîtrise des risques et l’innovation, avec pour objectif de renforcer sa position sur le marché bancaire burkinabè et de contribuer au développement économique et financier du pays sur le long terme.",
+        'telephone' => '(226) 25 30 88 70',
+        'adresse' => '770, Avenue du Président Aboubakar Sangoulé Lamizana 01 BP 1319 Ouagad Ouagadougou',
         'dirigeants' => [],
     ],
 

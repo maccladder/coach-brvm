@@ -1,6 +1,11 @@
 @extends('layouts.app')
 
 @section('content')
+@php
+    $descRaw = trim((string)($societe['description'] ?? ''));
+    $paragraphs = array_values(array_filter(preg_split("/\R{2,}/u", $descRaw))); // split sur lignes vides
+@endphp
+
 <div class="container py-5" style="max-width:1100px;">
 
     <a href="{{ route('societes.index') }}" class="small text-decoration-none">
@@ -34,10 +39,18 @@
         <div class="col-lg-8">
             <div class="card border-0 shadow-sm h-100">
                 <div class="card-body">
-                    <h5 class="fw-semibold mb-2">📌 Présentation</h5>
-                    <p class="text-muted mb-0">
-                        {{ $societe['description'] }}
-                    </p>
+                    <h5 class="fw-semibold mb-3">📌 Présentation</h5>
+
+                    @if($descRaw === '')
+                        <p class="text-muted mb-0">—</p>
+                    @else
+                        {{-- On “façonne” le texte : paragraphes + style propre --}}
+                        <div class="societe-article">
+                            @foreach($paragraphs as $p)
+                                <p class="societe-para">{!! e($p) !!}</p>
+                            @endforeach
+                        </div>
+                    @endif
                 </div>
             </div>
 
@@ -173,6 +186,8 @@
                             {{ $societe['adresse'] ?? '—' }}
                         </div>
 
+                        {{-- Dirigeants (désactivé pour le moment) --}}
+                        {{--
                         <div class="text-muted mb-1">Dirigeants</div>
                         @if(!empty($societe['dirigeants']))
                             <ul class="mb-0 ps-3">
@@ -183,6 +198,7 @@
                         @else
                             <div class="fw-semibold">—</div>
                         @endif
+                        --}}
                     </div>
                 </div>
             </div>
@@ -191,3 +207,24 @@
 
 </div>
 @endsection
+
+@push('styles')
+<style>
+    /* Présentation : rendu “article” propre, même si le texte source est mal formaté */
+    .societe-article{
+        color:#495057;
+        font-size: .98rem;
+        line-height: 1.8;
+        letter-spacing: .1px;
+        text-align: justify;
+        text-wrap: pretty;
+        overflow-wrap: anywhere;
+    }
+    .societe-para{
+        margin: 0 0 1rem 0;
+    }
+    .societe-para:last-child{
+        margin-bottom: 0;
+    }
+</style>
+@endpush
