@@ -3,82 +3,84 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 use App\Models\Societe;
 
 class SocietesSeeder extends Seeder
 {
     public function run(): void
     {
+        // ⚠️ Reset total (OK si tu n'as pas encore de données liées)
+        DB::table('societes')->truncate();
+
         $societes = [
+            // --- CI (Côte d’Ivoire)
+            ['code' => 'ABJC', 'name' => "SERVAIR ABIDJAN CÔTE D’IVOIRE", 'sector' => null, 'country' => 'CI'],
+            ['code' => 'BICC', 'name' => "BICI CÔTE D’IVOIRE", 'sector' => 'Banque', 'country' => 'CI'],
+            ['code' => 'BNBC', 'name' => "BERNABÉ CÔTE D’IVOIRE", 'sector' => null, 'country' => 'CI'],
+            ['code' => 'CABC', 'name' => "SICABLE CÔTE D’IVOIRE", 'sector' => null, 'country' => 'CI'],
+            ['code' => 'CFAC', 'name' => "CFAO MOTORS CÔTE D’IVOIRE", 'sector' => null, 'country' => 'CI'],
+            ['code' => 'CIEC', 'name' => "CIE CÔTE D’IVOIRE", 'sector' => 'Énergie', 'country' => 'CI'],
+            ['code' => 'ECOC', 'name' => "ECOBANK CÔTE D’IVOIRE", 'sector' => 'Banque', 'country' => 'CI'],
+            ['code' => 'FTSC', 'name' => "FILTISAC CÔTE D’IVOIRE", 'sector' => null, 'country' => 'CI'],
+            ['code' => 'NEIC', 'name' => "NEI-CEDA CÔTE D’IVOIRE", 'sector' => null, 'country' => 'CI'],
+            ['code' => 'NTLC', 'name' => "NESTLÉ CÔTE D’IVOIRE", 'sector' => null, 'country' => 'CI'],
+            ['code' => 'ORAC', 'name' => "ORANGE CÔTE D’IVOIRE", 'sector' => 'Télécoms', 'country' => 'CI'],
+            ['code' => 'PALC', 'name' => "PALM CÔTE D’IVOIRE", 'sector' => null, 'country' => 'CI'],
+            ['code' => 'PRSC', 'name' => "TRACTAFRIC MOTORS CÔTE D’IVOIRE", 'sector' => null, 'country' => 'CI'],
+            ['code' => 'SAFC', 'name' => "SAFCA - ALIOS FINANCE CÔTE D’IVOIRE", 'sector' => null, 'country' => 'CI'],
+            ['code' => 'SDCC', 'name' => "SODECI CÔTE D’IVOIRE", 'sector' => 'Eau', 'country' => 'CI'],
+            ['code' => 'SDSC', 'name' => "AFRICA GLOBAL LOGISTICS CÔTE D’IVOIRE (ex Bolloré)", 'sector' => null, 'country' => 'CI'],
+            ['code' => 'SEMC', 'name' => "CROWN SIEM CÔTE D’IVOIRE", 'sector' => null, 'country' => 'CI'],
+            ['code' => 'SGBC', 'name' => "SOCIÉTÉ GÉNÉRALE CÔTE D’IVOIRE", 'sector' => 'Banque', 'country' => 'CI'],
+            ['code' => 'SHEC', 'name' => "VIVO ENERGY CÔTE D’IVOIRE", 'sector' => null, 'country' => 'CI'],
+            ['code' => 'SIBC', 'name' => "SOCIÉTÉ IVOIRIENNE DE BANQUE CÔTE D’IVOIRE", 'sector' => 'Banque', 'country' => 'CI'],
+            ['code' => 'SICC', 'name' => "SICOR CÔTE D’IVOIRE", 'sector' => null, 'country' => 'CI'],
+            ['code' => 'SIVC', 'name' => "ERIUM CÔTE D’IVOIRE (ex Air Liquide)", 'sector' => null, 'country' => 'CI'],
+            ['code' => 'SLBC', 'name' => "SOLIBRA CÔTE D’IVOIRE", 'sector' => null, 'country' => 'CI'],
+            ['code' => 'SMBC', 'name' => "SMB CÔTE D’IVOIRE", 'sector' => null, 'country' => 'CI'],
+            ['code' => 'SOGC', 'name' => "SOGB CÔTE D’IVOIRE", 'sector' => null, 'country' => 'CI'],
+            ['code' => 'SPHC', 'name' => "SAPH CÔTE D’IVOIRE", 'sector' => null, 'country' => 'CI'],
+            ['code' => 'STAC', 'name' => "SETAO CÔTE D’IVOIRE", 'sector' => null, 'country' => 'CI'],
+            ['code' => 'STBC', 'name' => "SITAB CÔTE D’IVOIRE", 'sector' => null, 'country' => 'CI'],
+            ['code' => 'SCRC', 'name' => "SUCRIVOIRE CÔTE D’IVOIRE", 'sector' => null, 'country' => 'CI'],
+            ['code' => 'TTLC', 'name' => "TOTALENERGIES MARKETING CÔTE D’IVOIRE", 'sector' => null, 'country' => 'CI'],
+            ['code' => 'UNLC', 'name' => "UNILEVER CÔTE D’IVOIRE", 'sector' => null, 'country' => 'CI'],
+            ['code' => 'UNXC', 'name' => "UNIWAX CÔTE D’IVOIRE", 'sector' => null, 'country' => 'CI'],
+            ['code' => 'NSBC', 'name' => "NSIA BANQUE COTE D'IVOIRE", 'sector' => 'Banque', 'country' => 'CI'],
 
-            // =========================
-            // 🇨🇮 CÔTE D’IVOIRE
-            // =========================
-            ['code' => 'SODECI', 'name' => 'SODECI', 'sector' => 'Eau', 'country' => 'CI'],
-            ['code' => 'CIE', 'name' => 'Compagnie Ivoirienne d’Électricité', 'sector' => 'Énergie', 'country' => 'CI'],
-            ['code' => 'BICICI', 'name' => 'BICICI', 'sector' => 'Banque', 'country' => 'CI'],
-            ['code' => 'SGBCI', 'name' => 'Société Générale Côte d’Ivoire', 'sector' => 'Banque', 'country' => 'CI'],
-            ['code' => 'SIB', 'name' => 'Société Ivoirienne de Banque', 'sector' => 'Banque', 'country' => 'CI'],
-            ['code' => 'BOA_CI', 'name' => 'Bank of Africa Côte d’Ivoire', 'sector' => 'Banque', 'country' => 'CI'],
-            ['code' => 'NSIA_CI', 'name' => 'NSIA Banque Côte d’Ivoire', 'sector' => 'Banque', 'country' => 'CI'],
-            ['code' => 'ECOBANK_CI', 'name' => 'Ecobank Côte d’Ivoire', 'sector' => 'Banque', 'country' => 'CI'],
-            ['code' => 'TOTAL_CI', 'name' => 'TotalEnergies Marketing Côte d’Ivoire', 'sector' => 'Pétrole', 'country' => 'CI'],
-            ['code' => 'VIVO_CI', 'name' => 'Vivo Energy Côte d’Ivoire', 'sector' => 'Pétrole', 'country' => 'CI'],
-            ['code' => 'SERVAIR_ABJ', 'name' => 'Servair Abidjan', 'sector' => 'Services', 'country' => 'CI'],
-            ['code' => 'SICABLE', 'name' => 'SICABLE Côte d’Ivoire', 'sector' => 'Industrie', 'country' => 'CI'],
-            ['code' => 'SETAO', 'name' => 'SETAO Côte d’Ivoire', 'sector' => 'Immobilier', 'country' => 'CI'],
-            ['code' => 'PALMCI', 'name' => 'Palm Côte d’Ivoire', 'sector' => 'Agro-industrie', 'country' => 'CI'],
-            ['code' => 'SAPH', 'name' => 'Société Africaine de Plantations d’Hévéas', 'sector' => 'Agro-industrie', 'country' => 'CI'],
-            ['code' => 'SUCRIVOIRE', 'name' => 'Sucrivoire', 'sector' => 'Agro-industrie', 'country' => 'CI'],
-            ['code' => 'SMB_CI', 'name' => 'SMB Côte d’Ivoire', 'sector' => 'Industrie', 'country' => 'CI'],
 
-            // =========================
-            // 🇸🇳 SÉNÉGAL
-            // =========================
-            ['code' => 'SONATEL', 'name' => 'Sonatel', 'sector' => 'Télécoms', 'country' => 'SN'],
-            ['code' => 'CBAO', 'name' => 'CBAO Attijariwafa Bank', 'sector' => 'Banque', 'country' => 'SN'],
-            ['code' => 'BOA_SN', 'name' => 'Bank of Africa Sénégal', 'sector' => 'Banque', 'country' => 'SN'],
-            ['code' => 'TOTAL_SN', 'name' => 'TotalEnergies Sénégal', 'sector' => 'Pétrole', 'country' => 'SN'],
+            // --- BJ (Bénin)
+            ['code' => 'BICB', 'name' => "B.I.C.I.C. BÉNIN (BICB)", 'sector' => 'Banque', 'country' => 'BJ'],
+            ['code' => 'BOAB', 'name' => "BANK OF AFRICA BÉNIN", 'sector' => 'Banque', 'country' => 'BJ'],
+            ['code' => 'LNBB', 'name' => "LOTERIE NATIONALE DU BÉNIN", 'sector' => null, 'country' => 'BJ'],
 
-            // =========================
-            // 🇧🇫 BURKINA FASO
-            // =========================
-            ['code' => 'ONATEL_BF', 'name' => 'Onatel Burkina Faso', 'sector' => 'Télécoms', 'country' => 'BF'],
-            ['code' => 'BOA_BF', 'name' => 'Bank of Africa Burkina Faso', 'sector' => 'Banque', 'country' => 'BF'],
-            ['code' => 'SOPAFER_B', 'name' => 'SOPAFER-B', 'sector' => 'Transport', 'country' => 'BF'],
+            // --- BF (Burkina Faso)
+            ['code' => 'BOABF', 'name' => "BANK OF AFRICA BURKINA FASO", 'sector' => 'Banque', 'country' => 'BF'],
+            ['code' => 'CBIBF', 'name' => "CORIS BANK INTERNATIONAL BURKINA FASO", 'sector' => 'Banque', 'country' => 'BF'],
+            ['code' => 'ONTBF', 'name' => "ONATEL BURKINA FASO", 'sector' => 'Télécoms', 'country' => 'BF'],
 
-            // =========================
-            // 🇧🇯 BÉNIN
-            // =========================
-            ['code' => 'BOA_BJ', 'name' => 'Bank of Africa Bénin', 'sector' => 'Banque', 'country' => 'BJ'],
+            // --- ML (Mali)
+            ['code' => 'BOAM', 'name' => "BANK OF AFRICA MALI", 'sector' => 'Banque', 'country' => 'ML'],
 
-            // =========================
-            // 🇲🇱 MALI
-            // =========================
-            ['code' => 'BOA_ML', 'name' => 'Bank of Africa Mali', 'sector' => 'Banque', 'country' => 'ML'],
+            // --- NE (Niger)
+            ['code' => 'BOAN', 'name' => "BANK OF AFRICA NIGER", 'sector' => 'Banque', 'country' => 'NE'],
 
-            // =========================
-            // 🇹🇬 TOGO
-            // =========================
-            ['code' => 'BOA_TG', 'name' => 'Bank of Africa Togo', 'sector' => 'Banque', 'country' => 'TG'],
-            ['code' => 'NSIA_TG', 'name' => 'NSIA Banque Togo', 'sector' => 'Banque', 'country' => 'TG'],
+            // --- SN (Sénégal)
+            ['code' => 'BOAS', 'name' => "BANK OF AFRICA SÉNÉGAL", 'sector' => 'Banque', 'country' => 'SN'],
+            ['code' => 'SNTS', 'name' => "SONATEL SÉNÉGAL", 'sector' => 'Télécoms', 'country' => 'SN'],
+            ['code' => 'TTLS', 'name' => "TOTALENERGIES SÉNÉGAL", 'sector' => null, 'country' => 'SN'],
 
-            // =========================
-            // 🇳🇪 NIGER
-            // =========================
-            ['code' => 'BOA_NE', 'name' => 'Bank of Africa Niger', 'sector' => 'Banque', 'country' => 'NE'],
+            // --- TG (Togo)
+            ['code' => 'ETIT', 'name' => "ECOBANK TRANSNATIONAL INCORPORATED (TOGO)", 'sector' => 'Banque', 'country' => 'TG'],
+            ['code' => 'ORGT', 'name' => "ORAGROUP TOGO", 'sector' => 'Banque', 'country' => 'TG'],
 
-            // =========================
-            // 🇬🇼 GUINÉE-BISSAU
-            // =========================
-            ['code' => 'BOA_GW', 'name' => 'Bank of Africa Guinée-Bissau', 'sector' => 'Banque', 'country' => 'GW'],
+            // --- (Côte d'Ivoire) BOA CI
+            ['code' => 'BOAC', 'name' => "BANK OF AFRICA CÔTE D’IVOIRE", 'sector' => 'Banque', 'country' => 'CI'],
         ];
 
-        foreach ($societes as $societe) {
-            Societe::updateOrCreate(
-                ['code' => $societe['code']],
-                $societe
-            );
+        foreach ($societes as $s) {
+            Societe::create($s);
         }
     }
 }
