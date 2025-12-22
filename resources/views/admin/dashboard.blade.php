@@ -15,11 +15,11 @@
         </div>
 
         <div class="d-flex gap-2">
-            {{-- 👉 Bouton Annonces
-            <a href="{{ route('admin.announcements.index') }}"
-               class="btn btn-outline-success fw-semibold">
-                📣 Annonces BRVM
-            </a> --}}
+            {{-- 👉 Bouton États financiers (archive upload) --}}
+            <a href="{{ route('admin.financial_reports.index', ['year' => 2025]) }}"
+               class="btn btn-outline-info fw-semibold">
+                📄 États financiers 2025
+            </a>
 
             {{-- 👉 Bouton Analytics --}}
             <a href="{{ route('admin.analytics.index') }}"
@@ -40,6 +40,20 @@
                         <h5 class="fw-bold mb-1">📊 Gestion BOC journalières</h5>
                         <p class="small mb-0">
                             Suivi journalier des BOC : uploads, retards, fichiers manquants.
+                        </p>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        {{-- États financiers (archive upload) --}}
+        <div class="col-md-4">
+            <a href="{{ route('admin.financial_reports.index', ['year' => 2025]) }}" class="text-decoration-none">
+                <div class="card shadow-sm border-0 h-100 bg-info text-white">
+                    <div class="card-body d-flex flex-column justify-content-center">
+                        <h5 class="fw-bold mb-1">📄 États financiers (Archive)</h5>
+                        <p class="small mb-0">
+                            Upload & suivi des publications 2025 : T1, S1, T3 et Annuel.
                         </p>
                     </div>
                 </div>
@@ -151,10 +165,18 @@
         </div>
     </div>
 
-    {{-- SECTION ÉTATS FINANCIERS --}}
+    {{-- SECTION ÉTATS FINANCIERS (analyses clients) --}}
     <div class="card shadow-sm border-0">
         <div class="card-body">
-            <h4 class="fw-semibold mb-3">Derniers états financiers analysés</h4>
+            <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+                <h4 class="fw-semibold mb-0">Derniers états financiers analysés</h4>
+
+                {{-- Petit raccourci vers l’archive upload --}}
+                <a href="{{ route('admin.financial_reports.index', ['year' => 2025]) }}"
+                   class="btn btn-sm btn-outline-info fw-semibold">
+                    📄 Ouvrir l’archive 2025
+                </a>
+            </div>
 
             @if($financials->isEmpty())
                 <p class="text-muted">Aucun état financier analysé pour l’instant.</p>

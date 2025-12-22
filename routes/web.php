@@ -1,30 +1,47 @@
 <?php
 
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Route;
 
+use App\Services\BrvmActionsAiService;
 use App\Http\Controllers\FaqController;
 use App\Http\Controllers\SGIController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\UploadController;
 use App\Http\Controllers\LandingController;
 use App\Http\Controllers\SocieteController;
-use App\Http\Controllers\SummaryController;
 
+use App\Http\Controllers\SummaryController;
 use App\Http\Controllers\ClientBocController;
 use App\Http\Controllers\DividendeController;
 use App\Http\Controllers\GlossaireController;
+use App\Http\Controllers\AdminMarketController;
 use App\Http\Controllers\PerformanceController;
 use App\Http\Controllers\AnnouncementController;
 use App\Http\Controllers\AdminAnalyticsController;
 use App\Http\Controllers\ClientFinancialController;
 use App\Http\Controllers\AdminPerformanceController;
 use App\Http\Controllers\AdminAnnouncementController;
+use App\Http\Controllers\AdminVirtualWalletController;
+use App\Http\Controllers\AdminFinancialReportController;
+
+
+
 
 /*
 |--------------------------------------------------------------------------
 | Page d’accueil
 |--------------------------------------------------------------------------
 */
+
+Route::get('/test/brvm-actions-ai', function (BrvmActionsAiService $svc) {
+    $stocks = $svc->fetchCloseAndChangeFromSite();
+
+    return response()->json([
+        'count' => count($stocks),
+        'stocks' => array_slice($stocks, 0, 10), // affiche juste 10 pour tester
+    ], 200, [], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+});
 
 Route::redirect('/', '/welcome');
 
@@ -158,6 +175,31 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/bocs', [AdminController::class, 'dailyBocsIndex'])->name('bocs.index');
         Route::post('/bocs', [AdminController::class, 'dailyBocsStore'])->name('bocs.store');
 
+       // ✅ États financiers (ADMIN)
+Route::get('/financial-reports/{year}', [AdminFinancialReportController::class, 'index'])
+    ->name('financial_reports.index');
+
+Route::get('/financial-reports/{year}/societes/{societe}', [AdminFinancialReportController::class, 'showSociete'])
+    ->name('financial_reports.societe');
+
+Route::post('/financial-reports/{year}/societes/{societe}/{period}/upload', [AdminFinancialReportController::class, 'upload'])
+    ->name('financial_reports.upload');
+
+Route::post('/financial-reports/{year}/societes/{societe}/{period}/not-published', [AdminFinancialReportController::class, 'markNotPublished'])
+    ->name('financial_reports.not_published');
+
+
+
+    // ✅ Wallet
+    Route::get('/wallet', [AdminVirtualWalletController::class, 'index'])->name('wallet.index');
+    Route::post('/wallet/buy', [AdminVirtualWalletController::class, 'buy'])->name('wallet.buy');
+    Route::post('/wallet/sell', [AdminVirtualWalletController::class, 'sell'])->name('wallet.sell');
+
+     // ✅ Marché
+    Route::get('/market', [AdminMarketController::class, 'index'])->name('market.index');
+    Route::get('/market/api', [AdminMarketController::class, 'api'])->name('market.api');
+
+
         // ✅ Annonces ADMIN (CRUD)
         Route::resource('announcements', AdminAnnouncementController::class)->except(['show']);
     });
@@ -171,6 +213,50 @@ Route::prefix('admin')->name('admin.')->group(function () {
 */
 
 Route::post('/{clientBoc}/pdf', [ClientBocController::class, 'downloadPdf'])->name('client-bocs.pdf');
+
+Route::get('/ssl-http-test', function () {
+    $ca = 'C:\\wamp64\\bin\\php\\cacert.pem'; // <-- mets le nouveau chemin ici
+
+    $urls = [
+        'https://brvm.org/fr/cours-actions/0',      // va échouer (DNS)
+        'https://www.brvm.org/fr/cours-actions/0',  // doit passer après fix
+        'https://www.google.com',                   // contrôle
+    ];
+
+    $out = [];
+
+    foreach ($urls as $url) {
+        try {
+            $res = Http::withOptions(['verify' => $ca])
+                ->timeout(20)
+                ->withHeaders([
+                    'User-Agent' => 'CoachBRVM/1.0 (+https://coach-brvm.com)',
+                ])
+                ->get($url);
+
+            $out[$url] = [
+                'ok' => $res->successful(),
+                'status' => $res->status(),
+                'len' => strlen($res->body()),
+            ];
+        } catch (\Throwable $e) {
+            $out[$url] = [
+                'ok' => false,
+                'error' => $e->getMessage(),
+            ];
+        }
+    }
+
+    return response()->json($out, 200, [], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+});
+
+// Route::get('/admin/market/actions-ai', function (BrvmActionsAiService $svc) {
+//     $stocks = $svc->fetchStocks();
+//     return response()->json([
+//         'count' => count($stocks),
+//         'sample' => array_slice($stocks, 0, 15),
+//     ], 200, [], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+// });
 
 
 /*

@@ -64,8 +64,15 @@
                     <a class="nav-link" href="{{ route('admin.bocs.index') }}">BOC journalières</a>
                 </li>
                 <li class="nav-item">
+    <a class="nav-link" href="{{ route('admin.financial_reports.index', ['year' => 2025]) }}">
+        États financiers
+    </a>
+</li>
+
+                <li class="nav-item">
                     <a class="nav-link" href="{{ route('landing') }}">← Site public</a>
                 </li>
+
             </ul>
 
             @if(session('is_admin'))
