@@ -23,6 +23,11 @@ return [
         'bubble_model' => env('OPENAI_BUBBLE_MODEL', 'gpt-4.1-mini'),
     ],
 
+    'tawk' => [
+    'widget_id' => env('TAWK_TO_WIDGET_ID'),
+],
+
+
     'postmark' => [
         'token' => env('POSTMARK_TOKEN'),
     ],

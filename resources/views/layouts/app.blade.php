@@ -44,7 +44,7 @@
         .nav-link { font-weight: 500; }
     </style>
 
-    {{-- ✅ Styles spécifiques pages (optionnel mais utile) --}}
+    {{-- Styles spécifiques pages --}}
     @stack('styles')
 
     {{-- Google Analytics --}}
@@ -83,12 +83,10 @@
         <div class="collapse navbar-collapse" id="mainNavbar">
             <ul class="navbar-nav me-auto mb-2 mb-lg-0">
 
-                {{-- Accueil --}}
                 <li class="nav-item">
                     <a class="nav-link" href="{{ route('landing') }}">Accueil</a>
                 </li>
 
-                {{-- Analyses --}}
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
                         Analyses
@@ -110,7 +108,6 @@
                     </ul>
                 </li>
 
-                {{-- Marché --}}
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
                         Marché
@@ -131,50 +128,40 @@
                     </ul>
                 </li>
 
-                {{-- Sociétés --}}
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
                         Sociétés
                     </a>
                     <ul class="dropdown-menu dropdown-menu-scroll">
-
                         <li>
                             <a class="dropdown-item" href="{{ route('societes.index') }}">
                                 🏢 Annuaire des sociétés
                             </a>
                         </li>
-
                         <li>
                             <a class="dropdown-item" href="{{ route('sgis.index') }}">
                                 🏦 Courtiers (SGI)
                             </a>
                         </li>
-
                         <li>
                             <a class="dropdown-item disabled">
                                 🔍 Rechercher une société (bientôt)
                             </a>
                         </li>
-
                         <li><hr class="dropdown-divider"></li>
-
-                        {{-- 👉 AJOUT UNIQUE ICI --}}
                         <li>
                             <a class="dropdown-item fw-semibold"
                                href="{{ route('dividendes.index', ['year' => 2025]) }}">
-                                🏆 Classement des sociétés par dividendes (2025)
+                                🏆 Classement par dividendes (2025)
                             </a>
                         </li>
-
                     </ul>
                 </li>
 
-                {{-- Formations --}}
                 <li class="nav-item">
                     <a class="nav-link" href="{{ route('formations.brvm') }}">Formations</a>
                 </li>
 
-                {{-- ✅ Aide (FAQ + Glossaire + Contact + Formation) --}}
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
                         Aide
@@ -185,22 +172,17 @@
                                 ❓ Foire aux questions (FAQ)
                             </a>
                         </li>
-
-                        {{-- ✅ NOUVEAU : Glossaire --}}
                         <li>
                             <a class="dropdown-item" href="{{ route('aide.glossaire') }}">
                                 📘 Glossaire BRVM
                             </a>
                         </li>
-
                         <li>
                             <a class="dropdown-item" href="{{ route('contact') }}">
                                 📩 Contact
                             </a>
                         </li>
-
                         <li><hr class="dropdown-divider"></li>
-
                         <li>
                             <a class="dropdown-item" href="{{ route('formations.brvm') }}">
                                 🎓 Se former à la BRVM
@@ -223,8 +205,27 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
-{{-- ✅ Scripts spécifiques pages (FAQ utilise ça) --}}
+{{-- Scripts spécifiques pages --}}
 @stack('scripts')
+
+{{-- ========================= --}}
+{{-- tawk.to – Support client --}}
+{{-- ========================= --}}
+@if(config('services.tawk.widget_id'))
+<script type="text/javascript">
+    var Tawk_API = Tawk_API || {}, Tawk_LoadStart = new Date();
+    (function(){
+        var s1 = document.createElement("script"),
+            s0 = document.getElementsByTagName("script")[0];
+        s1.async = true;
+        s1.src = "https://embed.tawk.to/{{ config('services.tawk.widget_id') }}";
+
+        s1.charset = "UTF-8";
+        s1.setAttribute("crossorigin", "*");
+        s0.parentNode.insertBefore(s1, s0);
+    })();
+</script>
+@endif
 
 </body>
 </html>
