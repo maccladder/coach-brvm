@@ -25,9 +25,6 @@ use App\Http\Controllers\AdminAnnouncementController;
 use App\Http\Controllers\AdminVirtualWalletController;
 use App\Http\Controllers\AdminFinancialReportController;
 
-
-
-
 /*
 |--------------------------------------------------------------------------
 | Page d’accueil
@@ -39,7 +36,7 @@ Route::get('/test/brvm-actions-ai', function (BrvmActionsAiService $svc) {
 
     return response()->json([
         'count' => count($stocks),
-        'stocks' => array_slice($stocks, 0, 10), // affiche juste 10 pour tester
+        'stocks' => array_slice($stocks, 0, 10),
     ], 200, [], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
 });
 
@@ -48,7 +45,6 @@ Route::redirect('/', '/welcome');
 // ✅ Landing avec controller (pour passer $latestAnnouncements au welcome)
 Route::get('/welcome', [LandingController::class, 'index'])->name('landing');
 
-
 /*
 |--------------------------------------------------------------------------
 | Uploads (analyses & états financiers)
@@ -56,11 +52,8 @@ Route::get('/welcome', [LandingController::class, 'index'])->name('landing');
 */
 
 Route::get('/uploads', [UploadController::class, 'index'])->name('uploads.index');
-
 Route::post('/uploads/analysis', [UploadController::class, 'storeAnalysis'])->name('uploads.analysis.store');
-
 Route::post('/uploads/statement', [UploadController::class, 'storeStatement'])->name('uploads.statement.store');
-
 
 /*
 |--------------------------------------------------------------------------
@@ -74,9 +67,7 @@ Route::get('/summaries/generate', [SummaryController::class, 'generateForm'])->n
 Route::post('/summaries/generate', [SummaryController::class, 'generateForDate'])->name('summaries.generate');
 
 Route::get('/summaries/{summary}/audio', [SummaryController::class, 'audio'])->name('summaries.audio');
-
 Route::get('/summaries/{date}', [SummaryController::class, 'showDate'])->name('summaries.show');
-
 
 /*
 |--------------------------------------------------------------------------
@@ -103,7 +94,6 @@ Route::prefix('client-bocs')->name('client-bocs.')->group(function () {
     Route::get('/{clientBoc}', [ClientBocController::class, 'show'])->name('show');
 });
 
-
 /*
 |--------------------------------------------------------------------------
 | États financiers (client-financials)
@@ -128,7 +118,6 @@ Route::prefix('client-financials')->name('client-financials.')->group(function (
     Route::get('/{clientFinancial}', [ClientFinancialController::class, 'show'])->name('show');
 });
 
-
 /*
 |--------------------------------------------------------------------------
 | Formations BRVM
@@ -139,7 +128,6 @@ Route::get('/formations-brvm', function () {
     return view('sections.formations-brvm');
 })->name('formations.brvm');
 
-
 /*
 |--------------------------------------------------------------------------
 | Annonces (PUBLIC)
@@ -149,10 +137,9 @@ Route::get('/formations-brvm', function () {
 Route::get('/annonces', [AnnouncementController::class, 'index'])->name('announcements.index');
 Route::get('/annonces/{announcement}', [AnnouncementController::class, 'show'])->name('announcements.show');
 
-
 /*
 |--------------------------------------------------------------------------
-| Admin
+| Admin (ton système admin actuel)
 |--------------------------------------------------------------------------
 */
 
@@ -175,36 +162,49 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/bocs', [AdminController::class, 'dailyBocsIndex'])->name('bocs.index');
         Route::post('/bocs', [AdminController::class, 'dailyBocsStore'])->name('bocs.store');
 
-       // ✅ États financiers (ADMIN)
-Route::get('/financial-reports/{year}', [AdminFinancialReportController::class, 'index'])
-    ->name('financial_reports.index');
+        // ✅ États financiers (ADMIN)
+        Route::get('/financial-reports/{year}', [AdminFinancialReportController::class, 'index'])
+            ->name('financial_reports.index');
 
-Route::get('/financial-reports/{year}/societes/{societe}', [AdminFinancialReportController::class, 'showSociete'])
-    ->name('financial_reports.societe');
+        Route::get('/financial-reports/{year}/societes/{societe}', [AdminFinancialReportController::class, 'showSociete'])
+            ->name('financial_reports.societe');
 
-Route::post('/financial-reports/{year}/societes/{societe}/{period}/upload', [AdminFinancialReportController::class, 'upload'])
-    ->name('financial_reports.upload');
+        Route::post('/financial-reports/{year}/societes/{societe}/{period}/upload', [AdminFinancialReportController::class, 'upload'])
+            ->name('financial_reports.upload');
 
-Route::post('/financial-reports/{year}/societes/{societe}/{period}/not-published', [AdminFinancialReportController::class, 'markNotPublished'])
-    ->name('financial_reports.not_published');
+        Route::post('/financial-reports/{year}/societes/{societe}/{period}/not-published', [AdminFinancialReportController::class, 'markNotPublished'])
+            ->name('financial_reports.not_published');
 
+        // ✅ Wallet (ADMIN)
+        Route::get('/wallet', [AdminVirtualWalletController::class, 'index'])->name('wallet.index');
+        Route::post('/wallet/buy', [AdminVirtualWalletController::class, 'buy'])->name('wallet.buy');
+        Route::post('/wallet/sell', [AdminVirtualWalletController::class, 'sell'])->name('wallet.sell');
 
-
-    // ✅ Wallet
-    Route::get('/wallet', [AdminVirtualWalletController::class, 'index'])->name('wallet.index');
-    Route::post('/wallet/buy', [AdminVirtualWalletController::class, 'buy'])->name('wallet.buy');
-    Route::post('/wallet/sell', [AdminVirtualWalletController::class, 'sell'])->name('wallet.sell');
-
-     // ✅ Marché
-    Route::get('/market', [AdminMarketController::class, 'index'])->name('market.index');
-    Route::get('/market/api', [AdminMarketController::class, 'api'])->name('market.api');
-
+        // ✅ Marché
+        Route::get('/market', [AdminMarketController::class, 'index'])->name('market.index');
+        Route::get('/market/api', [AdminMarketController::class, 'api'])->name('market.api');
 
         // ✅ Annonces ADMIN (CRUD)
         Route::resource('announcements', AdminAnnouncementController::class)->except(['show']);
     });
 });
 
+/*
+|--------------------------------------------------------------------------
+| Portfolio virtuel (Breeze auth)
+|--------------------------------------------------------------------------
+| Ici c’est le portefeuille des utilisateurs "normaux" (user_id)
+| On protège avec auth (Breeze).
+|--------------------------------------------------------------------------
+|
+| ⚠️ Si tu n'as pas encore ces controllers/routes, tu peux laisser ce bloc vide
+| pour le moment. Mais c’est ici qu’on va travailler pour le wallet user.
+*/
+
+Route::middleware(['auth'])->group(function () {
+    // Exemple:
+    // Route::get('/portfolio', [\App\Http\Controllers\VirtualPortfolioController::class, 'index'])->name('portfolio.index');
+});
 
 /*
 |--------------------------------------------------------------------------
@@ -214,13 +214,19 @@ Route::post('/financial-reports/{year}/societes/{societe}/{period}/not-published
 
 Route::post('/{clientBoc}/pdf', [ClientBocController::class, 'downloadPdf'])->name('client-bocs.pdf');
 
+/*
+|--------------------------------------------------------------------------
+| SSL / debug
+|--------------------------------------------------------------------------
+*/
+
 Route::get('/ssl-http-test', function () {
-    $ca = 'C:\\wamp64\\bin\\php\\cacert.pem'; // <-- mets le nouveau chemin ici
+    $ca = 'C:\\wamp64\\bin\\php\\cacert.pem';
 
     $urls = [
-        'https://brvm.org/fr/cours-actions/0',      // va échouer (DNS)
-        'https://www.brvm.org/fr/cours-actions/0',  // doit passer après fix
-        'https://www.google.com',                   // contrôle
+        'https://brvm.org/fr/cours-actions/0',
+        'https://www.brvm.org/fr/cours-actions/0',
+        'https://www.google.com',
     ];
 
     $out = [];
@@ -250,15 +256,6 @@ Route::get('/ssl-http-test', function () {
     return response()->json($out, 200, [], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
 });
 
-// Route::get('/admin/market/actions-ai', function (BrvmActionsAiService $svc) {
-//     $stocks = $svc->fetchStocks();
-//     return response()->json([
-//         'count' => count($stocks),
-//         'sample' => array_slice($stocks, 0, 15),
-//     ], 200, [], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
-// });
-
-
 /*
 |--------------------------------------------------------------------------
 | Pages statiques
@@ -269,7 +266,6 @@ Route::view('/contact', 'sections.contact')->name('contact');
 Route::view('/conditions', 'sections.conditions')->name('conditions');
 Route::view('/confidentialite', 'sections.confidentialite')->name('confidentialite');
 Route::view('/notre-histoire', 'sections.notre-histoire')->name('notre.histoire');
-
 
 /*
 |--------------------------------------------------------------------------
@@ -285,40 +281,49 @@ Route::get('/ga-test', function (\App\Services\GoogleAnalyticsService $ga) {
     ];
 });
 
+/*
+|--------------------------------------------------------------------------
+| Radar marché
+|--------------------------------------------------------------------------
+*/
 
-// Route::get('/radar-marche', [PerformanceController::class, 'index'])->name('radar.index');
-// Route::get('/radar-marche/data', [PerformanceController::class, 'data'])->name('radar.data');
 Route::get('/radar-marche', [PerformanceController::class, 'index'])->name('radar.index');
 Route::get('/radar-marche/data', [PerformanceController::class, 'data'])->name('radar.data');
 
+// bulles du radar latest
+Route::get('/radar/bubbles-latest', [App\Http\Controllers\RadarController::class, 'bubblesLatest'])
+    ->name('radar.bubblesLatest');
 
-// route de société
+/*
+|--------------------------------------------------------------------------
+| Sociétés / dividendes / SGI / FAQ / Glossaire
+|--------------------------------------------------------------------------
+*/
 
 Route::get('/societes', [SocieteController::class, 'index'])->name('societes.index');
 Route::get('/societes/{slug}', [SocieteController::class, 'show'])->name('societes.show');
 
-// route de dividende
-
-Route::get('/dividendes', [DividendeController::class, 'index'])
-    ->name('dividendes.index');
-
-
-    //route des sgi
+Route::get('/dividendes', [DividendeController::class, 'index'])->name('dividendes.index');
 
 Route::get('/sgis', [SGIController::class, 'index'])->name('sgis.index');
 Route::get('/sgis/{slug}', [SGIController::class, 'show'])->name('sgis.show');
 
-//faq
 Route::get('/faq', [FaqController::class, 'index'])->name('faq');
 
-//bulles du radar latest
-
-// routes/web.php
-Route::get('/radar/bubbles-latest', [App\Http\Controllers\RadarController::class, 'bubblesLatest'])
-    ->name('radar.bubblesLatest');
-
-    // Glossaire
-
-    Route::get('/aide/glossaire', [GlossaireController::class, 'index'])
+Route::get('/aide/glossaire', [GlossaireController::class, 'index'])
     ->name('aide.glossaire');
 
+/*
+|--------------------------------------------------------------------------
+| ✅ Breeze routes (LOGIN/REGISTER/LOGOUT/PASSWORD RESET)
+|--------------------------------------------------------------------------
+| IMPORTANT: Breeze ajoute routes/auth.php.
+| On l'inclut ici, point final.
+|--------------------------------------------------------------------------
+*/
+
+Route::get('/dashboard', function () {
+    return redirect()->route('landing'); // /welcome
+})->middleware(['auth', 'verified'])->name('dashboard');
+
+require __DIR__.'/auth.php';

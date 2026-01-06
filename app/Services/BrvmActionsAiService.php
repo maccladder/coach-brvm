@@ -8,131 +8,117 @@ use Illuminate\Support\Facades\Log;
 class BrvmActionsAiService
 {
     /**
-     * Extrait le tableau "Toutes" (actions) depuis la page BRVM
-     * Retourne: ticker, name, prev, open, close, change
+     * Récupère les actions BRVM (table "Toutes") sans IA
      */
     public function fetchMarketTableFromSite(): array
     {
-        $apiKey = env('OPENAI_API_KEY');
-        if (!$apiKey) {
-            Log::error('BrvmActionsAiService: OPENAI_API_KEY manquant');
-            return [];
-        }
-
         $url = 'https://www.brvm.org/fr/cours-actions/0';
 
-        // 1) Fetch HTML
         try {
             $http = Http::timeout(30)->withHeaders([
                 'User-Agent' => 'CoachBRVM/1.0 (+https://coach-brvm.com)',
             ]);
 
-            // ✅ local WAMP only
+            // évite les soucis SSL en local (WAMP)
             if (app()->environment('local')) {
                 $http = $http->withOptions(['verify' => false]);
             }
 
-            $page = $http->get($url);
-
-            if (!$page->ok()) {
-                Log::error("BrvmActionsAiService: BRVM HTTP {$page->status()}");
-                return [];
-            }
-
-            $html = (string) $page->body();
-        } catch (\Throwable $e) {
-            Log::error('BrvmActionsAiService: erreur fetch BRVM: ' . $e->getMessage());
-            return [];
-        }
-
-        $htmlSlice = mb_substr($html, 0, 140000);
-
-        // 2) Prompt IA
-        $system = <<<SYS
-Tu reçois le HTML de la page BRVM "Cours actions - Toutes".
-Tu dois extraire une ligne par action (tableau "Toutes") avec EXACTEMENT ces champs :
-
-- ticker : symbole (ex: ABJC)
-- name   : nom complet
-- prev   : cours veille (FCFA) nombre sans séparateur, ou null
-- open   : cours ouverture (FCFA) nombre sans séparateur, ou null
-- close  : cours clôture (FCFA) nombre sans séparateur, ou null
-- change : variation (%) nombre (ex: -4.73), ou null
-
-Règles:
-- Ignore la colonne Volume (ne pas renvoyer volume).
-- Normalise les nombres:
-  - "3 020" => 3020
-  - "-4,73" => -4.73
-  - "NC" / vide => null
-- Réponds UNIQUEMENT avec un JSON valide, rien d'autre:
-
-{"stocks":[{"ticker":"ABJC","name":"SERVAIR ABIDJAN COTE D'IVOIRE","prev":3060,"open":3170,"close":3020,"change":-4.73}]}
-SYS;
-
-        $user = "HTML BRVM (extrait) :\n\n" . $htmlSlice;
-
-        try {
-            $resp = Http::withToken($apiKey)
-                ->timeout(120)
-                ->post('https://api.openai.com/v1/chat/completions', [
-                    'model' => env('OPENAI_BUBBLE_MODEL', 'gpt-4.1-mini'),
-                    'temperature' => 0.1,
-                    'messages' => [
-                        ['role' => 'system', 'content' => $system],
-                        ['role' => 'user', 'content' => $user],
-                    ],
-                ]);
+            $resp = $http->get($url);
 
             if (!$resp->ok()) {
-                Log::error('BrvmActionsAiService: OpenAI error ' . $resp->status() . ' ' . $resp->body());
+                Log::error('BRVM HTTP error', ['status' => $resp->status()]);
                 return [];
             }
 
-            $content = $resp->json('choices.0.message.content');
-            if (!$content) {
-                Log::error('BrvmActionsAiService: contenu vide');
-                return [];
-            }
-
-            $json = json_decode($content, true);
-            if (!is_array($json) || !isset($json['stocks']) || !is_array($json['stocks'])) {
-                Log::error('BrvmActionsAiService: JSON invalide: ' . $content);
-                return [];
-            }
-
-            // 3) Nettoyage + prix_achat calculé
-            $out = [];
-            foreach ($json['stocks'] as $r) {
-                if (empty($r['ticker'])) continue;
-
-                $prev  = array_key_exists('prev', $r)  ? ($r['prev']  !== null ? (float)$r['prev']  : null) : null;
-                $open  = array_key_exists('open', $r)  ? ($r['open']  !== null ? (float)$r['open']  : null) : null;
-                $close = array_key_exists('close', $r) ? ($r['close'] !== null ? (float)$r['close'] : null) : null;
-                $chg   = array_key_exists('change', $r)? ($r['change']!== null ? (float)$r['change']: null) : null;
-
-                // Prix utilisé pour acheter (open si > 0 sinon close sinon prev)
-                $buyPrice = null;
-                if ($open !== null && $open > 0) $buyPrice = $open;
-                elseif ($close !== null && $close > 0) $buyPrice = $close;
-                elseif ($prev !== null && $prev > 0) $buyPrice = $prev;
-
-                $out[] = [
-                    'ticker' => strtoupper(trim((string)$r['ticker'])),
-                    'name'   => trim((string)($r['name'] ?? $r['ticker'])),
-                    'prev'   => $prev,
-                    'open'   => $open,
-                    'close'  => $close,
-                    'change' => $chg,
-                    'buy_price' => $buyPrice,
-                ];
-            }
-
-            return $out;
-
+            $html = (string) $resp->body();
         } catch (\Throwable $e) {
-            Log::error('BrvmActionsAiService: exception ' . $e->getMessage());
+            Log::error('BRVM fetch error', ['msg' => $e->getMessage()]);
             return [];
         }
+
+        // 1️⃣ extraire tous les <tr>
+        preg_match_all('/<tr[^>]*>(.*?)<\/tr>/si', $html, $matches);
+        $rows = $matches[0] ?? [];
+
+        // 2️⃣ garder uniquement les lignes avec ticker (ABJC, BOABF, etc.)
+        $rows = array_values(array_filter($rows, function ($tr) {
+            return preg_match('/<td[^>]*>\s*[A-Z]{3,6}\s*<\/td>/si', $tr);
+        }));
+
+        if (empty($rows)) {
+            Log::warning('BRVM: aucune ligne action détectée');
+            return [];
+        }
+
+        $stocks = [];
+
+        foreach ($rows as $tr) {
+            // extraire les <td>
+            preg_match_all('/<td[^>]*>(.*?)<\/td>/si', $tr, $tds);
+            $cells = $tds[1] ?? [];
+
+            // nettoyage
+            $cells = array_map(function ($c) {
+                $c = strip_tags($c);
+                $c = html_entity_decode($c, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+                $c = trim(preg_replace('/\s+/u', ' ', $c));
+                return $c;
+            }, $cells);
+
+            /**
+             * Structure BRVM actuelle :
+             * 0 => Ticker
+             * 1 => Nom
+             * 2 => Volume (ignoré)
+             * 3 => Cours veille
+             * 4 => Cours ouverture
+             * 5 => Cours clôture
+             * 6 => Variation
+             */
+            if (count($cells) < 6) {
+                continue;
+            }
+
+            $ticker = $cells[0] ?? null;
+            if (!$ticker) {
+                continue;
+            }
+
+            $name = $cells[1] ?? $ticker;
+
+            $toNumber = function ($v, bool $percent = false) {
+                if (!$v || strtoupper($v) === 'NC' || $v === '-') {
+                    return null;
+                }
+                $v = str_replace(' ', '', $v);
+                $v = str_replace(',', '.', $v);
+                $v = str_replace('%', '', $v);
+                return is_numeric($v) ? (float) $v : null;
+            };
+
+            $prev   = $toNumber($cells[3] ?? null);
+            $open   = $toNumber($cells[4] ?? null);
+            $close  = $toNumber($cells[5] ?? null);
+            $change = $toNumber($cells[6] ?? null, true);
+
+            // règle prix d’achat
+            $buyPrice = $open > 0 ? $open : ($close > 0 ? $close : $prev);
+
+            $stocks[] = [
+                'ticker'    => strtoupper($ticker),
+                'name'      => $name,
+                'prev'      => $prev,
+                'open'      => $open,
+                'close'     => $close,
+                'change'    => $change,
+                'buy_price' => $buyPrice,
+            ];
+        }
+
+        // tri stable
+        usort($stocks, fn ($a, $b) => strcmp($a['ticker'], $b['ticker']));
+
+        return $stocks;
     }
 }

@@ -193,9 +193,55 @@
 
             </ul>
 
+            {{-- ✅ Zone Auth Breeze --}}
             <div class="d-flex align-items-center gap-2">
                 <span class="badge text-bg-light border">Beta privée</span>
-                <a class="btn btn-sm btn-outline-primary disabled">Se connecter (bientôt)</a>
+
+                @auth
+                    <div class="dropdown">
+                        <button class="btn btn-sm btn-outline-dark dropdown-toggle"
+                                type="button"
+                                data-bs-toggle="dropdown"
+                                aria-expanded="false">
+                            👤 {{ Auth::user()->name }}
+                        </button>
+
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li>
+                                <a class="dropdown-item" href="{{ route('dashboard') }}">
+                                    🧭 Dashboard
+                                </a>
+                            </li>
+
+                            {{-- On branchera la route portfolio plus tard --}}
+                            <li>
+                                <a class="dropdown-item" href="#">
+                                    💼 Mon portefeuille
+                                </a>
+                            </li>
+
+                            <li><hr class="dropdown-divider"></li>
+
+                            <li>
+                                <form method="POST" action="{{ route('logout') }}">
+                                    @csrf
+                                    <button type="submit" class="dropdown-item text-danger">
+                                        🚪 Déconnexion
+                                    </button>
+                                </form>
+                            </li>
+                        </ul>
+                    </div>
+                @endauth
+
+                @guest
+                    <a class="btn btn-sm btn-outline-primary" href="{{ route('login') }}">
+                        Se connecter
+                    </a>
+                    <a class="btn btn-sm btn-primary" href="{{ route('register') }}">
+                        S’inscrire
+                    </a>
+                @endguest
             </div>
         </div>
     </div>
