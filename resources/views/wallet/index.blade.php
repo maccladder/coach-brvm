@@ -26,9 +26,7 @@
     <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
         <div>
             <h1 class="h3 fw-bold mb-1">💼 Mon portefeuille virtuel</h1>
-            <div class="text-muted small">
-                Achats / ventes au cours BRVM (simulation).
-            </div>
+            <div class="text-muted small">Achats / ventes au cours BRVM (simulation).</div>
         </div>
 
         <div class="d-flex flex-wrap gap-2">
@@ -118,11 +116,12 @@
                     <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
                         <div class="fw-semibold">🛒 Acheter</div>
                         <div class="text-muted small">
-                            Le prix utilisé = dernier <strong>cours de clôture</strong>.
+                            Tu verras un <strong>récap + frais SGI</strong> avant de confirmer.
                         </div>
                     </div>
 
-                    <form method="POST" action="{{ route('wallet.buy') }}" class="row g-2 align-items-end">
+                    {{-- RECAP --}}
+                    <form method="POST" action="{{ route('wallet.buy.recap') }}" class="row g-2 align-items-end">
                         @csrf
 
                         <div class="col-md-6">
@@ -130,10 +129,15 @@
                             <select name="ticker" class="form-select" required>
                                 <option value="" selected disabled>Choisir…</option>
                                 @foreach(($market ?? []) as $s)
-                                    <option value="{{ $s['ticker'] ?? '' }}">
-                                        {{ $s['ticker'] ?? '' }} — {{ $s['name'] ?? '' }}
-                                        @if(isset($s['close']))
-                                            ({{ number_format((float)$s['close'], 0, ',', ' ') }} FCFA)
+                                    @php
+                                        $t = $s['ticker'] ?? '';
+                                        $name = $s['name'] ?? '';
+                                        $p = $s['buy_price'] ?? ($s['close'] ?? null);
+                                    @endphp
+                                    <option value="{{ $t }}">
+                                        {{ $t }} — {{ $name }}
+                                        @if(!is_null($p))
+                                            ({{ number_format((float)$p, 0, ',', ' ') }} FCFA)
                                         @endif
                                     </option>
                                 @endforeach
@@ -147,7 +151,7 @@
 
                         <div class="col-md-3 d-grid">
                             <button class="btn btn-primary fw-semibold">
-                                Acheter
+                                Continuer
                             </button>
                         </div>
                     </form>
@@ -187,11 +191,13 @@
                     <tbody>
                         @forelse(($positions ?? []) as $p)
                             @php
-                                $qty = (int)($p['qty'] ?? 0);
-                                $avg = (float)($p['avg'] ?? 0);
+                                // ✅ IMPORTANT: le controller renvoie avg_price (pas avg)
+                                $qty   = (int)($p['qty'] ?? 0);
+                                $avg   = (float)($p['avg_price'] ?? 0);
                                 $price = (float)($p['price'] ?? 0);
+
                                 $value = $price > 0 ? $price * $qty : 0;
-                                $pl = $price > 0 ? ($price - $avg) * $qty : 0;
+                                $pl    = $price > 0 ? ($price - $avg) * $qty : 0;
                             @endphp
                             <tr>
                                 <td class="fw-semibold">{{ $p['ticker'] }}</td>
@@ -269,25 +275,33 @@
                     </thead>
                     <tbody>
                         @forelse(($history ?? []) as $tx)
+                            @php
+                                $type = strtolower((string)($tx->type ?? ''));
+
+                                $badge = match($type) {
+                                    'topup' => 'success',
+                                    'buy'   => 'primary',
+                                    'sell'  => 'danger',
+                                    default => 'secondary',
+                                };
+
+                                // ✅ compat: certains enregistrements utilisent qty au lieu de quantity
+                                $q = $tx->quantity ?? $tx->qty ?? null;
+                            @endphp
                             <tr>
                                 <td class="text-muted small">{{ optional($tx->created_at)->format('d/m/Y H:i') }}</td>
                                 <td>
-                                    @php
-                                        $type = $tx->type ?? '';
-                                        $badge = match($type) {
-                                            'topup' => 'success',
-                                            'buy' => 'primary',
-                                            'sell' => 'danger',
-                                            default => 'secondary',
-                                        };
-                                    @endphp
                                     <span class="badge text-bg-{{ $badge }}">
-                                        {{ strtoupper($type) }}
+                                        {{ strtoupper($type ?: '—') }}
                                     </span>
                                 </td>
                                 <td class="fw-semibold">{{ $tx->ticker ?? '—' }}</td>
-                                <td class="text-end">{{ $tx->quantity ? number_format($tx->quantity, 0, ',', ' ') : '—' }}</td>
-                                <td class="text-end">{{ $tx->price ? number_format($tx->price, 0, ',', ' ') : '—' }}</td>
+                                <td class="text-end">
+                                    {{ $q ? number_format((int)$q, 0, ',', ' ') : '—' }}
+                                </td>
+                                <td class="text-end">
+                                    {{ $tx->price ? number_format((float)$tx->price, 0, ',', ' ') : '—' }}
+                                </td>
                                 <td class="text-end">
                                     @php $amt = (float)($tx->amount ?? 0); @endphp
                                     <span class="{{ $amt >= 0 ? 'text-success' : 'text-danger' }} fw-semibold">

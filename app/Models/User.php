@@ -6,6 +6,9 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use App\Models\VirtualWallet;
+use App\Models\VirtualPosition;
+use App\Models\VirtualWalletTransaction;
 
 class User extends Authenticatable
 {
@@ -22,6 +25,21 @@ class User extends Authenticatable
         'email',
         'password',
     ];
+
+   public function virtualWallet()
+{
+    return $this->hasOne(VirtualWallet::class);
+}
+
+public function virtualPositions()
+{
+    return $this->hasMany(VirtualPosition::class);
+}
+
+public function virtualWalletTransactions()
+{
+    return $this->hasMany(VirtualWalletTransaction::class);
+}
 
     /**
      * The attributes that should be hidden for serialization.

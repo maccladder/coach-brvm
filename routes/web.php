@@ -344,6 +344,8 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/wallet/topup/pay', [VirtualWalletController::class, 'topupPay'])->name('wallet.topup.pay');
 
     // achats/ventes
+   Route::match(['GET','POST'], '/wallet/buy/recap', [VirtualWalletController::class, 'buyRecap'])
+    ->name('wallet.buy.recap');
     Route::post('/wallet/buy', [VirtualWalletController::class, 'buy'])->name('wallet.buy');
     Route::post('/wallet/sell', [VirtualWalletController::class, 'sell'])->name('wallet.sell');
 });
