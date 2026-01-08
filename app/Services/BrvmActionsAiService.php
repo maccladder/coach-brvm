@@ -14,17 +14,32 @@ class BrvmActionsAiService
     {
         $url = 'https://www.brvm.org/fr/cours-actions/0';
 
+        $html = null;
+
+        // Helper : fait un GET avec ou sans vérification SSL
+        $doRequest = function (bool $verifySsl) use ($url) {
+            return Http::timeout(30)
+                ->withHeaders([
+                    'User-Agent' => 'CoachBRVM/1.0 (+https://coach-brvm.com)',
+                ])
+                ->withOptions([
+                    'verify' => $verifySsl,
+                ])
+                ->get($url);
+        };
+
         try {
-            $http = Http::timeout(30)->withHeaders([
-                'User-Agent' => 'CoachBRVM/1.0 (+https://coach-brvm.com)',
-            ]);
+            // 1) Tentative normale (SSL vérifié)
+            $resp = $doRequest(true);
 
-            // évite les soucis SSL en local (WAMP)
-            if (app()->environment('local')) {
-                $http = $http->withOptions(['verify' => false]);
+            // Si non OK, on tente un fallback sans vérification SSL
+            if (!$resp->ok()) {
+                Log::warning('BRVM HTTP not OK, retrying without SSL verify', [
+                    'status' => $resp->status(),
+                ]);
+
+                $resp = $doRequest(false);
             }
-
-            $resp = $http->get($url);
 
             if (!$resp->ok()) {
                 Log::error('BRVM HTTP error', ['status' => $resp->status()]);
@@ -33,8 +48,24 @@ class BrvmActionsAiService
 
             $html = (string) $resp->body();
         } catch (\Throwable $e) {
-            Log::error('BRVM fetch error', ['msg' => $e->getMessage()]);
-            return [];
+            // Exception (ex: cURL error 60) -> fallback verify=false
+            Log::warning('BRVM fetch exception, retrying without SSL verify', [
+                'msg' => $e->getMessage(),
+            ]);
+
+            try {
+                $resp = $doRequest(false);
+
+                if (!$resp->ok()) {
+                    Log::error('BRVM HTTP error after retry', ['status' => $resp->status()]);
+                    return [];
+                }
+
+                $html = (string) $resp->body();
+            } catch (\Throwable $e2) {
+                Log::error('BRVM fetch error (after retry)', ['msg' => $e2->getMessage()]);
+                return [];
+            }
         }
 
         // 1️⃣ extraire tous les <tr>
@@ -103,7 +134,7 @@ class BrvmActionsAiService
             $change = $toNumber($cells[6] ?? null, true);
 
             // règle prix d’achat
-            $buyPrice = $open > 0 ? $open : ($close > 0 ? $close : $prev);
+            $buyPrice = ($open > 0) ? $open : (($close > 0) ? $close : $prev);
 
             $stocks[] = [
                 'ticker'    => strtoupper($ticker),
