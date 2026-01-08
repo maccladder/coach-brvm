@@ -4,6 +4,8 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Route;
 
 use App\Services\BrvmActionsAiService;
+
+use App\Services\BrvmMarketAiService;
 use App\Http\Controllers\FaqController;
 use App\Http\Controllers\SGIController;
 use App\Http\Controllers\AdminController;
@@ -18,6 +20,7 @@ use App\Http\Controllers\GlossaireController;
 use App\Http\Controllers\AdminMarketController;
 use App\Http\Controllers\PerformanceController;
 use App\Http\Controllers\AnnouncementController;
+use App\Http\Controllers\VirtualWalletController;
 use App\Http\Controllers\AdminAnalyticsController;
 use App\Http\Controllers\ClientFinancialController;
 use App\Http\Controllers\AdminPerformanceController;
@@ -322,8 +325,20 @@ Route::get('/aide/glossaire', [GlossaireController::class, 'index'])
 |--------------------------------------------------------------------------
 */
 
+// Route::get('/dashboard', function () {
+//     return redirect()->route('landing'); // /welcome
+// })->middleware(['auth', 'verified'])->name('dashboard');
+
+
 Route::get('/dashboard', function () {
-    return redirect()->route('landing'); // /welcome
-})->middleware(['auth', 'verified'])->name('dashboard');
+    return view('dashboard');
+})->middleware(['auth'])->name('dashboard');
+
+Route::middleware(['auth'])->group(function () {
+    Route::get('/wallet', [VirtualWalletController::class, 'index'])->name('wallet.index');
+    Route::post('/wallet/topup', [VirtualWalletController::class, 'topup'])->name('wallet.topup');
+    Route::post('/wallet/buy', [VirtualWalletController::class, 'buy'])->name('wallet.buy');
+    Route::post('/wallet/sell', [VirtualWalletController::class, 'sell'])->name('wallet.sell');
+});
 
 require __DIR__.'/auth.php';

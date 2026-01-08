@@ -3,7 +3,115 @@
 @section('content')
 <div class="bg-light">
 
-    {{-- HERO --}}
+    {{-- ✅ INTRO COACH BRVM (NOUVELLE SECTION AVANT LE HERO IA) --}}
+    <section class="py-5 py-lg-6 border-bottom bg-white">
+        <div class="container" style="max-width:1100px;">
+            <div class="row g-4 align-items-center">
+
+                <div class="col-lg-7">
+                    <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
+                        <span class="badge rounded-pill bg-dark-subtle text-dark fw-semibold">Plateforme BRVM</span>
+                        <span class="badge rounded-pill bg-primary-subtle text-primary fw-semibold">Outils + Data</span>
+                        <span class="badge rounded-pill bg-success-subtle text-success fw-semibold">Formation + Simulation</span>
+                    </div>
+
+                    <h1 class="fw-bold mb-3" style="font-size: 2.4rem;">
+                        Coach BRVM – tout pour apprendre, suivre et progresser à la BRVM.
+                    </h1>
+
+                    <p class="lead text-muted mb-4">
+                        Coach BRVM n’est pas seulement une IA qui lit les BOC.
+                        C’est une plateforme qui regroupe <strong>toutes les infos utiles BRVM</strong> :
+                        annonces, radar marché, annuaires sociétés/SGI, <strong>formations</strong>,
+                        et maintenant un <strong>portefeuille virtuel</strong> pour s’entraîner (sans risque).
+                    </p>
+
+                    <div class="d-flex flex-wrap gap-2 mb-3">
+                        <a href="{{ route('radar.index') }}" class="btn btn-dark btn-lg">
+                            📡 Explorer le marché
+                        </a>
+
+                        <a href="{{ route('formations.brvm') }}" class="btn btn-outline-success btn-lg">
+                            🎓 Voir les formations
+                        </a>
+
+                        @auth
+                            <a href="{{ route('wallet.index') }}" class="btn btn-outline-primary btn-lg">
+                                💼 Tester le portefeuille virtuel
+                            </a>
+                        @else
+                            <a href="{{ route('login') }}" class="btn btn-outline-primary btn-lg">
+                                💼 Portefeuille virtuel (se connecter)
+                            </a>
+                        @endauth
+                    </div>
+
+                    <div class="text-muted small">
+                        <span class="me-3">✅ Infos & outils BRVM au même endroit</span>
+                        <span class="me-3">✅ Formations pour monter en niveau</span>
+                        <span>✅ Simulation via portefeuille virtuel</span>
+                    </div>
+                </div>
+
+                <div class="col-lg-5">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body">
+                            <div class="fw-semibold mb-2">Ce que tu peux faire sur Coach BRVM</div>
+
+                            <div class="list-group list-group-flush">
+                                <div class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                    <div>
+                                        <div class="fw-semibold">📢 Annonces BRVM</div>
+                                        <div class="text-muted small">Communiqués, AG, infos importantes</div>
+                                    </div>
+                                    <span class="badge bg-light text-dark border">Gratuit</span>
+                                </div>
+
+                                <div class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                    <div>
+                                        <div class="fw-semibold">📡 Radar Marché</div>
+                                        <div class="text-muted small">Performance 7 jours + comparaison</div>
+                                    </div>
+                                    <span class="badge bg-light text-dark border">Gratuit</span>
+                                </div>
+
+                                <div class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                    <div>
+                                        <div class="fw-semibold">🎓 Formations BRVM</div>
+                                        <div class="text-muted small">Débutant → Intermédiaire</div>
+                                    </div>
+                                    <span class="badge bg-light text-dark border">Payant</span>
+                                </div>
+
+                                <div class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                    <div>
+                                        <div class="fw-semibold">💼 Portefeuille virtuel</div>
+                                        <div class="text-muted small">Achat/vente en simulation</div>
+                                    </div>
+                                    <span class="badge bg-light text-dark border">Beta</span>
+                                </div>
+
+                                <div class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                    <div>
+                                        <div class="fw-semibold">🤖 IA (BOC & États financiers)</div>
+                                        <div class="text-muted small">Analyse texte / audio / vidéo</div>
+                                    </div>
+                                    <span class="badge bg-primary-subtle text-primary border">IA</span>
+                                </div>
+                            </div>
+
+                            <div class="alert alert-light border mt-3 mb-0 small">
+                                👉 Ensuite, tu peux utiliser l’IA ci-dessous pour analyser une BOC ou un état financier.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    {{-- HERO (TON BLOC IA ORIGINAL) --}}
     <section class="py-5 py-lg-6 border-bottom" style="background: radial-gradient(circle at top left, #0d6efd15, #ffffff);">
         <div class="container" style="max-width: 1100px;">
             <div class="row align-items-center g-4">
@@ -60,7 +168,6 @@
                                 </div>
                             </div>
 
-                            {{-- Mini mock vidéo --}}
                             <div class="ratio ratio-16x9 rounded mb-3" style="background:#000;">
                                 <video
                                     src="{{ $exampleVideoUrl ?? '' }}"
@@ -70,7 +177,6 @@
                                 ></video>
                             </div>
 
-                            {{-- Exemple de BOC --}}
                             <div class="border rounded-3 overflow-hidden mb-2">
                                 <img
                                     src="{{ asset('img/boc-exemple.png') }}"
@@ -95,7 +201,6 @@
                 </div>
             </div>
 
-            {{-- Bandeau disclaimer --}}
             <div class="d-flex flex-wrap align-items-center gap-3 mt-4 pt-2 border-top">
                 <div class="d-flex align-items-center gap-2">
                     <img src="{{ asset('img/coach-brvm-logo.png') }}"
@@ -110,25 +215,24 @@
     </section>
 
     {{-- ✅ CALLOUT : Radar Marché gratuit --}}
-<section class="py-4 border-bottom bg-white">
-    <div class="container" style="max-width:1100px;">
-        <div class="card border-0 shadow-sm">
-            <div class="card-body d-flex flex-wrap justify-content-between align-items-center gap-3">
-                <div>
-                    <div class="fw-semibold">🔥 Nouveau : Radar Marché gratuit</div>
-                    <div class="text-muted small">
-                        Performance sur 7 jours + comparaison des sociétés BRVM en un coup d’œil.
+    <section class="py-4 border-bottom bg-white">
+        <div class="container" style="max-width:1100px;">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body d-flex flex-wrap justify-content-between align-items-center gap-3">
+                    <div>
+                        <div class="fw-semibold">🔥 Nouveau : Radar Marché gratuit</div>
+                        <div class="text-muted small">
+                            Performance sur 7 jours + comparaison des sociétés BRVM en un coup d’œil.
+                        </div>
                     </div>
-                </div>
 
-                <a href="{{ route('radar.index') }}" class="btn btn-primary fw-semibold">
-                    📡 Ouvrir le Radar Marché
-                </a>
+                    <a href="{{ route('radar.index') }}" class="btn btn-primary fw-semibold">
+                        📡 Ouvrir le Radar Marché
+                    </a>
+                </div>
             </div>
         </div>
-    </div>
-</section>
-
+    </section>
 
     {{-- ✅ ANN0NCES BRVM (NOUVEAU) --}}
     <section class="py-5">
@@ -141,7 +245,6 @@
                     </p>
                 </div>
 
-                {{-- Lien vers page annonces si tu la crées --}}
                 <a href="{{ route('announcements.index') }}" class="btn btn-outline-primary">
                     Voir toutes les annonces
                 </a>

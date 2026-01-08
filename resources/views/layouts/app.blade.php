@@ -32,9 +32,7 @@
 
         table thead th { white-space: nowrap; }
 
-        .dropdown-menu {
-            border-radius: 14px;
-        }
+        .dropdown-menu { border-radius: 14px; }
 
         .dropdown-menu-scroll {
             max-height: 360px;
@@ -213,10 +211,21 @@
                                 </a>
                             </li>
 
-                            {{-- On branchera la route portfolio plus tard --}}
                             <li>
                                 <a class="dropdown-item" href="#">
+                                    🎓 Mes cours
+                                </a>
+                            </li>
+
+                            <li>
+                                <a class="dropdown-item" href="{{ route('wallet.index') }}">
                                     💼 Mon portefeuille
+                                </a>
+                            </li>
+
+                            <li>
+                                <a class="dropdown-item" href="#">
+                                    📄 Mes analyses
                                 </a>
                             </li>
 
@@ -265,7 +274,6 @@
             s0 = document.getElementsByTagName("script")[0];
         s1.async = true;
         s1.src = "https://embed.tawk.to/{{ config('services.tawk.widget_id') }}";
-
         s1.charset = "UTF-8";
         s1.setAttribute("crossorigin", "*");
         s0.parentNode.insertBefore(s1, s0);
