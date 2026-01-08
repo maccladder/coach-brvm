@@ -1,18 +1,19 @@
 <?php
 
 use Illuminate\Support\Facades\Http;
+use App\Services\BrvmMarketAiService;
+
 use Illuminate\Support\Facades\Route;
 
 use App\Services\BrvmActionsAiService;
-
-use App\Services\BrvmMarketAiService;
 use App\Http\Controllers\FaqController;
 use App\Http\Controllers\SGIController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\UploadController;
 use App\Http\Controllers\LandingController;
-use App\Http\Controllers\SocieteController;
+use App\Http\Controllers\PaymentController;
 
+use App\Http\Controllers\SocieteController;
 use App\Http\Controllers\SummaryController;
 use App\Http\Controllers\ClientBocController;
 use App\Http\Controllers\DividendeController;
@@ -334,11 +335,24 @@ Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth'])->name('dashboard');
 
+
 Route::middleware(['auth'])->group(function () {
     Route::get('/wallet', [VirtualWalletController::class, 'index'])->name('wallet.index');
-    Route::post('/wallet/topup', [VirtualWalletController::class, 'topup'])->name('wallet.topup');
+
+    // ✅ nouveau flow topup payant
+    Route::post('/wallet/topup/confirm', [VirtualWalletController::class, 'topupConfirm'])->name('wallet.topup.confirm');
+    Route::post('/wallet/topup/pay', [VirtualWalletController::class, 'topupPay'])->name('wallet.topup.pay');
+
+    // achats/ventes
     Route::post('/wallet/buy', [VirtualWalletController::class, 'buy'])->name('wallet.buy');
     Route::post('/wallet/sell', [VirtualWalletController::class, 'sell'])->name('wallet.sell');
 });
+
+// ✅ callback serveur (IPN) + retour utilisateur : PAS auth
+Route::post('/payments/cinetpay/ipn', [PaymentController::class, 'cinetpayIpn'])->name('cinetpay.ipn');
+
+Route::match(['GET', 'POST'], '/payments/cinetpay/return', [PaymentController::class, 'cinetpayReturn'])
+    ->name('cinetpay.return');
+
 
 require __DIR__.'/auth.php';

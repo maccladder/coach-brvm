@@ -13,30 +13,29 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
 
         /**
-         * Désactiver CSRF pour CinetPay
-         * Laravel 11+ utilise une nouvelle méthode :
-         * on utilise validateCsrfTokens(except: [...])
+         * Désactiver CSRF pour les callbacks de paiement (server-to-server) + retours
+         * Laravel 11+ : validateCsrfTokens(except: [...])
          */
         $middleware->validateCsrfTokens(except: [
+            // ✅ anciens
             'client-bocs/payment/notify',
             'client-bocs/payment/return/*',
 
-            // 🔽 nouveaux pour les états financiers
             'client-financials/payment/notify',
             'client-financials/payment/return/*',
+
+            // ✅ NOUVEAU : portefeuille virtuel (CinetPay)
+            'payments/cinetpay/ipn',     // POST callback serveur
+            'payments/cinetpay/return',  // GET retour utilisateur
         ]);
 
         /**
          * 🔐 Middleware Admin (code secret)
-         *
-         * Permet d'utiliser :
-         *   middleware('admin.code')
          */
         $middleware->alias([
             'admin.code' => \App\Http\Middleware\AdminCodeMiddleware::class,
         ]);
 
-        // Exemple si tu veux ajouter autre middleware plus tard :
         // $middleware->append(\App\Http\Middleware\TestMiddleware::class);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

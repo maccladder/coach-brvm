@@ -88,15 +88,15 @@
                         Ajoute du cash virtuel pour tester des achats.
                     </div>
 
-                    <form method="POST" action="{{ route('wallet.topup') }}" class="d-flex gap-2">
+                    <form method="POST" action="{{ route('wallet.topup.confirm') }}" class="d-flex gap-2">
                         @csrf
                         <input
                             type="number"
-                            name="amount"
+                            name="amount_paid"
                             class="form-control"
                             min="1000"
                             step="500"
-                            value="100000"
+                            value="1000"
                             required
                         >
                         <button class="btn btn-success fw-semibold">
