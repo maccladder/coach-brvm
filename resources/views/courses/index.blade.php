@@ -16,6 +16,15 @@
 
     <div class="row">
         @forelse ($courses as $course)
+            @php
+                // ✅ acheté ? (même logique que ton show: paid_at not null)
+                $isBought = auth()->check()
+                    && auth()->user()->coursePurchases()
+                        ->where('course_id', $course->id)
+                        ->whereNotNull('paid_at')
+                        ->exists();
+            @endphp
+
             <div class="col-md-4 mb-4">
                 <div class="card h-100 shadow-sm">
                     <div class="card-body d-flex flex-column">
@@ -32,16 +41,23 @@
                             </span>
 
                             @auth
-                                {{-- 🔥 BOUTON ACHETER (POST vers CinetPay) --}}
-                                <form method="POST" action="{{ route('courses.buy', $course) }}">
-                                    @csrf
-                                    <button type="submit" class="btn btn-primary btn-sm">
-                                        Acheter
-                                    </button>
-                                </form>
+                                @if($isBought)
+                                    {{-- ✅ Déjà acheté --}}
+                                    <a href="{{ route('courses.show', $course->slug) }}"
+                                       class="btn btn-success btn-sm">
+                                        ▶️ Continuer
+                                    </a>
+                                @else
+                                    {{-- 🔥 Acheter --}}
+                                    <form method="POST" action="{{ route('courses.buy', $course) }}">
+                                        @csrf
+                                        <button type="submit" class="btn btn-primary btn-sm">
+                                            Acheter
+                                        </button>
+                                    </form>
+                                @endif
                             @else
-                                <a href="{{ route('login') }}"
-                                   class="btn btn-outline-primary btn-sm">
+                                <a href="{{ route('login') }}" class="btn btn-outline-primary btn-sm">
                                     Se connecter
                                 </a>
                             @endauth
