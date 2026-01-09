@@ -1,23 +1,32 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container py-4">
+<div class="container py-5" style="max-width:1100px;">
 
-    <h2 class="mb-4">🎓 Formations Coach-BRVM</h2>
+    {{-- Titre --}}
+    <div class="mb-4">
+        <h2 class="fw-bold mb-1">🎓 Formations Coach-BRVM</h2>
+        <p class="text-muted">
+            Formations pratiques pour investir intelligemment à la BRVM.
+        </p>
+    </div>
 
-    {{-- messages --}}
+    {{-- Messages --}}
     @if(session('success'))
-        <div class="alert alert-success">{{ session('success') }}</div>
+        <div class="alert alert-success shadow-sm">
+            {{ session('success') }}
+        </div>
     @endif
 
     @if(session('error'))
-        <div class="alert alert-danger">{{ session('error') }}</div>
+        <div class="alert alert-danger shadow-sm">
+            {{ session('error') }}
+        </div>
     @endif
 
-    <div class="row">
+    <div class="row g-4">
         @forelse ($courses as $course)
             @php
-                // ✅ acheté ? (même logique que ton show: paid_at not null)
                 $isBought = auth()->check()
                     && auth()->user()->coursePurchases()
                         ->where('course_id', $course->id)
@@ -25,39 +34,53 @@
                         ->exists();
             @endphp
 
-            <div class="col-md-4 mb-4">
-                <div class="card h-100 shadow-sm">
-                    <div class="card-body d-flex flex-column">
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm rounded-4">
 
-                        <h5 class="card-title">{{ $course->title }}</h5>
+                    <div class="card-body d-flex flex-column p-4">
 
-                        <p class="card-text text-muted flex-grow-1">
-                            {{ \Illuminate\Support\Str::limit($course->description, 120) }}
+                        {{-- Badge acheté --}}
+                        @if($isBought)
+                            <span class="badge bg-success mb-2 align-self-start">
+                                ✔ Déjà acheté
+                            </span>
+                        @endif
+
+                        {{-- Titre --}}
+                        <h5 class="fw-semibold mb-2">
+                            {{ $course->title }}
+                        </h5>
+
+                        {{-- Description --}}
+                        <p class="text-muted small flex-grow-1">
+                            {{ \Illuminate\Support\Str::limit($course->description, 130) }}
                         </p>
 
-                        <div class="d-flex justify-content-between align-items-center mt-3">
-                            <span class="fw-bold text-success">
+                        {{-- Prix + action --}}
+                        <div class="mt-3 d-flex justify-content-between align-items-center">
+
+                            <div class="fw-bold text-success fs-6">
                                 {{ number_format($course->price_fcfa) }} FCFA
-                            </span>
+                            </div>
 
                             @auth
                                 @if($isBought)
-                                    {{-- ✅ Déjà acheté --}}
                                     <a href="{{ route('courses.show', $course->slug) }}"
-                                       class="btn btn-success btn-sm">
-                                        ▶️ Continuer
+                                       class="btn btn-success btn-sm rounded-pill px-3">
+                                        ▶ Continuer
                                     </a>
                                 @else
-                                    {{-- 🔥 Acheter --}}
                                     <form method="POST" action="{{ route('courses.buy', $course) }}">
                                         @csrf
-                                        <button type="submit" class="btn btn-primary btn-sm">
+                                        <button type="submit"
+                                                class="btn btn-primary btn-sm rounded-pill px-3">
                                             Acheter
                                         </button>
                                     </form>
                                 @endif
                             @else
-                                <a href="{{ route('login') }}" class="btn btn-outline-primary btn-sm">
+                                <a href="{{ route('login') }}"
+                                   class="btn btn-outline-primary btn-sm rounded-pill px-3">
                                     Se connecter
                                 </a>
                             @endauth
@@ -67,7 +90,11 @@
                 </div>
             </div>
         @empty
-            <p>Aucune formation disponible pour le moment.</p>
+            <div class="col-12">
+                <div class="alert alert-info">
+                    Aucune formation disponible pour le moment.
+                </div>
+            </div>
         @endforelse
     </div>
 
