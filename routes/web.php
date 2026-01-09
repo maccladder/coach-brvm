@@ -9,10 +9,11 @@ use Illuminate\Support\Facades\Route;
 use App\Services\BrvmActionsAiService;
 use App\Http\Controllers\FaqController;
 use App\Http\Controllers\SGIController;
+use App\Http\Controllers\BookController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\CourseController;
-use App\Http\Controllers\UploadController;
 
+use App\Http\Controllers\UploadController;
 use App\Http\Controllers\LandingController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\SocieteController;
@@ -49,6 +50,10 @@ Route::get('/test/brvm-actions-ai', function (BrvmActionsAiService $svc) {
 });
 
 Route::redirect('/', '/welcome');
+
+//LES ROUTES DES LIVRES
+Route::get('/livres', [BookController::class, 'index'])->name('books.index');
+Route::get('/livres/{book:slug}', [BookController::class, 'show'])->name('books.show');
 
 // ✅ Landing avec controller (pour passer $latestAnnouncements au welcome)
 Route::get('/welcome', [LandingController::class, 'index'])->name('landing');

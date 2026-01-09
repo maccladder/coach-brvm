@@ -46,6 +46,19 @@
                         @endauth
                     </div>
 
+                    {{-- ✅ NOUVEAU : MINI-COURS EN LIVRE --}}
+                    <div class="alert alert-primary border-0 shadow-sm d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+                        <div>
+                            <div class="fw-semibold">📚 Mini-cours en livre (gratuit)</div>
+                            <div class="small opacity-75">
+                                Apprends des notions BRVM rapidement, page par page, comme un vrai livre.
+                            </div>
+                        </div>
+                        <a href="{{ route('books.index') }}" class="btn btn-sm btn-dark fw-semibold">
+                            Ouvrir les livres →
+                        </a>
+                    </div>
+
                     <div class="text-muted small">
                         <span class="me-3">✅ Infos & outils BRVM au même endroit</span>
                         <span class="me-3">✅ Formations pour monter en niveau</span>
@@ -71,6 +84,15 @@
                                     <div>
                                         <div class="fw-semibold">📡 Radar Marché</div>
                                         <div class="text-muted small">Performance 7 jours + comparaison</div>
+                                    </div>
+                                    <span class="badge bg-light text-dark border">Gratuit</span>
+                                </div>
+
+                                {{-- ✅ NOUVEAU : LIVRES --}}
+                                <div class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                    <div>
+                                        <div class="fw-semibold">📚 Livres instructifs</div>
+                                        <div class="text-muted small">Mini-cours rapides en mode “livre”</div>
                                     </div>
                                     <span class="badge bg-light text-dark border">Gratuit</span>
                                 </div>

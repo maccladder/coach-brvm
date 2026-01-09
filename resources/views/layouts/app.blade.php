@@ -156,8 +156,27 @@
                     </ul>
                 </li>
 
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ route('formations.brvm') }}">Formations</a>
+                {{-- ✅ Formations (dropdown) + Livres --}}
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
+                        Formations
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li>
+                            <a class="dropdown-item" href="{{ route('formations.brvm') }}">
+                                🎓 Formations BRVM
+                            </a>
+                        </li>
+
+                        <li>
+                            <a class="dropdown-item" href="{{ route('books.index') }}">
+                                📚 Livres instructifs (mini-cours)
+                            </a>
+                        </li>
+
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item disabled">🧠 Parcours guidé (bientôt)</a></li>
+                    </ul>
                 </li>
 
                 <li class="nav-item dropdown">
@@ -180,10 +199,19 @@
                                 📩 Contact
                             </a>
                         </li>
+
                         <li><hr class="dropdown-divider"></li>
+
                         <li>
                             <a class="dropdown-item" href="{{ route('formations.brvm') }}">
                                 🎓 Se former à la BRVM
+                            </a>
+                        </li>
+
+                        {{-- Optionnel : lien livres aussi dans Aide --}}
+                        <li>
+                            <a class="dropdown-item" href="{{ route('books.index') }}">
+                                📚 Mini-cours en livre (gratuit)
                             </a>
                         </li>
                     </ul>
@@ -213,8 +241,8 @@
 
                             <li>
                                 <a class="dropdown-item" href="{{ route('courses.my') }}">
-    🎓 Mes cours
-</a>
+                                    🎓 Mes cours
+                                </a>
                             </li>
 
                             <li>
