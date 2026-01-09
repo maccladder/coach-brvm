@@ -406,66 +406,228 @@ public function buyRecap(Request $request)
     ]);
 }
 
-
-    public function sell(Request $r, BrvmMarketAiService $svc)
+public function sellRecap(Request $request)
 {
-    $d = $r->validate([
-        'ticker' => 'required',
-        'qty'    => 'required|integer|min:1',
+    // ✅ Support GET + POST
+    $ticker = strtoupper((string) $request->input('ticker', $request->query('ticker', '')));
+    $qty    = (int) $request->input('qty', $request->query('qty', 0));
+
+    if (empty($ticker) || $qty < 1) {
+        return redirect()
+            ->route('wallet.index')
+            ->with('error', 'Sélectionne une action et une quantité pour afficher le récapitulatif de vente.');
+    }
+
+    // ✅ marché (comme buy)
+    $market = app(\App\Services\BrvmMarketAiService::class)->fetchCloseAndChangeFromSite();
+    $row = collect($market)->firstWhere('ticker', $ticker);
+
+    if (!$row) {
+        return redirect()->route('wallet.index')->with('error', 'Ticker introuvable.');
+    }
+
+    // ✅ vente : close en priorité
+    $price = $row['close'] ?? $row['buy_price'] ?? null;
+    if (!$price) {
+        return redirect()->route('wallet.index')->with('error', 'Cours indisponible pour ce ticker.');
+    }
+
+    $price = (float) str_replace([' ', ','], ['', '.'], (string) $price);
+    if ($price <= 0) {
+        return redirect()->route('wallet.index')->with('error', 'Cours invalide pour ce ticker.');
+    }
+
+    // ✅ Vérifier la quantité détenue
+    $userId = auth()->id();
+    $pos = \App\Models\VirtualPosition::where('user_id', $userId)
+        ->where('ticker', $ticker)
+        ->first();
+
+    $ownedQty = (int) ($pos->qty ?? 0);
+    if ($ownedQty < $qty) {
+        return redirect()->route('wallet.index')->with('error', 'Quantité insuffisante.');
+    }
+
+    $grossAmount = $price * $qty;
+
+    // ✅ Frais SGI (vente aussi, cohérent avec BUY)
+    $rate = (float) config('sgi.fee_rate', 0.006);
+    $min  = (int)  config('sgi.fee_min', 500);
+
+    $fee = max((int) round($grossAmount * $rate), $min);
+    $net = $grossAmount - $fee;
+
+    return view('wallet.sell_recap', [
+        'ticker'      => $ticker,
+        'name'        => ($row['name'] ?? $ticker),
+        'qty'         => $qty,
+        'ownedQty'    => $ownedQty,
+        'price'       => $price,
+        'grossAmount' => $grossAmount,
+        'fee'         => $fee,
+        'net'         => $net,
+        'rate'        => $rate,
+        'min'         => $min,
+    ]);
+}
+
+public function sell(Request $request)
+{
+    Log::info('SELL:start', [
+        'user_id' => optional($request->user())->id,
+        'payload' => $request->all(),
+        'route'   => optional($request->route())->getName(),
+        'method'  => $request->method(),
     ]);
 
-    $ticker = strtoupper(trim($d['ticker']));
-    $qty    = (int) $d['qty'];
+    $data = $request->validate([
+        'ticker' => ['required', 'string'],
+        'qty'    => ['required', 'integer', 'min:1'],
+    ]);
 
-    // ⚠️ adapte ici selon ton service (tu avais fetchMarket() ailleurs)
-    $market = collect($svc->fetchMarket())->keyBy('ticker');
-    $row    = $market->get($ticker);
+    Log::info('SELL:validated', $data);
 
-    if (!$row) return back()->with('error', 'Ticker introuvable');
+    $user   = $request->user();
+    $ticker = strtoupper(trim($data['ticker']));
+    $qty    = (int) $data['qty'];
 
-    $price = (float) ($row['close'] ?? 0);
-    $name  = $row['name'] ?? $ticker;
+    // ✅ Prix du jour via TON service (comme buy)
+    $market = app(\App\Services\BrvmMarketAiService::class)->fetchCloseAndChangeFromSite();
+    Log::info('SELL:market_count', ['count' => is_array($market) ? count($market) : 0]);
 
-    if ($price <= 0) return back()->with('error', 'Prix introuvable');
+    $row = collect($market)->firstWhere('ticker', $ticker);
+    Log::info('SELL:row', [
+        'ticker'    => $ticker,
+        'row_found' => (bool) $row,
+        'keys'      => $row ? array_keys($row) : [],
+    ]);
 
-    $gain = $price * $qty;
+    if (!$row) {
+        return back()->with('error', 'Ticker introuvable.');
+    }
 
-    DB::transaction(function () use ($ticker, $qty, $price, $name, $gain) {
-        $userId = auth()->id();
+    // ✅ vente : close en priorité (sinon buy_price fallback)
+    $price = $row['close'] ?? $row['buy_price'] ?? null;
+    if (!$price) {
+        return back()->with('error', 'Prix introuvable pour ce ticker.');
+    }
 
-        $wallet = VirtualWallet::firstOrCreate(['user_id' => $userId], ['balance' => 0]);
+    $price = (float) str_replace([' ', ','], ['', '.'], (string) $price);
+    if ($price <= 0) {
+        return back()->with('error', 'Prix invalide pour ce ticker.');
+    }
 
-        $pos = VirtualPosition::where('user_id', $userId)
-            ->where('ticker', $ticker)
-            ->lockForUpdate()
-            ->first();
+    $grossAmount = $price * $qty;
 
-        if (!$pos || (int)$pos->qty < $qty) {
-            throw new \RuntimeException('Quantité insuffisante');
-        }
+    // ✅ Frais SGI (vente aussi)
+    $rate = (float) config('sgi.fee_rate', 0.006);
+    $min  = (int)  config('sgi.fee_min', 500);
 
-        $pos->qty = (int)$pos->qty - $qty;
+    $fee = max((int) round($grossAmount * $rate), $min);
+    $netCredit = $grossAmount - $fee;
 
-        if ($pos->qty <= 0) $pos->delete();
-        else $pos->save();
+    Log::info('SELL:amounts', [
+        'price'     => $price,
+        'qty'       => $qty,
+        'gross'     => $grossAmount,
+        'fee'       => $fee,
+        'netCredit' => $netCredit,
+        'rate'      => $rate,
+        'min'       => $min,
+    ]);
 
-        $wallet->balance = (float)$wallet->balance + (float)$gain;
-        $wallet->save();
+    try {
+        DB::transaction(function () use ($user, $ticker, $qty, $price, $grossAmount, $fee, $netCredit, $rate, $min, $row) {
 
-        VirtualWalletTransaction::create([
-            'user_id' => $userId,
-            'type'    => 'sell',
-            'ticker'  => $ticker,
-            'qty'     => $qty,
-            'price'   => $price,
-            'amount'  => $gain,
-            'meta'    => [
-                'name' => $name,
-            ],
+            // ✅ Wallet lock
+            $wallet = \App\Models\VirtualWallet::where('user_id', $user->id)->lockForUpdate()->first();
+            if (!$wallet) {
+                $wallet = \App\Models\VirtualWallet::create(['user_id' => $user->id, 'balance' => 0]);
+            }
+
+            Log::info('SELL:wallet', [
+                'wallet_id' => $wallet->id,
+                'balance'   => $wallet->balance,
+            ]);
+
+            // ✅ Position lock
+            $position = \App\Models\VirtualPosition::where('user_id', $user->id)
+                ->where('ticker', $ticker)
+                ->lockForUpdate()
+                ->first();
+
+            Log::info('SELL:position', [
+                'exists' => (bool) $position,
+                'qty'    => $position?->qty,
+            ]);
+
+            if (!$position) {
+                throw new \Exception('Aucune position pour ce ticker.');
+            }
+
+            if ((int) $position->qty < $qty) {
+                throw new \Exception('Quantité insuffisante.');
+            }
+
+            $oldQty = (int) $position->qty;
+            $newQty = $oldQty - $qty;
+
+            if ($newQty <= 0) {
+                $position->delete();
+                Log::info('SELL:position_deleted', ['old_qty' => $oldQty]);
+            } else {
+                $position->update(['qty' => $newQty]);
+                Log::info('SELL:position_updated', ['old_qty' => $oldQty, 'new_qty' => $newQty]);
+            }
+
+            // ✅ Crédit wallet = NET (après frais)
+            $wallet->balance = (float) $wallet->balance + (float) $netCredit;
+            $wallet->save();
+
+            Log::info('SELL:wallet_credited', [
+                'new_balance' => $wallet->balance,
+                'net_credit'  => $netCredit,
+            ]);
+
+            // ✅ Transaction (type minuscule => OK CHECK sqlite)
+            $tx = \App\Models\VirtualWalletTransaction::create([
+                'user_id' => $user->id,
+                'type'    => 'sell',
+                'ticker'  => $ticker,
+                'qty'     => $qty,
+                'price'   => $price,
+                'amount'  => $netCredit, // ✅ NET crédité
+                'meta'    => [
+                    'name'         => ($row['name'] ?? $ticker),
+                    'gross_amount' => $grossAmount,
+                    'sgi_fee'      => $fee,
+                    'sgi_rate'     => $rate,
+                    'sgi_min'      => $min,
+                ],
+            ]);
+
+            Log::info('SELL:tx_created', [
+                'tx_id'      => $tx->id ?? null,
+                'ticker'     => $ticker,
+                'qty'        => $qty,
+                'gross'      => $grossAmount,
+                'fee'        => $fee,
+                'net_credit' => $netCredit,
+            ]);
+        });
+
+    } catch (\Throwable $e) {
+        Log::error('SELL:FAILED', [
+            'msg'  => $e->getMessage(),
+            'file' => $e->getFile(),
+            'line' => $e->getLine(),
         ]);
-    });
 
-    return back()->with('success', 'Vente effectuée ✅');
+        return back()->with('error', $e->getMessage());
+    }
+
+    return redirect()->route('wallet.index')->with('success', 'Vente effectuée ✅ (frais SGI inclus)');
 }
+
 
 }

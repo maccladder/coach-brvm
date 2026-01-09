@@ -222,7 +222,7 @@
                                     @endif
                                 </td>
                                 <td class="text-end">
-                                    <form method="POST" action="{{ route('wallet.sell') }}" class="d-flex justify-content-end gap-2">
+                                    <form method="POST" action="{{ route('wallet.sell.recap') }}" class="d-flex justify-content-end gap-2">
                                         @csrf
                                         <input type="hidden" name="ticker" value="{{ $p['ticker'] }}">
                                         <input

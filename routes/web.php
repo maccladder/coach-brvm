@@ -389,6 +389,8 @@ Route::middleware(['auth'])->group(function () {
    Route::match(['GET','POST'], '/wallet/buy/recap', [VirtualWalletController::class, 'buyRecap'])
     ->name('wallet.buy.recap');
     Route::post('/wallet/buy', [VirtualWalletController::class, 'buy'])->name('wallet.buy');
+    Route::match(['GET','POST'], '/wallet/sell/recap', [VirtualWalletController::class, 'sellRecap'])
+    ->name('wallet.sell.recap');
     Route::post('/wallet/sell', [VirtualWalletController::class, 'sell'])->name('wallet.sell');
 });
 
