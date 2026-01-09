@@ -27,6 +27,14 @@ return [
     'widget_id' => env('TAWK_TO_WIDGET_ID'),
 ],
 
+'cloudflare_stream' => [
+    'account_id' => env('CLOUDFLARE_ACCOUNT_ID'),
+    'token' => env('CLOUDFLARE_STREAM_TOKEN'),
+    'customer_subdomain' => env('CLOUDFLARE_STREAM_CUSTOMER_SUBDOMAIN'),
+    'signed_exp' => (int) env('CLOUDFLARE_STREAM_SIGNED_EXP', 3600),
+],
+
+
 
     'postmark' => [
         'token' => env('POSTMARK_TOKEN'),

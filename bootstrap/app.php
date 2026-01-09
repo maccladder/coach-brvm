@@ -16,18 +16,22 @@ return Application::configure(basePath: dirname(__DIR__))
          * Désactiver CSRF pour les callbacks de paiement (server-to-server) + retours
          * Laravel 11+ : validateCsrfTokens(except: [...])
          */
-        $middleware->validateCsrfTokens(except: [
-            // ✅ anciens
-            'client-bocs/payment/notify',
-            'client-bocs/payment/return/*',
+       $middleware->validateCsrfTokens(except: [
+    // ✅ anciens
+    'client-bocs/payment/notify',
+    'client-bocs/payment/return/*',
 
-            'client-financials/payment/notify',
-            'client-financials/payment/return/*',
+    'client-financials/payment/notify',
+    'client-financials/payment/return/*',
 
-            // ✅ NOUVEAU : portefeuille virtuel (CinetPay)
-            'payments/cinetpay/ipn',     // POST callback serveur
-            'payments/cinetpay/return',  // GET retour utilisateur
-        ]);
+    // ✅ Wallet (déjà)
+    'payments/cinetpay/ipn',
+    'payments/cinetpay/return',
+
+    // ✅ Cours (NOUVEAU)
+    'paiement/cinetpay/ipn',     // POST IPN cours
+    'payment/cinetpay/return',   // GET/POST return cours
+]);
 
         /**
          * 🔐 Middleware Admin (code secret)

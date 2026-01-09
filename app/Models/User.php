@@ -36,9 +36,23 @@ public function virtualPositions()
     return $this->hasMany(VirtualPosition::class);
 }
 
+public function coursePurchases()
+{
+    return $this->hasMany(\App\Models\CoursePurchase::class);
+}
+
 public function virtualWalletTransactions()
 {
     return $this->hasMany(VirtualWalletTransaction::class);
+}
+
+
+
+public function courses()
+{
+    return $this->belongsToMany(\App\Models\Course::class, 'course_purchases')
+        ->withPivot(['paid_at','amount_fcfa','payment_ref'])
+        ->withTimestamps();
 }
 
     /**

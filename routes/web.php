@@ -1,18 +1,20 @@
 <?php
 
+use App\Services\CloudflareStream;
 use Illuminate\Support\Facades\Http;
+
 use App\Services\BrvmMarketAiService;
 
 use Illuminate\Support\Facades\Route;
-
 use App\Services\BrvmActionsAiService;
 use App\Http\Controllers\FaqController;
 use App\Http\Controllers\SGIController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\CourseController;
 use App\Http\Controllers\UploadController;
+
 use App\Http\Controllers\LandingController;
 use App\Http\Controllers\PaymentController;
-
 use App\Http\Controllers\SocieteController;
 use App\Http\Controllers\SummaryController;
 use App\Http\Controllers\ClientBocController;
@@ -21,6 +23,7 @@ use App\Http\Controllers\GlossaireController;
 use App\Http\Controllers\AdminMarketController;
 use App\Http\Controllers\PerformanceController;
 use App\Http\Controllers\AnnouncementController;
+use App\Http\Controllers\CoursePaymentController;
 use App\Http\Controllers\VirtualWalletController;
 use App\Http\Controllers\AdminAnalyticsController;
 use App\Http\Controllers\ClientFinancialController;
@@ -131,6 +134,31 @@ Route::prefix('client-financials')->name('client-financials.')->group(function (
 Route::get('/formations-brvm', function () {
     return view('sections.formations-brvm');
 })->name('formations.brvm');
+
+Route::get('/formations', [CourseController::class, 'index'])->name('courses.index');
+
+Route::get('/mon-espace/cours', [CourseController::class, 'myCourses'])
+    ->middleware('auth')
+    ->name('courses.my');
+
+Route::get('/mon-espace/cours/{slug}', [CourseController::class, 'show'])
+    ->middleware('auth')
+    ->name('courses.show');
+
+// ✅ ACHAT : auth obligatoire
+Route::post('/formations/{course}/acheter', [CoursePaymentController::class, 'buy'])
+    ->middleware('auth')
+    ->name('courses.buy');
+
+// ✅ RETOUR utilisateur : PAS auth (CinetPay peut faire GET/POST)
+Route::match(['GET','POST'], '/payment/cinetpay/return', [CoursePaymentController::class, 'return'])
+    ->name('cinetpay.return.course');
+
+// ✅ IPN serveur : PAS auth (CinetPay POST)
+Route::post('/paiement/cinetpay/ipn', [CoursePaymentController::class, 'ipn'])
+    ->name('cinetpay.ipn.course');
+
+
 
 /*
 |--------------------------------------------------------------------------
@@ -356,5 +384,33 @@ Route::post('/payments/cinetpay/ipn', [PaymentController::class, 'cinetpayIpn'])
 Route::match(['GET', 'POST'], '/payments/cinetpay/return', [PaymentController::class, 'cinetpayReturn'])
     ->name('cinetpay.return');
 
+
+    Route::get('/debug/cloudflare/video/{uid}', function (string $uid, CloudflareStream $cf) {
+    $video = $cf->getVideo($uid);
+    return response()->json([
+        'uid' => $uid,
+        'meta' => [
+            'status' => $video['status'] ?? null,
+            'duration' => $video['duration'] ?? null,
+            'created' => $video['created'] ?? null,
+            'requireSignedURLs' => $video['requireSignedURLs'] ?? null,
+        ],
+    ]);
+})->middleware('auth');
+
+Route::get('/debug/cloudflare/token/{uid}', function (string $uid, CloudflareStream $cf) {
+    $exp = config('services.cloudflare_stream.signed_exp', 3600);
+
+    $token = $cf->createPlaybackToken($uid, $exp);
+
+    $iframe = "https://" . config('services.cloudflare_stream.customer_subdomain') . "/{$uid}/iframe?token={$token}";
+
+    return response()->json([
+        'uid' => $uid,
+        'expires_in' => $exp,
+        'iframe' => $iframe,
+        // 'token' => $token, // optionnel: tu peux le cacher si tu veux
+    ]);
+});
 
 require __DIR__.'/auth.php';
