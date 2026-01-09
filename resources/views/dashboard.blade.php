@@ -32,7 +32,9 @@
                     <div class="text-muted small mb-3">
                         Accès à tes formations payées.
                     </div>
-                    <a href="#" class="btn btn-primary btn-sm disabled">Ouvrir (bientôt)</a>
+                    <a href="{{ route('courses.my') }}" class="btn btn-primary btn-sm">
+    Ouvrir
+</a>
                 </div>
             </div>
         </div>

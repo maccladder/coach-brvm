@@ -212,9 +212,9 @@
                             </li>
 
                             <li>
-                                <a class="dropdown-item" href="#">
-                                    🎓 Mes cours
-                                </a>
+                                <a class="dropdown-item" href="{{ route('courses.my') }}">
+    🎓 Mes cours
+</a>
                             </li>
 
                             <li>

@@ -15,12 +15,15 @@
             cours débutant, cours intermédiaire, exemples concrets, cas pratiques…
         </p>
 
-        {{-- Phrase sur Udemy --}}
-        <p class="mb-4">
-            Les formations complètes sont hébergées sur <strong>Udemy</strong>, l’une des plateformes
-            d’autoformation les plus connues et sécurisées au monde. Ici tu peux visionner un
-            <strong>aperçu d’environ 3 minutes</strong> avant de décider d’acheter le cours complet.
-        </p>
+        {{-- Phrase sur les 2 options --}}
+        <div class="alert alert-light border mb-4">
+            <div class="fw-semibold mb-1">✅ Deux façons d’acheter (accès à vie dans les deux cas)</div>
+            <div class="text-muted">
+                • <strong>Sur Udemy</strong> : paiement plutôt par <strong>carte bancaire</strong> (plateforme internationale).<br>
+                • <strong>Sur Coach BRVM</strong> : paiement plutôt par <strong>Mobile Money</strong> (Wave, Orange Money, MTN Money, Moov Money).<br>
+                <span class="small">Dans les deux cas, l’accès est <strong>à vie</strong> après achat.</span>
+            </div>
+        </div>
 
         {{-- Points clés --}}
         <ul class="mb-4">
@@ -61,12 +64,25 @@
                             🎬 Ci-contre : <strong>aperçu d’environ 3 minutes</strong> du cours débutant.
                         </p>
 
-                        <a href="https://www.udemy.com/course/investir-a-la-brvm-le-guide-du-debutant/?couponCode=E71A16F6B15F7654FC27"
-                           target="_blank"
-                           rel="noopener noreferrer"
-                           class="btn btn-success">
-                            Acheter le cours complet sur Udemy
-                        </a>
+                        <div class="d-flex flex-wrap gap-2">
+                            {{-- ✅ Achat sur Coach BRVM --}}
+                            <a href="{{ route('courses.index') }}"
+                               class="btn btn-primary">
+                                Acheter la formation sur Coach BRVM (Mobile Money)
+                            </a>
+
+                            {{-- ✅ Achat sur Udemy --}}
+                            <a href="https://www.udemy.com/course/investir-a-la-brvm-le-guide-du-debutant/?couponCode=E71A16F6B15F7654FC27"
+                               target="_blank"
+                               rel="noopener noreferrer"
+                               class="btn btn-success">
+                                Acheter sur Udemy (Carte bancaire)
+                            </a>
+                        </div>
+
+                        <div class="small text-muted mt-2">
+                            💡 Astuce : si tu es en Afrique de l’Ouest, l’achat sur Coach BRVM est souvent le plus simple grâce au Mobile Money.
+                        </div>
                     </div>
 
                     {{-- Vidéo à droite --}}
@@ -117,12 +133,25 @@
                             🎬 Ci-contre : <strong>aperçu d’environ 3 minutes</strong> du cours intermédiaire.
                         </p>
 
-                        <a href="https://www.udemy.com/course/brvm-strategies-dinvestissement-intermediaire/?couponCode=77B14D32720FB58FCF1C"
-                           target="_blank"
-                           rel="noopener noreferrer"
-                           class="btn btn-success">
-                            Acheter le cours complet sur Udemy
-                        </a>
+                        <div class="d-flex flex-wrap gap-2">
+                            {{-- ✅ Achat sur Coach BRVM --}}
+                            <a href="{{ route('courses.index') }}"
+                               class="btn btn-primary">
+                                Acheter la formation sur Coach BRVM (Mobile Money)
+                            </a>
+
+                            {{-- ✅ Achat sur Udemy --}}
+                            <a href="https://www.udemy.com/course/brvm-strategies-dinvestissement-intermediaire/?couponCode=77B14D32720FB58FCF1C"
+                               target="_blank"
+                               rel="noopener noreferrer"
+                               class="btn btn-success">
+                                Acheter sur Udemy (Carte bancaire)
+                            </a>
+                        </div>
+
+                        <div class="small text-muted mt-2">
+                            🔒 Accès à vie après achat, quel que soit le canal (Coach BRVM ou Udemy).
+                        </div>
                     </div>
 
                     {{-- Vidéo à droite --}}
@@ -140,14 +169,6 @@
                 </div>
             </div>
         </div>
-
-        {{-- Bouton global --}}
-        {{-- <div class="mt-3">
-            <a href="{{ route('formations.brvm') }}"
-               class="btn btn-primary rounded-pill">
-                🎓 Voir toutes les formations BRVM
-            </a>
-        </div> --}}
 
     </div>
 </section>
