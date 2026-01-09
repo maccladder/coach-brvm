@@ -15,7 +15,7 @@
         rel="stylesheet"
     >
 
-    {{-- Style global léger --}}
+    {{-- Style global --}}
     <style>
         body {
             font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
@@ -35,15 +35,20 @@
         table thead th {
             white-space: nowrap;
         }
+
+        .dropdown-menu {
+            border-radius: .5rem;
+        }
     </style>
 </head>
 
 <body>
 
+{{-- NAVBAR ADMIN --}}
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-    <div class="container" style="max-width: 1100px;">
+    <div class="container" style="max-width: 1200px;">
 
-        {{-- Brand admin --}}
+        {{-- Brand --}}
         <a class="navbar-brand d-flex align-items-center" href="{{ route('admin.dashboard') }}">
             <span class="logo-dot"></span>
             <span class="fw-semibold">Coach BRVM – Admin</span>
@@ -56,25 +61,69 @@
         </button>
 
         <div class="collapse navbar-collapse" id="adminNavbar">
+
+            {{-- MENU GAUCHE --}}
             <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ route('admin.dashboard') }}">Dashboard</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ route('admin.bocs.index') }}">BOC journalières</a>
-                </li>
-                <li class="nav-item">
-    <a class="nav-link" href="{{ route('admin.financial_reports.index', ['year' => 2025]) }}">
-        États financiers
-    </a>
-</li>
 
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ route('landing') }}">← Site public</a>
+                    <a class="nav-link" href="{{ route('admin.dashboard') }}">
+                        🏠 Dashboard
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ route('admin.bocs.index') }}">
+                        📊 BOC journalières
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ route('admin.financial_reports.index', ['year' => 2025]) }}">
+                        📄 États financiers
+                    </a>
+                </li>
+
+                {{-- 🎓 FORMATIONS (NOUVEAU MODULE) --}}
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button"
+                       data-bs-toggle="dropdown" aria-expanded="false">
+                        🎓 Formations
+                    </a>
+
+                    <ul class="dropdown-menu shadow-sm">
+                        <li>
+                            <a class="dropdown-item" href="{{ route('admin.courses.dashboard') }}">
+                                📊 Dashboard formations
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" href="{{ route('admin.courses.purchases') }}">
+                                🧾 Achats
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" href="{{ route('admin.courses.buyers') }}">
+                                👥 Utilisateurs
+                            </a>
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <a class="dropdown-item" href="{{ route('admin.courses.index') }}">
+                                🎥 Cours
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ route('landing') }}">
+                        ← Site public
+                    </a>
                 </li>
 
             </ul>
 
+            {{-- MENU DROITE --}}
             @if(session('is_admin'))
                 <form action="{{ route('admin.logout') }}" method="POST" class="d-flex">
                     @csrf
@@ -83,11 +132,12 @@
                     </button>
                 </form>
             @endif
+
         </div>
     </div>
 </nav>
 
-{{-- Contenu des pages admin --}}
+{{-- CONTENU ADMIN --}}
 @yield('content')
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>

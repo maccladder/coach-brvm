@@ -20,6 +20,7 @@ use App\Http\Controllers\SummaryController;
 use App\Http\Controllers\ClientBocController;
 use App\Http\Controllers\DividendeController;
 use App\Http\Controllers\GlossaireController;
+use App\Http\Controllers\AdminCourseController;
 use App\Http\Controllers\AdminMarketController;
 use App\Http\Controllers\PerformanceController;
 use App\Http\Controllers\AnnouncementController;
@@ -215,6 +216,14 @@ Route::prefix('admin')->name('admin.')->group(function () {
         // ✅ Marché
         Route::get('/market', [AdminMarketController::class, 'index'])->name('market.index');
         Route::get('/market/api', [AdminMarketController::class, 'api'])->name('market.api');
+
+        // 🎓 FORMATIONS ADMIN ✅ (corrigé)
+        Route::prefix('courses')->name('courses.')->group(function () {
+            Route::get('/dashboard', [AdminCourseController::class, 'dashboard'])->name('dashboard'); // /admin/courses/dashboard
+            Route::get('/purchases', [AdminCourseController::class, 'purchases'])->name('purchases'); // /admin/courses/purchases
+            Route::get('/buyers', [AdminCourseController::class, 'buyers'])->name('buyers');         // /admin/courses/buyers
+            Route::get('/', [AdminCourseController::class, 'courses'])->name('index');              // /admin/courses
+        });
 
         // ✅ Annonces ADMIN (CRUD)
         Route::resource('announcements', AdminAnnouncementController::class)->except(['show']);
