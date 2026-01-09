@@ -32,19 +32,43 @@
                         ->where('course_id', $course->id)
                         ->whereNotNull('paid_at')
                         ->exists();
+
+                // Covers (public/courses/*.jpg)
+                $covers = [
+                    'brvm-debutant' => asset('courses/brvm-debutant.jpg'),
+                    'brvm-intermediaire' => asset('courses/brvm-intermediaire.jpg'),
+                ];
+
+                $cover = $covers[$course->slug] ?? asset('courses/brvm-debutant.jpg');
             @endphp
 
             <div class="col-md-4">
-                <div class="card h-100 border-0 shadow-sm rounded-4">
+                <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden">
 
-                    <div class="card-body d-flex flex-column p-4">
+                    {{-- Cover vidéo --}}
+                    <div class="position-relative">
+                        <img src="{{ $cover }}"
+                             alt="Aperçu du cours"
+                             class="w-100"
+                             style="height:160px; object-fit:cover;">
 
-                        {{-- Badge acheté --}}
+                        {{-- Play --}}
+                        <div class="position-absolute top-50 start-50 translate-middle">
+                            <div class="bg-dark bg-opacity-50 rounded-circle d-flex align-items-center justify-content-center"
+                                 style="width:56px; height:56px;">
+                                <span class="text-white fs-4">▶</span>
+                            </div>
+                        </div>
+
+                        {{-- Badge acheté (sur l'image) --}}
                         @if($isBought)
-                            <span class="badge bg-success mb-2 align-self-start">
+                            <span class="badge bg-success position-absolute top-0 start-0 m-2">
                                 ✔ Déjà acheté
                             </span>
                         @endif
+                    </div>
+
+                    <div class="card-body d-flex flex-column p-4">
 
                         {{-- Titre --}}
                         <h5 class="fw-semibold mb-2">
@@ -52,12 +76,12 @@
                         </h5>
 
                         {{-- Description --}}
-                        <p class="text-muted small flex-grow-1">
+                        <p class="text-muted small flex-grow-1 mb-3">
                             {{ \Illuminate\Support\Str::limit($course->description, 130) }}
                         </p>
 
                         {{-- Prix + action --}}
-                        <div class="mt-3 d-flex justify-content-between align-items-center">
+                        <div class="d-flex justify-content-between align-items-center">
 
                             <div class="fw-bold text-success fs-6">
                                 {{ number_format($course->price_fcfa) }} FCFA
