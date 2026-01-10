@@ -14,11 +14,17 @@
             </p>
         </div>
 
-        <div class="d-flex gap-2">
+        <div class="d-flex gap-2 flex-wrap">
             {{-- 👉 Bouton Utilisateurs --}}
             <a href="{{ route('admin.users.index') }}"
                class="btn btn-outline-secondary fw-semibold">
                 👥 Utilisateurs
+            </a>
+
+            {{-- 👉 Bouton Emails --}}
+            <a href="{{ route('admin.emails.index') }}"
+               class="btn btn-outline-success fw-semibold">
+                📧 Emails
             </a>
 
             {{-- 👉 Bouton États financiers (archive upload) --}}
@@ -105,6 +111,20 @@
                         <h5 class="fw-bold mb-1">👥 Utilisateurs</h5>
                         <p class="small mb-0">
                             Liste des comptes : nom, email, date d’inscription.
+                        </p>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        {{-- Emails --}}
+        <div class="col-md-4">
+            <a href="{{ route('admin.emails.index') }}" class="text-decoration-none">
+                <div class="card shadow-sm border-0 h-100 border-success">
+                    <div class="card-body d-flex flex-column justify-content-center">
+                        <h5 class="fw-bold mb-1 text-success">📧 Emails utilisateurs</h5>
+                        <p class="small mb-0 text-muted">
+                            Envoyer un email à tous ou aux utilisateurs sélectionnés.
                         </p>
                     </div>
                 </div>

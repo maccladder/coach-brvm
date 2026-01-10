@@ -30,6 +30,7 @@ use App\Http\Controllers\CoursePaymentController;
 use App\Http\Controllers\VirtualWalletController;
 use App\Http\Controllers\AdminAnalyticsController;
 use App\Http\Controllers\ClientFinancialController;
+use App\Http\Controllers\AdminEmailController;
 use App\Http\Controllers\AdminPerformanceController;
 use App\Http\Controllers\AdminAnnouncementController;
 use App\Http\Controllers\AdminVirtualWalletController;
@@ -190,6 +191,14 @@ Route::prefix('admin')->name('admin.')->group(function () {
     // ✅ Utilisateurs (ADMIN)
 Route::get('/users', [AdminUserController::class, 'index'])
     ->name('users.index');
+
+    // mass mail campagne
+
+    Route::get('/emails', [\App\Http\Controllers\AdminEmailController::class, 'index'])
+    ->name('emails.index');
+
+Route::post('/emails/send', [AdminEmailController::class, 'send'])
+    ->name('emails.send');
 
     Route::middleware('admin.code')->group(function () {
 
