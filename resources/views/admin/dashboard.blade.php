@@ -15,6 +15,12 @@
         </div>
 
         <div class="d-flex gap-2">
+            {{-- 👉 Bouton Utilisateurs --}}
+            <a href="{{ route('admin.users.index') }}"
+               class="btn btn-outline-secondary fw-semibold">
+                👥 Utilisateurs
+            </a>
+
             {{-- 👉 Bouton États financiers (archive upload) --}}
             <a href="{{ route('admin.financial_reports.index', ['year' => 2025]) }}"
                class="btn btn-outline-info fw-semibold">
@@ -85,6 +91,20 @@
                         <h5 class="fw-bold mb-1">📣 Gestion des annonces</h5>
                         <p class="small mb-0">
                             Publier : calendrier AG, communiqués, infos BRVM, etc.
+                        </p>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        {{-- Utilisateurs --}}
+        <div class="col-md-4">
+            <a href="{{ route('admin.users.index') }}" class="text-decoration-none">
+                <div class="card shadow-sm border-0 h-100 bg-secondary text-white">
+                    <div class="card-body d-flex flex-column justify-content-center">
+                        <h5 class="fw-bold mb-1">👥 Utilisateurs</h5>
+                        <p class="small mb-0">
+                            Liste des comptes : nom, email, date d’inscription.
                         </p>
                     </div>
                 </div>

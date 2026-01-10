@@ -18,6 +18,7 @@ use App\Http\Controllers\LandingController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\SocieteController;
 use App\Http\Controllers\SummaryController;
+use App\Http\Controllers\AdminUserController;
 use App\Http\Controllers\ClientBocController;
 use App\Http\Controllers\DividendeController;
 use App\Http\Controllers\GlossaireController;
@@ -185,6 +186,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
     Route::get('/login', [AdminController::class, 'showLoginForm'])->name('login.form');
     Route::post('/login', [AdminController::class, 'login'])->name('login');
+
+    // ✅ Utilisateurs (ADMIN)
+Route::get('/users', [AdminUserController::class, 'index'])
+    ->name('users.index');
 
     Route::middleware('admin.code')->group(function () {
 

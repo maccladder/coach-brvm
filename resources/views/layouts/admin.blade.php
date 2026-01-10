@@ -71,6 +71,13 @@
                     </a>
                 </li>
 
+                {{-- ✅ Utilisateurs (ADMIN) --}}
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ route('admin.users.index') }}">
+                        👥 Utilisateurs
+                    </a>
+                </li>
+
                 <li class="nav-item">
                     <a class="nav-link" href="{{ route('admin.bocs.index') }}">
                         📊 BOC journalières
@@ -103,7 +110,7 @@
                         </li>
                         <li>
                             <a class="dropdown-item" href="{{ route('admin.courses.buyers') }}">
-                                👥 Utilisateurs
+                                👥 Utilisateurs (acheteurs)
                             </a>
                         </li>
                         <li><hr class="dropdown-divider"></li>
