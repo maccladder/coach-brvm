@@ -489,22 +489,65 @@
         </div>
     </section>
 
-    {{-- FOOTER --}}
-    <footer class="py-4 border-top bg-white">
-        <div class="container" style="max-width: 1100px;">
-            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+   {{-- FOOTER --}}
+<footer class="py-4 border-top bg-white">
+    <div class="container" style="max-width: 1100px;">
+        <div class="row g-3 align-items-center">
+
+            {{-- Left --}}
+            <div class="col-lg-5">
                 <div class="small text-muted">
                     © {{ date('Y') }} Coach BRVM – Une solution de CHENGGONG SARL.
                 </div>
-                <div class="small text-muted d-flex gap-3">
+
+                <div class="mt-2 small text-muted">
+                    <span class="me-2">Suivre Coach BRVM :</span>
+
+                    <a href="https://t.me/coachbrvm" target="_blank" rel="noopener"
+                       class="text-decoration-none text-muted me-3">
+                        <i class="bi bi-telegram"></i> Telegram
+                    </a>
+
+                    <a href="https://x.com/coachbrvm?s=21" target="_blank" rel="noopener"
+                       class="text-decoration-none text-muted me-3">
+                        <i class="bi bi-twitter-x"></i> X
+                    </a>
+
+                    <a href="https://youtube.com/@coachbrvm?si=gW0gTPH_CP4p41ZP" target="_blank" rel="noopener"
+                       class="text-decoration-none text-muted me-3">
+                        <i class="bi bi-youtube"></i> YouTube
+                    </a>
+
+                    <a href="https://www.linkedin.com/company/coach-brvm/" target="_blank" rel="noopener"
+                       class="text-decoration-none text-muted me-3">
+                        <i class="bi bi-linkedin"></i> LinkedIn
+                    </a>
+
+                    <a href="https://chat.whatsapp.com/JOz4th9OnLnJSFcABUFHPI" target="_blank" rel="noopener"
+                       class="text-decoration-none text-muted me-3">
+                        <i class="bi bi-whatsapp"></i> WhatsApp
+                    </a>
+
+                    <a href="https://www.facebook.com/share/17q4KouHax/" target="_blank" rel="noopener"
+                       class="text-decoration-none text-muted">
+                        <i class="bi bi-facebook"></i> Facebook
+                    </a>
+                </div>
+            </div>
+
+            {{-- Right --}}
+            <div class="col-lg-7">
+                <div class="small text-muted d-flex flex-wrap justify-content-lg-end gap-3">
                     <a href="{{ route('notre.histoire') }}" class="text-decoration-none text-muted">Notre histoire</a>
                     <a href="{{ route('conditions') }}" class="text-decoration-none text-muted">Conditions d’utilisation</a>
                     <a href="{{ route('confidentialite') }}" class="text-decoration-none text-muted">Confidentialité</a>
                     <a href="{{ route('contact') }}" class="text-decoration-none text-muted">Contact</a>
                 </div>
             </div>
+
         </div>
-    </footer>
+    </div>
+</footer>
 
 </div>
 @endsection

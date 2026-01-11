@@ -13,6 +13,8 @@ use App\Http\Controllers\BookController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\CourseController;
 
+use App\Http\Controllers\GoogleController;
+
 use App\Http\Controllers\UploadController;
 use App\Http\Controllers\LandingController;
 use App\Http\Controllers\PaymentController;
@@ -52,6 +54,11 @@ Route::get('/test/brvm-actions-ai', function (BrvmActionsAiService $svc) {
 });
 
 Route::redirect('/', '/welcome');
+
+// auth google
+
+Route::get('/auth/google', [GoogleController::class, 'redirect'])->name('auth.google');
+Route::get('/auth/google/callback', [GoogleController::class, 'callback'])->name('auth.google.callback');
 
 //LES ROUTES DES LIVRES
 Route::get('/livres', [BookController::class, 'index'])->name('books.index');
