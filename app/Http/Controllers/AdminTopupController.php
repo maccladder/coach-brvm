@@ -17,7 +17,8 @@ class AdminTopupController extends Controller
          */
 
         // Tu peux passer ?purpose=topup ou ?purpose=wallet_topup
-        $purpose = $request->get('purpose', 'topup');
+        $purpose = $request->get('purpose', 'wallet_topup');
+
 
         $q = Payment::query()
             ->with('user')
