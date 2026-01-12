@@ -30,6 +30,11 @@
         </div>
 
         <div class="d-flex flex-wrap gap-2">
+            {{-- ✅ AIDE (Option A) --}}
+            <button class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#walletHelpModal">
+                ❓ Aide
+            </button>
+
             <a href="{{ route('dashboard') }}" class="btn btn-outline-secondary">
                 ⬅️ Dashboard
             </a>
@@ -191,7 +196,6 @@
                     <tbody>
                         @forelse(($positions ?? []) as $p)
                             @php
-                                // ✅ IMPORTANT: le controller renvoie avg_price (pas avg)
                                 $qty   = (int)($p['qty'] ?? 0);
                                 $avg   = (float)($p['avg_price'] ?? 0);
                                 $price = (float)($p['price'] ?? 0);
@@ -285,7 +289,6 @@
                                     default => 'secondary',
                                 };
 
-                                // ✅ compat: certains enregistrements utilisent qty au lieu de quantity
                                 $q = $tx->quantity ?? $tx->qty ?? null;
                             @endphp
                             <tr>
@@ -327,4 +330,113 @@
     </div>
 
 </div>
+
+{{-- ✅ MODAL AIDE (Option A) --}}
+<div class="modal fade" id="walletHelpModal" tabindex="-1" aria-labelledby="walletHelpModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title fw-bold" id="walletHelpModalLabel">❓ Aide — Portefeuille Virtuel</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+      </div>
+
+      <div class="modal-body">
+
+        <div class="mb-4">
+          <h6 class="fw-bold mb-2">📊 Comprendre les indicateurs</h6>
+          <ul class="mb-0">
+            <li><b>Solde cash</b> : argent disponible pour acheter des actions.</li>
+            <li><b>Valeur positions</b> : valeur de tes positions au cours du jour (Σ cours × quantité).</li>
+            <li><b>Valeur nette</b> : Cash + Valeur positions.</li>
+            <li><b>Performance</b> : reflète ton gain/perte selon ta valeur nette (selon la formule que tu retiendras).</li>
+          </ul>
+        </div>
+
+        <div class="mb-4">
+          <h6 class="fw-bold mb-2">🧾 Table “Positions”</h6>
+          <ul class="mb-0">
+            <li><b>Qté</b> : nombre de titres détenus.</li>
+            <li><b>Prix moyen (PRU)</b> : prix moyen d’achat par action (coût pondéré).</li>
+            <li><b>Cours</b> : prix actuel du marché.</li>
+            <li><b>Valeur</b> : Qté × Cours.</li>
+            <li><b>P/L</b> : (Cours − PRU) × Qté (plus/moins-value latente).</li>
+          </ul>
+
+          <div class="alert alert-light border mt-2 mb-0">
+            <b>Formules rapides :</b><br>
+            <span class="text-muted">
+              Valeur = Quantité × Cours<br>
+              P&amp;L latent = (Cours − PRU) × Quantité
+            </span>
+          </div>
+        </div>
+
+        <div class="mb-4">
+          <h6 class="fw-bold mb-2">🟢 Achat + Renforcer</h6>
+          <ul class="mb-0">
+            <li>Un <b>achat</b> diminue ton cash de <b>(prix × quantité) + frais SGI</b>.</li>
+            <li>Ta position augmente, et ton <b>PRU</b> est recalculé automatiquement.</li>
+            <li><b>Renforcer</b> = racheter la même action pour augmenter ta quantité.</li>
+            <li>Si tu renforces <b>à un prix plus bas</b> que ton PRU, ton PRU baisse (“moyenner à la baisse”).</li>
+            <li>Si tu renforces <b>à un prix plus haut</b>, ton PRU monte.</li>
+          </ul>
+
+          <div class="alert alert-light border mt-2 mb-0">
+            <b>PRU (coût pondéré)</b> :<br>
+            <span class="text-muted">
+              Nouveau PRU = (Ancienne Qté × Ancien PRU + Qté achetée × Prix achat) ÷ Nouvelle Qté
+            </span>
+          </div>
+        </div>
+
+        <div class="mb-4">
+          <h6 class="fw-bold mb-2">🔴 Vente + Diminuer</h6>
+          <ul class="mb-0">
+            <li><b>Diminuer</b> = vendre une partie de ta position.</li>
+            <li>Quand tu vends, ta quantité baisse (ou disparaît si tu vends tout).</li>
+            <li>Ton cash augmente du <b>montant net</b> : (prix × quantité) − frais SGI.</li>
+          </ul>
+
+          <div class="alert alert-light border mt-2 mb-0">
+            <b>Plus/moins-value réalisée (simple)</b> :<br>
+            <span class="text-muted">
+              (Prix de vente − PRU) × Quantité vendue
+            </span>
+            <br>
+            <small class="text-muted">
+              (Dans ce portefeuille virtuel, on crédite le cash en <b>NET</b> après frais — plus réaliste.)
+            </small>
+          </div>
+        </div>
+
+        <div class="mb-4">
+          <h6 class="fw-bold mb-2">💸 Frais SGI (achat &amp; vente)</h6>
+          <ul class="mb-0">
+            <li>Les frais sont appliqués à chaque opération (achat et vente).</li>
+            <li>Formule : <b>frais = max(montant × taux, minimum)</b>.</li>
+            <li>Tu vois toujours un <b>récapitulatif</b> avant de confirmer.</li>
+          </ul>
+
+          <div class="alert alert-warning mt-2 mb-0">
+            ✅ <b>Astuce :</b> si ton cash “bouge trop”, pense aux frais (surtout sur les petits montants).
+          </div>
+        </div>
+
+        <div class="mb-0">
+          <h6 class="fw-bold mb-2">🧾 Historique</h6>
+          <ul class="mb-0">
+            <li>Chaque mouvement est enregistré (topup, buy, sell).</li>
+            <li>Tu peux t’en servir pour analyser tes décisions et ta stratégie.</li>
+          </ul>
+        </div>
+
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 @endsection
