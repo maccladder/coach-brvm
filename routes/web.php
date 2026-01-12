@@ -24,6 +24,8 @@ use App\Http\Controllers\AdminUserController;
 use App\Http\Controllers\ClientBocController;
 use App\Http\Controllers\DividendeController;
 use App\Http\Controllers\GlossaireController;
+use App\Http\Controllers\AdminEmailController;
+use App\Http\Controllers\AdminTopupController;
 use App\Http\Controllers\AdminCourseController;
 use App\Http\Controllers\AdminMarketController;
 use App\Http\Controllers\PerformanceController;
@@ -32,7 +34,6 @@ use App\Http\Controllers\CoursePaymentController;
 use App\Http\Controllers\VirtualWalletController;
 use App\Http\Controllers\AdminAnalyticsController;
 use App\Http\Controllers\ClientFinancialController;
-use App\Http\Controllers\AdminEmailController;
 use App\Http\Controllers\AdminPerformanceController;
 use App\Http\Controllers\AdminAnnouncementController;
 use App\Http\Controllers\AdminVirtualWalletController;
@@ -250,6 +251,11 @@ Route::post('/emails/send', [AdminEmailController::class, 'send'])
             Route::get('/buyers', [AdminCourseController::class, 'buyers'])->name('buyers');         // /admin/courses/buyers
             Route::get('/', [AdminCourseController::class, 'courses'])->name('index');              // /admin/courses
         });
+
+        // ✅ TOPUPS (ADMIN)
+Route::prefix('topups')->name('topups.')->group(function () {
+    Route::get('/', [AdminTopupController::class, 'index'])->name('index'); // /admin/topups
+});
 
         // ✅ Annonces ADMIN (CRUD)
         Route::resource('announcements', AdminAnnouncementController::class)->except(['show']);

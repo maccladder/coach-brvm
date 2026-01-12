@@ -117,6 +117,20 @@
             </a>
         </div>
 
+        {{-- Topups Wallet --}}
+<div class="col-md-4">
+    <a href="{{ route('admin.topups.index') }}" class="text-decoration-none">
+        <div class="card shadow-sm border-0 h-100 bg-dark text-white">
+            <div class="card-body d-flex flex-column justify-content-center">
+                <h5 class="fw-bold mb-1">💳 Topups Wallet</h5>
+                <p class="small mb-0 opacity-75">
+                    Suivi des rechargements : validés, en attente, échoués + montants encaissés.
+                </p>
+            </div>
+        </div>
+    </a>
+</div>
+
         {{-- Emails --}}
         <div class="col-md-4">
             <a href="{{ route('admin.emails.index') }}" class="text-decoration-none">

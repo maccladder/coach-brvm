@@ -16,4 +16,9 @@ class Payment extends Model
         'meta' => 'array',
         'credited_at' => 'datetime',
     ];
+
+    public function user()
+{
+    return $this->belongsTo(\App\Models\User::class);
+}
 }

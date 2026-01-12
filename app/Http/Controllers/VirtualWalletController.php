@@ -45,6 +45,11 @@ class VirtualWalletController extends Controller
 
             $totalValue += $value;
 
+            $history = VirtualWalletTransaction::where('user_id', $user->id)
+    ->orderByDesc('created_at')
+    ->limit(100)
+    ->get();
+
             $positions[] = [
                 'ticker' => $pos->ticker,
                 'name' => $pos->name,
@@ -61,6 +66,7 @@ class VirtualWalletController extends Controller
             'market' => $market,
             'totalValue' => $totalValue,
             'netWorth' => $wallet->balance + $totalValue,
+            'history'    => $history,
         ]);
     }
 
