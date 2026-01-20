@@ -6,7 +6,7 @@
 
         {{-- Titre principal --}}
         <h2 class="h2 fw-bold mb-3">
-            Formations BRVM pour monter en niveau
+            🎓 Formations BRVM pour monter en niveau
         </h2>
 
         {{-- Sous-titre --}}
@@ -41,9 +41,7 @@
 
                     {{-- Texte --}}
                     <div class="col-md-8">
-                        <h3 class="h4 mb-1">
-                            🚀 Niveau Débutant
-                        </h3>
+                        <h3 class="h4 mb-1">🚀 Niveau Débutant</h3>
 
                         <p class="text-success fw-semibold mb-2">
                             « Investir à la BRVM – Le guide du débutant »
@@ -65,35 +63,24 @@
                         </p>
 
                         <div class="d-flex flex-wrap gap-2">
-                            {{-- ✅ Achat sur Coach BRVM --}}
-                            <a href="{{ route('courses.index') }}"
-                               class="btn btn-primary">
-                                Acheter la formation sur Coach BRVM (Mobile Money)
+                            <a href="{{ route('courses.index') }}" class="btn btn-primary">
+                                Acheter sur Coach BRVM (Mobile Money)
                             </a>
 
-                            {{-- ✅ Achat sur Udemy --}}
                             <a href="https://www.udemy.com/course/investir-a-la-brvm-le-guide-du-debutant/?couponCode=E71A16F6B15F7654FC27"
-                               target="_blank"
-                               rel="noopener noreferrer"
+                               target="_blank" rel="noopener noreferrer"
                                class="btn btn-success">
                                 Acheter sur Udemy (Carte bancaire)
                             </a>
                         </div>
-
-                        <div class="small text-muted mt-2">
-                            💡 Astuce : si tu es en Afrique de l’Ouest, l’achat sur Coach BRVM est souvent le plus simple grâce au Mobile Money.
-                        </div>
                     </div>
 
-                    {{-- Vidéo à droite --}}
+                    {{-- Vidéo --}}
                     <div class="col-md-4 text-md-end text-center">
-                        <video
-                            class="img-fluid rounded shadow-sm"
-                            style="max-width: 260px;"
-                            controls
-                            preload="metadata">
+                        <video class="img-fluid rounded shadow-sm"
+                               style="max-width:260px;"
+                               controls preload="metadata">
                             <source src="{{ asset('previews/brvm-debutant-preview.mp4') }}" type="video/mp4">
-                            Ton navigateur ne supporte pas la lecture vidéo.
                         </video>
                     </div>
 
@@ -108,11 +95,8 @@
             <div class="card-body">
                 <div class="row align-items-start g-3">
 
-                    {{-- Texte --}}
                     <div class="col-md-8">
-                        <h3 class="h4 mb-1">
-                            📈 Niveau Intermédiaire
-                        </h3>
+                        <h3 class="h4 mb-1">📈 Niveau Intermédiaire</h3>
 
                         <p class="text-success fw-semibold mb-2">
                             « BRVM – Stratégies d’investissement intermédiaire »
@@ -134,35 +118,81 @@
                         </p>
 
                         <div class="d-flex flex-wrap gap-2">
-                            {{-- ✅ Achat sur Coach BRVM --}}
-                            <a href="{{ route('courses.index') }}"
-                               class="btn btn-primary">
-                                Acheter la formation sur Coach BRVM (Mobile Money)
+                            <a href="{{ route('courses.index') }}" class="btn btn-primary">
+                                Acheter sur Coach BRVM (Mobile Money)
                             </a>
 
-                            {{-- ✅ Achat sur Udemy --}}
                             <a href="https://www.udemy.com/course/brvm-strategies-dinvestissement-intermediaire/?couponCode=77B14D32720FB58FCF1C"
-                               target="_blank"
-                               rel="noopener noreferrer"
+                               target="_blank" rel="noopener noreferrer"
+                               class="btn btn-success">
+                                Acheter sur Udemy (Carte bancaire)
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4 text-md-end text-center">
+                        <video class="img-fluid rounded shadow-sm"
+                               style="max-width:260px;"
+                               controls preload="metadata">
+                            <source src="{{ asset('previews/brvm-intermediare-preview.mp4') }}" type="video/mp4">
+                        </video>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        {{-- ============================ --}}
+        {{--      BRVM PRATIQUE            --}}
+        {{-- ============================ --}}
+        <div class="card mb-4 shadow-sm border-primary">
+            <div class="card-body">
+                <div class="row align-items-start g-3">
+
+                    <div class="col-md-8">
+                        <h3 class="h4 mb-1">🧰 BRVM Pratique</h3>
+
+                        <p class="text-success fw-semibold mb-2">
+                            « BRVM pratique : outils d’analyse et portefeuille virtuel »
+                        </p>
+
+                        <p class="mb-3">
+                            Un cours orienté action : outils simples, lecture rapide des infos clés,
+                            et surtout simulation via un portefeuille virtuel avant d’investir en réel.
+                        </p>
+
+                        <ul class="mb-3">
+                            <li>✔ Outils d’analyse concrets</li>
+                            <li>✔ Portefeuille virtuel (sans risque)</li>
+                            <li>✔ Démo réelle sur la plateforme Coach-BRVM</li>
+                        </ul>
+
+                        <p class="mb-2 text-muted">
+                            🎬 Ci-contre : <strong>démo / introduction</strong> du cours BRVM pratique.
+                        </p>
+
+                        <div class="d-flex flex-wrap gap-2">
+                            <a href="{{ route('courses.index') }}" class="btn btn-primary">
+                                Acheter sur Coach BRVM (Mobile Money)
+                            </a>
+
+                            <a href="https://www.udemy.com/course/brvm-pratique-outils-danalyse-et-portefeuille-virtuel/?referralCode=187E6FB3DA9B0BF308AE"
+                               target="_blank" rel="noopener noreferrer"
                                class="btn btn-success">
                                 Acheter sur Udemy (Carte bancaire)
                             </a>
                         </div>
 
                         <div class="small text-muted mt-2">
-                            🔒 Accès à vie après achat, quel que soit le canal (Coach BRVM ou Udemy).
+                            💡 Conseil : fais la démo, puis choisis le mode de paiement qui te convient.
                         </div>
                     </div>
 
-                    {{-- Vidéo à droite --}}
                     <div class="col-md-4 text-md-end text-center">
-                        <video
-                            class="img-fluid rounded shadow-sm"
-                            style="max-width: 260px;"
-                            controls
-                            preload="metadata">
-                            <source src="{{ asset('previews/brvm-intermediare-preview.mp4') }}" type="video/mp4">
-                            Ton navigateur ne supporte pas la lecture vidéo.
+                        <video class="img-fluid rounded shadow-sm"
+                               style="max-width:260px;"
+                               controls preload="metadata">
+                            <source src="{{ asset('previews/brvm-pratique-preview.mp4') }}" type="video/mp4">
                         </video>
                     </div>
 
