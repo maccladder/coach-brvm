@@ -35,9 +35,10 @@
 
                 // Covers (public/courses/*.jpg)
                 $covers = [
-                    'brvm-debutant' => asset('courses/brvm-debutant.jpg'),
-                    'brvm-intermediaire' => asset('courses/brvm-intermediaire.jpg'),
-                ];
+    'brvm-debutant' => asset('courses/brvm-debutant.jpg'),
+    'brvm-intermediaire' => asset('courses/brvm-intermediaire.jpg'),
+    'brvm-pratique-outils-analyse-portefeuille-virtuel' => asset('courses/brvm-pratique.jpg'),
+];
 
                 $cover = $covers[$course->slug] ?? asset('courses/brvm-debutant.jpg');
             @endphp
