@@ -28,6 +28,7 @@ use App\Http\Controllers\AdminEmailController;
 use App\Http\Controllers\AdminTopupController;
 use App\Http\Controllers\AdminCourseController;
 use App\Http\Controllers\AdminMarketController;
+use App\Http\Controllers\ChocsMarcheController;
 use App\Http\Controllers\PerformanceController;
 use App\Http\Controllers\AnnouncementController;
 use App\Http\Controllers\CoursePaymentController;
@@ -420,6 +421,11 @@ Route::middleware(['auth'])->group(function () {
     ->name('wallet.sell.recap');
     Route::post('/wallet/sell', [VirtualWalletController::class, 'sell'])->name('wallet.sell');
 });
+
+// route du choc du marché
+
+Route::get('/chocs-marche', [ChocsMarcheController::class, 'index'])->name('chocs.index');
+Route::get('/chocs-marche/{sector}', [ChocsMarcheController::class, 'show'])->name('chocs.show');
 
 // ✅ callback serveur (IPN) + retour utilisateur : PAS auth
 Route::post('/payments/cinetpay/ipn', [PaymentController::class, 'cinetpayIpn'])->name('cinetpay.ipn');

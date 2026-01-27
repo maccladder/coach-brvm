@@ -256,6 +256,25 @@
         </div>
     </section>
 
+    <section class="py-4 border-bottom bg-white">
+  <div class="container" style="max-width:1100px;">
+    <div class="card border-0 shadow-sm">
+      <div class="card-body d-flex flex-wrap justify-content-between align-items-center gap-3">
+        <div>
+          <div class="fw-semibold">⚡ Nouveau : Chocs de marché (par secteur)</div>
+          <div class="text-muted small">
+            Comprends pourquoi une action BRVM peut monter ou chuter subitement, avec des exemples.
+          </div>
+        </div>
+        <a href="{{ route('chocs.index') }}" class="btn btn-outline-dark fw-semibold">
+          Explorer →
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+
     {{-- ✅ ANN0NCES BRVM (NOUVEAU) --}}
     <section class="py-5">
         <div class="container" style="max-width: 1100px;">

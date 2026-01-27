@@ -124,8 +124,14 @@
                                 📢 Annonces
                             </a>
                         </li>
-                        <li><a class="dropdown-item disabled">📅 Calendrier AG (bientôt)</a></li>
-                        <li><a class="dropdown-item disabled">📈 Indices BRVM (bientôt)</a></li>
+
+                        <li>
+  <a class="dropdown-item" href="{{ route('chocs.index') }}">
+      ⚡ Chocs de marché (par secteur)
+  </a>
+</li>
+                        {{-- <li><a class="dropdown-item disabled">📅 Calendrier AG (bientôt)</a></li>
+                        <li><a class="dropdown-item disabled">📈 Indices BRVM (bientôt)</a></li> --}}
                     </ul>
                 </li>
 
