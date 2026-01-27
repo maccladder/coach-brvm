@@ -102,78 +102,79 @@ class AdminController extends Controller
 
 
     public function dailyBocsIndex(Request $request)
-    {
-        $startDate = Carbon::create(2025, 1, 1)->startOfDay();
-        $today     = Carbon::today();
+{
+    $startDate = Carbon::create(2025, 1, 1)->startOfDay();
+    $today     = Carbon::today();
 
-        $holidays = $this->getBrvmHolidays();
+    $holidays = $this->getBrvmHolidays();
 
-        // BOCs déjà en base
-        $bocs = DailyBoc::whereBetween('date_boc', [$startDate, $today])
-            ->get()
-            ->keyBy(fn ($boc) => Carbon::parse($boc->date_boc)->toDateString());
+    $bocs = DailyBoc::whereBetween('date_boc', [$startDate, $today])
+        ->get()
+        ->keyBy(fn ($boc) => Carbon::parse($boc->date_boc)->toDateString());
 
-        // Construire la liste complète des jours ouvrés suivis
-        $daysAll = [];
-        $current = $startDate->copy();
+    $daysAll = [];
+    $current = $startDate->copy();
 
-        while ($current->lte($today)) {
-            $key = $current->toDateString();
+    while ($current->lte($today)) {
+        $key = $current->toDateString();
 
-            // 1️⃣ Sauter samedis / dimanches
-            if ($current->isWeekend()) {
-                $current->addDay();
-                continue;
-            }
-
-            // 2️⃣ Sauter jours fériés BRVM
-            if (in_array($key, $holidays, true)) {
-                $current->addDay();
-                continue;
-            }
-
-            $record  = $bocs->get($key);
-            $isToday = $current->isSameDay($today);
-
-            $daysAll[] = [
-                'date'       => $current->copy(),
-                'record'     => $record,
-                'has_boc'    => (bool) $record,
-                'is_today'   => $isToday,
-                'is_missing' => !$record && !$isToday,
-            ];
-
+        if ($current->isWeekend()) {
             $current->addDay();
+            continue;
         }
 
-        $daysCollection = collect($daysAll);
+        if (in_array($key, $holidays, true)) {
+            $current->addDay();
+            continue;
+        }
 
-        // ✅ Stats sur TOUTE la période (pas seulement la page)
-        $stats = [
-            'total_days' => $daysCollection->count(),
-            'received'   => $daysCollection->where('has_boc', true)->count(),
-            'missing'    => $daysCollection->where('is_missing', true)->count(),
+        $record  = $bocs->get($key);
+        $isToday = $current->isSameDay($today);
+
+        $daysAll[] = [
+            'date'       => $current->copy(),
+            'record'     => $record,
+            'has_boc'    => (bool) $record,
+            'is_today'   => $isToday,
+            'is_missing' => !$record && !$isToday,
         ];
 
-        // ✅ Pagination
-        $perPage = (int) $request->query('per_page', 60); // ajuste 30/50/100 si tu veux
-        $page    = (int) $request->query('page', 1);
-
-        $itemsForCurrentPage = $daysCollection->slice(($page - 1) * $perPage, $perPage)->values();
-
-        $days = new LengthAwarePaginator(
-            $itemsForCurrentPage,
-            $daysCollection->count(),
-            $perPage,
-            $page,
-            [
-                'path'  => $request->url(),
-                'query' => $request->query(), // garde page/per_page dans l’URL
-            ]
-        );
-
-        return view('admin.daily_bocs', compact('days', 'today', 'stats'));
+        $current->addDay();
     }
+
+    // ✅ Tri du plus récent au plus ancien
+    $daysCollection = collect($daysAll)
+        ->sortByDesc(fn ($d) => $d['date']->timestamp)
+        ->values();
+
+    // ✅ Stats sur toute la période
+    $stats = [
+        'total_days' => $daysCollection->count(),
+        'received'   => $daysCollection->where('has_boc', true)->count(),
+        'missing'    => $daysCollection->where('is_missing', true)->count(),
+    ];
+
+    // ✅ Pagination
+    $perPage = (int) $request->query('per_page', 60);
+    $page    = (int) $request->query('page', 1);
+
+    $itemsForCurrentPage = $daysCollection
+        ->slice(($page - 1) * $perPage, $perPage)
+        ->values();
+
+    $days = new LengthAwarePaginator(
+        $itemsForCurrentPage,
+        $daysCollection->count(),
+        $perPage,
+        $page,
+        [
+            'path'  => $request->url(),
+            'query' => $request->query(),
+        ]
+    );
+
+    return view('admin.daily_bocs', compact('days', 'today', 'stats', 'perPage'));
+}
 
     /** 👉 Upload d’une BOC */
     public function dailyBocsStore(Request $request, BrvmBubbleService $bubble)
