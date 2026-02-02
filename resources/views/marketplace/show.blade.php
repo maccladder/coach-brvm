@@ -21,13 +21,13 @@
             <div class="fw-semibold">💼 Tu veux vendre sur la Marketplace ?</div>
             <div class="small opacity-75">
                 Il suffit de contacter :
-                ✉️ <a class="fw-semibold text-decoration-none" href="mailto:ghislainkouadiodjaha@gmail.com">ghislainkouadiodjaha@gmail.com</a>
+                ✉️ <a class="fw-semibold text-decoration-none" href="mailto:coachbrvm@gmail.com">coachbrvm@gmail.com</a>
                 • 📞 Téléphone / WhatsApp : <a class="fw-semibold text-decoration-none" href="tel:+2250788035432">+2250788035432</a>
             </div>
         </div>
         <div class="d-flex gap-2">
             <a class="btn btn-sm btn-dark fw-semibold"
-               href="mailto:ghislainkouadiodjaha@gmail.com?subject=Devenir%20vendeur%20sur%20la%20Marketplace%20Coach%20BRVM">
+               href="mailto:coachbrvm@gmail.com?subject=Devenir%20vendeur%20sur%20la%20Marketplace%20Coach%20BRVM">
                 Envoyer un mail →
             </a>
             <a class="btn btn-sm btn-outline-dark fw-semibold"

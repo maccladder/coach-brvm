@@ -154,11 +154,11 @@
 
         if (t === 'book') {
             fileLabel.textContent = 'PDF du livre *';
-            fileHelp.textContent  = 'Upload obligatoire : PDF (max 50MB).';
+            fileHelp.textContent  = 'Upload obligatoire : PDF (max 400MB).';
             fileInput.setAttribute('accept', 'application/pdf,.pdf');
         } else if (t === 'software') {
             fileLabel.textContent = 'Fichier logiciel (ZIP/RAR) *';
-            fileHelp.textContent  = 'Upload obligatoire : ZIP ou RAR (max 100MB).';
+            fileHelp.textContent  = 'Upload obligatoire : ZIP ou RAR (max 400MB).';
             fileInput.setAttribute('accept', '.zip,.rar,application/zip,application/x-zip-compressed,application/x-rar-compressed');
         } else {
             fileLabel.textContent = 'Fichier produit';
