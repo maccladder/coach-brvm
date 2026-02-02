@@ -62,7 +62,7 @@ class MarketplaceProductAdminController extends Controller
             'cover'       => ['nullable', 'image', 'max:4096'],
 
             // fichier produit (PDF/ZIP/RAR) - conditionné ensuite
-            'file'        => ['nullable', 'file', 'max:102400'], // 100MB max (ajuste)
+            'file'        => ['nullable', 'file', 'max:409600'], // 100MB max (ajuste)
         ], [], [
             'file' => 'fichier produit',
             'cover' => 'image de couverture',
@@ -77,7 +77,7 @@ class MarketplaceProductAdminController extends Controller
 
         if ($data['type'] === 'software') {
             $request->validate([
-                'file' => ['required', 'file', 'mimes:zip,rar', 'max:102400'], // 100MB
+                'file' => ['required', 'file', 'mimes:zip,rar', 'max:409600'], // 100MB
             ], [], ['file' => 'archive du logiciel']);
         }
 
