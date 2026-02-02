@@ -132,11 +132,10 @@
 
                             {{-- Badge déjà acheté --}}
                             @if($isOwnedCard)
-                                <span class="badge rounded-pill text-bg-success position-absolute"
-                                      style="top:10px; left:10px; z-index:5;">
-                                    <i class="bi bi-check2-circle"></i> Déjà acheté
-                                </span>
-                            @endif
+    <span class="badge text-bg-success market-badge-owned">
+        <i class="bi bi-check2-circle me-1"></i> Déjà acheté
+    </span>
+@endif
                         </div>
 
                         <div class="card-body d-flex flex-column">

@@ -59,11 +59,11 @@
 
                     {{-- Badge acheté --}}
                     @if(!empty($isOwned) && $isOwned)
-                        <span class="badge rounded-pill text-bg-success position-absolute"
-                              style="top:12px; left:12px; z-index:5;">
-                            <i class="bi bi-check2-circle"></i> Déjà acheté
-                        </span>
-                    @endif
+    <span class="badge text-bg-success market-badge-owned">
+        <i class="bi bi-check2-circle me-1"></i> Déjà acheté
+    </span>
+@endif
+
                 </div>
             </div>
 
