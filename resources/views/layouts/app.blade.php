@@ -47,30 +47,40 @@
         /* ===================================================== */
         /* ✅ Marketplace badge "Déjà acheté" (fix taille/position) */
         /* ===================================================== */
-        .market-badge-owned{
-            position:absolute;
-            top:12px;
-            left:12px;
-            z-index:20;
 
-            padding:.30rem .55rem;
-            font-size:.78rem;
-            font-weight:600;
-            line-height:1;
-            border-radius:999px;
+.market-badge-owned{
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    z-index: 30;
 
-            backdrop-filter: blur(6px);
-            box-shadow: 0 6px 16px rgba(0,0,0,.15);
-        }
+    display: inline-flex;
+    align-items: center;
+    gap: .35rem;
 
-        @media (max-width: 576px){
-            .market-badge-owned{
-                top:10px;
-                left:10px;
-                font-size:.72rem;
-                padding:.28rem .50rem;
-            }
-        }
+    padding: .35rem .65rem;
+    font-size: .80rem;
+    font-weight: 700;
+    line-height: 1;
+
+    border-radius: 999px;
+    white-space: nowrap;
+
+    color: #fff;
+    background: rgba(25,135,84,.95); /* success */
+    box-shadow: 0 10px 24px rgba(0,0,0,.18);
+    backdrop-filter: blur(6px);
+}
+
+@media (max-width: 576px){
+    .market-badge-owned{
+        top: 10px;
+        left: 10px;
+        font-size: .75rem;
+        padding: .32rem .55rem;
+    }
+}
+
     </style>
 
     {{-- Styles spécifiques pages --}}

@@ -115,28 +115,34 @@
                     <div class="card border-0 shadow-sm h-100">
 
                         {{-- ✅ Cover (fix gap) --}}
-                        <div class="ratio ratio-16x9 bg-light rounded-top overflow-hidden position-relative">
-                            @if($p->cover_image_path)
-                                <img src="{{ asset('storage/'.$p->cover_image_path) }}"
-                                     alt="{{ $p->title }}"
-                                     class="w-100 h-100 d-block"
-                                     style="object-fit:cover; object-position:center;">
-                            @else
-                                <div class="w-100 h-100 d-flex align-items-center justify-content-center text-muted">
-                                    <div class="text-center">
-                                        <div style="font-size:28px;">📦</div>
-                                        <div class="small">Aucune cover</div>
-                                    </div>
-                                </div>
-                            @endif
+                        <div class="rounded-top overflow-hidden bg-light">
+    <div class="position-relative">
 
-                            {{-- Badge déjà acheté --}}
-                            @if($isOwnedCard)
-    <span class="badge text-bg-success market-badge-owned">
-        <i class="bi bi-check2-circle me-1"></i> Déjà acheté
-    </span>
-@endif
-                        </div>
+        @if($isOwnedCard)
+            <span class="market-badge-owned">
+                <i class="bi bi-check2-circle"></i> Déjà acheté
+            </span>
+        @endif
+
+        <div class="ratio ratio-16x9 bg-light">
+            @if($p->cover_image_path)
+                <img src="{{ asset('storage/'.$p->cover_image_path) }}"
+                     alt="{{ $p->title }}"
+                     class="w-100 h-100 d-block"
+                     style="object-fit:cover; object-position:center;">
+            @else
+                <div class="w-100 h-100 d-flex align-items-center justify-content-center text-muted">
+                    <div class="text-center">
+                        <div style="font-size:28px;">📦</div>
+                        <div class="small">Aucune cover</div>
+                    </div>
+                </div>
+            @endif
+        </div>
+
+    </div>
+</div>
+
 
                         <div class="card-body d-flex flex-column">
                             {{-- Badges --}}

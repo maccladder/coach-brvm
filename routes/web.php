@@ -495,18 +495,22 @@ Route::middleware(['auth'])->group(function () {
 });
 
 // Marketplace payment (auth pour buy)
-Route::middleware('auth')->group(function () {
-    Route::post('/marketplace/{product}/buy', [\App\Http\Controllers\MarketplacePaymentController::class, 'buy'])
-        ->name('marketplace.buy');
 
-    // ✅ return spécifique marketplace (GET/POST)
-    Route::match(['GET','POST'], '/marketplace/payment/cinetpay/return', [\App\Http\Controllers\MarketplacePaymentController::class, 'return'])
-        ->name('cinetpay.return.marketplace');
-});
+
+// ✅ return spécifique marketplace (PUBLIC, GET/POST)
+Route::match(['GET','POST'], '/marketplace/payment/cinetpay/return', [\App\Http\Controllers\MarketplacePaymentController::class, 'return'])
+    ->name('cinetpay.return.marketplace');
 
 // ✅ notify spécifique marketplace (POST, sans auth)
 Route::post('/marketplace/payment/cinetpay/notify', [\App\Http\Controllers\MarketplacePaymentController::class, 'notify'])
     ->name('cinetpay.notify.marketplace');
+
+// buy reste protégé (normal)
+Route::middleware('auth')->group(function () {
+    Route::post('/marketplace/{product}/buy', [\App\Http\Controllers\MarketplacePaymentController::class, 'buy'])
+        ->name('marketplace.buy');
+});
+
 
 
 

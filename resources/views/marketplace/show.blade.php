@@ -42,29 +42,34 @@
 
             {{-- ✅ Cover (fix gap) --}}
             <div class="col-lg-5 bg-light">
-                <div class="ratio ratio-4x3 bg-light position-relative">
-                    @if($product->cover_image_path)
-                        <img src="{{ asset('storage/'.$product->cover_image_path) }}"
-                             alt="{{ $product->title }}"
-                             class="w-100 h-100 d-block"
-                             style="object-fit:cover; object-position:center;">
-                    @else
-                        <div class="w-100 h-100 d-flex align-items-center justify-content-center text-muted">
-                            <div class="text-center">
-                                <div style="font-size:38px;">📦</div>
-                                <div class="small">Aucune cover</div>
-                            </div>
-                        </div>
-                    @endif
+                <div class="bg-light">
+    <div class="position-relative">
 
-                    {{-- Badge acheté --}}
-                    @if(!empty($isOwned) && $isOwned)
-    <span class="badge text-bg-success market-badge-owned">
-        <i class="bi bi-check2-circle me-1"></i> Déjà acheté
-    </span>
-@endif
+        @if(!empty($isOwned) && $isOwned)
+            <span class="market-badge-owned">
+                <i class="bi bi-check2-circle"></i> Déjà acheté
+            </span>
+        @endif
 
+        <div class="ratio ratio-4x3 bg-light">
+            @if($product->cover_image_path)
+                <img src="{{ asset('storage/'.$product->cover_image_path) }}"
+                     alt="{{ $product->title }}"
+                     class="w-100 h-100 d-block"
+                     style="object-fit:cover; object-position:center;">
+            @else
+                <div class="w-100 h-100 d-flex align-items-center justify-content-center text-muted">
+                    <div class="text-center">
+                        <div style="font-size:38px;">📦</div>
+                        <div class="small">Aucune cover</div>
+                    </div>
                 </div>
+            @endif
+        </div>
+
+    </div>
+</div>
+
             </div>
 
             {{-- Infos --}}

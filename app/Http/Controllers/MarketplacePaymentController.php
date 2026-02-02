@@ -70,7 +70,7 @@ class MarketplacePaymentController extends Controller
             'amount'         => (int) $product->price,
             'description'    => "Achat Marketplace: {$product->title}",
             'notify_url'     => route('cinetpay.notify.marketplace'),
-            'return_url'     => route('cinetpay.return.marketplace'),
+            'return_url' => route('cinetpay.return.marketplace', ['transaction_id' => $transactionId]),
             'customer_name'  => $user->name ?? 'Client',
             'customer_email' => $user->email ?? null,
 
@@ -158,12 +158,52 @@ class MarketplacePaymentController extends Controller
         return response()->json(['ok' => true, 'pending' => true]);
     }
 
-    public function return(Request $request)
-    {
-        // Ici on ne “valide” pas à la confiance: c’est l’IPN qui valide.
-        // Mais on peut afficher un message propre.
+   public function return(Request $request)
+{
+    $transactionId = $request->input('transaction_id')
+        ?? $request->input('cpm_trans_id')
+        ?? $request->input('cpm_transaction_id');
+
+    if (!$transactionId) {
         return redirect()
-            ->route('my.products')
-            ->with('success', "✅ Retour paiement reçu. Si le paiement est validé, ton produit est débloqué.");
+            ->route('marketplace.index')
+            ->with('error', "❌ Retour paiement reçu, mais transaction introuvable.");
     }
+
+    // On essaye de retrouver le produit via Payment.meta
+    $payment = Payment::where('transaction_id', $transactionId)->first();
+
+    $productId = data_get($payment?->meta, 'product_id');
+    $productSlug = data_get($payment?->meta, 'product_slug');
+
+    // Si l'IPN n'est pas encore passé, on peut faire un check rapide ici (optionnel mais pratique)
+    $purchase = DB::table('marketplace_purchases')->where('provider_ref', $transactionId)->first();
+
+    if ($purchase && $purchase->status !== 'paid') {
+        $status = $this->cinetpay->checkPayment($transactionId);
+
+        if (in_array($status, ['ACCEPTED', 'PAID', 'SUCCESS'], true)) {
+            DB::table('marketplace_purchases')
+                ->where('provider_ref', $transactionId)
+                ->update(['status' => 'paid', 'paid_at' => now(), 'updated_at' => now()]);
+
+            Payment::where('transaction_id', $transactionId)->update([
+                'status'      => 'paid',
+                'credited_at' => now(),
+            ]);
+        }
+    }
+
+    // Redirection finale
+    if ($productSlug) {
+        return redirect()
+            ->route('marketplace.show', $productSlug)
+            ->with('success', "✅ Paiement reçu. Si validé, le produit est débloqué.");
+    }
+
+    return redirect()
+        ->route('my.products')
+        ->with('success', "✅ Paiement reçu. Si validé, ton produit est débloqué.");
+}
+
 }
