@@ -43,6 +43,34 @@
         }
 
         .nav-link { font-weight: 500; }
+
+        /* ===================================================== */
+        /* ✅ Marketplace badge "Déjà acheté" (fix taille/position) */
+        /* ===================================================== */
+        .market-badge-owned{
+            position:absolute;
+            top:12px;
+            left:12px;
+            z-index:20;
+
+            padding:.30rem .55rem;
+            font-size:.78rem;
+            font-weight:600;
+            line-height:1;
+            border-radius:999px;
+
+            backdrop-filter: blur(6px);
+            box-shadow: 0 6px 16px rgba(0,0,0,.15);
+        }
+
+        @media (max-width: 576px){
+            .market-badge-owned{
+                top:10px;
+                left:10px;
+                font-size:.72rem;
+                padding:.28rem .50rem;
+            }
+        }
     </style>
 
     {{-- Styles spécifiques pages --}}
@@ -243,7 +271,7 @@
                             </a>
                         </li>
 
-                        {{-- ✅ Marketplace dans aide aussi (optionnel mais pratique) --}}
+                        {{-- ✅ Marketplace dans aide aussi --}}
                         <li>
                             <a class="dropdown-item" href="{{ route('marketplace.index') }}">
                                 🛍️ Marketplace
@@ -280,14 +308,12 @@
                                 </a>
                             </li>
 
-                            {{-- ✅ AJOUT : Marketplace --}}
                             <li>
                                 <a class="dropdown-item" href="{{ route('marketplace.index') }}">
                                     🛍️ Marketplace
                                 </a>
                             </li>
 
-                            {{-- ✅ AJOUT : Mes produits --}}
                             <li>
                                 <a class="dropdown-item" href="{{ route('my.products') }}">
                                     🧾 Mes produits
