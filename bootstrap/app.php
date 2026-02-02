@@ -28,6 +28,10 @@ return Application::configure(basePath: dirname(__DIR__))
     'payments/cinetpay/ipn',
     'payments/cinetpay/return',
 
+     // ✅ Marketplace (NOUVEAU)
+    'marketplace/payment/cinetpay/notify',
+    'marketplace/payment/cinetpay/return',
+
     // ✅ Cours (NOUVEAU)
     'paiement/cinetpay/ipn',     // POST IPN cours
     'payment/cinetpay/return',   // GET/POST return cours

@@ -13,6 +13,7 @@
                         <span class="badge rounded-pill bg-dark-subtle text-dark fw-semibold">Plateforme BRVM</span>
                         <span class="badge rounded-pill bg-primary-subtle text-primary fw-semibold">Outils + Data</span>
                         <span class="badge rounded-pill bg-success-subtle text-success fw-semibold">Formation + Simulation</span>
+                        <span class="badge rounded-pill bg-warning-subtle text-warning fw-semibold">Marketplace</span>
                     </div>
 
                     <h1 class="fw-bold mb-3" style="font-size: 2.4rem;">
@@ -23,12 +24,17 @@
                         Coach BRVM n’est pas seulement une IA qui lit les BOC.
                         C’est une plateforme qui regroupe <strong>toutes les infos utiles BRVM</strong> :
                         annonces, radar marché, annuaires sociétés/SGI, <strong>formations</strong>,
-                        et maintenant un <strong>portefeuille virtuel</strong> pour s’entraîner (sans risque).
+                        un <strong>portefeuille virtuel</strong> pour s’entraîner (sans risque),
+                        et maintenant une <strong>Marketplace</strong> pour acheter (et bientôt vendre) des contenus.
                     </p>
 
                     <div class="d-flex flex-wrap gap-2 mb-3">
                         <a href="{{ route('radar.index') }}" class="btn btn-dark btn-lg">
                             📡 Explorer le marché
+                        </a>
+
+                        <a href="{{ route('marketplace.index') }}" class="btn btn-warning btn-lg">
+                            🛍️ Ouvrir la Marketplace
                         </a>
 
                         <a href="{{ route('formations.brvm') }}" class="btn btn-outline-success btn-lg">
@@ -44,6 +50,27 @@
                                 💼 Portefeuille virtuel (se connecter)
                             </a>
                         @endauth
+                    </div>
+
+                    {{-- ✅ NOUVEAU : MARKETPLACE --}}
+                    <div class="alert alert-warning border-0 shadow-sm d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+                        <div>
+                            <div class="fw-semibold">🛍️ Nouveau : Marketplace Coach BRVM</div>
+                            <div class="small opacity-75">
+                                Achète des <strong>livres (PDF)</strong>, <strong>vidéos</strong> et <strong>logiciels</strong> en quelques secondes.
+                                <span class="d-block">Paiement sécurisé par <strong>Mobile Money via CinetPay</strong>.</span>
+                            </div>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <a href="{{ route('marketplace.index') }}" class="btn btn-sm btn-dark fw-semibold">
+                                Découvrir →
+                            </a>
+                            @auth
+                                <a href="{{ route('my.products') }}" class="btn btn-sm btn-outline-dark fw-semibold">
+                                    Mes achats
+                                </a>
+                            @endauth
+                        </div>
                     </div>
 
                     {{-- ✅ NOUVEAU : MINI-COURS EN LIVRE --}}
@@ -62,7 +89,8 @@
                     <div class="text-muted small">
                         <span class="me-3">✅ Infos & outils BRVM au même endroit</span>
                         <span class="me-3">✅ Formations pour monter en niveau</span>
-                        <span>✅ Simulation via portefeuille virtuel</span>
+                        <span class="me-3">✅ Simulation via portefeuille virtuel</span>
+                        <span>✅ Achats instantanés via Marketplace</span>
                     </div>
                 </div>
 
@@ -95,6 +123,15 @@
                                         <div class="text-muted small">Mini-cours rapides en mode “livre”</div>
                                     </div>
                                     <span class="badge bg-light text-dark border">Gratuit</span>
+                                </div>
+
+                                {{-- ✅ NOUVEAU : MARKETPLACE --}}
+                                <div class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                    <div>
+                                        <div class="fw-semibold">🛍️ Marketplace</div>
+                                        <div class="text-muted small">PDF, vidéos, logiciels (achat instantané)</div>
+                                    </div>
+                                    <span class="badge bg-warning-subtle text-warning border">Nouveau</span>
                                 </div>
 
                                 <div class="list-group-item d-flex justify-content-between align-items-center px-0">
@@ -166,6 +203,10 @@
                         <a href="{{ route('client-financials.create') }}" class="btn btn-outline-secondary btn-lg">
                             📊 Analyser un état financier
                         </a>
+
+                        <a href="{{ route('marketplace.index') }}" class="btn btn-outline-dark btn-lg">
+                            🛍️ Marketplace
+                        </a>
                     </div>
 
                     <div class="text-muted small">
@@ -236,6 +277,26 @@
         </div>
     </section>
 
+    {{-- ✅ CALLOUT : Marketplace --}}
+    <section class="py-4 border-bottom bg-white">
+        <div class="container" style="max-width:1100px;">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body d-flex flex-wrap justify-content-between align-items-center gap-3">
+                    <div>
+                        <div class="fw-semibold">🛍️ Nouveau : Marketplace Coach BRVM</div>
+                        <div class="text-muted small">
+                            PDF, vidéos, logiciels – achat instantané. Accès débloqué dès confirmation CinetPay.
+                        </div>
+                    </div>
+
+                    <a href="{{ route('marketplace.index') }}" class="btn btn-warning fw-semibold">
+                        Ouvrir la Marketplace
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
     {{-- ✅ CALLOUT : Radar Marché gratuit --}}
     <section class="py-4 border-bottom bg-white">
         <div class="container" style="max-width:1100px;">
@@ -257,25 +318,24 @@
     </section>
 
     <section class="py-4 border-bottom bg-white">
-  <div class="container" style="max-width:1100px;">
-    <div class="card border-0 shadow-sm">
-      <div class="card-body d-flex flex-wrap justify-content-between align-items-center gap-3">
-        <div>
-          <div class="fw-semibold">⚡ Nouveau : Chocs de marché (par secteur)</div>
-          <div class="text-muted small">
-            Comprends pourquoi une action BRVM peut monter ou chuter subitement, avec des exemples.
-          </div>
+        <div class="container" style="max-width:1100px;">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body d-flex flex-wrap justify-content-between align-items-center gap-3">
+                    <div>
+                        <div class="fw-semibold">⚡ Nouveau : Chocs de marché (par secteur)</div>
+                        <div class="text-muted small">
+                            Comprends pourquoi une action BRVM peut monter ou chuter subitement, avec des exemples.
+                        </div>
+                    </div>
+                    <a href="{{ route('chocs.index') }}" class="btn btn-outline-dark fw-semibold">
+                        Explorer →
+                    </a>
+                </div>
+            </div>
         </div>
-        <a href="{{ route('chocs.index') }}" class="btn btn-outline-dark fw-semibold">
-          Explorer →
-        </a>
-      </div>
-    </div>
-  </div>
-</section>
+    </section>
 
-
-    {{-- ✅ ANN0NCES BRVM (NOUVEAU) --}}
+    {{-- ✅ ANNONCES BRVM --}}
     <section class="py-5">
         <div class="container" style="max-width: 1100px;">
             <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
@@ -394,6 +454,18 @@
                     </div>
                 </div>
             </div>
+
+            {{-- Mini bandeau marketplace (rappel) --}}
+            <div class="mt-4">
+                <div class="alert alert-warning border-0 shadow-sm d-flex flex-wrap justify-content-between align-items-center gap-2 mb-0">
+                    <div class="fw-semibold">
+                        🛍️ Astuce : récupère tes PDF/vidéos/logiciels directement dans la Marketplace après paiement.
+                    </div>
+                    <a href="{{ route('marketplace.index') }}" class="btn btn-sm btn-dark fw-semibold">
+                        Voir la Marketplace →
+                    </a>
+                </div>
+            </div>
         </div>
     </section>
 
@@ -463,6 +535,23 @@
                     </div>
                 </div>
             </div>
+
+            {{-- CTA Marketplace --}}
+            <div class="mt-4">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body d-flex flex-wrap justify-content-between align-items-center gap-3">
+                        <div>
+                            <div class="fw-semibold">🛍️ Contenus premium & outils</div>
+                            <div class="text-muted small">
+                                Retrouve des livres PDF, vidéos et logiciels utiles pour progresser sur la BRVM.
+                            </div>
+                        </div>
+                        <a href="{{ route('marketplace.index') }}" class="btn btn-warning fw-semibold">
+                            Découvrir la Marketplace
+                        </a>
+                    </div>
+                </div>
+            </div>
         </div>
     </section>
 
@@ -482,9 +571,14 @@
                         <li>Adaptés aux débutants comme à ceux qui veulent aller plus loin</li>
                     </ul>
 
-                    <a href="{{ route('formations.brvm') }}" class="btn btn-success">
-                        🎓 Voir les formations BRVM
-                    </a>
+                    <div class="d-flex flex-wrap gap-2">
+                        <a href="{{ route('formations.brvm') }}" class="btn btn-success">
+                            🎓 Voir les formations BRVM
+                        </a>
+                        <a href="{{ route('marketplace.index') }}" class="btn btn-outline-dark">
+                            🛍️ Marketplace
+                        </a>
+                    </div>
                 </div>
 
                 <div class="col-lg-6">
@@ -508,65 +602,65 @@
         </div>
     </section>
 
-   {{-- FOOTER --}}
-<footer class="py-4 border-top bg-white">
-    <div class="container" style="max-width: 1100px;">
-        <div class="row g-3 align-items-center">
+    {{-- FOOTER --}}
+    <footer class="py-4 border-top bg-white">
+        <div class="container" style="max-width: 1100px;">
+            <div class="row g-3 align-items-center">
 
-            {{-- Left --}}
-            <div class="col-lg-5">
-                <div class="small text-muted">
-                    © {{ date('Y') }} Coach BRVM – Une solution de CHENGGONG SARL.
+                {{-- Left --}}
+                <div class="col-lg-5">
+                    <div class="small text-muted">
+                        © {{ date('Y') }} Coach BRVM – Une solution de CHENGGONG SARL.
+                    </div>
+
+                    <div class="mt-2 small text-muted">
+                        <span class="me-2">Suivre Coach BRVM :</span>
+
+                        <a href="https://t.me/coachbrvm" target="_blank" rel="noopener"
+                           class="text-decoration-none text-muted me-3">
+                            <i class="bi bi-telegram"></i> Telegram
+                        </a>
+
+                        <a href="https://x.com/coachbrvm?s=21" target="_blank" rel="noopener"
+                           class="text-decoration-none text-muted me-3">
+                            <i class="bi bi-twitter-x"></i> X
+                        </a>
+
+                        <a href="https://youtube.com/@coachbrvm?si=gW0gTPH_CP4p41ZP" target="_blank" rel="noopener"
+                           class="text-decoration-none text-muted me-3">
+                            <i class="bi bi-youtube"></i> YouTube
+                        </a>
+
+                        <a href="https://www.linkedin.com/company/coach-brvm/" target="_blank" rel="noopener"
+                           class="text-decoration-none text-muted me-3">
+                            <i class="bi bi-linkedin"></i> LinkedIn
+                        </a>
+
+                        <a href="https://chat.whatsapp.com/JOz4th9OnLnJSFcABUFHPI" target="_blank" rel="noopener"
+                           class="text-decoration-none text-muted me-3">
+                            <i class="bi bi-whatsapp"></i> WhatsApp
+                        </a>
+
+                        <a href="https://www.facebook.com/share/17q4KouHax/" target="_blank" rel="noopener"
+                           class="text-decoration-none text-muted">
+                            <i class="bi bi-facebook"></i> Facebook
+                        </a>
+                    </div>
                 </div>
 
-                <div class="mt-2 small text-muted">
-                    <span class="me-2">Suivre Coach BRVM :</span>
-
-                    <a href="https://t.me/coachbrvm" target="_blank" rel="noopener"
-                       class="text-decoration-none text-muted me-3">
-                        <i class="bi bi-telegram"></i> Telegram
-                    </a>
-
-                    <a href="https://x.com/coachbrvm?s=21" target="_blank" rel="noopener"
-                       class="text-decoration-none text-muted me-3">
-                        <i class="bi bi-twitter-x"></i> X
-                    </a>
-
-                    <a href="https://youtube.com/@coachbrvm?si=gW0gTPH_CP4p41ZP" target="_blank" rel="noopener"
-                       class="text-decoration-none text-muted me-3">
-                        <i class="bi bi-youtube"></i> YouTube
-                    </a>
-
-                    <a href="https://www.linkedin.com/company/coach-brvm/" target="_blank" rel="noopener"
-                       class="text-decoration-none text-muted me-3">
-                        <i class="bi bi-linkedin"></i> LinkedIn
-                    </a>
-
-                    <a href="https://chat.whatsapp.com/JOz4th9OnLnJSFcABUFHPI" target="_blank" rel="noopener"
-                       class="text-decoration-none text-muted me-3">
-                        <i class="bi bi-whatsapp"></i> WhatsApp
-                    </a>
-
-                    <a href="https://www.facebook.com/share/17q4KouHax/" target="_blank" rel="noopener"
-                       class="text-decoration-none text-muted">
-                        <i class="bi bi-facebook"></i> Facebook
-                    </a>
+                {{-- Right --}}
+                <div class="col-lg-7">
+                    <div class="small text-muted d-flex flex-wrap justify-content-lg-end gap-3">
+                        <a href="{{ route('notre.histoire') }}" class="text-decoration-none text-muted">Notre histoire</a>
+                        <a href="{{ route('conditions') }}" class="text-decoration-none text-muted">Conditions d’utilisation</a>
+                        <a href="{{ route('confidentialite') }}" class="text-decoration-none text-muted">Confidentialité</a>
+                        <a href="{{ route('contact') }}" class="text-decoration-none text-muted">Contact</a>
+                    </div>
                 </div>
+
             </div>
-
-            {{-- Right --}}
-            <div class="col-lg-7">
-                <div class="small text-muted d-flex flex-wrap justify-content-lg-end gap-3">
-                    <a href="{{ route('notre.histoire') }}" class="text-decoration-none text-muted">Notre histoire</a>
-                    <a href="{{ route('conditions') }}" class="text-decoration-none text-muted">Conditions d’utilisation</a>
-                    <a href="{{ route('confidentialite') }}" class="text-decoration-none text-muted">Confidentialité</a>
-                    <a href="{{ route('contact') }}" class="text-decoration-none text-muted">Contact</a>
-                </div>
-            </div>
-
         </div>
-    </div>
-</footer>
+    </footer>
 
 </div>
 @endsection

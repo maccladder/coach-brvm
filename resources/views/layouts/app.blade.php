@@ -13,8 +13,8 @@
     {{-- Bootstrap 5 --}}
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 
-    {{-- ✅ Bootstrap Icons (AJOUT ICI) --}}
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    {{-- ✅ Bootstrap Icons --}}
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
     {{-- Style global léger --}}
     <style>
@@ -126,12 +126,21 @@
                         </li>
 
                         <li>
-  <a class="dropdown-item" href="{{ route('chocs.index') }}">
-      ⚡ Chocs de marché (par secteur)
-  </a>
-</li>
-                        {{-- <li><a class="dropdown-item disabled">📅 Calendrier AG (bientôt)</a></li>
-                        <li><a class="dropdown-item disabled">📈 Indices BRVM (bientôt)</a></li> --}}
+                            <a class="dropdown-item" href="{{ route('chocs.index') }}">
+                                ⚡ Chocs de marché (par secteur)
+                            </a>
+                        </li>
+
+                        <li><hr class="dropdown-divider"></li>
+
+                        {{-- ✅ NOUVEAU : Marketplace --}}
+                        <li>
+                            <a class="dropdown-item d-flex justify-content-between align-items-center"
+                               href="{{ route('marketplace.index') }}">
+                                <span>🛍️ Marketplace</span>
+                                <span class="badge rounded-pill text-bg-warning">Nouveau</span>
+                            </a>
+                        </li>
                     </ul>
                 </li>
 
@@ -184,6 +193,17 @@
                         </li>
 
                         <li><hr class="dropdown-divider"></li>
+
+                        {{-- ✅ Marketplace aussi ici (logique: contenus payants) --}}
+                        <li>
+                            <a class="dropdown-item d-flex justify-content-between align-items-center"
+                               href="{{ route('marketplace.index') }}">
+                                <span>🛍️ Marketplace</span>
+                                <span class="badge rounded-pill text-bg-warning">Nouveau</span>
+                            </a>
+                        </li>
+
+                        <li><hr class="dropdown-divider"></li>
                         <li><a class="dropdown-item disabled">🧠 Parcours guidé (bientôt)</a></li>
                     </ul>
                 </li>
@@ -217,10 +237,16 @@
                             </a>
                         </li>
 
-                        {{-- Optionnel : lien livres aussi dans Aide --}}
                         <li>
                             <a class="dropdown-item" href="{{ route('books.index') }}">
                                 📚 Mini-cours en livre (gratuit)
+                            </a>
+                        </li>
+
+                        {{-- ✅ Marketplace dans aide aussi (optionnel mais pratique) --}}
+                        <li>
+                            <a class="dropdown-item" href="{{ route('marketplace.index') }}">
+                                🛍️ Marketplace
                             </a>
                         </li>
                     </ul>
@@ -251,6 +277,20 @@
                             <li>
                                 <a class="dropdown-item" href="{{ route('courses.my') }}">
                                     🎓 Mes cours
+                                </a>
+                            </li>
+
+                            {{-- ✅ AJOUT : Marketplace --}}
+                            <li>
+                                <a class="dropdown-item" href="{{ route('marketplace.index') }}">
+                                    🛍️ Marketplace
+                                </a>
+                            </li>
+
+                            {{-- ✅ AJOUT : Mes produits --}}
+                            <li>
+                                <a class="dropdown-item" href="{{ route('my.products') }}">
+                                    🧾 Mes produits
                                 </a>
                             </li>
 

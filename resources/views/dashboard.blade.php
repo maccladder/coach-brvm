@@ -1,9 +1,10 @@
-{{-- resources/views/dashboard.blade.php (ou ta vue "Mon espace") --}}
+{{-- resources/views/dashboard.blade.php --}}
 @extends('layouts.app')
 
 @section('content')
 <div class="container py-4" style="max-width:1100px;">
 
+    {{-- En-tête --}}
     <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
         <div>
             <h3 class="fw-bold mb-0">Mon espace</h3>
@@ -17,14 +18,19 @@
                 ← Retour accueil
             </a>
 
-            {{-- <form method="POST" action="{{ route('logout') }}" class="m-0">
+            {{--
+            <form method="POST" action="{{ route('logout') }}" class="m-0">
                 @csrf
                 <button class="btn btn-outline-danger btn-sm">Déconnexion</button>
-            </form> --}}
+            </form>
+            --}}
         </div>
     </div>
 
+    {{-- Cartes --}}
     <div class="row g-3">
+
+        {{-- 🎓 Mes cours --}}
         <div class="col-md-4">
             <div class="card border-0 shadow-sm h-100">
                 <div class="card-body">
@@ -33,12 +39,28 @@
                         Accès à tes formations payées.
                     </div>
                     <a href="{{ route('courses.my') }}" class="btn btn-primary btn-sm">
-    Ouvrir
-</a>
+                        Ouvrir
+                    </a>
                 </div>
             </div>
         </div>
 
+        {{-- 🧾 Mes produits --}}
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="fw-semibold mb-1">🧾 Mes produits</div>
+                    <div class="text-muted small mb-3">
+                        Livres PDF, logiciels et contenus achetés.
+                    </div>
+                    <a href="{{ route('my.products') }}" class="btn btn-primary btn-sm">
+                        Ouvrir
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        {{-- 💼 Mon portefeuille --}}
         <div class="col-md-4">
             <div class="card border-0 shadow-sm h-100">
                 <div class="card-body">
@@ -46,8 +68,6 @@
                     <div class="text-muted small mb-3">
                         Solde virtuel + historique.
                     </div>
-
-                    {{-- ✅ Lien portefeuille --}}
                     <a href="{{ route('wallet.index') }}" class="btn btn-primary btn-sm">
                         Ouvrir
                     </a>
@@ -55,6 +75,7 @@
             </div>
         </div>
 
+        {{-- 📄 Mes analyses --}}
         <div class="col-md-4">
             <div class="card border-0 shadow-sm h-100">
                 <div class="card-body">
@@ -62,10 +83,13 @@
                     <div class="text-muted small mb-3">
                         BOC & états financiers commandés.
                     </div>
-                    <a href="#" class="btn btn-primary btn-sm disabled">Ouvrir (bientôt)</a>
+                    <a href="#" class="btn btn-primary btn-sm disabled">
+                        Ouvrir (bientôt)
+                    </a>
                 </div>
             </div>
         </div>
+
     </div>
 
 </div>

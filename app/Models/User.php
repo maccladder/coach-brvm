@@ -55,6 +55,18 @@ public function courses()
         ->withTimestamps();
 }
 
+public function marketplacePurchases()
+{
+    return $this->hasMany(\App\Models\MarketplacePurchase::class);
+}
+
+public function purchasedProducts()
+{
+    return $this->belongsToMany(\App\Models\MarketplaceProduct::class, 'marketplace_purchases', 'user_id', 'product_id')
+        ->withPivot(['status','paid_at','amount','provider','provider_ref'])
+        ->withTimestamps();
+}
+
     /**
      * The attributes that should be hidden for serialization.
      *

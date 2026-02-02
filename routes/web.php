@@ -29,6 +29,7 @@ use App\Http\Controllers\AdminTopupController;
 use App\Http\Controllers\AdminCourseController;
 use App\Http\Controllers\AdminMarketController;
 use App\Http\Controllers\ChocsMarcheController;
+use App\Http\Controllers\MarketplaceController;
 use App\Http\Controllers\PerformanceController;
 use App\Http\Controllers\AnnouncementController;
 use App\Http\Controllers\CoursePaymentController;
@@ -39,6 +40,9 @@ use App\Http\Controllers\AdminPerformanceController;
 use App\Http\Controllers\AdminAnnouncementController;
 use App\Http\Controllers\AdminVirtualWalletController;
 use App\Http\Controllers\AdminFinancialReportController;
+use App\Http\Controllers\MarketplaceMyProductsController;
+use App\Http\Controllers\MarketplaceProductAdminController;
+use App\Http\Controllers\MarketplaceCategoryAdminController;
 
 /*
 |--------------------------------------------------------------------------
@@ -65,6 +69,10 @@ Route::get('/auth/google/callback', [GoogleController::class, 'callback'])->name
 //LES ROUTES DES LIVRES
 Route::get('/livres', [BookController::class, 'index'])->name('books.index');
 Route::get('/livres/{book:slug}', [BookController::class, 'show'])->name('books.show');
+
+// ✅ Marketplace (PUBLIC)
+Route::get('/marketplace', [MarketplaceController::class, 'index'])->name('marketplace.index');
+Route::get('/marketplace/{slug}', [MarketplaceController::class, 'show'])->name('marketplace.show');
 
 // ✅ Landing avec controller (pour passer $latestAnnouncements au welcome)
 Route::get('/welcome', [LandingController::class, 'index'])->name('landing');
@@ -235,6 +243,19 @@ Route::post('/emails/send', [AdminEmailController::class, 'send'])
 
         Route::post('/financial-reports/{year}/societes/{societe}/{period}/not-published', [AdminFinancialReportController::class, 'markNotPublished'])
             ->name('financial_reports.not_published');
+
+            // ✅ Marketplace (ADMIN)
+Route::prefix('marketplace')->name('marketplace.')->group(function () {
+    Route::get('/', [MarketplaceProductAdminController::class, 'index'])->name('index');           // /admin/marketplace
+    Route::get('/create', [MarketplaceProductAdminController::class, 'create'])->name('create');  // /admin/marketplace/create
+    Route::post('/', [MarketplaceProductAdminController::class, 'store'])->name('store');         // POST
+    Route::get('/{product}/edit', [MarketplaceProductAdminController::class, 'edit'])->name('edit');
+    Route::put('/{product}', [MarketplaceProductAdminController::class, 'update'])->name('update');
+    Route::delete('/{product}', [MarketplaceProductAdminController::class, 'destroy'])->name('destroy');
+});
+
+// ✅ Catégories (ADMIN)
+Route::resource('marketplace-categories', MarketplaceCategoryAdminController::class)->except(['show']);
 
         // ✅ Wallet (ADMIN)
         Route::get('/wallet', [AdminVirtualWalletController::class, 'index'])->name('wallet.index');
@@ -461,5 +482,33 @@ Route::get('/debug/cloudflare/token/{uid}', function (string $uid, CloudflareStr
         // 'token' => $token, // optionnel: tu peux le cacher si tu veux
     ]);
 });
+// Route download sécurisée de mes produits
+
+Route::middleware(['auth'])->group(function () {
+    Route::get('/mon-espace/mes-produits',
+        [MarketplaceMyProductsController::class, 'index']
+    )->name('my.products');
+
+    Route::get('/mon-espace/mes-produits/{product}/download',
+        [MarketplaceMyProductsController::class, 'download']
+    )->name('my.products.download');
+});
+
+/// Marketplace payment (auth pour buy)
+Route::middleware('auth')->group(function () {
+    Route::post('/marketplace/{product}/buy', [\App\Http\Controllers\MarketplacePaymentController::class, 'buy'])
+        ->name('marketplace.buy');
+
+    // ✅ return spécifique marketplace (GET/POST)
+    Route::match(['GET','POST'], '/marketplace/payment/cinetpay/return', [\App\Http\Controllers\MarketplacePaymentController::class, 'return'])
+        ->name('cinetpay.return.marketplace');
+});
+
+// ✅ notify spécifique marketplace (POST, sans auth)
+Route::post('/marketplace/payment/cinetpay/notify', [\App\Http\Controllers\MarketplacePaymentController::class, 'notify'])
+    ->name('cinetpay.notify.marketplace');
+
+
+
 
 require __DIR__.'/auth.php';
