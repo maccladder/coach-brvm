@@ -26,10 +26,12 @@
             </div>
         </div>
         <div class="d-flex gap-2">
-            <a class="btn btn-sm btn-dark fw-semibold" href="mailto:ghislainkouadiodjaha@gmail.com?subject=Devenir%20vendeur%20sur%20la%20Marketplace%20Coach%20BRVM">
+            <a class="btn btn-sm btn-dark fw-semibold"
+               href="mailto:ghislainkouadiodjaha@gmail.com?subject=Devenir%20vendeur%20sur%20la%20Marketplace%20Coach%20BRVM">
                 Envoyer un mail →
             </a>
-            <a class="btn btn-sm btn-outline-dark fw-semibold" href="https://wa.me/2250788035432" target="_blank" rel="noopener">
+            <a class="btn btn-sm btn-outline-dark fw-semibold"
+               href="https://wa.me/2250788035432" target="_blank" rel="noopener">
                 WhatsApp
             </a>
         </div>
@@ -37,32 +39,31 @@
 
     <div class="card border-0 shadow-sm overflow-hidden">
         <div class="row g-0">
-            {{-- Cover --}}
-            <div class="col-lg-5 bg-light">
-                <div class="ratio ratio-4x3">
-                    <div class="w-100 h-100 position-relative">
-                        @if($product->cover_image_path)
-                            <img src="{{ asset('storage/'.$product->cover_image_path) }}"
-                                 alt="{{ $product->title }}"
-                                 class="w-100 h-100"
-                                 style="object-fit:cover;">
-                        @else
-                            <div class="w-100 h-100 d-flex align-items-center justify-content-center text-muted">
-                                <div class="text-center">
-                                    <div style="font-size:38px;">📦</div>
-                                    <div class="small">Aucune cover</div>
-                                </div>
-                            </div>
-                        @endif
 
-                        {{-- ✅ Badge acheté --}}
-                        @if(!empty($isOwned) && $isOwned)
-                            <span class="badge rounded-pill text-bg-success position-absolute"
-                                  style="top:12px; left:12px; z-index:5;">
-                                <i class="bi bi-check2-circle"></i> Déjà acheté
-                            </span>
-                        @endif
-                    </div>
+            {{-- ✅ Cover (fix gap) --}}
+            <div class="col-lg-5 bg-light">
+                <div class="ratio ratio-4x3 bg-light position-relative">
+                    @if($product->cover_image_path)
+                        <img src="{{ asset('storage/'.$product->cover_image_path) }}"
+                             alt="{{ $product->title }}"
+                             class="w-100 h-100 d-block"
+                             style="object-fit:cover; object-position:center;">
+                    @else
+                        <div class="w-100 h-100 d-flex align-items-center justify-content-center text-muted">
+                            <div class="text-center">
+                                <div style="font-size:38px;">📦</div>
+                                <div class="small">Aucune cover</div>
+                            </div>
+                        </div>
+                    @endif
+
+                    {{-- Badge acheté --}}
+                    @if(!empty($isOwned) && $isOwned)
+                        <span class="badge rounded-pill text-bg-success position-absolute"
+                              style="top:12px; left:12px; z-index:5;">
+                            <i class="bi bi-check2-circle"></i> Déjà acheté
+                        </span>
+                    @endif
                 </div>
             </div>
 
@@ -97,7 +98,11 @@
 
                     <div class="d-flex flex-wrap align-items-center gap-3 mb-3">
                         <div class="fs-4 fw-bold">
-                            {{ number_format($product->price, 0, ',', ' ') }} FCFA
+                            @if((int)$product->price <= 0)
+                                Gratuit
+                            @else
+                                {{ number_format($product->price, 0, ',', ' ') }} FCFA
+                            @endif
                         </div>
 
                         <span class="text-muted small">
@@ -111,7 +116,12 @@
                         </div>
                     @endif
 
-                    {{-- CTA --}}
+                    <div class="text-muted small mb-3">
+                        <i class="bi bi-lightning-charge"></i>
+                        Après achat : <strong>téléchargement immédiat</strong>.
+                    </div>
+
+                    {{-- ✅ CTA cohérent --}}
                     <div class="d-flex flex-wrap gap-2">
                         @auth
                             @if(!empty($isOwned) && $isOwned)
@@ -120,10 +130,13 @@
                                     <i class="bi bi-download"></i> Télécharger
                                 </a>
                             @else
-                                {{-- Quand tu actives buy, remplace par un form POST marketplace.buy --}}
-                                <button class="btn btn-primary" disabled>
-                                    <i class="bi bi-credit-card"></i> Acheter (bientôt)
-                                </button>
+                                {{-- ✅ Achat ACTIF (POST) --}}
+                                <form method="POST" action="{{ route('marketplace.buy', $product) }}">
+                                    @csrf
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="bi bi-credit-card"></i> Acheter maintenant
+                                    </button>
+                                </form>
                             @endif
                         @endauth
 
@@ -176,9 +189,19 @@
                                             <i class="bi bi-unlock"></i> Accéder
                                         </a>
                                     @else
-                                        <button class="btn btn-outline-primary btn-sm" disabled>
-                                            Débloquer
-                                        </button>
+                                        {{-- ✅ Débloquer => Acheter (POST) --}}
+                                        @auth
+                                            <form method="POST" action="{{ route('marketplace.buy', $product) }}">
+                                                @csrf
+                                                <button type="submit" class="btn btn-outline-primary btn-sm">
+                                                    Débloquer
+                                                </button>
+                                            </form>
+                                        @else
+                                            <a href="{{ route('login') }}" class="btn btn-outline-primary btn-sm">
+                                                Débloquer
+                                            </a>
+                                        @endauth
                                     @endif
                                 </div>
                             @endforeach
@@ -214,25 +237,27 @@
                         <a href="{{ route('marketplace.show', $p->slug) }}"
                            class="text-decoration-none text-dark">
                             <div class="card border-0 shadow-sm h-100">
-                                <div class="ratio ratio-16x9 bg-light rounded-top overflow-hidden">
-                                    <div class="w-100 h-100">
-                                        @if($p->cover_image_path)
-                                            <img src="{{ asset('storage/'.$p->cover_image_path) }}"
-                                                 alt="{{ $p->title }}"
-                                                 class="w-100 h-100"
-                                                 style="object-fit:cover;">
-                                        @else
-                                            <div class="w-100 h-100 d-flex align-items-center justify-content-center text-muted">
-                                                📦
-                                            </div>
-                                        @endif
-                                    </div>
+                                <div class="ratio ratio-16x9 bg-light rounded-top overflow-hidden position-relative">
+                                    @if($p->cover_image_path)
+                                        <img src="{{ asset('storage/'.$p->cover_image_path) }}"
+                                             alt="{{ $p->title }}"
+                                             class="w-100 h-100 d-block"
+                                             style="object-fit:cover; object-position:center;">
+                                    @else
+                                        <div class="w-100 h-100 d-flex align-items-center justify-content-center text-muted">
+                                            📦
+                                        </div>
+                                    @endif
                                 </div>
                                 <div class="card-body">
                                     <div class="fw-bold mb-1">{{ $p->title }}</div>
                                     <div class="d-flex justify-content-between align-items-center">
                                         <div class="text-muted small">
-                                            {{ number_format($p->price, 0, ',', ' ') }} FCFA
+                                            @if((int)$p->price <= 0)
+                                                Gratuit
+                                            @else
+                                                {{ number_format($p->price, 0, ',', ' ') }} FCFA
+                                            @endif
                                         </div>
                                         <span class="badge text-bg-light border">Voir</span>
                                     </div>

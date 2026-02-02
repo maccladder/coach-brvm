@@ -29,10 +29,12 @@
             </div>
         </div>
         <div class="d-flex gap-2">
-            <a class="btn btn-sm btn-dark fw-semibold" href="mailto:ghislainkouadiodjaha@gmail.com?subject=Devenir%20vendeur%20sur%20la%20Marketplace%20Coach%20BRVM">
+            <a class="btn btn-sm btn-dark fw-semibold"
+               href="mailto:ghislainkouadiodjaha@gmail.com?subject=Devenir%20vendeur%20sur%20la%20Marketplace%20Coach%20BRVM">
                 Envoyer un mail →
             </a>
-            <a class="btn btn-sm btn-outline-dark fw-semibold" href="https://wa.me/2250788035432" target="_blank" rel="noopener">
+            <a class="btn btn-sm btn-outline-dark fw-semibold"
+               href="https://wa.me/2250788035432" target="_blank" rel="noopener">
                 WhatsApp
             </a>
         </div>
@@ -106,37 +108,35 @@
 
                     $isOwnedCard = auth()->check()
                         && !empty($ownedIds)
-                        && in_array($p->id, $ownedIds, true); // ✅ strict
+                        && in_array($p->id, $ownedIds, true);
                 @endphp
 
                 <div class="col-md-6 col-lg-4">
                     <div class="card border-0 shadow-sm h-100">
 
-                        {{-- Cover --}}
-                        <div class="ratio ratio-16x9 bg-light rounded-top overflow-hidden">
-                            <div class="w-100 h-100 position-relative">
-                                @if($p->cover_image_path)
-                                    <img src="{{ asset('storage/'.$p->cover_image_path) }}"
-                                         alt="{{ $p->title }}"
-                                         class="w-100 h-100"
-                                         style="object-fit:cover;">
-                                @else
-                                    <div class="w-100 h-100 d-flex align-items-center justify-content-center text-muted">
-                                        <div class="text-center">
-                                            <div style="font-size:28px;">📦</div>
-                                            <div class="small">Aucune cover</div>
-                                        </div>
+                        {{-- ✅ Cover (fix gap) --}}
+                        <div class="ratio ratio-16x9 bg-light rounded-top overflow-hidden position-relative">
+                            @if($p->cover_image_path)
+                                <img src="{{ asset('storage/'.$p->cover_image_path) }}"
+                                     alt="{{ $p->title }}"
+                                     class="w-100 h-100 d-block"
+                                     style="object-fit:cover; object-position:center;">
+                            @else
+                                <div class="w-100 h-100 d-flex align-items-center justify-content-center text-muted">
+                                    <div class="text-center">
+                                        <div style="font-size:28px;">📦</div>
+                                        <div class="small">Aucune cover</div>
                                     </div>
-                                @endif
+                                </div>
+                            @endif
 
-                                {{-- ✅ Badge déjà acheté --}}
-                                @if($isOwnedCard)
-                                    <span class="badge rounded-pill text-bg-success position-absolute"
-                                          style="top:10px; left:10px; z-index:5;">
-                                        <i class="bi bi-check2-circle"></i> Déjà acheté
-                                    </span>
-                                @endif
-                            </div>
+                            {{-- Badge déjà acheté --}}
+                            @if($isOwnedCard)
+                                <span class="badge rounded-pill text-bg-success position-absolute"
+                                      style="top:10px; left:10px; z-index:5;">
+                                    <i class="bi bi-check2-circle"></i> Déjà acheté
+                                </span>
+                            @endif
                         </div>
 
                         <div class="card-body d-flex flex-column">
@@ -172,7 +172,11 @@
                                             <i class="bi bi-unlock"></i> Payé
                                         </span>
                                     @else
-                                        {{ number_format($p->price, 0, ',', ' ') }} FCFA
+                                        @if((int)$p->price <= 0)
+                                            Gratuit
+                                        @else
+                                            {{ number_format($p->price, 0, ',', ' ') }} FCFA
+                                        @endif
                                     @endif
                                 </div>
 

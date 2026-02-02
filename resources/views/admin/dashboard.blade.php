@@ -15,6 +15,12 @@
         </div>
 
         <div class="d-flex gap-2 flex-wrap">
+            {{-- ✅ NOUVEAU : Marketplace (Admin) --}}
+            <a href="{{ route('admin.marketplace.index') }}"
+               class="btn btn-outline-dark fw-semibold">
+                🛍️ Marketplace (Admin)
+            </a>
+
             {{-- 👉 Bouton Utilisateurs --}}
             <a href="{{ route('admin.users.index') }}"
                class="btn btn-outline-secondary fw-semibold">
@@ -43,6 +49,28 @@
 
     {{-- 🔥 CARDS RAPIDES --}}
     <div class="row g-3 mb-4">
+
+        {{-- ✅ NOUVEAU : Marketplace (Admin) --}}
+        <div class="col-md-4">
+            <a href="{{ route('admin.marketplace.index') }}" class="text-decoration-none">
+                <div class="card shadow-sm border-0 h-100 bg-warning text-dark">
+                    <div class="card-body d-flex flex-column justify-content-center">
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <h5 class="fw-bold mb-0">🛍️ Marketplace (Admin)</h5>
+                            <span class="badge bg-dark text-white fw-semibold">Produits</span>
+                        </div>
+                        <p class="small mb-0">
+                            Ajouter / modifier les produits (PDF, vidéos, logiciels), covers, prix et assets.
+                        </p>
+                        <div class="mt-3 d-flex gap-2 flex-wrap">
+                            <span class="badge bg-light text-dark border">Créer un produit</span>
+                            <span class="badge bg-light text-dark border">Gérer catégories</span>
+                            <span class="badge bg-light text-dark border">Assets & accès</span>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
 
         {{-- Gestion BOC journalières --}}
         <div class="col-md-4">
@@ -118,18 +146,18 @@
         </div>
 
         {{-- Topups Wallet --}}
-<div class="col-md-4">
-    <a href="{{ route('admin.topups.index') }}" class="text-decoration-none">
-        <div class="card shadow-sm border-0 h-100 bg-dark text-white">
-            <div class="card-body d-flex flex-column justify-content-center">
-                <h5 class="fw-bold mb-1">💳 Topups Wallet</h5>
-                <p class="small mb-0 opacity-75">
-                    Suivi des rechargements : validés, en attente, échoués + montants encaissés.
-                </p>
-            </div>
+        <div class="col-md-4">
+            <a href="{{ route('admin.topups.index') }}" class="text-decoration-none">
+                <div class="card shadow-sm border-0 h-100 bg-dark text-white">
+                    <div class="card-body d-flex flex-column justify-content-center">
+                        <h5 class="fw-bold mb-1">💳 Topups Wallet</h5>
+                        <p class="small mb-0 opacity-75">
+                            Suivi des rechargements : validés, en attente, échoués + montants encaissés.
+                        </p>
+                    </div>
+                </div>
+            </a>
         </div>
-    </a>
-</div>
 
         {{-- Emails --}}
         <div class="col-md-4">

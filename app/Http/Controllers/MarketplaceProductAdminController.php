@@ -139,101 +139,109 @@ class MarketplaceProductAdminController extends Controller
 }
 
     public function update(Request $request, MarketplaceProduct $product)
-    {
-        // 1) Validation base
-        $data = $request->validate([
-            'category_id' => ['nullable', 'integer', 'exists:marketplace_categories,id'],
-            'title'       => ['required', 'string', 'max:255'],
-            'type'        => ['required', 'in:video,book,software'],
-            'description' => ['nullable', 'string'],
-            'price'       => ['required', 'integer', 'min:0'],
-            'status'      => ['required', 'in:draft,published'],
-            'is_featured' => ['nullable', 'boolean'],
+{
+    // 0) Charger les assets (utile pour déterminer s'il existe déjà un fichier)
+    $product->load('assets');
 
-            'cover'       => ['nullable', 'image', 'max:4096'],
-            'file'        => ['nullable', 'file', 'max:102400'],
-        ], [], [
+    // 1) Validation de base
+    $data = $request->validate([
+        'category_id' => ['nullable', 'integer', 'exists:marketplace_categories,id'],
+        'title'       => ['required', 'string', 'max:255'],
+        'type'        => ['required', 'in:video,book,software'],
+        'description' => ['nullable', 'string'],
+        'price'       => ['required', 'integer', 'min:0'],
+        'status'      => ['required', 'in:draft,published'],
+        'is_featured' => ['nullable', 'boolean'],
+
+        'cover'       => ['nullable', 'image', 'max:4096'],     // 4MB
+        'file'        => ['nullable', 'file', 'max:102400'],    // 100MB
+    ], [], [
+        'file'  => 'fichier produit',
+        'cover' => 'image de couverture',
+    ]);
+
+    // 2) Validation conditionnelle du fichier produit
+    $hasFileAsset = $product->assets->firstWhere('kind', 'file') !== null;
+    $requiresFile = in_array($data['type'], ['book', 'software'], true);
+
+    // Si on est en book/software et qu'il n'y a pas encore de fichier -> il faut obliger un upload
+    if ($requiresFile && !$hasFileAsset && !$request->hasFile('file')) {
+        $request->validate([
+            'file' => ['required'],
+        ], [
+            'file.required' => 'Le fichier produit est obligatoire pour ce type.',
+        ], [
             'file' => 'fichier produit',
-            'cover' => 'image de couverture',
         ]);
+    }
 
-        // 2) Validation conditionnelle (si book/software et pas de fichier existant => required)
-        // -> on force le fichier si l’utilisateur change type vers book/software et qu’il n’y a pas déjà un asset file
-        $hasFileAsset = $product->assets()->where('kind', 'file')->exists();
-        $requiresFile = in_array($data['type'], ['book', 'software'], true);
-
-        if ($requiresFile && !$hasFileAsset && !$request->hasFile('file')) {
-            // On oblige l’upload si aucun fichier n’existe déjà
+    // Si un fichier est uploadé, on vérifie les mimes selon type
+    if ($request->hasFile('file')) {
+        if ($data['type'] === 'book') {
             $request->validate([
-                'file' => ['required'],
-            ], [
-                'file.required' => 'Le fichier produit est obligatoire pour ce type.',
-            ]);
-        }
-
-        if ($data['type'] === 'book' && $request->hasFile('file')) {
-            $request->validate([
-                'file' => ['file', 'mimes:pdf', 'max:51200'],
+                'file' => ['file', 'mimes:pdf', 'max:51200'], // 50MB
             ], [], ['file' => 'PDF du livre']);
         }
 
-        if ($data['type'] === 'software' && $request->hasFile('file')) {
+        if ($data['type'] === 'software') {
             $request->validate([
-                'file' => ['file', 'mimes:zip,rar', 'max:102400'],
+                'file' => ['file', 'mimes:zip,rar', 'max:102400'], // 100MB
             ], [], ['file' => 'archive du logiciel']);
         }
 
-        // 3) Si titre change => slug optionnel (je conseille de garder slug stable; ici on ne change pas)
-        // Si tu veux changer slug à chaque update, dis-moi.
-
-        // 4) Upload cover (si nouveau)
-        if ($request->hasFile('cover')) {
-            $product->cover_image_path = $request->file('cover')->store('marketplace/covers', 'public');
-        }
-
-        // 5) Update produit
-        $product->update([
-            'category_id' => $data['category_id'] ?? null,
-            'title'       => $data['title'],
-            'type'        => $data['type'],
-            'description' => $data['description'] ?? null,
-            'price'       => (int) $data['price'],
-            'status'      => $data['status'],
-            'is_featured' => (bool) ($data['is_featured'] ?? false),
-        ]);
-
-        // 6) Si nouveau fichier => remplacer / créer asset principal "file"
-        if ($request->hasFile('file')) {
-            $uploadedPath = $request->file('file')->store('marketplace/files', 'public');
-
-            $label = match ($product->type) {
-                'book'     => 'PDF',
-                'software' => 'Logiciel',
-                default    => 'Fichier',
-            };
-
-            $asset = $product->assets()->where('kind', 'file')->first();
-
-            if ($asset) {
-                $asset->update([
-                    'path'            => $uploadedPath,
-                    'url'             => null,
-                    'label'           => $label,
-                    'is_downloadable' => true,
-                ]);
-            } else {
-                $product->assets()->create([
-                    'kind'            => 'file',
-                    'path'            => $uploadedPath,
-                    'url'             => null,
-                    'label'           => $label,
-                    'is_downloadable' => true,
-                ]);
-            }
-        }
-
-        return back()->with('success', 'Produit mis à jour ✅');
+        // (video) : fichier non obligatoire, et pas de contrainte ici pour le moment.
     }
+
+    // 3) Upload cover (si nouveau) -> on garde l'ancienne si rien n'est uploadé
+    $coverPath = $product->cover_image_path;
+    if ($request->hasFile('cover')) {
+        $coverPath = $request->file('cover')->store('marketplace/covers', 'public');
+    }
+
+    // 4) Update produit (inclut cover)
+    $product->update([
+        'category_id'      => $data['category_id'] ?? null,
+        'title'            => $data['title'],
+        'type'             => $data['type'],
+        'description'      => $data['description'] ?? null,
+        'price'            => (int) $data['price'],
+        'status'           => $data['status'],
+        'is_featured'      => (bool) ($data['is_featured'] ?? false),
+        'cover_image_path' => $coverPath,
+    ]);
+
+    // 5) Si nouveau fichier => remplacer / créer asset principal "file"
+    if ($request->hasFile('file')) {
+        $uploadedPath = $request->file('file')->store('marketplace/files', 'public');
+
+        $label = match ($product->type) {
+            'book'     => 'PDF',
+            'software' => 'Logiciel',
+            default    => 'Fichier',
+        };
+
+        $asset = $product->assets()->where('kind', 'file')->first();
+
+        if ($asset) {
+            $asset->update([
+                'path'            => $uploadedPath,
+                'url'             => null,
+                'label'           => $label,
+                'is_downloadable' => true,
+            ]);
+        } else {
+            $product->assets()->create([
+                'kind'            => 'file',
+                'path'            => $uploadedPath,
+                'url'             => null,
+                'label'           => $label,
+                'is_downloadable' => true,
+            ]);
+        }
+    }
+
+    return back()->with('success', 'Produit mis à jour ✅');
+}
 
     public function destroy(MarketplaceProduct $product)
     {

@@ -494,7 +494,7 @@ Route::middleware(['auth'])->group(function () {
     )->name('my.products.download');
 });
 
-/// Marketplace payment (auth pour buy)
+// Marketplace payment (auth pour buy)
 Route::middleware('auth')->group(function () {
     Route::post('/marketplace/{product}/buy', [\App\Http\Controllers\MarketplacePaymentController::class, 'buy'])
         ->name('marketplace.buy');

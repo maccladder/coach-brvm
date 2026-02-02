@@ -10,9 +10,23 @@
             <h2 class="fw-bold mb-1">✏️ Modifier produit</h2>
             <p class="text-muted mb-0">Modifie les infos, la cover et le fichier du produit.</p>
         </div>
-        <a href="{{ route('admin.marketplace.index') }}" class="btn btn-outline-secondary">
-            ← Retour
-        </a>
+        <div class="d-flex gap-2">
+            <a href="{{ route('admin.marketplace.index') }}" class="btn btn-outline-secondary">
+                ← Retour
+            </a>
+
+            {{-- ✅ DELETE form séparé (PAS imbriqué) --}}
+            <form id="deleteForm"
+                  action="{{ route('admin.marketplace.destroy', $product) }}"
+                  method="POST"
+                  onsubmit="return confirm('Supprimer ce produit ?')">
+                @csrf
+                @method('DELETE')
+                <button type="submit" class="btn btn-outline-danger">
+                    Supprimer
+                </button>
+            </form>
+        </div>
     </div>
 
     @if(session('success'))
@@ -37,6 +51,7 @@
         $fileAsset = $product->assets->firstWhere('kind', 'file');
     @endphp
 
+    {{-- ✅ UPDATE form unique --}}
     <form class="card border-0 shadow-sm"
           method="POST"
           action="{{ route('admin.marketplace.update', $product) }}"
@@ -180,18 +195,9 @@
 
             <hr class="my-4">
 
-            <div class="d-flex justify-content-between align-items-center">
-                <form action="{{ route('admin.marketplace.destroy', $product) }}" method="POST"
-                      onsubmit="return confirm('Supprimer ce produit ?')">
-                    @csrf
-                    @method('DELETE')
-                    <button class="btn btn-outline-danger">Supprimer</button>
-                </form>
-
-                <div class="d-flex justify-content-end gap-2">
-                    <a href="{{ route('admin.marketplace.index') }}" class="btn btn-outline-secondary">Annuler</a>
-                    <button class="btn btn-primary">Enregistrer ✅</button>
-                </div>
+            <div class="d-flex justify-content-end gap-2">
+                <a href="{{ route('admin.marketplace.index') }}" class="btn btn-outline-secondary">Annuler</a>
+                <button type="submit" class="btn btn-primary">Enregistrer ✅</button>
             </div>
 
         </div>
@@ -212,9 +218,8 @@
         const t = typeSelect.value;
 
         if (t === 'video') {
-            // on cache l’upload (tu peux aussi laisser affiché si tu veux)
             fileBlock.style.display = 'none';
-            fileInput.value = '';
+            // ⚠️ IMPORTANT : ne force pas fileInput.value='' sinon tu perds l’input si tu reviens au type
             return;
         }
 
