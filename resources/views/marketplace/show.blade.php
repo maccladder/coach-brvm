@@ -43,33 +43,32 @@
             {{-- ✅ Cover (fix gap) --}}
             <div class="col-lg-5 bg-light">
                 <div class="bg-light">
-    <div class="position-relative">
+                    <div class="position-relative">
 
-        @if(!empty($isOwned) && $isOwned)
-            <span class="market-badge-owned">
-                <i class="bi bi-check2-circle"></i> Déjà acheté
-            </span>
-        @endif
+                        @if(!empty($isOwned) && $isOwned)
+                            <span class="market-badge-owned">
+                                <i class="bi bi-check2-circle"></i> Déjà acheté
+                            </span>
+                        @endif
 
-        <div class="ratio ratio-4x3 bg-light">
-            @if($product->cover_image_path)
-                <img src="{{ asset('storage/'.$product->cover_image_path) }}"
-                     alt="{{ $product->title }}"
-                     class="w-100 h-100 d-block"
-                     style="object-fit:cover; object-position:center;">
-            @else
-                <div class="w-100 h-100 d-flex align-items-center justify-content-center text-muted">
-                    <div class="text-center">
-                        <div style="font-size:38px;">📦</div>
-                        <div class="small">Aucune cover</div>
+                        <div class="ratio ratio-4x3 bg-light">
+                            @if($product->cover_image_path)
+                                <img src="{{ asset('storage/'.$product->cover_image_path) }}"
+                                     alt="{{ $product->title }}"
+                                     class="w-100 h-100 d-block"
+                                     style="object-fit:cover; object-position:center;">
+                            @else
+                                <div class="w-100 h-100 d-flex align-items-center justify-content-center text-muted">
+                                    <div class="text-center">
+                                        <div style="font-size:38px;">📦</div>
+                                        <div class="small">Aucune cover</div>
+                                    </div>
+                                </div>
+                            @endif
+                        </div>
+
                     </div>
                 </div>
-            @endif
-        </div>
-
-    </div>
-</div>
-
             </div>
 
             {{-- Infos --}}
@@ -123,17 +122,29 @@
 
                     <div class="text-muted small mb-3">
                         <i class="bi bi-lightning-charge"></i>
-                        Après achat : <strong>téléchargement immédiat</strong>.
+                        Après achat :
+                        <strong>
+                            {{ $product->type === 'video' ? 'lecture en ligne' : 'téléchargement immédiat' }}
+                        </strong>.
                     </div>
 
                     {{-- ✅ CTA cohérent --}}
                     <div class="d-flex flex-wrap gap-2">
                         @auth
                             @if(!empty($isOwned) && $isOwned)
-                                <a href="{{ route('my.products.download', $product) }}"
-                                   class="btn btn-success">
-                                    <i class="bi bi-download"></i> Télécharger
-                                </a>
+
+                                @if($product->type === 'video')
+                                    <a href="{{ route('my.products.watch', $product) }}"
+                                       class="btn btn-success">
+                                        <i class="bi bi-play-circle"></i> Visualiser
+                                    </a>
+                                @else
+                                    <a href="{{ route('my.products.download', $product) }}"
+                                       class="btn btn-success">
+                                        <i class="bi bi-download"></i> Télécharger
+                                    </a>
+                                @endif
+
                             @else
                                 {{-- ✅ Achat ACTIF (POST) --}}
                                 <form method="POST" action="{{ route('marketplace.buy', $product) }}">
@@ -189,10 +200,19 @@
                                     </div>
 
                                     @if(!empty($isOwned) && $isOwned)
-                                        <a href="{{ route('my.products.download', $product) }}"
-                                           class="btn btn-outline-success btn-sm">
-                                            <i class="bi bi-unlock"></i> Accéder
-                                        </a>
+
+                                        @if($product->type === 'video')
+                                            <a href="{{ route('my.products.watch', $product) }}"
+                                               class="btn btn-outline-success btn-sm">
+                                                <i class="bi bi-play-circle"></i> Accéder
+                                            </a>
+                                        @else
+                                            <a href="{{ route('my.products.download', $product) }}"
+                                               class="btn btn-outline-success btn-sm">
+                                                <i class="bi bi-unlock"></i> Accéder
+                                            </a>
+                                        @endif
+
                                     @else
                                         {{-- ✅ Débloquer => Acheter (POST) --}}
                                         @auth

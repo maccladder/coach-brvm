@@ -485,14 +485,20 @@ Route::get('/debug/cloudflare/token/{uid}', function (string $uid, CloudflareStr
 // Route download sécurisée de mes produits
 
 Route::middleware(['auth'])->group(function () {
-    Route::get('/mon-espace/mes-produits',
-        [MarketplaceMyProductsController::class, 'index']
-    )->name('my.products');
 
-    Route::get('/mon-espace/mes-produits/{product}/download',
-        [MarketplaceMyProductsController::class, 'download']
-    )->name('my.products.download');
+    Route::get('/mon-espace/mes-produits', [MarketplaceMyProductsController::class, 'index'])
+        ->name('my.products');
+
+    Route::get('/mon-espace/mes-produits/{product}/download', [MarketplaceMyProductsController::class, 'download'])
+        ->name('my.products.download');
+
+    // ✅ NOUVEAU : regarder une vidéo achetée (Cloudflare Stream)
+    Route::get('/mon-espace/mes-produits/{product}/watch', [MarketplaceMyProductsController::class, 'watch'])
+        ->name('my.products.watch');
+
 });
+
+
 
 // Marketplace payment (auth pour buy)
 

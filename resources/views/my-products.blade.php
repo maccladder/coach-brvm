@@ -42,17 +42,30 @@
                                         Catégorie: {{ $p->category?->name ?? '—' }}
                                     </div>
 
-                                    <div class="mt-2 d-flex gap-2">
-                                        <a class="btn btn-primary btn-sm"
-                                           href="{{ route('my.products.download', $p) }}">
-                                            ⬇️ Télécharger
-                                        </a>
+                                    <div class="mt-2 d-flex gap-2 flex-wrap">
+                                        @if($p->type === 'video')
+                                            <a class="btn btn-success btn-sm"
+                                               href="{{ route('my.products.watch', $p) }}">
+                                                ▶ Visualiser
+                                            </a>
+                                        @else
+                                            <a class="btn btn-primary btn-sm"
+                                               href="{{ route('my.products.download', $p) }}">
+                                                ⬇️ Télécharger
+                                            </a>
+                                        @endif
 
                                         <a class="btn btn-outline-secondary btn-sm"
                                            href="{{ route('marketplace.show', $p->slug) }}">
                                             Voir
                                         </a>
                                     </div>
+
+                                    @if($p->type === 'video')
+                                        <div class="small text-muted mt-2">
+                                            Lecture en ligne (sans téléchargement).
+                                        </div>
+                                    @endif
                                 </div>
                             </div>
                         </div>

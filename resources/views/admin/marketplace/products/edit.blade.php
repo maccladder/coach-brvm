@@ -8,7 +8,7 @@
     <div class="d-flex justify-content-between align-items-start mb-4">
         <div>
             <h2 class="fw-bold mb-1">✏️ Modifier produit</h2>
-            <p class="text-muted mb-0">Modifie les infos, la cover et le fichier du produit.</p>
+            <p class="text-muted mb-0">Modifie les infos, la cover et le fichier / vidéo du produit.</p>
         </div>
         <div class="d-flex gap-2">
             <a href="{{ route('admin.marketplace.index') }}" class="btn btn-outline-secondary">
@@ -49,6 +49,10 @@
     @php
         // Asset principal de type fichier (PDF/ZIP/RAR)
         $fileAsset = $product->assets->firstWhere('kind', 'file');
+
+        // Asset vidéo Cloudflare (stream)
+        $streamAsset = $product->assets->firstWhere('kind', 'stream');
+        $streamId = $streamAsset?->url;
     @endphp
 
     {{-- ✅ UPDATE form unique --}}
@@ -188,7 +192,37 @@
 
                     <input type="file" name="file" class="form-control" id="fileInput">
                     <div class="form-text" id="fileHelp">
-                        Livre → PDF, Logiciel → ZIP/RAR. Vidéo → pas obligatoire.
+                        Livre → PDF, Logiciel → ZIP/RAR.
+                    </div>
+                </div>
+            </div>
+
+            {{-- ✅ VIDEO (Cloudflare Stream) --}}
+            <div class="row g-3 mt-0" id="videoBlock" style="display:none;">
+                <div class="col-12">
+                    <label class="form-label">Cloudflare Video ID *</label>
+
+                    @if($streamId)
+                        <div class="alert alert-light border d-flex justify-content-between align-items-center">
+                            <div>
+                                <div class="fw-semibold">Vidéo actuelle (Cloudflare)</div>
+                                <div class="text-muted small">{{ $streamId }}</div>
+                            </div>
+                            <div class="small text-muted">
+                                (remplace en saisissant un nouvel ID)
+                            </div>
+                        </div>
+                    @else
+                        <div class="form-text mb-2">Aucun Cloudflare Video ID enregistré.</div>
+                    @endif
+
+                    <input type="text"
+                           name="cloudflare_video_id"
+                           value="{{ old('cloudflare_video_id', $streamId) }}"
+                           class="form-control"
+                           placeholder="Ex: 1ccbd5cea14c894b8c50c6d9d2aca6e">
+                    <div class="form-text">
+                        Colle le <b>Video ID</b> depuis Cloudflare Stream.
                     </div>
                 </div>
             </div>
@@ -205,29 +239,34 @@
 
 </div>
 
-{{-- ✅ JS: adapte l’upload file selon le type --}}
+{{-- ✅ JS: adapte l’upload file / vidéo selon le type --}}
 <script>
 (function(){
     const typeSelect = document.getElementById('typeSelect');
+
     const fileBlock  = document.getElementById('fileBlock');
     const fileHelp   = document.getElementById('fileHelp');
     const fileLabel  = document.getElementById('fileLabel');
     const fileInput  = document.getElementById('fileInput');
 
+    const videoBlock = document.getElementById('videoBlock');
+
     function refresh(){
         const t = typeSelect.value;
 
         if (t === 'video') {
-            fileBlock.style.display = 'none';
-            // ⚠️ IMPORTANT : ne force pas fileInput.value='' sinon tu perds l’input si tu reviens au type
+            fileBlock.style.display  = 'none';
+            videoBlock.style.display = 'block';
+            // ⚠️ ne pas faire fileInput.value='' (sinon tu perds une sélection si tu reviens)
             return;
         }
 
-        fileBlock.style.display = 'block';
+        videoBlock.style.display = 'none';
+        fileBlock.style.display  = 'block';
 
         if (t === 'book') {
             fileLabel.textContent = 'PDF du livre';
-            fileHelp.textContent  = 'Si tu upload ici, ça remplace le PDF. (max 100MB)';
+            fileHelp.textContent  = 'Si tu upload ici, ça remplace le PDF. (max 50MB)';
             fileInput.setAttribute('accept', 'application/pdf,.pdf');
         } else if (t === 'software') {
             fileLabel.textContent = 'Fichier logiciel (ZIP/RAR)';

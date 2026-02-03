@@ -67,6 +67,9 @@ class MarketplaceProductAdminController extends Controller
 
             // fichier produit (PDF/ZIP/RAR) - conditionné ensuite
             'file'        => ['nullable', 'file', 'max:' . self::MAX_FILE_KB], // 400MB
+
+            // vidéo (Cloudflare) - conditionné ensuite
+            'cloudflare_video_id' => ['nullable', 'string', 'max:255'],
         ], [], [
             'file'  => 'fichier produit',
             'cover' => 'image de couverture',
@@ -83,6 +86,14 @@ class MarketplaceProductAdminController extends Controller
             $request->validate([
                 'file' => ['required', 'file', 'mimes:zip,rar', 'max:' . self::MAX_FILE_KB], // 400MB
             ], [], ['file' => 'archive du logiciel']);
+        }
+
+        if ($data['type'] === 'video') {
+            $request->validate([
+                'cloudflare_video_id' => ['required', 'string', 'max:255'],
+            ], [], [
+                'cloudflare_video_id' => 'Cloudflare Video ID',
+            ]);
         }
 
         // 3) Slug unique
@@ -110,7 +121,18 @@ class MarketplaceProductAdminController extends Controller
             'cover_image_path' => $coverPath,
         ]);
 
-        // 6) Si fichier => créer asset (PDF/ZIP/RAR)
+        // 6) Si vidéo => créer asset stream (Cloudflare)
+        if ($product->type === 'video') {
+            $product->assets()->create([
+                'kind'            => 'stream',
+                'path'            => null,
+                'url'             => trim((string) $request->input('cloudflare_video_id')),
+                'label'           => 'Vidéo',
+                'is_downloadable' => false,
+            ]);
+        }
+
+        // 7) Si fichier => créer asset (PDF/ZIP/RAR)
         if ($request->hasFile('file')) {
             $uploadedPath = $request->file('file')->store('marketplace/files', 'public');
 
@@ -156,12 +178,15 @@ class MarketplaceProductAdminController extends Controller
 
             'cover'       => ['nullable', 'image', 'max:' . self::MAX_COVER_KB], // 4MB
             'file'        => ['nullable', 'file', 'max:' . self::MAX_FILE_KB],  // 400MB
+
+            // vidéo (Cloudflare) - conditionné ensuite
+            'cloudflare_video_id' => ['nullable', 'string', 'max:255'],
         ], [], [
             'file'  => 'fichier produit',
             'cover' => 'image de couverture',
         ]);
 
-        // 2) Validation conditionnelle du fichier produit
+        // 2) Validation conditionnelle du fichier produit (book/software)
         $hasFileAsset = $product->assets->firstWhere('kind', 'file') !== null;
         $requiresFile = in_array($data['type'], ['book', 'software'], true);
 
@@ -190,6 +215,15 @@ class MarketplaceProductAdminController extends Controller
             }
         }
 
+        // Validation vidéo
+        if ($data['type'] === 'video') {
+            $request->validate([
+                'cloudflare_video_id' => ['required', 'string', 'max:255'],
+            ], [], [
+                'cloudflare_video_id' => 'Cloudflare Video ID',
+            ]);
+        }
+
         // 3) Upload cover (si nouveau)
         $coverPath = $product->cover_image_path;
         if ($request->hasFile('cover')) {
@@ -208,7 +242,36 @@ class MarketplaceProductAdminController extends Controller
             'cover_image_path' => $coverPath,
         ]);
 
-        // 5) Si nouveau fichier => remplacer / créer asset principal "file"
+        // 5) Si type = vidéo => créer / update asset stream, et (optionnel) supprimer asset file
+        if ($product->type === 'video') {
+            $videoId = trim((string) $request->input('cloudflare_video_id'));
+
+            $streamAsset = $product->assets()->where('kind', 'stream')->first();
+
+            if ($streamAsset) {
+                $streamAsset->update([
+                    'path'            => null,
+                    'url'             => $videoId,
+                    'label'           => 'Vidéo',
+                    'is_downloadable' => false,
+                ]);
+            } else {
+                $product->assets()->create([
+                    'kind'            => 'stream',
+                    'path'            => null,
+                    'url'             => $videoId,
+                    'label'           => 'Vidéo',
+                    'is_downloadable' => false,
+                ]);
+            }
+
+            // Propre : si on passe un produit en vidéo, on supprime l'ancien fichier téléchargeable
+            $product->assets()->where('kind', 'file')->delete();
+
+            return back()->with('success', 'Produit mis à jour ✅');
+        }
+
+        // 6) Si nouveau fichier => remplacer / créer asset principal "file"
         if ($request->hasFile('file')) {
             $uploadedPath = $request->file('file')->store('marketplace/files', 'public');
 
@@ -237,6 +300,9 @@ class MarketplaceProductAdminController extends Controller
                 ]);
             }
         }
+
+        // Si on passe en book/software, on peut enlever un ancien asset stream (optionnel mais propre)
+        $product->assets()->where('kind', 'stream')->delete();
 
         return back()->with('success', 'Produit mis à jour ✅');
     }

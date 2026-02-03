@@ -34,7 +34,11 @@ class MarketplaceMyProductsController extends Controller
             abort(403, "Accès refusé : produit non acheté.");
         }
 
-        // On récupère le 1er asset fichier téléchargeable
+        // ✅ pas de téléchargement pour les vidéos
+        if ($product->type === 'video') {
+            abort(403, "Téléchargement indisponible : ce produit est une vidéo.");
+        }
+
         $asset = $product->assets()
             ->where('kind', 'file')
             ->where('is_downloadable', true)
@@ -45,9 +49,6 @@ class MarketplaceMyProductsController extends Controller
             abort(404, "Fichier introuvable pour ce produit.");
         }
 
-        // IMPORTANT :
-        // si tu stockes sur disk 'public' => Storage::disk('public')
-        // si tu veux + safe plus tard => disk 'private'
         $disk = 'public';
 
         if (!Storage::disk($disk)->exists($asset->path)) {
@@ -57,5 +58,38 @@ class MarketplaceMyProductsController extends Controller
         $downloadName = $product->slug . '.' . pathinfo($asset->path, PATHINFO_EXTENSION);
 
         return Storage::disk($disk)->download($asset->path, $downloadName);
+    }
+
+    // ✅ NOUVEAU : visualiser une vidéo Cloudflare Stream
+    public function watch(Request $request, MarketplaceProduct $product)
+    {
+        $user = $request->user();
+
+        $hasAccess = $user->purchasedProducts()
+            ->where('marketplace_products.id', $product->id)
+            ->wherePivot('status', 'paid')
+            ->exists();
+
+        if (!$hasAccess) {
+            abort(403, "Accès refusé : produit non acheté.");
+        }
+
+        if ($product->type !== 'video') {
+            abort(404, "Ce produit n'est pas une vidéo.");
+        }
+
+        // ✅ On récupère l’asset stream (url = video_id)
+        $streamAsset = $product->assets()
+            ->where('kind', 'stream')
+            ->latest()
+            ->first();
+
+        if (!$streamAsset || empty($streamAsset->url)) {
+            abort(404, "Vidéo introuvable (Cloudflare Video ID manquant).");
+        }
+
+        $cloudflareVideoId = trim((string) $streamAsset->url);
+
+        return view('my-products-watch', compact('product', 'cloudflareVideoId'));
     }
 }

@@ -115,7 +115,22 @@
                     <label class="form-label" id="fileLabel">Fichier produit</label>
                     <input type="file" name="file" class="form-control" id="fileInput">
                     <div class="form-text" id="fileHelp">
-                        Upload obligatoire : PDF pour Livre, ZIP/RAR pour Logiciel. (Vidéo: pas de fichier)
+                        Upload obligatoire : PDF pour Livre, ZIP/RAR pour Logiciel.
+                    </div>
+                </div>
+            </div>
+
+            {{-- ✅ VIDEO (Cloudflare Stream) --}}
+            <div class="row g-3 mt-0" id="videoBlock" style="display:none;">
+                <div class="col-12">
+                    <label class="form-label">Cloudflare Video ID *</label>
+                    <input type="text"
+                           name="cloudflare_video_id"
+                           value="{{ old('cloudflare_video_id') }}"
+                           class="form-control"
+                           placeholder="Ex: 1ccbd5cea14c894b8c50c6d9d2aca6e">
+                    <div class="form-text">
+                        Colle le <b>Video ID</b> depuis Cloudflare Stream (champ “Video ID” dans le dashboard).
                     </div>
                 </div>
             </div>
@@ -136,25 +151,30 @@
 <script>
 (function(){
     const typeSelect = document.getElementById('typeSelect');
+
     const fileBlock  = document.getElementById('fileBlock');
     const fileHelp   = document.getElementById('fileHelp');
     const fileLabel  = document.getElementById('fileLabel');
     const fileInput  = document.getElementById('fileInput');
 
+    const videoBlock = document.getElementById('videoBlock');
+
     function refresh(){
         const t = typeSelect.value;
 
         if (t === 'video') {
-            fileBlock.style.display = 'none';
+            fileBlock.style.display  = 'none';
+            videoBlock.style.display = 'block';
             fileInput.value = '';
             return;
         }
 
-        fileBlock.style.display = 'block';
+        videoBlock.style.display = 'none';
+        fileBlock.style.display  = 'block';
 
         if (t === 'book') {
             fileLabel.textContent = 'PDF du livre *';
-            fileHelp.textContent  = 'Upload obligatoire : PDF (max 400MB).';
+            fileHelp.textContent  = 'Upload obligatoire : PDF (max 50MB).';
             fileInput.setAttribute('accept', 'application/pdf,.pdf');
         } else if (t === 'software') {
             fileLabel.textContent = 'Fichier logiciel (ZIP/RAR) *';
