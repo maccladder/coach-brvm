@@ -134,6 +134,15 @@
                                     <span class="badge bg-warning-subtle text-warning border">Nouveau</span>
                                 </div>
 
+                                {{-- ✅ NOUVEAU : ÉTUDES & BUSINESS PLANS --}}
+                                <div class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                    <div>
+                                        <div class="fw-semibold">📄 Études & Business plans</div>
+                                        <div class="text-muted small">PDF pro (marché, banque, projets)</div>
+                                    </div>
+                                    <span class="badge bg-info-subtle text-info border">Nouveau</span>
+                                </div>
+
                                 <div class="list-group-item d-flex justify-content-between align-items-center px-0">
                                     <div>
                                         <div class="fw-semibold">🎓 Formations BRVM</div>
@@ -291,6 +300,27 @@
 
                     <a href="{{ route('marketplace.index') }}" class="btn btn-warning fw-semibold">
                         Ouvrir la Marketplace
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    {{-- ✅ NOUVEAU : CALLOUT Études & Business plans --}}
+    <section class="py-4 border-bottom bg-white">
+        <div class="container" style="max-width:1100px;">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body d-flex flex-wrap justify-content-between align-items-center gap-3">
+                    <div>
+                        <div class="fw-semibold">📄 Nouveau : Études de marché & Business plans</div>
+                        <div class="text-muted small">
+                            Achète des <strong>PDF pro</strong> (études, business plans, dossiers banque).
+                            Accès immédiat dans <strong>Mes documents</strong> après paiement.
+                        </div>
+                    </div>
+
+                    <a href="{{ route('docs.public.index') }}" class="btn btn-outline-primary fw-semibold">
+                        Voir les documents →
                     </a>
                 </div>
             </div>

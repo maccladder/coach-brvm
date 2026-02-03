@@ -20,6 +20,7 @@ use App\Http\Controllers\LandingController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\SocieteController;
 use App\Http\Controllers\SummaryController;
+use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\AdminUserController;
 use App\Http\Controllers\ClientBocController;
 use App\Http\Controllers\DividendeController;
@@ -33,9 +34,11 @@ use App\Http\Controllers\MarketplaceController;
 use App\Http\Controllers\PerformanceController;
 use App\Http\Controllers\AnnouncementController;
 use App\Http\Controllers\CoursePaymentController;
+use App\Http\Controllers\DocumentAdminController;
 use App\Http\Controllers\VirtualWalletController;
 use App\Http\Controllers\AdminAnalyticsController;
 use App\Http\Controllers\ClientFinancialController;
+use App\Http\Controllers\DocumentPaymentController;
 use App\Http\Controllers\AdminPerformanceController;
 use App\Http\Controllers\AdminAnnouncementController;
 use App\Http\Controllers\AdminVirtualWalletController;
@@ -517,6 +520,41 @@ Route::middleware('auth')->group(function () {
         ->name('marketplace.buy');
 });
 
+
+// Public
+// Route::get('/documents', [DocumentController::class, 'index'])->name('documents.index');
+// Route::get('/documents/{slug}', [DocumentController::class, 'show'])->name('documents.show');
+
+// Client
+Route::middleware('auth')->group(function () {
+    Route::get('/mes-documents', [DocumentController::class, 'myDocuments'])->name('documents.mine');
+    Route::get('/documents/{id}/download', [DocumentController::class, 'download'])->name('documents.download');
+});
+
+
+Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
+    Route::resource('documents', DocumentAdminController::class);
+    Route::patch('documents/{document}/toggle', [DocumentAdminController::class, 'toggle'])
+        ->name('documents.toggle');
+});
+
+
+Route::get('/etudes-businessplans', [DocumentController::class, 'index'])->name('docs.public.index');
+Route::get('/etudes-businessplans/{slug}', [DocumentController::class, 'show'])->name('docs.public.show');
+
+
+Route::middleware('auth')->group(function () {
+    Route::post('/documents/{document}/buy', [DocumentPaymentController::class, 'buy'])
+        ->name('documents.buy');
+});
+
+// retour user (public GET/POST)
+Route::match(['GET','POST'], '/documents/payment/cinetpay/return', [DocumentPaymentController::class, 'return'])
+    ->name('cinetpay.return.documents');
+
+// notify serveur (IPN) (public POST)
+Route::post('/documents/payment/cinetpay/notify', [DocumentPaymentController::class, 'notify'])
+    ->name('cinetpay.notify.documents');
 
 
 

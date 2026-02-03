@@ -47,40 +47,38 @@
         /* ===================================================== */
         /* ✅ Marketplace badge "Déjà acheté" (fix taille/position) */
         /* ===================================================== */
+        .market-badge-owned{
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            z-index: 30;
 
-.market-badge-owned{
-    position: absolute;
-    top: 12px;
-    left: 12px;
-    z-index: 30;
+            display: inline-flex;
+            align-items: center;
+            gap: .35rem;
 
-    display: inline-flex;
-    align-items: center;
-    gap: .35rem;
+            padding: .35rem .65rem;
+            font-size: .80rem;
+            font-weight: 700;
+            line-height: 1;
 
-    padding: .35rem .65rem;
-    font-size: .80rem;
-    font-weight: 700;
-    line-height: 1;
+            border-radius: 999px;
+            white-space: nowrap;
 
-    border-radius: 999px;
-    white-space: nowrap;
+            color: #fff;
+            background: rgba(25,135,84,.95); /* success */
+            box-shadow: 0 10px 24px rgba(0,0,0,.18);
+            backdrop-filter: blur(6px);
+        }
 
-    color: #fff;
-    background: rgba(25,135,84,.95); /* success */
-    box-shadow: 0 10px 24px rgba(0,0,0,.18);
-    backdrop-filter: blur(6px);
-}
-
-@media (max-width: 576px){
-    .market-badge-owned{
-        top: 10px;
-        left: 10px;
-        font-size: .75rem;
-        padding: .32rem .55rem;
-    }
-}
-
+        @media (max-width: 576px){
+            .market-badge-owned{
+                top: 10px;
+                left: 10px;
+                font-size: .75rem;
+                padding: .32rem .55rem;
+            }
+        }
     </style>
 
     {{-- Styles spécifiques pages --}}
@@ -163,6 +161,13 @@
                             </a>
                         </li>
 
+                        {{-- ✅ NOUVEAU : Études & Business plans --}}
+                        <li>
+                            <a class="dropdown-item" href="{{ route('docs.public.index') }}">
+                                📄 Études & Business plans
+                            </a>
+                        </li>
+
                         <li>
                             <a class="dropdown-item" href="{{ route('chocs.index') }}">
                                 ⚡ Chocs de marché (par secteur)
@@ -232,7 +237,7 @@
 
                         <li><hr class="dropdown-divider"></li>
 
-                        {{-- ✅ Marketplace aussi ici (logique: contenus payants) --}}
+                        {{-- ✅ Marketplace aussi ici --}}
                         <li>
                             <a class="dropdown-item d-flex justify-content-between align-items-center"
                                href="{{ route('marketplace.index') }}">
@@ -281,7 +286,6 @@
                             </a>
                         </li>
 
-                        {{-- ✅ Marketplace dans aide aussi --}}
                         <li>
                             <a class="dropdown-item" href="{{ route('marketplace.index') }}">
                                 🛍️ Marketplace
@@ -327,6 +331,13 @@
                             <li>
                                 <a class="dropdown-item" href="{{ route('my.products') }}">
                                     🧾 Mes produits
+                                </a>
+                            </li>
+
+                            {{-- ✅ NOUVEAU : Mes documents --}}
+                            <li>
+                                <a class="dropdown-item" href="{{ route('documents.mine') }}">
+                                    🧾 Mes documents
                                 </a>
                             </li>
 

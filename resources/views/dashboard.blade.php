@@ -45,7 +45,7 @@
             </div>
         </div>
 
-        {{-- 🧾 Mes produits --}}
+        {{-- 🧾 Mes produits Marketplace --}}
         <div class="col-md-4">
             <div class="card border-0 shadow-sm h-100">
                 <div class="card-body">
@@ -69,6 +69,21 @@
                         Solde virtuel + historique.
                     </div>
                     <a href="{{ route('wallet.index') }}" class="btn btn-primary btn-sm">
+                        Ouvrir
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        {{-- 📚 Mes documents (études / business plans) --}}
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="fw-semibold mb-1">📚 Mes documents</div>
+                    <div class="text-muted small mb-3">
+                        Études de marché & business plans achetés.
+                    </div>
+                    <a href="{{ route('documents.mine') }}" class="btn btn-primary btn-sm">
                         Ouvrir
                     </a>
                 </div>
