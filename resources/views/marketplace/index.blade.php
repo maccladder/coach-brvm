@@ -114,35 +114,34 @@
                 <div class="col-md-6 col-lg-4">
                     <div class="card border-0 shadow-sm h-100">
 
-                        {{-- ✅ Cover (fix gap) --}}
+                        {{-- ✅ Cover --}}
                         <div class="rounded-top overflow-hidden bg-light">
-    <div class="position-relative">
+                            <div class="position-relative">
 
-        @if($isOwnedCard)
-            <span class="market-badge-owned">
-                <i class="bi bi-check2-circle"></i> Déjà acheté
-            </span>
-        @endif
+                                @if($isOwnedCard)
+                                    <span class="market-badge-owned">
+                                        <i class="bi bi-check2-circle"></i> Déjà acheté
+                                    </span>
+                                @endif
 
-        <div class="ratio ratio-16x9 bg-light">
-            @if($p->cover_image_path)
-                <img src="{{ asset('storage/'.$p->cover_image_path) }}"
-                     alt="{{ $p->title }}"
-                     class="w-100 h-100 d-block"
-                     style="object-fit:cover; object-position:center;">
-            @else
-                <div class="w-100 h-100 d-flex align-items-center justify-content-center text-muted">
-                    <div class="text-center">
-                        <div style="font-size:28px;">📦</div>
-                        <div class="small">Aucune cover</div>
-                    </div>
-                </div>
-            @endif
-        </div>
+                                <div class="ratio ratio-16x9 bg-light">
+                                    @if($p->cover_image_path)
+                                        <img src="{{ asset('storage/'.$p->cover_image_path) }}"
+                                             alt="{{ $p->title }}"
+                                             class="w-100 h-100 d-block"
+                                             style="object-fit:cover; object-position:center;">
+                                    @else
+                                        <div class="w-100 h-100 d-flex align-items-center justify-content-center text-muted">
+                                            <div class="text-center">
+                                                <div style="font-size:28px;">📦</div>
+                                                <div class="small">Aucune cover</div>
+                                            </div>
+                                        </div>
+                                    @endif
+                                </div>
 
-    </div>
-</div>
-
+                            </div>
+                        </div>
 
                         <div class="card-body d-flex flex-column">
                             {{-- Badges --}}
@@ -186,12 +185,21 @@
                                 </div>
 
                                 <div class="d-flex gap-2">
+                                    {{-- ✅ Si déjà acheté: vidéo => visualiser / sinon => télécharger --}}
                                     @if($isOwnedCard)
-                                        <a href="{{ route('my.products.download', $p) }}"
-                                           class="btn btn-primary btn-sm"
-                                           title="Télécharger">
-                                            <i class="bi bi-download"></i>
-                                        </a>
+                                        @if($p->type === 'video')
+                                            <a href="{{ route('my.products.watch', $p) }}"
+                                               class="btn btn-success btn-sm"
+                                               title="Visualiser">
+                                                <i class="bi bi-play-circle"></i>
+                                            </a>
+                                        @else
+                                            <a href="{{ route('my.products.download', $p) }}"
+                                               class="btn btn-primary btn-sm"
+                                               title="Télécharger">
+                                                <i class="bi bi-download"></i>
+                                            </a>
+                                        @endif
                                     @endif
 
                                     <a href="{{ route('marketplace.show', $p->slug) }}"

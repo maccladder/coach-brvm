@@ -40,7 +40,7 @@
     <div class="card border-0 shadow-sm overflow-hidden">
         <div class="row g-0">
 
-            {{-- ✅ Cover (fix gap) --}}
+            {{-- ✅ Cover --}}
             <div class="col-lg-5 bg-light">
                 <div class="bg-light">
                     <div class="position-relative">
@@ -235,8 +235,14 @@
                         @if(!empty($isOwned) && $isOwned)
                             <div class="alert alert-success border mt-3 mb-0">
                                 <i class="bi bi-shield-check"></i>
-                                Produit déjà payé : tu peux le re-télécharger à tout moment depuis
-                                <a class="fw-semibold" href="{{ route('my.products') }}">Mes produits</a>.
+
+                                @if($product->type === 'video')
+                                    Produit déjà payé : tu peux le re-visualiser à tout moment depuis
+                                    <a class="fw-semibold" href="{{ route('my.products') }}">Mes produits</a>.
+                                @else
+                                    Produit déjà payé : tu peux le re-télécharger à tout moment depuis
+                                    <a class="fw-semibold" href="{{ route('my.products') }}">Mes produits</a>.
+                                @endif
                             </div>
                         @endif
                     @endif
