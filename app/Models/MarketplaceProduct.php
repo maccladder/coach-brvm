@@ -8,6 +8,7 @@ class MarketplaceProduct extends Model
 {
     protected $fillable = [
         'category_id','title','slug','type','description',
+        'support_whatsapp', // ✅ NEW
         'price','cover_image_path','status','is_featured'
     ];
 
@@ -17,9 +18,9 @@ class MarketplaceProduct extends Model
     }
 
     public function purchases()
-{
-    return $this->hasMany(\App\Models\MarketplacePurchase::class, 'product_id');
-}
+    {
+        return $this->hasMany(\App\Models\MarketplacePurchase::class, 'product_id');
+    }
 
     public function assets()
     {

@@ -1,3 +1,4 @@
+{{-- resources/views/admin/marketplace/products/edit.blade.php --}}
 @extends('layouts.admin')
 
 @section('title', 'Marketplace – Modifier produit')
@@ -47,15 +48,11 @@
     @endif
 
     @php
-        // Asset principal de type fichier (PDF/ZIP/RAR)
         $fileAsset = $product->assets->firstWhere('kind', 'file');
-
-        // Asset vidéo Cloudflare (stream)
         $streamAsset = $product->assets->firstWhere('kind', 'stream');
         $streamId = $streamAsset?->url;
     @endphp
 
-    {{-- ✅ UPDATE form unique --}}
     <form class="card border-0 shadow-sm"
           method="POST"
           action="{{ route('admin.marketplace.update', $product) }}"
@@ -124,6 +121,19 @@
                     <textarea name="description" class="form-control" rows="4">{{ old('description', $product->description) }}</textarea>
                 </div>
 
+                {{-- ✅ NEW: WhatsApp développeur --}}
+                <div class="col-md-6">
+                    <label class="form-label">WhatsApp du développeur (optionnel)</label>
+                    <input type="text"
+                           name="support_whatsapp"
+                           value="{{ old('support_whatsapp', $product->support_whatsapp) }}"
+                           class="form-control"
+                           placeholder="Ex: +2250788035432">
+                    <div class="form-text">
+                        Pour les <b>logiciels</b>, affiche un bouton “Contacter le développeur” si renseigné.
+                    </div>
+                </div>
+
                 {{-- COVER --}}
                 <div class="col-md-6">
                     <label class="form-label">Image de couverture</label>
@@ -146,7 +156,7 @@
                     <div class="form-text">PNG/JPG, max 4MB. (Si tu upload, ça remplace l’ancienne)</div>
                 </div>
 
-                <div class="col-md-6 d-flex align-items-end">
+                <div class="col-12 d-flex align-items-end">
                     <div class="form-check">
                         <input class="form-check-input"
                                type="checkbox"
@@ -239,7 +249,6 @@
 
 </div>
 
-{{-- ✅ JS: adapte l’upload file / vidéo selon le type --}}
 <script>
 (function(){
     const typeSelect = document.getElementById('typeSelect');
@@ -257,7 +266,6 @@
         if (t === 'video') {
             fileBlock.style.display  = 'none';
             videoBlock.style.display = 'block';
-            // ⚠️ ne pas faire fileInput.value='' (sinon tu perds une sélection si tu reviens)
             return;
         }
 

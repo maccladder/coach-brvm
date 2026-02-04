@@ -14,6 +14,21 @@ class MarketplaceProductAdminController extends Controller
     private const MAX_FILE_KB  = 409600;   // 400 MB
     private const MAX_BOOK_KB  = 51200;    // 50 MB
 
+    /**
+     * Nettoie un numéro WhatsApp : garde seulement les chiffres
+     * Ex: +225 07 88 03 54 32 => 2250788035432
+     */
+    private function cleanWhatsapp(?string $value): ?string
+    {
+        $raw = trim((string) $value);
+        if ($raw === '') {
+            return null;
+        }
+
+        $digits = preg_replace('/[^0-9]/', '', $raw);
+        return $digits ?: null;
+    }
+
     public function index(Request $request)
     {
         $q = MarketplaceProduct::query()
@@ -62,6 +77,9 @@ class MarketplaceProductAdminController extends Controller
             'status'      => ['required', 'in:draft,published'],
             'is_featured' => ['nullable', 'boolean'],
 
+            // ✅ NEW : WhatsApp support (optionnel)
+            'support_whatsapp' => ['nullable', 'string', 'max:32'],
+
             // cover image
             'cover'       => ['nullable', 'image', 'max:' . self::MAX_COVER_KB],
 
@@ -74,6 +92,9 @@ class MarketplaceProductAdminController extends Controller
             'file'  => 'fichier produit',
             'cover' => 'image de couverture',
         ]);
+
+        // Nettoyer WhatsApp (digits only)
+        $data['support_whatsapp'] = $this->cleanWhatsapp($data['support_whatsapp'] ?? null);
 
         // 2) Validation conditionnelle selon le type
         if ($data['type'] === 'book') {
@@ -115,6 +136,10 @@ class MarketplaceProductAdminController extends Controller
             'slug'             => $slug,
             'type'             => $data['type'],
             'description'      => $data['description'] ?? null,
+
+            // ✅ NEW
+            'support_whatsapp' => $data['support_whatsapp'],
+
             'price'            => (int) $data['price'],
             'status'           => $data['status'],
             'is_featured'      => (bool) ($data['is_featured'] ?? false),
@@ -176,6 +201,9 @@ class MarketplaceProductAdminController extends Controller
             'status'      => ['required', 'in:draft,published'],
             'is_featured' => ['nullable', 'boolean'],
 
+            // ✅ NEW : WhatsApp support (optionnel)
+            'support_whatsapp' => ['nullable', 'string', 'max:32'],
+
             'cover'       => ['nullable', 'image', 'max:' . self::MAX_COVER_KB], // 4MB
             'file'        => ['nullable', 'file', 'max:' . self::MAX_FILE_KB],  // 400MB
 
@@ -185,6 +213,9 @@ class MarketplaceProductAdminController extends Controller
             'file'  => 'fichier produit',
             'cover' => 'image de couverture',
         ]);
+
+        // Nettoyer WhatsApp (digits only)
+        $data['support_whatsapp'] = $this->cleanWhatsapp($data['support_whatsapp'] ?? null);
 
         // 2) Validation conditionnelle du fichier produit (book/software)
         $hasFileAsset = $product->assets->firstWhere('kind', 'file') !== null;
@@ -236,13 +267,17 @@ class MarketplaceProductAdminController extends Controller
             'title'            => $data['title'],
             'type'             => $data['type'],
             'description'      => $data['description'] ?? null,
+
+            // ✅ NEW
+            'support_whatsapp' => $data['support_whatsapp'],
+
             'price'            => (int) $data['price'],
             'status'           => $data['status'],
             'is_featured'      => (bool) ($data['is_featured'] ?? false),
             'cover_image_path' => $coverPath,
         ]);
 
-        // 5) Si type = vidéo => créer / update asset stream, et (optionnel) supprimer asset file
+        // 5) Si type = vidéo => créer / update asset stream + supprimer asset file
         if ($product->type === 'video') {
             $videoId = trim((string) $request->input('cloudflare_video_id'));
 
@@ -265,7 +300,7 @@ class MarketplaceProductAdminController extends Controller
                 ]);
             }
 
-            // Propre : si on passe un produit en vidéo, on supprime l'ancien fichier téléchargeable
+            // si on passe en vidéo, on supprime l'ancien fichier téléchargeable
             $product->assets()->where('kind', 'file')->delete();
 
             return back()->with('success', 'Produit mis à jour ✅');
@@ -301,7 +336,7 @@ class MarketplaceProductAdminController extends Controller
             }
         }
 
-        // Si on passe en book/software, on peut enlever un ancien asset stream (optionnel mais propre)
+        // Si on passe en book/software, on enlève un ancien asset stream (propre)
         $product->assets()->where('kind', 'stream')->delete();
 
         return back()->with('success', 'Produit mis à jour ✅');

@@ -1,3 +1,4 @@
+{{-- resources/views/marketplace/show.blade.php --}}
 @extends('layouts.app')
 
 @section('content')
@@ -15,7 +16,7 @@
         @endauth
     </div>
 
-    {{-- ✅ NOUVEAU : Devenir vendeur --}}
+    {{-- ✅ Devenir vendeur --}}
     <div class="alert alert-warning border-0 shadow-sm d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
         <div>
             <div class="fw-semibold">💼 Tu veux vendre sur la Marketplace ?</div>
@@ -40,34 +41,32 @@
     <div class="card border-0 shadow-sm overflow-hidden">
         <div class="row g-0">
 
-            {{-- ✅ Cover --}}
+            {{-- Cover --}}
             <div class="col-lg-5 bg-light">
-                <div class="bg-light">
-                    <div class="position-relative">
+                <div class="position-relative">
 
-                        @if(!empty($isOwned) && $isOwned)
-                            <span class="market-badge-owned">
-                                <i class="bi bi-check2-circle"></i> Déjà acheté
-                            </span>
-                        @endif
+                    @if(!empty($isOwned) && $isOwned)
+                        <span class="market-badge-owned">
+                            <i class="bi bi-check2-circle"></i> Déjà acheté
+                        </span>
+                    @endif
 
-                        <div class="ratio ratio-4x3 bg-light">
-                            @if($product->cover_image_path)
-                                <img src="{{ asset('storage/'.$product->cover_image_path) }}"
-                                     alt="{{ $product->title }}"
-                                     class="w-100 h-100 d-block"
-                                     style="object-fit:cover; object-position:center;">
-                            @else
-                                <div class="w-100 h-100 d-flex align-items-center justify-content-center text-muted">
-                                    <div class="text-center">
-                                        <div style="font-size:38px;">📦</div>
-                                        <div class="small">Aucune cover</div>
-                                    </div>
+                    <div class="ratio ratio-4x3 bg-light">
+                        @if($product->cover_image_path)
+                            <img src="{{ asset('storage/'.$product->cover_image_path) }}"
+                                 alt="{{ $product->title }}"
+                                 class="w-100 h-100 d-block"
+                                 style="object-fit:cover; object-position:center;">
+                        @else
+                            <div class="w-100 h-100 d-flex align-items-center justify-content-center text-muted">
+                                <div class="text-center">
+                                    <div style="font-size:38px;">📦</div>
+                                    <div class="small">Aucune cover</div>
                                 </div>
-                            @endif
-                        </div>
-
+                            </div>
+                        @endif
                     </div>
+
                 </div>
             </div>
 
@@ -82,6 +81,10 @@
                             'software' => '🧩 Logiciel',
                             default => ucfirst($product->type),
                         };
+
+                        // ✅ WhatsApp dev (visible pour TOUS si software + numéro)
+                        $wa = preg_replace('/[^0-9]/', '', (string) ($product->support_whatsapp ?? ''));
+                        $waText = rawurlencode("Bonjour, je suis intéressé par votre logiciel \"{$product->title}\" sur Coach BRVM Marketplace.");
                     @endphp
 
                     <div class="d-flex flex-wrap gap-2 mb-2">
@@ -128,25 +131,22 @@
                         </strong>.
                     </div>
 
-                    {{-- ✅ CTA cohérent --}}
+                    {{-- ✅ CTA --}}
                     <div class="d-flex flex-wrap gap-2">
                         @auth
                             @if(!empty($isOwned) && $isOwned)
 
                                 @if($product->type === 'video')
-                                    <a href="{{ route('my.products.watch', $product) }}"
-                                       class="btn btn-success">
+                                    <a href="{{ route('my.products.watch', $product) }}" class="btn btn-success">
                                         <i class="bi bi-play-circle"></i> Visualiser
                                     </a>
                                 @else
-                                    <a href="{{ route('my.products.download', $product) }}"
-                                       class="btn btn-success">
+                                    <a href="{{ route('my.products.download', $product) }}" class="btn btn-success">
                                         <i class="bi bi-download"></i> Télécharger
                                     </a>
                                 @endif
 
                             @else
-                                {{-- ✅ Achat ACTIF (POST) --}}
                                 <form method="POST" action="{{ route('marketplace.buy', $product) }}">
                                     @csrf
                                     <button type="submit" class="btn btn-primary">
@@ -162,6 +162,15 @@
                             </a>
                         @endguest
 
+                        {{-- ✅ Contacter le développeur : TOUJOURS visible (guest / payé / non payé) --}}
+                        @if($product->type === 'software' && !empty($wa))
+                            <a class="btn btn-outline-success"
+                               href="https://wa.me/{{ $wa }}?text={{ $waText }}"
+                               target="_blank" rel="noopener">
+                                <i class="bi bi-whatsapp"></i> Contacter le développeur
+                            </a>
+                        @endif
+
                         <a href="{{ route('marketplace.index') }}" class="btn btn-outline-secondary">
                             Continuer à explorer
                         </a>
@@ -169,7 +178,6 @@
 
                     <hr class="my-4">
 
-                    {{-- Ce que tu reçois --}}
                     <h5 class="fw-bold mb-2">📦 Ce que tu reçois</h5>
 
                     @if($product->assets->isEmpty())
@@ -200,7 +208,6 @@
                                     </div>
 
                                     @if(!empty($isOwned) && $isOwned)
-
                                         @if($product->type === 'video')
                                             <a href="{{ route('my.products.watch', $product) }}"
                                                class="btn btn-outline-success btn-sm">
@@ -212,9 +219,7 @@
                                                 <i class="bi bi-unlock"></i> Accéder
                                             </a>
                                         @endif
-
                                     @else
-                                        {{-- ✅ Débloquer => Acheter (POST) --}}
                                         @auth
                                             <form method="POST" action="{{ route('marketplace.buy', $product) }}">
                                                 @csrf
@@ -265,8 +270,7 @@
             <div class="row g-3">
                 @foreach($related as $p)
                     <div class="col-md-6 col-lg-4">
-                        <a href="{{ route('marketplace.show', $p->slug) }}"
-                           class="text-decoration-none text-dark">
+                        <a href="{{ route('marketplace.show', $p->slug) }}" class="text-decoration-none text-dark">
                             <div class="card border-0 shadow-sm h-100">
                                 <div class="ratio ratio-16x9 bg-light rounded-top overflow-hidden position-relative">
                                     @if($p->cover_image_path)

@@ -75,4 +75,18 @@ class MarketplaceController extends Controller
 
         return view('marketplace.show', compact('product', 'related', 'isOwned'));
     }
+
+//     public function show($slug)
+// {
+//     $product = MarketplaceProduct::with(['category','assets'])->where('slug', $slug)->firstOrFail();
+
+//     dd([
+//         'support_whatsapp' => $product->support_whatsapp,
+//         'type' => $product->type,
+//         'slug' => $product->slug,
+//     ]);
+
+//     return view('marketplace.show', compact('product'));
+// }
+
 }

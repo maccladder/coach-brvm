@@ -1,3 +1,4 @@
+{{-- resources/views/admin/marketplace/products/create.blade.php --}}
 @extends('layouts.admin')
 
 @section('title', 'Marketplace – Nouveau produit')
@@ -41,7 +42,7 @@
                            name="title"
                            value="{{ old('title') }}"
                            class="form-control"
-                           placeholder="Ex: BRVM Pratique (PDF) – Outils d’analyse">
+                           placeholder="Ex: Proformine – Générateur de facture proforma (Windows)">
                 </div>
 
                 <div class="col-md-4">
@@ -90,13 +91,26 @@
                               placeholder="Décris le contenu, ce que l’utilisateur reçoit, etc.">{{ old('description') }}</textarea>
                 </div>
 
+                {{-- ✅ NEW: WhatsApp développeur (optionnel) --}}
+                <div class="col-md-6">
+                    <label class="form-label">WhatsApp du développeur (optionnel)</label>
+                    <input type="text"
+                           name="support_whatsapp"
+                           value="{{ old('support_whatsapp') }}"
+                           class="form-control"
+                           placeholder="Ex: +2250788035432">
+                    <div class="form-text">
+                        Visible surtout pour les <b>logiciels</b> : un bouton “Contacter le développeur” s’affichera si renseigné.
+                    </div>
+                </div>
+
                 <div class="col-md-6">
                     <label class="form-label">Image de couverture</label>
                     <input type="file" name="cover" class="form-control" accept="image/*">
                     <div class="form-text">PNG/JPG, max 4MB.</div>
                 </div>
 
-                <div class="col-md-6 d-flex align-items-end">
+                <div class="col-12 d-flex align-items-end">
                     <div class="form-check">
                         <input class="form-check-input" type="checkbox" name="is_featured" value="1" id="featured"
                                @checked(old('is_featured'))>
