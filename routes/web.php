@@ -580,6 +580,18 @@ Route::post('/wallet/topup/paystack', [VirtualWalletController::class, 'topupPay
     Route::get('/wallet/topup/paystack/callback', [VirtualWalletController::class, 'paystackCallback'])
     ->name('wallet.paystack.callback');
 
+    // ✅ Marketplace Paystack (auth)
+Route::middleware('auth')->group(function () {
+
+    Route::post('/marketplace/{product}/buy/paystack', [\App\Http\Controllers\MarketplacePaymentController::class, 'buyPaystack'])
+        ->name('paystack.marketplace.buy');
+
+});
+
+// ✅ Callback Paystack (PUBLIC) - Paystack redirige ici
+Route::get('/paystack/marketplace/callback', [\App\Http\Controllers\MarketplacePaymentController::class, 'paystackCallback'])
+    ->name('paystack.marketplace.callback');
+
 
 
 

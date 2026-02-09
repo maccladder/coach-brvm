@@ -147,10 +147,19 @@
                                 @endif
 
                             @else
+                                {{-- ✅ CinetPay --}}
                                 <form method="POST" action="{{ route('marketplace.buy', $product) }}">
                                     @csrf
                                     <button type="submit" class="btn btn-primary">
-                                        <i class="bi bi-credit-card"></i> Acheter maintenant
+                                        <i class="bi bi-credit-card"></i> Payer avec CinetPay
+                                    </button>
+                                </form>
+
+                                {{-- ✅ Paystack --}}
+                                <form method="POST" action="{{ route('paystack.marketplace.buy', $product) }}">
+                                    @csrf
+                                    <button type="submit" class="btn btn-dark">
+                                        <i class="bi bi-shield-check"></i> Payer avec Paystack
                                     </button>
                                 </form>
                             @endif
@@ -221,12 +230,23 @@
                                         @endif
                                     @else
                                         @auth
-                                            <form method="POST" action="{{ route('marketplace.buy', $product) }}">
-                                                @csrf
-                                                <button type="submit" class="btn btn-outline-primary btn-sm">
-                                                    Débloquer
-                                                </button>
-                                            </form>
+                                            <div class="d-flex flex-wrap gap-2">
+                                                {{-- ✅ CinetPay --}}
+                                                <form method="POST" action="{{ route('marketplace.buy', $product) }}">
+                                                    @csrf
+                                                    <button type="submit" class="btn btn-outline-primary btn-sm">
+                                                        Débloquer (CinetPay)
+                                                    </button>
+                                                </form>
+
+                                                {{-- ✅ Paystack --}}
+                                                <form method="POST" action="{{ route('paystack.marketplace.buy', $product) }}">
+                                                    @csrf
+                                                    <button type="submit" class="btn btn-outline-dark btn-sm">
+                                                        Débloquer (Paystack)
+                                                    </button>
+                                                </form>
+                                            </div>
                                         @else
                                             <a href="{{ route('login') }}" class="btn btn-outline-primary btn-sm">
                                                 Débloquer

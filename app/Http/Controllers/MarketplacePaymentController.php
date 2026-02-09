@@ -14,6 +14,9 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
 use App\Mail\PaymentReceivedMail;
 
+use App\Services\PaystackService;
+
+
 class MarketplacePaymentController extends Controller
 {
     public function __construct(private CinetpayService $cinetpay) {}
@@ -303,4 +306,186 @@ class MarketplacePaymentController extends Controller
             ->route('my.products')
             ->with('success', "✅ Paiement reçu. Si validé, ton produit est débloqué.");
     }
+
+    public function buyPaystack(Request $request, MarketplaceProduct $product, PaystackService $paystack)
+{
+    $user = $request->user();
+
+    // ✅ déjà acheté ?
+    $alreadyPaid = $user->purchasedProducts()
+        ->where('marketplace_products.id', $product->id)
+        ->wherePivot('status', 'paid')
+        ->exists();
+
+    if ($alreadyPaid) {
+        return redirect()
+            ->route('marketplace.show', $product->slug)
+            ->with('success', '✅ Produit déjà acheté. Tu peux le télécharger / regarder.');
+    }
+
+    // ✅ transaction id unique
+    $transactionId = 'MP-' . now()->format('YmdHis') . '-' . Str::upper(Str::random(6));
+
+    // 1) purchase pending
+    DB::table('marketplace_purchases')->updateOrInsert(
+        ['user_id' => $user->id, 'product_id' => $product->id],
+        [
+            'status'        => 'pending',
+            'amount'        => (int) $product->price,
+            'provider'      => 'paystack',
+            'provider_ref'  => $transactionId,
+            'paid_at'       => null,
+            'updated_at'    => now(),
+            'created_at'    => now(),
+        ]
+    );
+
+    // 2) Payment log
+    Payment::updateOrCreate(
+        ['transaction_id' => $transactionId],
+        [
+            'user_id'         => $user->id,
+            'amount_paid'     => (int) $product->price,
+            'amount_virtual'  => 0,
+            'purpose'         => 'marketplace',
+            'status'          => 'pending',
+            'credited_at'     => null,
+            'meta'            => [
+                'product_id'    => $product->id,
+                'product_slug'  => $product->slug,
+                'product_title' => $product->title,
+                'provider'      => 'paystack',
+            ],
+        ]
+    );
+
+    $callbackUrl = route('paystack.marketplace.callback', [], true);
+
+    $authUrl = $paystack->initialize([
+        'email'        => $user->email,
+        'amount'       => (int) $product->price, // XOF
+        'currency'     => 'XOF',
+        'reference'    => $transactionId,
+        'callback_url' => $callbackUrl,
+        'metadata'     => [
+            'purpose'    => 'marketplace',
+            'product_id' => $product->id,
+            'user_id'    => $user->id,
+        ],
+    ]);
+
+    if (!$authUrl) {
+        DB::table('marketplace_purchases')
+            ->where('provider_ref', $transactionId)
+            ->update(['status' => 'failed', 'updated_at' => now()]);
+
+        Payment::where('transaction_id', $transactionId)->update(['status' => 'failed']);
+
+        return back()->with('error', "❌ Impossible d'initialiser Paystack.");
+    }
+
+    return redirect()->away($authUrl);
+}
+
+public function paystackCallback(Request $request, PaystackService $paystack)
+{
+    $reference = (string) ($request->query('reference') ?: $request->query('trxref'));
+
+    if (!$reference) {
+        return redirect()->route('marketplace.index')->with('error', 'Référence Paystack manquante.');
+    }
+
+    // 1) Vérifier chez Paystack
+    $data = $paystack->verify($reference);
+
+    if (!$data) {
+        return redirect()->route('marketplace.index')->with('error', 'Impossible de vérifier la transaction Paystack.');
+    }
+
+    if (($data['status'] ?? null) !== 'success') {
+        return redirect()->route('marketplace.index')->with('error', 'Paiement non validé : ' . ($data['status'] ?? 'unknown'));
+    }
+
+    // 2) Retrouver Payment
+    $payment = Payment::where('transaction_id', $reference)->first();
+
+    if (!$payment) {
+        Log::error('PAYSTACK_MP_PAYMENT_NOT_FOUND', ['reference' => $reference, 'data' => $data]);
+        return redirect()->route('marketplace.index')->with('error', 'Paiement introuvable en base.');
+    }
+
+    // 3) Sécurité montant
+    $paid = (int) (($data['amount'] ?? 0) / 100); // XOF
+    if ($paid <= 0 || $paid !== (int) $payment->amount_paid) {
+        Log::error('PAYSTACK_MP_AMOUNT_MISMATCH', [
+            'reference' => $reference,
+            'db_amount' => (int) $payment->amount_paid,
+            'paid' => $paid,
+            'raw_amount' => $data['amount'] ?? null,
+        ]);
+        return redirect()->route('marketplace.index')->with('error', 'Montant Paystack invalide.');
+    }
+
+    $productSlug = data_get($payment->meta, 'product_slug');
+
+    // 4) Débloquer (idempotent)
+    DB::transaction(function () use ($reference, $payment, $data) {
+
+        // lock payment
+        $paymentLocked = Payment::where('id', $payment->id)->lockForUpdate()->first();
+
+        if ($paymentLocked->status === 'paid') {
+            return; // déjà fait
+        }
+
+        // unlock purchase
+        DB::table('marketplace_purchases')
+            ->where('provider_ref', $reference)
+            ->update([
+                'status'     => 'paid',
+                'paid_at'    => now(),
+                'updated_at' => now(),
+            ]);
+
+        $paymentLocked->status = 'paid';
+        $paymentLocked->credited_at = $paymentLocked->credited_at ?? now();
+        $paymentLocked->meta = array_merge((array) ($paymentLocked->meta ?? []), [
+            'paystack' => [
+                'reference' => $reference,
+                'channel'   => $data['channel'] ?? null,
+                'paid_at'   => $data['paid_at'] ?? null,
+            ],
+        ]);
+        $paymentLocked->save();
+
+        // ✅ backup mail admin (comme tu fais déjà)
+        if (!$paymentLocked->notified_at) {
+            try {
+                $paymentLocked->loadMissing('user');
+
+                Mail::to([
+                    'maccladder@gmail.com',
+                    'ghislainkouadiodjaha@gmail.com',
+                ])->send(new PaymentReceivedMail($paymentLocked));
+
+                $paymentLocked->notified_at = now();
+                $paymentLocked->save();
+            } catch (\Throwable $e) {
+                Log::error('Marketplace paystackCallback: mail error', [
+                    'reference' => $reference,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+        }
+    });
+
+    if ($productSlug) {
+        return redirect()
+            ->route('marketplace.show', $productSlug)
+            ->with('success', "✅ Paiement Paystack confirmé. Produit débloqué.");
+    }
+
+    return redirect()->route('my.products')->with('success', "✅ Paiement Paystack confirmé. Produit débloqué.");
+}
+
 }
