@@ -565,6 +565,11 @@ Route::get('/test/paystack', [PaystackTestController::class, 'form'])->name('pay
 Route::post('/test/paystack/start', [PaystackTestController::class, 'start'])->name('paystack.start');
 Route::get('/paystack/callback', [PaystackTestController::class, 'callback'])->name('paystack.callback');
 
+use App\Http\Controllers\PaystackWebhookController;
+
+Route::post('/paystack/webhook', [PaystackWebhookController::class, 'handle']);
+
+
 
 
 
