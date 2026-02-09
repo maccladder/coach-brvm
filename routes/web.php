@@ -577,6 +577,10 @@ Route::post('/wallet/topup/paystack', [VirtualWalletController::class, 'topupPay
     ->middleware('auth')
     ->name('wallet.topup.paystack');
 
+    Route::get('/wallet/topup/paystack/callback', [VirtualWalletController::class, 'paystackCallback'])
+    ->name('wallet.paystack.callback');
+
+
 
 
 

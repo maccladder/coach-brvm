@@ -362,6 +362,102 @@ public function buy(Request $request)
     }
 }
 
+public function paystackCallback(Request $request, PaystackService $paystack)
+{
+    $reference = (string) ($request->query('reference') ?: $request->query('trxref'));
+
+    Log::error('PAYSTACK_WALLET_CALLBACK_HIT', [
+        'reference' => $reference,
+        'all' => $request->all(),
+        'url' => $request->fullUrl(),
+    ]);
+
+    if (!$reference) {
+        return redirect()->route('wallet.index')->with('error', 'Référence Paystack manquante.');
+    }
+
+    // 1) Vérifier chez Paystack
+    $data = $paystack->verify($reference);
+
+    if (!$data) {
+        return redirect()->route('wallet.index')->with('error', 'Impossible de vérifier la transaction Paystack.');
+    }
+
+    if (($data['status'] ?? null) !== 'success') {
+        return redirect()->route('wallet.index')->with('error', 'Paiement non validé : ' . ($data['status'] ?? 'unknown'));
+    }
+
+    // 2) Retrouver le payment par transaction_id (= reference)
+    $payment = Payment::where('transaction_id', $reference)->first();
+
+    if (!$payment) {
+        Log::error('PAYSTACK_CALLBACK_PAYMENT_NOT_FOUND', ['reference' => $reference, 'data' => $data]);
+        return redirect()->route('wallet.index')->with('error', 'Paiement introuvable en base.');
+    }
+
+    // 3) Sécurité: montant (Paystack renvoie amount en "kobo-like")
+    $paid = (int) (($data['amount'] ?? 0) / 100); // XOF
+    if ($paid <= 0 || $paid !== (int) $payment->amount_paid) {
+        Log::error('PAYSTACK_AMOUNT_MISMATCH', [
+            'reference' => $reference,
+            'db_amount' => (int) $payment->amount_paid,
+            'paid' => $paid,
+            'raw_amount' => $data['amount'] ?? null,
+        ]);
+        // tu peux décider de bloquer ou tolérer
+        // je bloque pour éviter crédit frauduleux
+        return redirect()->route('wallet.index')->with('error', 'Montant Paystack invalide.');
+    }
+
+    // 4) Crédit wallet (idempotent)
+    DB::transaction(function () use ($payment, $reference, $data) {
+
+        // lock paiement
+        $payment = Payment::where('id', $payment->id)->lockForUpdate()->first();
+
+        if ($payment->credited_at) {
+            // déjà crédité
+            return;
+        }
+
+        $wallet = VirtualWallet::where('user_id', $payment->user_id)->lockForUpdate()->first();
+        if (!$wallet) {
+            $wallet = VirtualWallet::create(['user_id' => $payment->user_id, 'balance' => 0]);
+        }
+
+        $wallet->balance = (float) $wallet->balance + (float) $payment->amount_virtual;
+        $wallet->save();
+
+        VirtualWalletTransaction::create([
+            'user_id' => $payment->user_id,
+            'type'    => 'topup',
+            'amount'  => (float) $payment->amount_virtual,
+            'meta'    => [
+                'source'    => 'paystack_callback',
+                'reference' => $reference,
+                'paystack'  => [
+                    'channel' => $data['channel'] ?? null,
+                    'paid_at' => $data['paid_at'] ?? null,
+                ],
+            ],
+        ]);
+
+        $payment->status = 'SUCCESS';
+        $payment->credited_at = now();
+        $payment->meta = array_merge((array) ($payment->meta ?? []), [
+            'paystack' => [
+                'reference' => $reference,
+                'channel'   => $data['channel'] ?? null,
+                'paid_at'   => $data['paid_at'] ?? null,
+            ],
+        ]);
+        $payment->save();
+    });
+
+    return redirect()->route('wallet.index')->with('success', '✅ Paiement Paystack confirmé. Portefeuille crédité.');
+}
+
+
 
 public function topupPayPaystack(Request $request, PaystackService $paystack)
 {
@@ -389,7 +485,8 @@ public function topupPayPaystack(Request $request, PaystackService $paystack)
     $payment->status = 'PENDING';
     $payment->save();
 
-    $callbackUrl = route('paystack.callback', [], true);
+    $callbackUrl = route('wallet.paystack.callback', [], true);
+
 
     $authUrl = $paystack->initialize([
         'email'        => $user->email,
