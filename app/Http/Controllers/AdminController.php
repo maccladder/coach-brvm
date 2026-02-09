@@ -13,6 +13,7 @@ use App\Services\BrvmBubbleService;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Storage;
 
 class AdminController extends Controller
 {
@@ -21,6 +22,66 @@ class AdminController extends Controller
     {
         return view('admin.login');
     }
+
+    public function dailyBocsReplace(Request $request, DailyBoc $dailyBoc, BrvmBubbleService $bubble)
+{
+    $request->validate([
+        'file' => ['required', 'file', 'mimes:pdf', 'max:20480'],
+    ]);
+
+    $dateString = Carbon::parse($dailyBoc->date_boc)->toDateString();
+
+    DB::transaction(function () use ($request, $dailyBoc, $bubble) {
+
+        // 1) Sauvegarder l'ancien chemin
+        $oldPath = $dailyBoc->file_path;
+
+        // 2) Stocker le nouveau PDF
+        $newPath = $request->file('file')->store('bocs', 'public');
+
+        // 3) Mettre à jour le DailyBoc
+        $dailyBoc->previous_file_path = $oldPath;
+        $dailyBoc->file_path = $newPath;
+        $dailyBoc->original_name = $request->file('file')->getClientOriginalName();
+        $dailyBoc->replaced_at = now();
+        $dailyBoc->replaced_by = auth()->id(); // si admin est connecté via auth
+        $dailyBoc->save();
+
+        // 4) Re-extraction + rewrite BocStock
+        $stocks = $bubble->extractFromBoc($dailyBoc->file_path);
+
+        BocStock::where('daily_boc_id', $dailyBoc->id)->delete();
+
+        $rows = [];
+        foreach ($stocks as $s) {
+            $ticker = strtoupper(trim($s['ticker'] ?? ''));
+            if ($ticker === '') continue;
+
+            $rows[] = [
+                'daily_boc_id' => $dailyBoc->id,
+                'date_boc'     => $dailyBoc->date_boc,
+                'ticker'       => $ticker,
+                'name'         => $s['name'] ?? null,
+                'price'        => $s['price'] ?? null,
+                'change'       => $s['change'] ?? null,
+                'created_at'   => now(),
+                'updated_at'   => now(),
+            ];
+        }
+
+        if (!empty($rows)) {
+            BocStock::insert($rows);
+        }
+
+        // OPTION: supprimer l'ancien fichier (si tu veux garder aucune trace disque)
+        // if ($oldPath && Storage::disk('public')->exists($oldPath)) {
+        //     Storage::disk('public')->delete($oldPath);
+        // }
+    });
+
+    return back()->with('success', "✅ BOC du {$dateString} remplacée + données recalculées.");
+}
+
 
     /** Vérification du code admin */
     public function login(Request $request)

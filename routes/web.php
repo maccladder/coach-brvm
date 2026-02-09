@@ -604,6 +604,8 @@ Route::get('/paystack/courses/callback', [\App\Http\Controllers\CoursePaymentCon
     ->name('paystack.courses.callback');
 
 
+Route::post('/admin/daily-bocs/{dailyBoc}/replace', [AdminController::class, 'dailyBocsReplace'])
+    ->name('admin.bocs.replace');
 
 
 
