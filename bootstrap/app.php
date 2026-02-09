@@ -28,6 +28,9 @@ return Application::configure(basePath: dirname(__DIR__))
     'payments/cinetpay/ipn',
     'payments/cinetpay/return',
 
+    // ✅ Paystack
+    'paystack/webhook',
+
      // ✅ Marketplace (NOUVEAU)
     'marketplace/payment/cinetpay/notify',
     'marketplace/payment/cinetpay/return',
