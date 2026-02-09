@@ -33,6 +33,7 @@ use App\Http\Controllers\ChocsMarcheController;
 use App\Http\Controllers\MarketplaceController;
 use App\Http\Controllers\PerformanceController;
 use App\Http\Controllers\AnnouncementController;
+use App\Http\Controllers\PaystackTestController;
 use App\Http\Controllers\CoursePaymentController;
 use App\Http\Controllers\DocumentAdminController;
 use App\Http\Controllers\VirtualWalletController;
@@ -555,6 +556,14 @@ Route::match(['GET','POST'], '/documents/payment/cinetpay/return', [DocumentPaym
 // notify serveur (IPN) (public POST)
 Route::post('/documents/payment/cinetpay/notify', [DocumentPaymentController::class, 'notify'])
     ->name('cinetpay.notify.documents');
+
+    //routes test pour paystack
+
+
+
+Route::get('/test/paystack', [PaystackTestController::class, 'form'])->name('paystack.test');
+Route::post('/test/paystack/start', [PaystackTestController::class, 'start'])->name('paystack.start');
+Route::get('/paystack/callback', [PaystackTestController::class, 'callback'])->name('paystack.callback');
 
 
 
