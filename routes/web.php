@@ -4,6 +4,7 @@ use App\Services\CloudflareStream;
 use Illuminate\Support\Facades\Http;
 
 use App\Services\BrvmMarketAiService;
+use App\Http\Controllers\PaystackWebhookController;
 
 use Illuminate\Support\Facades\Route;
 use App\Services\BrvmActionsAiService;
@@ -565,9 +566,17 @@ Route::get('/test/paystack', [PaystackTestController::class, 'form'])->name('pay
 Route::post('/test/paystack/start', [PaystackTestController::class, 'start'])->name('paystack.start');
 Route::get('/paystack/callback', [PaystackTestController::class, 'callback'])->name('paystack.callback');
 
-use App\Http\Controllers\PaystackWebhookController;
 
-Route::post('/paystack/webhook', [PaystackWebhookController::class, 'handle']);
+
+Route::post('/paystack/webhook', [PaystackWebhookController::class, 'handle'])
+    ->name('paystack.webhook');
+
+
+
+Route::post('/wallet/topup/paystack', [VirtualWalletController::class, 'topupPayPaystack'])
+    ->middleware('auth')
+    ->name('wallet.topup.paystack');
+
 
 
 

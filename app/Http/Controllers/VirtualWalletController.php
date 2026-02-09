@@ -9,6 +9,7 @@ use App\Models\VirtualWallet;
 use App\Models\VirtualPosition;
 use App\Models\WalletTransaction;
 use App\Services\CinetpayService;
+use App\Services\PaystackService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Services\BrvmActionsAiService;
@@ -359,6 +360,55 @@ public function buy(Request $request)
 
         return back()->with('error', $e->getMessage());
     }
+}
+
+
+public function topupPayPaystack(Request $request, PaystackService $paystack)
+{
+    $request->validate([
+        'payment_id' => ['required', 'integer', 'exists:payments,id'],
+    ]);
+
+    $user = $request->user();
+
+    $payment = Payment::query()
+        ->where('id', $request->payment_id)
+        ->where('user_id', $user->id)
+        ->firstOrFail();
+
+    // ✅ déjà crédité → stop
+    if ($payment->credited_at !== null) {
+        return redirect()->route('wallet.index')->with('success', 'Paiement déjà validé ✅');
+    }
+
+    // ✅ référence Paystack = transaction_id (important pour webhook)
+    if (empty($payment->transaction_id)) {
+        $payment->transaction_id = 'WALLET_' . now()->format('YmdHis') . '_' . Str::upper(Str::random(6));
+    }
+
+    $payment->status = 'PENDING';
+    $payment->save();
+
+    $callbackUrl = route('paystack.callback', [], true);
+
+    $authUrl = $paystack->initialize([
+        'email'        => $user->email,
+        'amount'       => (int) $payment->amount_paid, // XOF
+        'currency'     => 'XOF',
+        'reference'    => $payment->transaction_id,
+        'callback_url' => $callbackUrl,
+        'metadata'     => [
+            'purpose'    => 'wallet_topup',
+            'payment_id' => $payment->id,
+            'user_id'    => $user->id,
+        ],
+    ]);
+
+    if (!$authUrl) {
+        return back()->with('error', "Impossible d'initialiser Paystack.");
+    }
+
+    return redirect()->away($authUrl);
 }
 
 

@@ -2,14 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\Payments\PaystackWalletTopupService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
 class PaystackWebhookController extends Controller
 {
-    public function handle(Request $request)
+    public function handle(Request $request, PaystackWalletTopupService $walletTopup)
     {
-        // 1️⃣ Vérification signature Paystack (HMAC SHA512)
         $signature = $request->header('x-paystack-signature');
         $payload   = $request->getContent();
         $secret    = env('PAYSTACK_SECRET_KEY');
@@ -26,32 +26,17 @@ class PaystackWebhookController extends Controller
             return response()->json(['status' => 'unauthorized'], 401);
         }
 
-        // 2️⃣ Payload valide
-        $event = $request->input('event');
-        $data  = $request->input('data');
+        $event = (string) $request->input('event');
+        $data  = (array) $request->input('data', []);
 
         Log::info('Paystack webhook received', [
             'event' => $event,
             'reference' => $data['reference'] ?? null,
         ]);
 
-        // 3️⃣ On ne traite QUE les paiements réussis
         if ($event === 'charge.success') {
-            $reference = $data['reference'] ?? null;
-            $amount    = ($data['amount'] ?? 0) / 100; // retour en FCFA
-            $email     = $data['customer']['email'] ?? null;
-
-            // ⚠️ ICI : branchement business
-            // ex :
-            // - crédit wallet
-            // - valider commande marketplace
-            // - marquer transaction payée
-
-            Log::info('Paystack payment confirmed', [
-                'reference' => $reference,
-                'amount'    => $amount,
-                'email'     => $email,
-            ]);
+            // ✅ Délégation métier
+            $walletTopup->handleChargeSuccess($data);
         }
 
         return response()->json(['status' => 'ok'], 200);
