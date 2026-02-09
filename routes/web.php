@@ -593,6 +593,18 @@ Route::get('/paystack/marketplace/callback', [\App\Http\Controllers\MarketplaceP
     ->name('paystack.marketplace.callback');
 
 
+    // ✅ Paystack courses (auth)
+Route::middleware('auth')->group(function () {
+    Route::post('/formations/{course}/buy/paystack', [\App\Http\Controllers\CoursePaymentController::class, 'buyPaystack'])
+        ->name('courses.buy.paystack');
+});
+
+// ✅ Callback Paystack (PUBLIC)
+Route::get('/paystack/courses/callback', [\App\Http\Controllers\CoursePaymentController::class, 'paystackCallback'])
+    ->name('paystack.courses.callback');
+
+
+
 
 
 

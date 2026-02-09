@@ -33,12 +33,12 @@
                         ->whereNotNull('paid_at')
                         ->exists();
 
-                // Covers (public/courses/*.jpg)
+                // Covers
                 $covers = [
-    'brvm-debutant' => asset('courses/brvm-debutant.jpg'),
-    'brvm-intermediaire' => asset('courses/brvm-intermediaire.jpg'),
-    'brvm-pratique-outils-analyse-portefeuille-virtuel' => asset('courses/brvm-pratique.jpg'),
-];
+                    'brvm-debutant' => asset('courses/brvm-debutant.jpg'),
+                    'brvm-intermediaire' => asset('courses/brvm-intermediaire.jpg'),
+                    'brvm-pratique-outils-analyse-portefeuille-virtuel' => asset('courses/brvm-pratique.jpg'),
+                ];
 
                 $cover = $covers[$course->slug] ?? asset('courses/brvm-debutant.jpg');
             @endphp
@@ -46,7 +46,7 @@
             <div class="col-md-4">
                 <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden">
 
-                    {{-- Cover vidéo --}}
+                    {{-- Cover --}}
                     <div class="position-relative">
                         <img src="{{ $cover }}"
                              alt="Aperçu du cours"
@@ -61,7 +61,7 @@
                             </div>
                         </div>
 
-                        {{-- Badge acheté (sur l'image) --}}
+                        {{-- Badge acheté --}}
                         @if($isBought)
                             <span class="badge bg-success position-absolute top-0 start-0 m-2">
                                 ✔ Déjà acheté
@@ -81,11 +81,11 @@
                             {{ \Illuminate\Support\Str::limit($course->description, 130) }}
                         </p>
 
-                        {{-- Prix + action --}}
+                        {{-- Prix + actions --}}
                         <div class="d-flex justify-content-between align-items-center">
 
                             <div class="fw-bold text-success fs-6">
-                                {{ number_format($course->price_fcfa) }} FCFA
+                                {{ number_format($course->price_fcfa, 0, ',', ' ') }} FCFA
                             </div>
 
                             @auth
@@ -95,13 +95,25 @@
                                         ▶ Continuer
                                     </a>
                                 @else
-                                    <form method="POST" action="{{ route('courses.buy', $course) }}">
-                                        @csrf
-                                        <button type="submit"
-                                                class="btn btn-primary btn-sm rounded-pill px-3">
-                                            Acheter
-                                        </button>
-                                    </form>
+                                    <div class="d-flex gap-2">
+                                        {{-- CinetPay --}}
+                                        <form method="POST" action="{{ route('courses.buy', $course) }}">
+                                            @csrf
+                                            <button type="submit"
+                                                    class="btn btn-primary btn-sm rounded-pill px-3">
+                                                CinetPay
+                                            </button>
+                                        </form>
+
+                                        {{-- Paystack --}}
+                                        <form method="POST" action="{{ route('courses.buy.paystack', $course) }}">
+                                            @csrf
+                                            <button type="submit"
+                                                    class="btn btn-dark btn-sm rounded-pill px-3">
+                                                Paystack
+                                            </button>
+                                        </form>
+                                    </div>
                                 @endif
                             @else
                                 <a href="{{ route('login') }}"
