@@ -3,6 +3,8 @@
 use App\Services\CloudflareStream;
 use Illuminate\Support\Facades\Http;
 
+
+
 use App\Services\BrvmMarketAiService;
 use App\Http\Controllers\PaystackWebhookController;
 
@@ -607,6 +609,9 @@ Route::get('/paystack/courses/callback', [\App\Http\Controllers\CoursePaymentCon
 Route::post('/admin/daily-bocs/{dailyBoc}/replace', [AdminController::class, 'dailyBocsReplace'])
     ->name('admin.bocs.replace');
 
+
+Route::view('/strategies-investissement', 'aide.strategies')
+    ->name('aide.strategies');
 
 
 

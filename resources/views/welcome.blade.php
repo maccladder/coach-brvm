@@ -1,3 +1,4 @@
+{{-- resources/views/welcome.blade.php --}}
 @extends('layouts.app')
 
 @section('content')
@@ -360,6 +361,34 @@
                     <a href="{{ route('chocs.index') }}" class="btn btn-outline-dark fw-semibold">
                         Explorer →
                     </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    {{-- ✅ NOUVEAU : Module stratégies d’investissement --}}
+    <section class="py-4 border-bottom bg-white">
+        <div class="container" style="max-width:1100px;">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body d-flex flex-wrap justify-content-between align-items-center gap-3">
+                    <div>
+                        <div class="fw-semibold">🧠 Nouveau : Techniques & stratégies d’investissement (BRVM)</div>
+                        <div class="text-muted small">
+                            Mean reversion, dividendes, suivi de tendance… avec les dangers à éviter
+                            et les outils Coach BRVM pour appliquer.
+                        </div>
+                    </div>
+                    <div class="d-flex flex-wrap gap-2">
+                        <a href="{{ route('aide.strategies') }}" class="btn btn-primary fw-semibold">
+                            Ouvrir le module →
+                        </a>
+                        <a href="https://coach-brvm.com/radar-marche" class="btn btn-outline-dark fw-semibold">
+                            📡 Radar
+                        </a>
+                        <a href="https://coach-brvm.com/dividendes?year=2025" class="btn btn-outline-success fw-semibold">
+                            🏆 Dividendes
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>

@@ -1,3 +1,4 @@
+{{-- resources/views/layouts/app.blade.php --}}
 <!doctype html>
 <html lang="fr">
 <head>
@@ -269,6 +270,13 @@
                         <li>
                             <a class="dropdown-item" href="{{ route('contact') }}">
                                 📩 Contact
+                            </a>
+                        </li>
+
+                        {{-- ✅ NOUVEAU : Stratégies --}}
+                        <li>
+                            <a class="dropdown-item" href="{{ route('aide.strategies') }}">
+                                🧠 Stratégies d’investissement
                             </a>
                         </li>
 
