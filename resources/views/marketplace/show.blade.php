@@ -148,18 +148,18 @@
 
                             @else
                                 {{-- ✅ CinetPay --}}
-                                <form method="POST" action="{{ route('marketplace.buy', $product) }}">
+                                {{-- <form method="POST" action="{{ route('marketplace.buy', $product) }}">
                                     @csrf
                                     <button type="submit" class="btn btn-primary">
                                         <i class="bi bi-credit-card"></i> Payer avec CinetPay
                                     </button>
-                                </form>
+                                </form> --}}
 
                                 {{-- ✅ Paystack --}}
                                 <form method="POST" action="{{ route('paystack.marketplace.buy', $product) }}">
                                     @csrf
                                     <button type="submit" class="btn btn-dark">
-                                        <i class="bi bi-shield-check"></i> Payer avec Paystack
+                                        <i class="bi bi-shield-check"></i> Payer
                                     </button>
                                 </form>
                             @endif
@@ -232,18 +232,18 @@
                                         @auth
                                             <div class="d-flex flex-wrap gap-2">
                                                 {{-- ✅ CinetPay --}}
-                                                <form method="POST" action="{{ route('marketplace.buy', $product) }}">
+                                                {{-- <form method="POST" action="{{ route('marketplace.buy', $product) }}">
                                                     @csrf
                                                     <button type="submit" class="btn btn-outline-primary btn-sm">
                                                         Débloquer (CinetPay)
                                                     </button>
-                                                </form>
+                                                </form> --}}
 
                                                 {{-- ✅ Paystack --}}
                                                 <form method="POST" action="{{ route('paystack.marketplace.buy', $product) }}">
                                                     @csrf
                                                     <button type="submit" class="btn btn-outline-dark btn-sm">
-                                                        Débloquer (Paystack)
+                                                        Débloquer
                                                     </button>
                                                 </form>
                                             </div>

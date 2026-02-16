@@ -60,6 +60,11 @@ public function marketplacePurchases()
     return $this->hasMany(\App\Models\MarketplacePurchase::class);
 }
 
+public function marketplaceProducts()
+{
+    return $this->hasMany(\App\Models\MarketplaceProduct::class, 'user_id');
+}
+
 public function documentPurchases()
 {
     return $this->hasMany(\App\Models\DocumentPurchase::class);

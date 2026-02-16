@@ -1,0 +1,281 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\MarketplaceCategory;
+use App\Models\MarketplaceProduct;
+use Illuminate\Http\Request;
+use Illuminate\Support\Str;
+
+class VendorProductController extends Controller
+{
+    // tailles (KB)
+    private const MAX_COVER_KB = 4096;    // 4MB
+    private const MAX_PDF_KB   = 51200;   // 50MB
+    private const MAX_ZIP_KB   = 409600;  // 400MB
+    private const MAX_VIDEO_KB = 512000;  // 500MB (ajuste si tu veux)
+
+    private function cleanWhatsapp(?string $value): ?string
+    {
+        $raw = trim((string) $value);
+        if ($raw === '') return null;
+
+        $digits = preg_replace('/[^0-9]/', '', $raw);
+        return $digits ?: null;
+    }
+
+    private function typeLabel(string $type): string
+    {
+        return match ($type) {
+            'pdf'   => 'PDF',
+            'zip'   => 'ZIP',
+            'video' => 'Video',
+            default => strtoupper($type),
+        };
+    }
+
+    public function index(Request $request)
+    {
+        $q = MarketplaceProduct::query()
+            ->with('category')
+            ->where('user_id', $request->user()->id)
+            ->latest();
+
+        if ($request->filled('status')) {
+            $q->where('status', (string) $request->input('status'));
+        }
+
+        $products = $q->paginate(15)->withQueryString();
+
+        return view('vendor.products.index', compact('products'));
+    }
+
+    public function create()
+    {
+        $categories = MarketplaceCategory::orderBy('name')->get();
+        $types = ['pdf' => 'PDF', 'video' => 'Vidéo', 'zip' => 'Fichier ZIP']; // service retiré (tu peux le remettre après)
+
+        return view('vendor.products.create', compact('categories', 'types'));
+    }
+
+    public function store(Request $request)
+    {
+        $data = $request->validate([
+            'category_id'      => ['required','integer','exists:marketplace_categories,id'],
+            'title'            => ['required','string','max:160'],
+            'type'             => ['required','in:pdf,video,zip'],
+            'description'      => ['nullable','string'],
+            'support_whatsapp' => ['nullable','string','max:30'],
+            'price'            => ['required','numeric','min:0'],
+            'cover_image'      => ['nullable','image','max:' . self::MAX_COVER_KB],
+
+            // ✅ NEW : fichier produit (optionnel au draft)
+            'file'             => ['nullable','file'],
+        ]);
+
+        $data['support_whatsapp'] = $this->cleanWhatsapp($data['support_whatsapp'] ?? null);
+
+        // ✅ Validation conditionnelle du fichier selon type (si fourni)
+        if ($request->hasFile('file')) {
+            if ($data['type'] === 'pdf') {
+                $request->validate([
+                    'file' => ['file','mimes:pdf','max:' . self::MAX_PDF_KB],
+                ], [], ['file' => 'fichier PDF']);
+            } elseif ($data['type'] === 'zip') {
+                $request->validate([
+                    'file' => ['file','mimes:zip,rar','max:' . self::MAX_ZIP_KB],
+                ], [], ['file' => 'archive ZIP/RAR']);
+            } elseif ($data['type'] === 'video') {
+                $request->validate([
+                    'file' => ['file','mimes:mp4,mov,m4v,avi','max:' . self::MAX_VIDEO_KB],
+                ], [], ['file' => 'fichier vidéo']);
+            }
+        }
+
+        // slug unique
+        $slug = Str::slug($data['title']);
+        $base = $slug;
+        $i = 2;
+        while (MarketplaceProduct::where('slug', $slug)->exists()) {
+            $slug = $base.'-'.$i++;
+        }
+
+        // cover
+        $coverPath = null;
+        if ($request->hasFile('cover_image')) {
+            $coverPath = $request->file('cover_image')->store('marketplace/covers', 'public');
+        }
+
+        // create product
+        $product = MarketplaceProduct::create([
+            'user_id'          => $request->user()->id,
+            'category_id'      => $data['category_id'],
+            'title'            => $data['title'],
+            'slug'             => $slug,
+            'type'             => $data['type'],
+            'description'      => $data['description'] ?? null,
+            'support_whatsapp' => $data['support_whatsapp'],
+            'price'            => $data['price'],
+            'cover_image_path' => $coverPath,
+            'status'           => 'draft',
+            'is_featured'      => false,
+        ]);
+
+        // ✅ NEW : create asset if file uploaded
+        if ($request->hasFile('file')) {
+            $uploadedPath = $request->file('file')->store('marketplace/files', 'public');
+
+            $product->assets()->create([
+                'kind'            => 'file',
+                'path'            => $uploadedPath,
+                'url'             => null,
+                'label'           => $this->typeLabel($product->type),
+                // vidéo: pas téléchargeable pour acheteurs (mais admin peut inspecter)
+                'is_downloadable' => $product->type !== 'video',
+            ]);
+        }
+
+        return redirect()->route('vendor.products.edit', $product)
+            ->with('success', '✅ Produit créé (brouillon). Ajoute le fichier (PDF/ZIP/VIDÉO) puis soumets.');
+    }
+
+    public function edit(Request $request, MarketplaceProduct $product)
+    {
+        abort_unless($product->user_id === $request->user()->id, 403);
+
+        $product->load('assets');
+        $categories = MarketplaceCategory::orderBy('name')->get();
+        $types = ['pdf' => 'PDF', 'video' => 'Vidéo', 'zip' => 'Fichier ZIP'];
+
+        return view('vendor.products.edit', compact('product', 'categories', 'types'));
+    }
+
+    public function update(Request $request, MarketplaceProduct $product)
+    {
+        abort_unless($product->user_id === $request->user()->id, 403);
+
+        if ($product->status === 'pending') {
+            return back()->with('warning', '⏳ Produit en validation : modification désactivée.');
+        }
+
+        $product->load('assets');
+
+        $data = $request->validate([
+            'category_id'      => ['required','integer','exists:marketplace_categories,id'],
+            'title'            => ['required','string','max:160'],
+            'type'             => ['required','in:pdf,video,zip'],
+            'description'      => ['nullable','string'],
+            'support_whatsapp' => ['nullable','string','max:30'],
+            'price'            => ['required','numeric','min:0'],
+            'cover_image'      => ['nullable','image','max:' . self::MAX_COVER_KB],
+
+            // ✅ NEW
+            'file'             => ['nullable','file'],
+        ]);
+
+        $data['support_whatsapp'] = $this->cleanWhatsapp($data['support_whatsapp'] ?? null);
+
+        // Validation conditionnelle si upload file
+        if ($request->hasFile('file')) {
+            if ($data['type'] === 'pdf') {
+                $request->validate([
+                    'file' => ['file','mimes:pdf','max:' . self::MAX_PDF_KB],
+                ], [], ['file' => 'fichier PDF']);
+            } elseif ($data['type'] === 'zip') {
+                $request->validate([
+                    'file' => ['file','mimes:zip,rar','max:' . self::MAX_ZIP_KB],
+                ], [], ['file' => 'archive ZIP/RAR']);
+            } elseif ($data['type'] === 'video') {
+                $request->validate([
+                    'file' => ['file','mimes:mp4,mov,m4v,avi','max:' . self::MAX_VIDEO_KB],
+                ], [], ['file' => 'fichier vidéo']);
+            }
+        }
+
+        if ($request->hasFile('cover_image')) {
+            $product->cover_image_path = $request->file('cover_image')->store('marketplace/covers', 'public');
+        }
+
+        $product->category_id      = $data['category_id'];
+        $product->title            = $data['title'];
+        $product->type             = $data['type'];
+        $product->description      = $data['description'] ?? null;
+        $product->support_whatsapp = $data['support_whatsapp'];
+        $product->price            = $data['price'];
+
+        if ($product->status === 'rejected') {
+            $product->status = 'draft';
+            $product->admin_note = null;
+        }
+
+        $product->save();
+
+        // ✅ NEW : remplacer/créer asset fichier
+        if ($request->hasFile('file')) {
+            $uploadedPath = $request->file('file')->store('marketplace/files', 'public');
+
+            $asset = $product->assets()->where('kind', 'file')->first();
+
+            if ($asset) {
+                $asset->update([
+                    'path'            => $uploadedPath,
+                    'url'             => null,
+                    'label'           => $this->typeLabel($product->type),
+                    'is_downloadable' => $product->type !== 'video',
+                ]);
+            } else {
+                $product->assets()->create([
+                    'kind'            => 'file',
+                    'path'            => $uploadedPath,
+                    'url'             => null,
+                    'label'           => $this->typeLabel($product->type),
+                    'is_downloadable' => $product->type !== 'video',
+                ]);
+            }
+        } else {
+            // si le vendor change le type, mets à jour le label/is_downloadable de l’asset existant (si présent)
+            $asset = $product->assets()->where('kind', 'file')->first();
+            if ($asset) {
+                $asset->update([
+                    'label'           => $this->typeLabel($product->type),
+                    'is_downloadable' => $product->type !== 'video',
+                ]);
+            }
+        }
+
+        return back()->with('success', '✅ Produit mis à jour.');
+    }
+
+    public function submit(Request $request, MarketplaceProduct $product)
+    {
+        abort_unless($product->user_id === $request->user()->id, 403);
+
+        if (!in_array($product->status, ['draft','rejected'], true)) {
+            return back()->with('warning', 'Action impossible pour ce statut.');
+        }
+
+        $product->load('assets');
+
+        if (!$product->title || !$product->category_id || $product->price === null || !$product->type) {
+            return back()->with('warning', 'Complète les infos principales avant de soumettre.');
+        }
+
+        if (!$product->cover_image_path) {
+            return back()->with('warning', 'Ajoute une image de couverture avant de soumettre.');
+        }
+
+        // ✅ NEW : exiger un fichier pour pdf/zip/video
+        $fileAsset = $product->assets->firstWhere('kind', 'file');
+        if (!$fileAsset) {
+            return back()->with('warning', 'Ajoute le fichier (PDF/ZIP/VIDÉO) avant de soumettre.');
+        }
+
+        $product->status = 'pending';
+        $product->submitted_at = now();
+        $product->admin_note = null;
+        $product->save();
+
+        return redirect()->route('vendor.products.index')
+            ->with('success', '✅ Produit soumis. En attente de validation admin.');
+    }
+}

@@ -361,6 +361,52 @@
                                 </a>
                             </li>
 
+                            {{-- ========================= --}}
+                            {{-- ✅ MODE VENDEUR (switch) --}}
+                            {{-- ========================= --}}
+                            @php
+                                $isVendor = (bool) (auth()->user()->is_vendor ?? false);
+                                $viewMode = session('view_mode', 'user'); // user|vendor
+                            @endphp
+
+                            <li><hr class="dropdown-divider"></li>
+
+                            @if(!$isVendor)
+                                <li>
+                                    <form method="POST" action="{{ route('vendor.become') }}">
+                                        @csrf
+                                        <button type="submit" class="dropdown-item">
+                                            🛍️ Devenir vendeur
+                                        </button>
+                                    </form>
+                                </li>
+                            @else
+                                @if($viewMode === 'user')
+                                    <li>
+                                        <form method="POST" action="{{ route('switch.vendor') }}">
+                                            @csrf
+                                            <button type="submit" class="dropdown-item">
+                                                🛍️ Passer en vue vendeur
+                                            </button>
+                                        </form>
+                                    </li>
+                                @else
+                                    <li>
+                                        <a class="dropdown-item" href="{{ route('vendor.dashboard') }}">
+                                            🧾 Dashboard vendeur
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <form method="POST" action="{{ route('switch.user') }}">
+                                            @csrf
+                                            <button type="submit" class="dropdown-item">
+                                                👤 Revenir en vue utilisateur
+                                            </button>
+                                        </form>
+                                    </li>
+                                @endif
+                            @endif
+
                             <li><hr class="dropdown-divider"></li>
 
                             <li>

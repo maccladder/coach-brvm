@@ -97,20 +97,20 @@
                                 @else
                                     <div class="d-flex gap-2">
                                         {{-- CinetPay --}}
-                                        <form method="POST" action="{{ route('courses.buy', $course) }}">
+                                        {{-- <form method="POST" action="{{ route('courses.buy', $course) }}">
                                             @csrf
                                             <button type="submit"
                                                     class="btn btn-primary btn-sm rounded-pill px-3">
                                                 CinetPay
                                             </button>
-                                        </form>
+                                        </form> --}}
 
                                         {{-- Paystack --}}
                                         <form method="POST" action="{{ route('courses.buy.paystack', $course) }}">
                                             @csrf
                                             <button type="submit"
                                                     class="btn btn-dark btn-sm rounded-pill px-3">
-                                                Paystack
+                                                Payer
                                             </button>
                                         </form>
                                     </div>

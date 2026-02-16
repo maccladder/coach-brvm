@@ -24,10 +24,13 @@
     @if(session('success'))
         <div class="alert alert-success">{{ session('success') }}</div>
     @endif
+    @if(session('warning'))
+        <div class="alert alert-warning">{{ session('warning') }}</div>
+    @endif
 
     {{-- STATS --}}
     <div class="row g-3 mb-4">
-        <div class="col-md-4">
+        <div class="col-md-3">
             <div class="card border-0 shadow-sm">
                 <div class="card-body">
                     <div class="text-muted">Total</div>
@@ -35,7 +38,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-4">
+        <div class="col-md-3">
             <div class="card border-0 shadow-sm">
                 <div class="card-body">
                     <div class="text-muted">Publiés</div>
@@ -43,11 +46,19 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-4">
+        <div class="col-md-3">
             <div class="card border-0 shadow-sm">
                 <div class="card-body">
-                    <div class="text-muted">Brouillons</div>
-                    <div class="h3 fw-bold text-warning mb-0">{{ $stats['draft'] }}</div>
+                    <div class="text-muted">En attente</div>
+                    <div class="h3 fw-bold text-warning mb-0">{{ $stats['pending'] }}</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="text-muted">Rejetés</div>
+                    <div class="h3 fw-bold text-danger mb-0">{{ $stats['rejected'] }}</div>
                 </div>
             </div>
         </div>
@@ -76,8 +87,9 @@
                     <label class="form-label text-muted">Statut</label>
                     <select name="status" class="form-select">
                         <option value="">Tous</option>
-                        <option value="published" @selected(request('status')==='published')>Publié</option>
-                        <option value="draft" @selected(request('status')==='draft')>Brouillon</option>
+                        @foreach(['published'=>'Publié','draft'=>'Brouillon','pending'=>'En attente','rejected'=>'Rejeté'] as $k=>$v)
+                            <option value="{{ $k }}" @selected(request('status')===$k)>{{ $v }}</option>
+                        @endforeach
                     </select>
                 </div>
 
@@ -106,10 +118,22 @@
                     </thead>
                     <tbody>
                     @forelse($products as $p)
+                        @php
+                            $badge = match($p->status) {
+                                'published' => 'success',
+                                'draft'     => 'secondary',
+                                'pending'   => 'warning',
+                                'rejected'  => 'danger',
+                                default     => 'secondary',
+                            };
+                        @endphp
                         <tr>
                             <td>
                                 <div class="fw-semibold">{{ $p->title }}</div>
                                 <div class="text-muted small">slug: {{ $p->slug }}</div>
+                                @if($p->admin_note)
+                                    <div class="small text-danger">Motif: {{ $p->admin_note }}</div>
+                                @endif
                             </td>
                             <td class="text-muted">
                                 {{ ['video'=>'Vidéo','book'=>'Livre','software'=>'Logiciel'][$p->type] ?? $p->type }}
@@ -121,16 +145,33 @@
                                 {{ number_format($p->price ?? 0, 0, ',', ' ') }} FCFA
                             </td>
                             <td>
-                                @php $badge = $p->status === 'published' ? 'success' : 'secondary'; @endphp
                                 <span class="badge bg-{{ $badge }}">{{ $p->status }}</span>
                                 @if($p->is_featured)
                                     <span class="badge bg-warning text-dark ms-1">featured</span>
                                 @endif
                             </td>
                             <td class="text-end">
+                                {{-- ✅ Inspecter --}}
+                                <a href="{{ route('admin.marketplace.show', $p) }}" class="btn btn-sm btn-outline-dark">
+                                    Inspecter
+                                </a>
+
+                                {{-- Approve/Reject rapides --}}
+                                @if($p->status === 'pending')
+                                    <form action="{{ route('admin.marketplace.approve', $p) }}" method="POST" class="d-inline">
+                                        @csrf
+                                        <button class="btn btn-sm btn-success">✅</button>
+                                    </form>
+
+                                    <a href="{{ route('admin.marketplace.show', $p) }}" class="btn btn-sm btn-outline-danger">
+                                        ⛔
+                                    </a>
+                                @endif
+
                                 <a href="{{ route('admin.marketplace.edit', $p) }}" class="btn btn-sm btn-outline-primary">
                                     Modifier
                                 </a>
+
                                 <form action="{{ route('admin.marketplace.destroy', $p) }}" method="POST" class="d-inline"
                                       onsubmit="return confirm('Supprimer ce produit ?');">
                                     @csrf

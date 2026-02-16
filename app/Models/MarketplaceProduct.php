@@ -6,11 +6,13 @@ use Illuminate\Database\Eloquent\Model;
 
 class MarketplaceProduct extends Model
 {
-    protected $fillable = [
-        'category_id','title','slug','type','description',
-        'support_whatsapp', // ✅ NEW
-        'price','cover_image_path','status','is_featured'
-    ];
+   protected $fillable = [
+    'user_id',
+    'category_id','title','slug','type','description',
+    'support_whatsapp',
+    'price','cover_image_path','status','is_featured',
+    'submitted_at','reviewed_at','admin_note',
+];
 
     public function category()
     {
@@ -26,6 +28,11 @@ class MarketplaceProduct extends Model
     {
         return $this->hasMany(MarketplaceAsset::class, 'product_id');
     }
+
+    public function vendor()
+{
+    return $this->belongsTo(\App\Models\User::class, 'user_id');
+}
 
     public function scopePublished($q)
     {

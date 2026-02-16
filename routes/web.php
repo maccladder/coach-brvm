@@ -1,55 +1,58 @@
 <?php
 
-use App\Services\CloudflareStream;
-use Illuminate\Support\Facades\Http;
-
-
-
-use App\Services\BrvmMarketAiService;
-use App\Http\Controllers\PaystackWebhookController;
-
-use Illuminate\Support\Facades\Route;
-use App\Services\BrvmActionsAiService;
-use App\Http\Controllers\FaqController;
-use App\Http\Controllers\SGIController;
-use App\Http\Controllers\BookController;
-use App\Http\Controllers\AdminController;
-use App\Http\Controllers\CourseController;
-
-use App\Http\Controllers\GoogleController;
-
-use App\Http\Controllers\UploadController;
-use App\Http\Controllers\LandingController;
-use App\Http\Controllers\PaymentController;
-use App\Http\Controllers\SocieteController;
-use App\Http\Controllers\SummaryController;
-use App\Http\Controllers\DocumentController;
-use App\Http\Controllers\AdminUserController;
-use App\Http\Controllers\ClientBocController;
-use App\Http\Controllers\DividendeController;
-use App\Http\Controllers\GlossaireController;
-use App\Http\Controllers\AdminEmailController;
-use App\Http\Controllers\AdminTopupController;
-use App\Http\Controllers\AdminCourseController;
-use App\Http\Controllers\AdminMarketController;
-use App\Http\Controllers\ChocsMarcheController;
-use App\Http\Controllers\MarketplaceController;
-use App\Http\Controllers\PerformanceController;
-use App\Http\Controllers\AnnouncementController;
-use App\Http\Controllers\PaystackTestController;
-use App\Http\Controllers\CoursePaymentController;
-use App\Http\Controllers\DocumentAdminController;
-use App\Http\Controllers\VirtualWalletController;
 use App\Http\Controllers\AdminAnalyticsController;
-use App\Http\Controllers\ClientFinancialController;
-use App\Http\Controllers\DocumentPaymentController;
-use App\Http\Controllers\AdminPerformanceController;
 use App\Http\Controllers\AdminAnnouncementController;
-use App\Http\Controllers\AdminVirtualWalletController;
+
+
+
+use App\Http\Controllers\AdminController;
+use App\Http\Controllers\AdminCourseController;
+
+use App\Http\Controllers\AdminEmailController;
 use App\Http\Controllers\AdminFinancialReportController;
+use App\Http\Controllers\AdminMarketController;
+use App\Http\Controllers\AdminPerformanceController;
+use App\Http\Controllers\AdminTopupController;
+use App\Http\Controllers\AdminUserController;
+use App\Http\Controllers\AdminVirtualWalletController;
+
+use App\Http\Controllers\AnnouncementController;
+
+use App\Http\Controllers\BookController;
+use App\Http\Controllers\ChocsMarcheController;
+use App\Http\Controllers\ClientBocController;
+use App\Http\Controllers\ClientFinancialController;
+use App\Http\Controllers\CourseController;
+use App\Http\Controllers\CoursePaymentController;
+use App\Http\Controllers\DividendeController;
+use App\Http\Controllers\DocumentAdminController;
+use App\Http\Controllers\DocumentController;
+use App\Http\Controllers\DocumentPaymentController;
+use App\Http\Controllers\FaqController;
+use App\Http\Controllers\GlossaireController;
+use App\Http\Controllers\GoogleController;
+use App\Http\Controllers\LandingController;
+use App\Http\Controllers\MarketplaceCategoryAdminController;
+use App\Http\Controllers\MarketplaceController;
 use App\Http\Controllers\MarketplaceMyProductsController;
 use App\Http\Controllers\MarketplaceProductAdminController;
-use App\Http\Controllers\MarketplaceCategoryAdminController;
+use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\PaystackTestController;
+use App\Http\Controllers\PaystackWebhookController;
+use App\Http\Controllers\PerformanceController;
+use App\Http\Controllers\SGIController;
+use App\Http\Controllers\SocieteController;
+use App\Http\Controllers\SummaryController;
+use App\Http\Controllers\UploadController;
+use App\Http\Controllers\VendorDashboardController;
+use App\Http\Controllers\VendorModeController;
+use App\Http\Controllers\VendorProductController;
+use App\Http\Controllers\VirtualWalletController;
+use App\Services\BrvmActionsAiService;
+use App\Services\BrvmMarketAiService;
+use App\Services\CloudflareStream;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
@@ -251,14 +254,26 @@ Route::post('/emails/send', [AdminEmailController::class, 'send'])
         Route::post('/financial-reports/{year}/societes/{societe}/{period}/not-published', [AdminFinancialReportController::class, 'markNotPublished'])
             ->name('financial_reports.not_published');
 
-            // ✅ Marketplace (ADMIN)
+           // // ✅ Marketplace (ADMIN)
 Route::prefix('marketplace')->name('marketplace.')->group(function () {
+
     Route::get('/', [MarketplaceProductAdminController::class, 'index'])->name('index');           // /admin/marketplace
     Route::get('/create', [MarketplaceProductAdminController::class, 'create'])->name('create');  // /admin/marketplace/create
     Route::post('/', [MarketplaceProductAdminController::class, 'store'])->name('store');         // POST
+
+    // ✅ inspecter / review (admin)
+    Route::get('/{product}', [MarketplaceProductAdminController::class, 'show'])->name('show');
+
+    // ✅ télécharger un asset (admin)
+    Route::get('/assets/{asset}/download', [MarketplaceProductAdminController::class, 'downloadAsset'])
+        ->name('assets.download');
+
     Route::get('/{product}/edit', [MarketplaceProductAdminController::class, 'edit'])->name('edit');
     Route::put('/{product}', [MarketplaceProductAdminController::class, 'update'])->name('update');
     Route::delete('/{product}', [MarketplaceProductAdminController::class, 'destroy'])->name('destroy');
+
+    Route::post('/{product}/approve', [MarketplaceProductAdminController::class, 'approve'])->name('approve');
+    Route::post('/{product}/reject', [MarketplaceProductAdminController::class, 'reject'])->name('reject');
 });
 
 // ✅ Catégories (ADMIN)
@@ -613,7 +628,40 @@ Route::post('/admin/daily-bocs/{dailyBoc}/replace', [AdminController::class, 'da
 Route::view('/strategies-investissement', 'aide.strategies')
     ->name('aide.strategies');
 
+Route::middleware('auth')->group(function () {
 
+    // ✅ Devenir vendeur
+    Route::post('/devenir-vendeur', [VendorModeController::class, 'becomeVendor'])
+        ->name('vendor.become');
+
+    // ✅ Switch modes
+    Route::post('/switch-to-vendor', [VendorModeController::class, 'switchToVendor'])
+        ->name('switch.vendor');
+
+    Route::post('/switch-to-user', [VendorModeController::class, 'switchToUser'])
+        ->name('switch.user');
+});
+
+Route::middleware(['auth', 'vendor.mode'])->prefix('vendor')->name('vendor.')->group(function () {
+    Route::get('/', function () {
+        return view('vendor.dashboard'); // on la créera à l’étape 4
+    })->name('dashboard');
+});
+
+
+Route::middleware(['auth','vendor.mode'])->prefix('vendor')->name('vendor.')->group(function () {
+
+    Route::get('/', [VendorDashboardController::class, 'index'])->name('dashboard');
+
+    Route::get('/products', [VendorProductController::class, 'index'])->name('products.index');
+    Route::get('/products/create', [VendorProductController::class, 'create'])->name('products.create');
+    Route::post('/products', [VendorProductController::class, 'store'])->name('products.store');
+
+    Route::get('/products/{product}/edit', [VendorProductController::class, 'edit'])->name('products.edit');
+    Route::put('/products/{product}', [VendorProductController::class, 'update'])->name('products.update');
+
+    Route::post('/products/{product}/submit', [VendorProductController::class, 'submit'])->name('products.submit');
+});
 
 
 

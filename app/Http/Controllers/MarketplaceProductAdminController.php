@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\MarketplaceProduct;
+use App\Models\MarketplaceAsset;
 use App\Models\MarketplaceCategory;
+use App\Models\MarketplaceProduct;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class MarketplaceProductAdminController extends Controller
@@ -32,7 +34,7 @@ class MarketplaceProductAdminController extends Controller
     public function index(Request $request)
     {
         $q = MarketplaceProduct::query()
-            ->with('category')
+            ->with(['category'])
             ->latest();
 
         if ($request->filled('status')) {
@@ -54,9 +56,31 @@ class MarketplaceProductAdminController extends Controller
             'total'     => MarketplaceProduct::count(),
             'published' => MarketplaceProduct::where('status', 'published')->count(),
             'draft'     => MarketplaceProduct::where('status', 'draft')->count(),
+            'pending'   => MarketplaceProduct::where('status', 'pending')->count(),
+            'rejected'  => MarketplaceProduct::where('status', 'rejected')->count(),
         ];
 
         return view('admin.marketplace.products.index', compact('products', 'stats'));
+    }
+
+    public function show(MarketplaceProduct $product)
+    {
+        $product->load(['category', 'assets', 'vendor']); // vendor relation si tu l’as
+        return view('admin.marketplace.products.show', compact('product'));
+    }
+
+    public function downloadAsset(MarketplaceAsset $asset)
+    {
+        // admin peut télécharger même si pas acheté
+        $disk = 'public';
+
+        abort_unless($asset->path && Storage::disk($disk)->exists($asset->path), 404);
+
+        $filename = $asset->label
+            ? Str::slug($asset->label) . '-' . basename($asset->path)
+            : basename($asset->path);
+
+        return Storage::disk($disk)->download($asset->path, $filename);
     }
 
     public function create()
@@ -67,45 +91,37 @@ class MarketplaceProductAdminController extends Controller
 
     public function store(Request $request)
     {
-        // 1) Validation de base
         $data = $request->validate([
             'category_id' => ['nullable', 'integer', 'exists:marketplace_categories,id'],
             'title'       => ['required', 'string', 'max:255'],
             'type'        => ['required', 'in:video,book,software'],
             'description' => ['nullable', 'string'],
             'price'       => ['required', 'integer', 'min:0'],
-            'status'      => ['required', 'in:draft,published'],
+            'status'      => ['required', 'in:draft,published,pending,rejected'],
             'is_featured' => ['nullable', 'boolean'],
 
-            // ✅ NEW : WhatsApp support (optionnel)
             'support_whatsapp' => ['nullable', 'string', 'max:32'],
 
-            // cover image
             'cover'       => ['nullable', 'image', 'max:' . self::MAX_COVER_KB],
+            'file'        => ['nullable', 'file', 'max:' . self::MAX_FILE_KB],
 
-            // fichier produit (PDF/ZIP/RAR) - conditionné ensuite
-            'file'        => ['nullable', 'file', 'max:' . self::MAX_FILE_KB], // 400MB
-
-            // vidéo (Cloudflare) - conditionné ensuite
             'cloudflare_video_id' => ['nullable', 'string', 'max:255'],
         ], [], [
             'file'  => 'fichier produit',
             'cover' => 'image de couverture',
         ]);
 
-        // Nettoyer WhatsApp (digits only)
         $data['support_whatsapp'] = $this->cleanWhatsapp($data['support_whatsapp'] ?? null);
 
-        // 2) Validation conditionnelle selon le type
         if ($data['type'] === 'book') {
             $request->validate([
-                'file' => ['required', 'file', 'mimes:pdf', 'max:' . self::MAX_BOOK_KB], // 50MB
+                'file' => ['required', 'file', 'mimes:pdf', 'max:' . self::MAX_BOOK_KB],
             ], [], ['file' => 'PDF du livre']);
         }
 
         if ($data['type'] === 'software') {
             $request->validate([
-                'file' => ['required', 'file', 'mimes:zip,rar', 'max:' . self::MAX_FILE_KB], // 400MB
+                'file' => ['required', 'file', 'mimes:zip,rar', 'max:' . self::MAX_FILE_KB],
             ], [], ['file' => 'archive du logiciel']);
         }
 
@@ -117,36 +133,29 @@ class MarketplaceProductAdminController extends Controller
             ]);
         }
 
-        // 3) Slug unique
         $slug = Str::slug($data['title']);
         if (MarketplaceProduct::where('slug', $slug)->exists()) {
             $slug .= '-' . Str::random(6);
         }
 
-        // 4) Upload cover
         $coverPath = null;
         if ($request->hasFile('cover')) {
             $coverPath = $request->file('cover')->store('marketplace/covers', 'public');
         }
 
-        // 5) Création produit
         $product = MarketplaceProduct::create([
             'category_id'      => $data['category_id'] ?? null,
             'title'            => $data['title'],
             'slug'             => $slug,
             'type'             => $data['type'],
             'description'      => $data['description'] ?? null,
-
-            // ✅ NEW
             'support_whatsapp' => $data['support_whatsapp'],
-
             'price'            => (int) $data['price'],
             'status'           => $data['status'],
             'is_featured'      => (bool) ($data['is_featured'] ?? false),
             'cover_image_path' => $coverPath,
         ]);
 
-        // 6) Si vidéo => créer asset stream (Cloudflare)
         if ($product->type === 'video') {
             $product->assets()->create([
                 'kind'            => 'stream',
@@ -157,7 +166,6 @@ class MarketplaceProductAdminController extends Controller
             ]);
         }
 
-        // 7) Si fichier => créer asset (PDF/ZIP/RAR)
         if ($request->hasFile('file')) {
             $uploadedPath = $request->file('file')->store('marketplace/files', 'public');
 
@@ -188,36 +196,30 @@ class MarketplaceProductAdminController extends Controller
 
     public function update(Request $request, MarketplaceProduct $product)
     {
-        // 0) Charger les assets
         $product->load('assets');
 
-        // 1) Validation de base
         $data = $request->validate([
             'category_id' => ['nullable', 'integer', 'exists:marketplace_categories,id'],
             'title'       => ['required', 'string', 'max:255'],
             'type'        => ['required', 'in:video,book,software'],
             'description' => ['nullable', 'string'],
             'price'       => ['required', 'integer', 'min:0'],
-            'status'      => ['required', 'in:draft,published'],
+            'status'      => ['required', 'in:draft,published,pending,rejected'],
             'is_featured' => ['nullable', 'boolean'],
 
-            // ✅ NEW : WhatsApp support (optionnel)
             'support_whatsapp' => ['nullable', 'string', 'max:32'],
 
-            'cover'       => ['nullable', 'image', 'max:' . self::MAX_COVER_KB], // 4MB
-            'file'        => ['nullable', 'file', 'max:' . self::MAX_FILE_KB],  // 400MB
+            'cover'       => ['nullable', 'image', 'max:' . self::MAX_COVER_KB],
+            'file'        => ['nullable', 'file', 'max:' . self::MAX_FILE_KB],
 
-            // vidéo (Cloudflare) - conditionné ensuite
             'cloudflare_video_id' => ['nullable', 'string', 'max:255'],
         ], [], [
             'file'  => 'fichier produit',
             'cover' => 'image de couverture',
         ]);
 
-        // Nettoyer WhatsApp (digits only)
         $data['support_whatsapp'] = $this->cleanWhatsapp($data['support_whatsapp'] ?? null);
 
-        // 2) Validation conditionnelle du fichier produit (book/software)
         $hasFileAsset = $product->assets->firstWhere('kind', 'file') !== null;
         $requiresFile = in_array($data['type'], ['book', 'software'], true);
 
@@ -231,22 +233,20 @@ class MarketplaceProductAdminController extends Controller
             ]);
         }
 
-        // Si un fichier est uploadé, on vérifie les mimes selon type
         if ($request->hasFile('file')) {
             if ($data['type'] === 'book') {
                 $request->validate([
-                    'file' => ['file', 'mimes:pdf', 'max:' . self::MAX_BOOK_KB], // 50MB
+                    'file' => ['file', 'mimes:pdf', 'max:' . self::MAX_BOOK_KB],
                 ], [], ['file' => 'PDF du livre']);
             }
 
             if ($data['type'] === 'software') {
                 $request->validate([
-                    'file' => ['file', 'mimes:zip,rar', 'max:' . self::MAX_FILE_KB], // 400MB
+                    'file' => ['file', 'mimes:zip,rar', 'max:' . self::MAX_FILE_KB],
                 ], [], ['file' => 'archive du logiciel']);
             }
         }
 
-        // Validation vidéo
         if ($data['type'] === 'video') {
             $request->validate([
                 'cloudflare_video_id' => ['required', 'string', 'max:255'],
@@ -255,29 +255,23 @@ class MarketplaceProductAdminController extends Controller
             ]);
         }
 
-        // 3) Upload cover (si nouveau)
         $coverPath = $product->cover_image_path;
         if ($request->hasFile('cover')) {
             $coverPath = $request->file('cover')->store('marketplace/covers', 'public');
         }
 
-        // 4) Update produit
         $product->update([
             'category_id'      => $data['category_id'] ?? null,
             'title'            => $data['title'],
             'type'             => $data['type'],
             'description'      => $data['description'] ?? null,
-
-            // ✅ NEW
             'support_whatsapp' => $data['support_whatsapp'],
-
             'price'            => (int) $data['price'],
             'status'           => $data['status'],
             'is_featured'      => (bool) ($data['is_featured'] ?? false),
             'cover_image_path' => $coverPath,
         ]);
 
-        // 5) Si type = vidéo => créer / update asset stream + supprimer asset file
         if ($product->type === 'video') {
             $videoId = trim((string) $request->input('cloudflare_video_id'));
 
@@ -300,13 +294,11 @@ class MarketplaceProductAdminController extends Controller
                 ]);
             }
 
-            // si on passe en vidéo, on supprime l'ancien fichier téléchargeable
             $product->assets()->where('kind', 'file')->delete();
 
             return back()->with('success', 'Produit mis à jour ✅');
         }
 
-        // 6) Si nouveau fichier => remplacer / créer asset principal "file"
         if ($request->hasFile('file')) {
             $uploadedPath = $request->file('file')->store('marketplace/files', 'public');
 
@@ -336,7 +328,6 @@ class MarketplaceProductAdminController extends Controller
             }
         }
 
-        // Si on passe en book/software, on enlève un ancien asset stream (propre)
         $product->assets()->where('kind', 'stream')->delete();
 
         return back()->with('success', 'Produit mis à jour ✅');
@@ -346,5 +337,50 @@ class MarketplaceProductAdminController extends Controller
     {
         $product->delete();
         return back()->with('success', 'Produit supprimé ✅');
+    }
+
+    public function approve(Request $request, MarketplaceProduct $product)
+    {
+        if ($product->status !== 'pending') {
+            return back()->with('warning', 'Ce produit n’est pas en attente.');
+        }
+
+        // ✅ sécurité : on ne publie pas sans asset selon type
+        $product->load('assets');
+
+        if ($product->type === 'video') {
+            if (!$product->assets->firstWhere('kind', 'stream')) {
+                return back()->with('warning', 'Impossible d’approuver: aucune vidéo Cloudflare attachée.');
+            }
+        } else {
+            if (!$product->assets->firstWhere('kind', 'file')) {
+                return back()->with('warning', 'Impossible d’approuver: aucun fichier attaché (PDF/ZIP).');
+            }
+        }
+
+        $product->status = 'published';
+        $product->reviewed_at = now();
+        $product->admin_note = null;
+        $product->save();
+
+        return back()->with('success', '✅ Produit approuvé et publié sur la marketplace.');
+    }
+
+    public function reject(Request $request, MarketplaceProduct $product)
+    {
+        if ($product->status !== 'pending') {
+            return back()->with('warning', 'Ce produit n’est pas en attente.');
+        }
+
+        $data = $request->validate([
+            'admin_note' => ['required','string','max:500'],
+        ]);
+
+        $product->status = 'rejected';
+        $product->reviewed_at = now();
+        $product->admin_note = $data['admin_note'];
+        $product->save();
+
+        return back()->with('success', '⛔ Produit rejeté. Le vendeur verra le motif.');
     }
 }
