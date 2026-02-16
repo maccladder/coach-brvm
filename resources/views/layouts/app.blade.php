@@ -45,29 +45,23 @@
 
         .nav-link { font-weight: 500; }
 
-        /* ===================================================== */
-        /* ✅ Marketplace badge "Déjà acheté" (fix taille/position) */
-        /* ===================================================== */
+        /* ✅ Marketplace badge "Déjà acheté" */
         .market-badge-owned{
             position: absolute;
             top: 12px;
             left: 12px;
             z-index: 30;
-
             display: inline-flex;
             align-items: center;
             gap: .35rem;
-
             padding: .35rem .65rem;
             font-size: .80rem;
             font-weight: 700;
             line-height: 1;
-
             border-radius: 999px;
             white-space: nowrap;
-
             color: #fff;
-            background: rgba(25,135,84,.95); /* success */
+            background: rgba(25,135,84,.95);
             box-shadow: 0 10px 24px rgba(0,0,0,.18);
             backdrop-filter: blur(6px);
         }
@@ -162,7 +156,6 @@
                             </a>
                         </li>
 
-                        {{-- ✅ NOUVEAU : Études & Business plans --}}
                         <li>
                             <a class="dropdown-item" href="{{ route('docs.public.index') }}">
                                 📄 Études & Business plans
@@ -177,7 +170,6 @@
 
                         <li><hr class="dropdown-divider"></li>
 
-                        {{-- ✅ NOUVEAU : Marketplace --}}
                         <li>
                             <a class="dropdown-item d-flex justify-content-between align-items-center"
                                href="{{ route('marketplace.index') }}">
@@ -218,7 +210,6 @@
                     </ul>
                 </li>
 
-                {{-- ✅ Formations (dropdown) + Livres --}}
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
                         Formations
@@ -238,7 +229,6 @@
 
                         <li><hr class="dropdown-divider"></li>
 
-                        {{-- ✅ Marketplace aussi ici --}}
                         <li>
                             <a class="dropdown-item d-flex justify-content-between align-items-center"
                                href="{{ route('marketplace.index') }}">
@@ -273,7 +263,6 @@
                             </a>
                         </li>
 
-                        {{-- ✅ NOUVEAU : Stratégies --}}
                         <li>
                             <a class="dropdown-item" href="{{ route('aide.strategies') }}">
                                 🧠 Stratégies d’investissement
@@ -307,6 +296,74 @@
             {{-- ✅ Zone Auth Breeze --}}
             <div class="d-flex align-items-center gap-2">
                 <span class="badge text-bg-light border">Beta privée</span>
+
+                {{-- 🔔 CLOCHE NOTIFICATIONS (USER/VENDOR) --}}
+                @auth
+                    @php
+                        $unreadCount = auth()->user()->unreadNotifications()->count();
+                        $latestNotifs = auth()->user()->notifications()->latest()->limit(8)->get();
+                    @endphp
+
+                    <div class="dropdown">
+                        <button class="btn btn-sm btn-outline-dark position-relative"
+                                type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-bell"></i>
+
+                            @if($unreadCount > 0)
+                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill text-bg-danger">
+                                    {{ $unreadCount > 99 ? '99+' : $unreadCount }}
+                                </span>
+                            @endif
+                        </button>
+
+                        <div class="dropdown-menu dropdown-menu-end p-0" style="min-width:360px;">
+                            <div class="px-3 py-2 border-bottom d-flex justify-content-between align-items-center">
+                                <div class="fw-semibold">Notifications</div>
+
+                                <form method="POST" action="{{ route('notifications.readAll') }}">
+                                    @csrf
+                                    <button class="btn btn-sm btn-outline-secondary">Tout lire</button>
+                                </form>
+                            </div>
+
+                            <div class="dropdown-menu-scroll">
+                                @forelse($latestNotifs as $n)
+                                    @php
+                                        $data  = $n->data ?? [];
+                                        $url   = $data['url'] ?? route('notifications.index');
+                                        $title = $data['title'] ?? 'Notification';
+                                        $msg   = $data['message'] ?? '';
+                                    @endphp
+
+                                    <div class="px-3 py-2 border-bottom {{ $n->read_at ? '' : 'bg-light' }}">
+                                        <div class="d-flex justify-content-between gap-2">
+                                            <a href="{{ $url }}" class="text-decoration-none text-dark">
+                                                <div class="fw-semibold">{{ $title }}</div>
+                                                <div class="text-muted small">{{ $msg }}</div>
+                                                <div class="text-muted small">{{ $n->created_at->diffForHumans() }}</div>
+                                            </a>
+
+                                            @if(!$n->read_at)
+                                                <form method="POST" action="{{ route('notifications.read', $n->id) }}">
+                                                    @csrf
+                                                    <button class="btn btn-sm btn-outline-dark">Lire</button>
+                                                </form>
+                                            @endif
+                                        </div>
+                                    </div>
+                                @empty
+                                    <div class="px-3 py-3 text-muted">Aucune notification.</div>
+                                @endforelse
+                            </div>
+
+                            <div class="px-3 py-2">
+                                <a class="btn btn-sm btn-dark w-100" href="{{ route('notifications.index') }}">
+                                    Voir tout
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                @endauth
 
                 @auth
                     <div class="dropdown">
@@ -342,7 +399,6 @@
                                 </a>
                             </li>
 
-                            {{-- ✅ NOUVEAU : Mes documents --}}
                             <li>
                                 <a class="dropdown-item" href="{{ route('documents.mine') }}">
                                     🧾 Mes documents
@@ -361,9 +417,6 @@
                                 </a>
                             </li>
 
-                            {{-- ========================= --}}
-                            {{-- ✅ MODE VENDEUR (switch) --}}
-                            {{-- ========================= --}}
                             @php
                                 $isVendor = (bool) (auth()->user()->is_vendor ?? false);
                                 $viewMode = session('view_mode', 'user'); // user|vendor
@@ -441,9 +494,7 @@
 {{-- Scripts spécifiques pages --}}
 @stack('scripts')
 
-{{-- ========================= --}}
 {{-- tawk.to – Support client --}}
-{{-- ========================= --}}
 @if(config('services.tawk.widget_id'))
 <script type="text/javascript">
     var Tawk_API = Tawk_API || {}, Tawk_LoadStart = new Date();

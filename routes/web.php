@@ -11,13 +11,14 @@ use App\Http\Controllers\AdminCourseController;
 use App\Http\Controllers\AdminEmailController;
 use App\Http\Controllers\AdminFinancialReportController;
 use App\Http\Controllers\AdminMarketController;
+use App\Http\Controllers\AdminNotificationController;
 use App\Http\Controllers\AdminPerformanceController;
 use App\Http\Controllers\AdminTopupController;
 use App\Http\Controllers\AdminUserController;
+
 use App\Http\Controllers\AdminVirtualWalletController;
 
 use App\Http\Controllers\AnnouncementController;
-
 use App\Http\Controllers\BookController;
 use App\Http\Controllers\ChocsMarcheController;
 use App\Http\Controllers\ClientBocController;
@@ -36,6 +37,7 @@ use App\Http\Controllers\MarketplaceCategoryAdminController;
 use App\Http\Controllers\MarketplaceController;
 use App\Http\Controllers\MarketplaceMyProductsController;
 use App\Http\Controllers\MarketplaceProductAdminController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\PaystackTestController;
 use App\Http\Controllers\PaystackWebhookController;
@@ -664,5 +666,21 @@ Route::middleware(['auth','vendor.mode'])->prefix('vendor')->name('vendor.')->gr
 });
 
 
+Route::middleware('auth')->group(function () {
+    Route::get('/notifications', [\App\Http\Controllers\NotificationController::class, 'index'])
+        ->name('notifications.index');
+
+    Route::post('/notifications/{id}/read', [\App\Http\Controllers\NotificationController::class, 'markAsRead'])
+        ->name('notifications.read');
+
+    Route::post('/notifications/read-all', [NotificationController::class, 'markAllAsRead'])
+        ->name('notifications.readAll');
+});
+
+Route::middleware('admin.code')->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/notifications', [AdminNotificationController::class, 'index'])->name('notifications.index');
+    Route::post('/notifications/{id}/read', [AdminNotificationController::class, 'read'])->name('notifications.read');
+    Route::post('/notifications/read-all', [AdminNotificationController::class, 'readAll'])->name('notifications.readAll');
+});
 
 require __DIR__.'/auth.php';
