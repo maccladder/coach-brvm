@@ -265,6 +265,14 @@ Route::prefix('marketplace')->name('marketplace.')->group(function () {
     Route::get('/create', [MarketplaceProductAdminController::class, 'create'])->name('create');  // /admin/marketplace/create
     Route::post('/', [MarketplaceProductAdminController::class, 'store'])->name('store');         // POST
 
+    // ✅ Pré-approuver / publier une vidéo (Cloudflare)
+Route::get('/{product}/publish', [MarketplaceProductAdminController::class, 'publishForm'])
+    ->name('publish.form');
+
+Route::post('/{product}/publish', [MarketplaceProductAdminController::class, 'publish'])
+    ->name('publish');
+
+
     // ✅ inspecter / review (admin)
     Route::get('/{product}', [MarketplaceProductAdminController::class, 'show'])->name('show');
 

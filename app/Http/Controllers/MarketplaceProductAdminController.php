@@ -323,37 +323,28 @@ class MarketplaceProductAdminController extends Controller
 
     $product->load(['assets', 'vendor']);
 
-    // ✅ sécurité : on ne publie pas sans asset selon type
+    // ✅ Vidéo => workflow spécial : page "pré-approuver" (Cloudflare)
     if ($product->type === 'video') {
-        // accepte stream (Cloudflare) OU fichier vidéo uploadé (mp4...)
-        $hasStream = (bool) $product->assets->firstWhere('kind', 'stream');
-        $hasFile   = (bool) $product->assets->firstWhere('kind', 'file');
-
-        if (!$hasStream && !$hasFile) {
-            return back()->with('warning', 'Impossible d’approuver: aucune vidéo attachée (stream ou fichier).');
-        }
-    } else {
-        if (!$product->assets->firstWhere('kind', 'file')) {
-            return back()->with('warning', 'Impossible d’approuver: aucun fichier attaché (PDF/ZIP).');
-        }
+        return redirect()->route('admin.marketplace.publish.form', $product);
     }
 
-    // ✅ Publication
+    // ✅ Sécurité PDF/ZIP : on exige un fichier
+    if (!$product->assets->firstWhere('kind', 'file')) {
+        return back()->with('warning', 'Impossible d’approuver: aucun fichier attaché (PDF/ZIP).');
+    }
+
+    // ✅ Publication (PDF/ZIP)
     $product->status      = 'published';
     $product->reviewed_at = now();
     $product->admin_note  = null;
     $product->save();
 
-    // URL publique (fallback safe)
     $publicUrl = $product->slug
         ? route('marketplace.show', $product->slug)
         : route('marketplace.index');
 
-    // =========================================================
-    // 1) ✅ NOTIF SPÉCIALE VENDEUR
-    // =========================================================
+    // 1) ✅ Notif vendeur
     $vendor = $product->vendor ?: $this->getVendor($product);
-
     if ($vendor) {
         $vendor->notify(new \App\Notifications\VendorProductReviewedNotification(
             productId: $product->id,
@@ -364,10 +355,8 @@ class MarketplaceProductAdminController extends Controller
         ));
     }
 
-    // =========================================================
-    // 2) ✅ NOTIF AUTRES UTILISATEURS (on exclut le vendeur)
-    // =========================================================
-    User::query()
+    // 2) ✅ Notif autres utilisateurs
+    \App\Models\User::query()
         ->where('id', '!=', $product->user_id)
         ->chunkById(500, function ($users) use ($product, $publicUrl) {
             foreach ($users as $u) {
@@ -379,9 +368,7 @@ class MarketplaceProductAdminController extends Controller
             }
         });
 
-    // =========================================================
-    // 3) ✅ NOTIF ADMIN (optionnel)
-    // =========================================================
+    // 3) ✅ Notif admin (optionnel)
     if (class_exists(\App\Models\AdminNotification::class)) {
         \App\Models\AdminNotification::create([
             'type'    => 'product_approved',
@@ -394,6 +381,7 @@ class MarketplaceProductAdminController extends Controller
 
     return back()->with('success', '✅ Produit approuvé et publié sur la marketplace.');
 }
+
 
 
     public function reject(Request $request, MarketplaceProduct $product)
@@ -440,6 +428,130 @@ class MarketplaceProductAdminController extends Controller
 
     return back()->with('success', '⛔ Produit rejeté. Le vendeur a été notifié avec le motif.');
 }
+
+public function publishForm(MarketplaceProduct $product)
+{
+    $product->load(['assets', 'vendor', 'category']);
+
+    if ($product->type !== 'video') {
+        return redirect()->route('admin.marketplace.show', $product)
+            ->with('warning', 'Cette page est uniquement pour les vidéos.');
+    }
+
+    if ($product->status !== 'pending') {
+        return redirect()->route('admin.marketplace.show', $product)
+            ->with('warning', 'Ce produit n’est pas en attente.');
+    }
+
+    // ✅ il faut au moins le mp4 du vendeur (asset file)
+    $hasFile = (bool) $product->assets->firstWhere('kind', 'file');
+    if (!$hasFile) {
+        return redirect()->route('admin.marketplace.show', $product)
+            ->with('warning', 'Aucun fichier vidéo MP4 envoyé par le vendeur.');
+    }
+
+    // stream déjà présent ?
+    $stream = $product->assets->firstWhere('kind', 'stream');
+
+    return view('admin.marketplace.products.publish', compact('product', 'stream'));
+}
+
+public function publish(Request $request, MarketplaceProduct $product)
+{
+    $product->load(['assets', 'vendor']);
+
+    if ($product->type !== 'video') {
+        return back()->with('warning', 'Action réservée aux vidéos.');
+    }
+
+    if ($product->status !== 'pending') {
+        return back()->with('warning', 'Ce produit n’est pas en attente.');
+    }
+
+    // ✅ doit avoir le mp4 vendeur pour inspection
+    $hasFile = (bool) $product->assets->firstWhere('kind', 'file');
+    if (!$hasFile) {
+        return back()->with('warning', 'Aucun fichier vidéo MP4 trouvé.');
+    }
+
+    $data = $request->validate([
+        'cloudflare_video_id' => ['required', 'string', 'max:255'],
+    ], [], [
+        'cloudflare_video_id' => 'Cloudflare Video ID',
+    ]);
+
+    $videoId = trim((string) $data['cloudflare_video_id']);
+
+    // ✅ créer/maj l’asset stream
+    $streamAsset = $product->assets()->where('kind', 'stream')->first();
+    if ($streamAsset) {
+        $streamAsset->update([
+            'path'            => null,
+            'url'             => $videoId,
+            'label'           => 'Vidéo',
+            'is_downloadable' => false,
+        ]);
+    } else {
+        $product->assets()->create([
+            'kind'            => 'stream',
+            'path'            => null,
+            'url'             => $videoId,
+            'label'           => 'Vidéo',
+            'is_downloadable' => false,
+        ]);
+    }
+
+    // ✅ publier maintenant
+    $product->status      = 'published';
+    $product->reviewed_at = now();
+    $product->admin_note  = null;
+    $product->save();
+
+    // URL publique
+    $publicUrl = $product->slug
+        ? route('marketplace.show', $product->slug)
+        : route('marketplace.index');
+
+    // ✅ notif vendeur (tu as déjà VendorProductReviewedNotification)
+    $vendor = $product->vendor ?: $this->getVendor($product);
+    if ($vendor) {
+        $vendor->notify(new \App\Notifications\VendorProductReviewedNotification(
+            productId: $product->id,
+            productTitle: $product->title,
+            status: 'approved',
+            message: "🎉 Ta vidéo « {$product->title} » a été approuvée et publiée sur la marketplace.",
+            url: $publicUrl
+        ));
+    }
+
+    // ✅ notif autres users (optionnel, tu le fais déjà dans approve())
+    \App\Models\User::query()
+        ->where('id', '!=', $product->user_id)
+        ->chunkById(500, function ($users) use ($product, $publicUrl) {
+            foreach ($users as $u) {
+                $u->notify(new \App\Notifications\UserNewMarketplaceContentNotification(
+                    productId: $product->id,
+                    productTitle: $product->title,
+                    url: $publicUrl
+                ));
+            }
+        });
+
+    // ✅ notif admin (optionnel)
+    if (class_exists(\App\Models\AdminNotification::class)) {
+        \App\Models\AdminNotification::create([
+            'type'    => 'product_published',
+            'title'   => 'Vidéo publiée',
+            'message' => $product->title,
+            'url'     => route('admin.marketplace.show', $product),
+            'read_at' => null,
+        ]);
+    }
+
+    return redirect()->route('admin.marketplace.show', $product)
+        ->with('success', '✅ Vidéo publiée (Cloudflare OK).');
+}
+
 
 
 }

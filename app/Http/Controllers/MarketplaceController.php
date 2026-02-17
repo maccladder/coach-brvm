@@ -8,42 +8,44 @@ use Illuminate\Http\Request;
 
 class MarketplaceController extends Controller
 {
-    public function index(Request $request)
-    {
-        $q = MarketplaceProduct::query()
-            ->with('category')
-            ->where('status', 'published')
-            ->latest();
 
-        if ($request->filled('type')) {
-            $q->where('type', $request->string('type'));
-        }
+public function index(Request $request)
+{
+    $q = MarketplaceProduct::query()
+        ->with('category')
+        ->where('status', 'published')
+        ->latest();
 
-        if ($request->filled('category')) {
-            $q->where('category_id', (int) $request->input('category'));
-        }
-
-        if ($request->filled('s')) {
-            $s = trim((string) $request->input('s'));
-            $q->where('title', 'like', "%{$s}%");
-        }
-
-        $products = $q->paginate(12)->withQueryString();
-
-        $categories = MarketplaceCategory::orderBy('name')->get();
-
-        // ✅ IDs des produits déjà achetés (paid) par l'user connecté
-        $ownedIds = [];
-        if (auth()->check() && method_exists(auth()->user(), 'purchasedProducts')) {
-            $ownedIds = auth()->user()
-                ->purchasedProducts()
-                ->wherePivot('status', 'paid')
-                ->pluck('marketplace_products.id')
-                ->all();
-        }
-
-        return view('marketplace.index', compact('products', 'categories', 'ownedIds'));
+    if ($request->filled('type')) {
+        $q->where('type', (string) $request->input('type'));
     }
+
+    if ($request->filled('category')) {
+        $q->where('category_id', (int) $request->input('category'));
+    }
+
+    if ($request->filled('s')) {
+        $s = trim((string) $request->input('s'));
+        $q->where('title', 'like', "%{$s}%");
+    }
+
+    $products = $q->paginate(12)->withQueryString();
+
+    $categories = MarketplaceCategory::orderBy('name')->get();
+
+    // ✅ IDs des produits déjà achetés (paid) par l'user connecté
+    $ownedIds = [];
+    if (auth()->check() && method_exists(auth()->user(), 'purchasedProducts')) {
+        $ownedIds = auth()->user()
+            ->purchasedProducts()
+            ->wherePivot('status', 'paid')
+            ->pluck('marketplace_products.id')
+            ->all();
+    }
+
+    return view('marketplace.index', compact('products', 'categories', 'ownedIds'));
+}
+
 
     public function show(string $slug)
     {

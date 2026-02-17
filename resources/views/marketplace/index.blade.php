@@ -16,20 +16,65 @@
         @endauth
     </div>
 
-    {{-- ✅ NOUVEAU : Devenir vendeur --}}
+    {{-- ✅ Bloc vendeur rapide (inspiré du layout app) --}}
+    @php
+        $isAuth   = auth()->check();
+        $isVendor = $isAuth && (bool) (auth()->user()->is_vendor ?? false);
+        $viewMode = session('view_mode', 'user'); // user|vendor
+    @endphp
+
     <div class="alert alert-warning border-0 shadow-sm d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
         <div>
             <div class="fw-semibold">💼 Tu veux vendre tes produits ici ?</div>
             <div class="small opacity-75">
-                Pour devenir vendeur sur la Marketplace Coach BRVM, contacte-nous :
+                Publie tes livres PDF, vidéos ou logiciels sur la marketplace Coach BRVM.
                 <span class="d-block">
                     ✉️ <a class="fw-semibold text-decoration-none" href="mailto:coachbrvm@gmail.com">coachbrvm@gmail.com</a>
-                    • 📞 Téléphone / WhatsApp : <a class="fw-semibold text-decoration-none" href="tel:+2250788035432">+2250788035432</a>
+                    • 📞 WhatsApp : <a class="fw-semibold text-decoration-none" href="tel:+2250788035432">+2250788035432</a>
                 </span>
             </div>
         </div>
-        <div class="d-flex gap-2">
-            <a class="btn btn-sm btn-dark fw-semibold"
+
+        <div class="d-flex flex-wrap gap-2 justify-content-end">
+
+            {{-- ✅ CTA principal selon état --}}
+            @guest
+                <a class="btn btn-sm btn-primary fw-semibold" href="{{ route('login') }}">
+                    Se connecter
+                </a>
+                <a class="btn btn-sm btn-outline-primary fw-semibold" href="{{ route('register') }}">
+                    S’inscrire
+                </a>
+            @else
+                @if(!$isVendor)
+                    <form method="POST" action="{{ route('vendor.become') }}">
+                        @csrf
+                        <button type="submit" class="btn btn-sm btn-dark fw-semibold">
+                            🛍️ Devenir vendeur
+                        </button>
+                    </form>
+                @else
+                    @if($viewMode === 'user')
+                        <form method="POST" action="{{ route('switch.vendor') }}">
+                            @csrf
+                            <button type="submit" class="btn btn-sm btn-dark fw-semibold">
+                                🛍️ Passer en vue vendeur
+                            </button>
+                        </form>
+                    @else
+                        {{-- ✅ Déjà en mode vendeur : bouton qui garde/force la vue vendeur --}}
+                        <form method="POST" action="{{ route('switch.vendor') }}">
+                            @csrf
+                            <button type="submit" class="btn btn-sm btn-dark fw-semibold">
+                                🧾 Dashboard vendeur
+                            </button>
+                        </form>
+                    @endif
+                @endif
+            @endguest
+
+            {{-- ✅ On garde mail/whatsapp --}}
+            <a class="btn btn-sm btn-outline-dark fw-semibold"
                href="mailto:coachbrvm@gmail.com?subject=Devenir%20vendeur%20sur%20la%20Marketplace%20Coach%20BRVM">
                 Envoyer un mail →
             </a>
@@ -114,7 +159,7 @@
                 <div class="col-md-6 col-lg-4">
                     <div class="card border-0 shadow-sm h-100">
 
-                        {{-- ✅ Cover --}}
+                        {{-- Cover --}}
                         <div class="rounded-top overflow-hidden bg-light">
                             <div class="position-relative">
 
@@ -144,6 +189,7 @@
                         </div>
 
                         <div class="card-body d-flex flex-column">
+
                             {{-- Badges --}}
                             <div class="d-flex flex-wrap gap-2 mb-2">
                                 <span class="badge text-bg-light border">{{ $typeLabel }}</span>
@@ -185,7 +231,7 @@
                                 </div>
 
                                 <div class="d-flex gap-2">
-                                    {{-- ✅ Si déjà acheté: vidéo => visualiser / sinon => télécharger --}}
+                                    {{-- Si déjà acheté: vidéo => visualiser / sinon => télécharger --}}
                                     @if($isOwnedCard)
                                         @if($p->type === 'video')
                                             <a href="{{ route('my.products.watch', $p) }}"
@@ -210,7 +256,6 @@
                             </div>
 
                         </div>
-
                     </div>
                 </div>
             @endforeach

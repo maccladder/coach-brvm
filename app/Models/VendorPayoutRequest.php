@@ -44,4 +44,6 @@ class VendorPayoutRequest extends Model
     {
         return $this->belongsTo(User::class, 'paid_by');
     }
+
+
 }
