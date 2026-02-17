@@ -247,35 +247,46 @@ class VendorProductController extends Controller
     }
 
     public function submit(Request $request, MarketplaceProduct $product)
-    {
-        abort_unless($product->user_id === $request->user()->id, 403);
+{
+    abort_unless($product->user_id === $request->user()->id, 403);
 
-        if (!in_array($product->status, ['draft','rejected'], true)) {
-            return back()->with('warning', 'Action impossible pour ce statut.');
-        }
-
-        $product->load('assets');
-
-        if (!$product->title || !$product->category_id || $product->price === null || !$product->type) {
-            return back()->with('warning', 'Complète les infos principales avant de soumettre.');
-        }
-
-        if (!$product->cover_image_path) {
-            return back()->with('warning', 'Ajoute une image de couverture avant de soumettre.');
-        }
-
-        // ✅ NEW : exiger un fichier pour pdf/zip/video
-        $fileAsset = $product->assets->firstWhere('kind', 'file');
-        if (!$fileAsset) {
-            return back()->with('warning', 'Ajoute le fichier (PDF/ZIP/VIDÉO) avant de soumettre.');
-        }
-
-        $product->status = 'pending';
-        $product->submitted_at = now();
-        $product->admin_note = null;
-        $product->save();
-
-        return redirect()->route('vendor.products.index')
-            ->with('success', '✅ Produit soumis. En attente de validation admin.');
+    if (!in_array($product->status, ['draft','rejected'], true)) {
+        return back()->with('warning', 'Action impossible pour ce statut.');
     }
+
+    $product->load('assets');
+
+    if (!$product->title || !$product->category_id || $product->price === null || !$product->type) {
+        return back()->with('warning', 'Complète les infos principales avant de soumettre.');
+    }
+
+    if (!$product->cover_image_path) {
+        return back()->with('warning', 'Ajoute une image de couverture avant de soumettre.');
+    }
+
+    // ✅ Exiger un fichier pour pdf/zip/video
+    $fileAsset = $product->assets->firstWhere('kind', 'file');
+    if (!$fileAsset) {
+        return back()->with('warning', 'Ajoute le fichier (PDF/ZIP/VIDÉO) avant de soumettre.');
+    }
+
+    $product->status = 'pending';
+    $product->submitted_at = now();
+    $product->admin_note = null;
+    $product->save();
+
+    // ✅ NOTIF ADMIN : nouveau produit en attente
+    if (class_exists(\App\Models\AdminNotification::class)) {
+        \App\Models\AdminNotification::create([
+            'type'    => 'product_pending',
+            'title'   => '🕒 Nouveau produit en attente',
+            'message' => $product->title,
+            'url'     => route('admin.marketplace.show', $product),
+            'read_at' => null,
+        ]);
+    }
+
+    return redirect()->route('vendor.products.index')
+        ->with('success', '✅ Produit soumis. En attente de validation admin.');
+}
 }
