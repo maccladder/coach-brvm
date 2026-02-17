@@ -38,6 +38,29 @@
         </div>
     </div>
 
+    @php
+        $typeLabel = match($product->type) {
+            'book' => '📘 Livre (PDF)',
+            'video' => '🎬 Vidéo',
+            'software' => '🧩 Logiciel',
+            default => ucfirst($product->type),
+        };
+
+        // ✅ WhatsApp dev (visible pour TOUS si software + numéro)
+        $wa = preg_replace('/[^0-9]/', '', (string) ($product->support_whatsapp ?? ''));
+        $waText = rawurlencode("Bonjour, je suis intéressé par votre logiciel \"{$product->title}\" sur Coach BRVM Marketplace.");
+
+        // ==========================================================
+        // ✅ STREAM ONLY : on n'affiche QUE le stream pour les vidéos
+        // ==========================================================
+        $assetsToShow = $product->assets;
+
+        if ($product->type === 'video') {
+            // On ne montre que le stream (Cloudflare) si présent
+            $assetsToShow = $product->assets->filter(fn($a) => $a->kind === 'stream')->values();
+        }
+    @endphp
+
     <div class="card border-0 shadow-sm overflow-hidden">
         <div class="row g-0">
 
@@ -73,19 +96,6 @@
             {{-- Infos --}}
             <div class="col-lg-7">
                 <div class="card-body p-4">
-
-                    @php
-                        $typeLabel = match($product->type) {
-                            'book' => '📘 Livre (PDF)',
-                            'video' => '🎬 Vidéo',
-                            'software' => '🧩 Logiciel',
-                            default => ucfirst($product->type),
-                        };
-
-                        // ✅ WhatsApp dev (visible pour TOUS si software + numéro)
-                        $wa = preg_replace('/[^0-9]/', '', (string) ($product->support_whatsapp ?? ''));
-                        $waText = rawurlencode("Bonjour, je suis intéressé par votre logiciel \"{$product->title}\" sur Coach BRVM Marketplace.");
-                    @endphp
 
                     <div class="d-flex flex-wrap gap-2 mb-2">
                         <span class="badge text-bg-light border">{{ $typeLabel }}</span>
@@ -147,14 +157,6 @@
                                 @endif
 
                             @else
-                                {{-- ✅ CinetPay --}}
-                                {{-- <form method="POST" action="{{ route('marketplace.buy', $product) }}">
-                                    @csrf
-                                    <button type="submit" class="btn btn-primary">
-                                        <i class="bi bi-credit-card"></i> Payer avec CinetPay
-                                    </button>
-                                </form> --}}
-
                                 {{-- ✅ Paystack --}}
                                 <form method="POST" action="{{ route('paystack.marketplace.buy', $product) }}">
                                     @csrf
@@ -189,13 +191,17 @@
 
                     <h5 class="fw-bold mb-2">📦 Ce que tu reçois</h5>
 
-                    @if($product->assets->isEmpty())
+                    @if($assetsToShow->isEmpty())
                         <div class="alert alert-light border mb-0">
-                            Les fichiers / liens seront ajoutés par l’admin.
+                            @if($product->type === 'video')
+                                La vidéo sera disponible en lecture (stream) après validation.
+                            @else
+                                Les fichiers / liens seront ajoutés par l’admin.
+                            @endif
                         </div>
                     @else
                         <div class="list-group">
-                            @foreach($product->assets as $a)
+                            @foreach($assetsToShow as $a)
                                 <div class="list-group-item d-flex justify-content-between align-items-center">
                                     <div>
                                         <div class="fw-semibold">
@@ -204,7 +210,8 @@
                                             @else
                                                 <i class="bi bi-link-45deg"></i>
                                             @endif
-                                            {{ $a->label ?: ($a->kind === 'file' ? 'Fichier' : 'Lien') }}
+
+                                            {{ $a->label ?: ($product->type === 'video' ? 'Vidéo (stream)' : ($a->kind === 'file' ? 'Fichier' : 'Lien')) }}
                                         </div>
 
                                         <div class="text-muted small">
@@ -216,6 +223,7 @@
                                         </div>
                                     </div>
 
+                                    {{-- ✅ 1 seul bouton "Accéder" (pas une boucle de "Débloquer") --}}
                                     @if(!empty($isOwned) && $isOwned)
                                         @if($product->type === 'video')
                                             <a href="{{ route('my.products.watch', $product) }}"
@@ -230,23 +238,12 @@
                                         @endif
                                     @else
                                         @auth
-                                            <div class="d-flex flex-wrap gap-2">
-                                                {{-- ✅ CinetPay --}}
-                                                {{-- <form method="POST" action="{{ route('marketplace.buy', $product) }}">
-                                                    @csrf
-                                                    <button type="submit" class="btn btn-outline-primary btn-sm">
-                                                        Débloquer (CinetPay)
-                                                    </button>
-                                                </form> --}}
-
-                                                {{-- ✅ Paystack --}}
-                                                <form method="POST" action="{{ route('paystack.marketplace.buy', $product) }}">
-                                                    @csrf
-                                                    <button type="submit" class="btn btn-outline-dark btn-sm">
-                                                        Débloquer
-                                                    </button>
-                                                </form>
-                                            </div>
+                                            <form method="POST" action="{{ route('paystack.marketplace.buy', $product) }}">
+                                                @csrf
+                                                <button type="submit" class="btn btn-outline-dark btn-sm">
+                                                    Débloquer
+                                                </button>
+                                            </form>
                                         @else
                                             <a href="{{ route('login') }}" class="btn btn-outline-primary btn-sm">
                                                 Débloquer
