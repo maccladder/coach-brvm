@@ -29,6 +29,28 @@
         }
         table thead th{ white-space:nowrap; }
         .dropdown-menu{ border-radius:.5rem; }
+
+        /* ✅ NOTIFS (ADMIN) — mobile friendly */
+        .notif-menu{
+            width:380px;
+            max-width:92vw;
+        }
+        .notif-scroll{
+            max-height:360px;
+            overflow:auto;
+            -webkit-overflow-scrolling:touch;
+        }
+        @media (max-width: 576px){
+            .notif-menu{
+                width:calc(100vw - 24px)!important;
+                max-width:calc(100vw - 24px)!important;
+                margin:0 12px!important;
+                left:0!important;
+                right:0!important;
+                transform:none!important;
+            }
+            .notif-scroll{ max-height:60vh; }
+        }
     </style>
 
     @stack('styles')
@@ -115,7 +137,8 @@
                             @endif
                         </button>
 
-                        <div class="dropdown-menu dropdown-menu-end p-0 shadow-sm" style="min-width:380px;">
+                        {{-- ✅ notif-menu + notif-scroll --}}
+                        <div class="dropdown-menu dropdown-menu-end p-0 shadow-sm notif-menu">
                             <div class="px-3 py-2 border-bottom d-flex justify-content-between align-items-center">
                                 <div class="fw-semibold">Notifications</div>
 
@@ -125,7 +148,7 @@
                                 </form>
                             </div>
 
-                            <div style="max-height:360px; overflow:auto;">
+                            <div class="notif-scroll">
                                 @forelse($adminLatest as $n)
                                     <div class="px-3 py-2 border-bottom {{ $n->read_at ? '' : 'bg-light' }}">
                                         <div class="d-flex justify-content-between align-items-start gap-2">

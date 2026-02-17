@@ -7,9 +7,17 @@
             <h3 class="mb-1">🛍️ Tableau de bord vendeur</h3>
             <div class="text-muted">Crée des produits, soumets-les, puis l’admin valide.</div>
         </div>
-        <a class="btn btn-dark" href="{{ route('vendor.products.create') }}">
-            <i class="bi bi-plus-circle"></i> Nouveau produit
-        </a>
+
+        <div class="d-flex gap-2 flex-wrap">
+            {{-- ✅ NOUVEAU : Revenus vendeur --}}
+            <a class="btn btn-outline-dark" href="{{ route('vendor.earnings') }}">
+                <i class="bi bi-cash-coin"></i> Revenus
+            </a>
+
+            <a class="btn btn-dark" href="{{ route('vendor.products.create') }}">
+                <i class="bi bi-plus-circle"></i> Nouveau produit
+            </a>
+        </div>
     </div>
 
     <div class="row g-3 mb-4">

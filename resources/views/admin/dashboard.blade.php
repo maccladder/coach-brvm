@@ -15,6 +15,12 @@
         </div>
 
         <div class="d-flex gap-2 flex-wrap">
+            {{-- ✅ NOUVEAU : Reversements vendeurs --}}
+            <a href="{{ route('admin.payouts.index') }}"
+               class="btn btn-outline-dark fw-semibold">
+                💸 Reversements vendeurs
+            </a>
+
             {{-- ✅ NOUVEAU : Marketplace (Admin) --}}
             <a href="{{ route('admin.marketplace.index') }}"
                class="btn btn-outline-dark fw-semibold">
@@ -49,6 +55,28 @@
 
     {{-- 🔥 CARDS RAPIDES --}}
     <div class="row g-3 mb-4">
+
+        {{-- ✅ NOUVEAU : Reversements vendeurs --}}
+        <div class="col-md-4">
+            <a href="{{ route('admin.payouts.index') }}" class="text-decoration-none">
+                <div class="card shadow-sm border-0 h-100 bg-dark text-white">
+                    <div class="card-body d-flex flex-column justify-content-center">
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <h5 class="fw-bold mb-0">💸 Reversements vendeurs</h5>
+                            <span class="badge bg-warning text-dark fw-semibold">Payouts</span>
+                        </div>
+                        <p class="small mb-0 opacity-75">
+                            Voir les demandes, approuver / rejeter / marquer payé, et suivre l’historique.
+                        </p>
+                        <div class="mt-3 d-flex gap-2 flex-wrap">
+                            <span class="badge bg-light text-dark border">Demandes</span>
+                            <span class="badge bg-light text-dark border">Validation</span>
+                            <span class="badge bg-light text-dark border">Paiement</span>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
 
         {{-- ✅ NOUVEAU : Marketplace (Admin) --}}
         <div class="col-md-4">

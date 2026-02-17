@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AdminAnalyticsController;
 use App\Http\Controllers\AdminAnnouncementController;
+use App\Http\Controllers\VendorEarningsController;
 
 
 
@@ -48,6 +49,7 @@ use App\Http\Controllers\SummaryController;
 use App\Http\Controllers\UploadController;
 use App\Http\Controllers\VendorDashboardController;
 use App\Http\Controllers\VendorModeController;
+use App\Http\Controllers\VendorPayoutAdminController;
 use App\Http\Controllers\VendorProductController;
 use App\Http\Controllers\VirtualWalletController;
 use App\Services\BrvmActionsAiService;
@@ -681,6 +683,23 @@ Route::middleware('admin.code')->prefix('admin')->name('admin.')->group(function
     Route::get('/notifications', [AdminNotificationController::class, 'index'])->name('notifications.index');
     Route::post('/notifications/{id}/read', [AdminNotificationController::class, 'read'])->name('notifications.read');
     Route::post('/notifications/read-all', [AdminNotificationController::class, 'readAll'])->name('notifications.readAll');
+});
+
+Route::middleware(['auth']) // + ton middleware admin
+    ->prefix('admin')
+    ->name('admin.')
+    ->group(function () {
+
+        Route::get('/payouts', [VendorPayoutAdminController::class, 'index'])->name('payouts.index');
+
+        Route::post('/payouts/{payout}/approve', [VendorPayoutAdminController::class, 'approve'])->name('payouts.approve');
+        Route::post('/payouts/{payout}/reject', [VendorPayoutAdminController::class, 'reject'])->name('payouts.reject');
+        Route::post('/payouts/{payout}/paid', [VendorPayoutAdminController::class, 'markPaid'])->name('payouts.paid');
+});
+
+Route::middleware(['auth'])->prefix('vendor')->name('vendor.')->group(function () {
+    Route::get('/earnings', [VendorEarningsController::class, 'index'])->name('earnings');
+    Route::post('/payouts/request', [VendorEarningsController::class, 'requestPayout'])->name('payouts.request');
 });
 
 require __DIR__.'/auth.php';
