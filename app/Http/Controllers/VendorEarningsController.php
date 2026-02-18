@@ -24,44 +24,62 @@ class VendorEarningsController extends Controller
     }
 
     public function requestPayout(Request $request, VendorEarningsService $svc)
-    {
-        $user = $request->user();
-        $vendorId = $user->id;
+{
+    $user     = $request->user();
+    $vendorId = $user->id;
 
-        $data = $request->validate([
-            'amount'         => ['required', 'integer', 'min:' . VendorEarningsService::MIN_PAYOUT],
-            'payout_method'  => ['required', 'string', 'max:30'],
-            'payout_account' => ['required', 'string', 'max:80'],
-        ]);
+    // 1) Toujours calculer AVANT la validation pour avoir les vrais seuils
+    $totals    = $svc->totalsForVendor($vendorId);
+    $available = (int) ($totals['available'] ?? 0);
+    $minPayout = (int) ($totals['min_payout'] ?? VendorEarningsService::MIN_PAYOUT);
 
-        $totals = $svc->totalsForVendor($vendorId);
-
-        if ((int) $data['amount'] > (int) ($totals['available'] ?? 0)) {
-            return back()->with('error', "❌ Montant demandé supérieur au disponible.");
-        }
-
-        $payout = VendorPayoutRequest::create([
-            'vendor_id'      => $vendorId,
-            'amount'         => (int) $data['amount'],
-            'status'         => 'pending',
-            'payout_method'  => $data['payout_method'],
-            'payout_account' => $data['payout_account'],
-            'requested_at'   => now(),
-        ]);
-
-        // ✅ OPTION A : notif ADMIN via table AdminNotification
-        if (class_exists(AdminNotification::class)) {
-            AdminNotification::create([
-                'type'    => 'vendor_payout_requested',
-                'title'   => '💸 Demande de reversement',
-                'message' => ($user->name ?? 'Un vendeur') . ' — '
-                    . number_format((int) $payout->amount, 0, ',', ' ') . ' FCFA'
-                    . ' — ' . ($payout->payout_method ?? 'méthode') . ' (' . ($payout->payout_account ?? '') . ')',
-                'url'     => route('admin.payouts.index'),
-                'read_at' => null,
-            ]);
-        }
-
-        return back()->with('success', '✅ Demande de reversement envoyée. En attente de validation.');
+    // 2) Si pas éligible, on refuse (même si bouton “forcé”)
+    if ($available < $minPayout) {
+        return back()->with('error', "❌ Reversement indisponible (minimum: {$minPayout} FCFA).");
     }
+
+    // 3) Empêcher double demande en cours
+    $hasPending = VendorPayoutRequest::query()
+        ->where('vendor_id', $vendorId)
+        ->whereIn('status', ['pending', 'approved'])
+        ->exists();
+
+    if ($hasPending) {
+        return back()->with('warning', '⏳ Tu as déjà une demande en cours. Patiente la validation.');
+    }
+
+    // 4) Validation (Wave only + téléphone)
+    $data = $request->validate([
+        'amount'        => ['required', 'integer', 'min:' . $minPayout, 'max:' . $available],
+        'payout_method' => ['required', 'in:wave'],
+        // accepte: 07xxxxxxxx ou +22507xxxxxxxx ou 22507xxxxxxxx (ajuste si besoin)
+        'payout_phone'  => ['required', 'string', 'max:20', 'regex:/^(\+?225)?\d{8,10}$/'],
+    ]);
+
+    // (Optionnel) normaliser en stockant sans espaces
+    $phone = preg_replace('/\s+/', '', (string) $data['payout_phone']);
+
+    $payout = VendorPayoutRequest::create([
+        'vendor_id'      => $vendorId,
+        'amount'         => (int) $data['amount'],
+        'status'         => 'pending',
+        'payout_method'  => 'wave',
+        'payout_account' => $phone, // on réutilise payout_account pour stocker le tel
+        'requested_at'   => now(),
+    ]);
+
+    if (class_exists(AdminNotification::class)) {
+        AdminNotification::create([
+            'type'    => 'vendor_payout_requested',
+            'title'   => '💸 Demande de reversement',
+            'message' => ($user->name ?? 'Un vendeur') . ' — '
+                . number_format((int) $payout->amount, 0, ',', ' ') . ' FCFA'
+                . ' — WAVE (' . ($payout->payout_account ?? '') . ')',
+            'url'     => route('admin.payouts.index'),
+            'read_at' => null,
+        ]);
+    }
+
+    return back()->with('success', '✅ Demande de reversement envoyée. En attente de validation.');
+}
 }

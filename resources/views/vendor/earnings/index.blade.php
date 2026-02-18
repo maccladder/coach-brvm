@@ -7,7 +7,9 @@
         <div>
             <h3 class="mb-1">💰 Revenus vendeur</h3>
             <div class="text-muted">
-                Commission Coach BRVM : <strong>15%</strong> — Délai sécurité : <strong>72h</strong> — Arrondi (round)
+                Commission Coach BRVM : <strong>15%</strong> —
+                Délai sécurité : <strong>{{ $totals['delay_hours'] ?? 72 }}h</strong> —
+                Arrondi (round)
             </div>
         </div>
         <a href="{{ route('vendor.dashboard') }}" class="btn btn-outline-secondary">
@@ -15,26 +17,15 @@
         </a>
     </div>
 
-    @php
-        $grossTotal     = (int)($totals['gross_total'] ?? 0);
-        $feeTotal       = (int)($totals['fee_total'] ?? 0);
-        $netTotal       = (int)($totals['net_total'] ?? 0);
-
-        $available      = (int)($totals['available'] ?? 0);
-        $pendingRelease = (int)($totals['pending_release'] ?? 0);
-
-        $minPayout      = (int)($totals['min_payout'] ?? 10000);
-        $delayHours     = (int)($totals['delay_hours'] ?? 72);
-    @endphp
-
     {{-- ✅ Totaux --}}
     <div class="row g-3 mb-4">
+
         <div class="col-md-3">
             <div class="card border-0 shadow-sm h-100">
                 <div class="card-body">
                     <div class="text-muted small">💵 Argent encaissé (brut)</div>
                     <div class="fs-4 fw-bold">
-                        {{ number_format($grossTotal, 0, ',', ' ') }} FCFA
+                        {{ number_format((int)($totals['gross_total'] ?? 0), 0, ',', ' ') }} FCFA
                     </div>
                 </div>
             </div>
@@ -45,7 +36,7 @@
                 <div class="card-body">
                     <div class="text-muted small">🏦 Commission Coach BRVM (15%)</div>
                     <div class="fs-4 fw-bold text-danger">
-                        {{ number_format($feeTotal, 0, ',', ' ') }} FCFA
+                        {{ number_format((int)($totals['fee_total'] ?? 0), 0, ',', ' ') }} FCFA
                     </div>
                 </div>
             </div>
@@ -56,11 +47,9 @@
                 <div class="card-body">
                     <div class="text-muted small">✅ Montant net (théorique)</div>
                     <div class="fs-4 fw-bold text-success">
-                        {{ number_format($netTotal, 0, ',', ' ') }} FCFA
+                        {{ number_format((int)($totals['net_total'] ?? 0), 0, ',', ' ') }} FCFA
                     </div>
-                    <div class="text-muted small mt-1">
-                        (visible immédiatement)
-                    </div>
+                    <div class="text-muted small">(visible immédiatement)</div>
                 </div>
             </div>
         </div>
@@ -68,34 +57,52 @@
         <div class="col-md-3">
             <div class="card border-0 shadow-sm h-100">
                 <div class="card-body">
-                    <div class="text-muted small">🟢 Disponible (après {{ $delayHours }}h)</div>
-                    <div class="fs-4 fw-bold">
-                        {{ number_format($available, 0, ',', ' ') }} FCFA
+                    <div class="text-muted small">
+                        🟢 Retirable (après {{ $totals['delay_hours'] ?? 72 }}h)
                     </div>
+                    <div class="fs-4 fw-bold">
+                        {{ number_format((int)($totals['available'] ?? 0), 0, ',', ' ') }} FCFA
+                    </div>
+
                     <div class="text-muted small mt-1">
-                        En attente de déblocage : <strong>{{ number_format($pendingRelease, 0, ',', ' ') }} FCFA</strong>
+                        En attente de déblocage :
+                        {{ number_format((int)($totals['locked_net_72h'] ?? 0), 0, ',', ' ') }} FCFA
+
+                        @if(!empty($totals['next_unlock_at']))
+                            <div>
+                                Prochain déblocage :
+                                <strong>
+                                    {{ \Carbon\Carbon::parse($totals['next_unlock_at'])->format('d/m/Y H:i') }}
+                                </strong>
+                            </div>
+                        @endif
                     </div>
                 </div>
             </div>
         </div>
+
     </div>
 
-    {{-- ✅ Form demande reversement --}}
+    {{-- ✅ Reversement --}}
     <div class="card border-0 shadow-sm mb-4">
         <div class="card-header bg-white d-flex justify-content-between align-items-center">
             <div class="fw-semibold">📤 Demander un reversement</div>
             <span class="badge text-bg-light border">
-                Minimum : {{ number_format($minPayout, 0, ',', ' ') }} FCFA
+                Minimum :
+                {{ number_format((int)($totals['min_payout'] ?? 10000), 0, ',', ' ') }} FCFA
             </span>
         </div>
 
         <div class="card-body">
+
             @if(session('success'))
                 <div class="alert alert-success mb-3">{{ session('success') }}</div>
             @endif
+
             @if(session('error'))
                 <div class="alert alert-danger mb-3">{{ session('error') }}</div>
             @endif
+
             @if(session('warning'))
                 <div class="alert alert-warning mb-3">{{ session('warning') }}</div>
             @endif
@@ -111,68 +118,100 @@
                 </div>
             @endif
 
-            {{-- ✅ Important : le bouton dépend de AVAILABLE seulement --}}
-            @if($available < $minPayout)
-                <div class="alert alert-info mb-0">
-                    Ton montant disponible est de <strong>{{ number_format($available, 0, ',', ' ') }} FCFA</strong>.
-                    Tu pourras demander un reversement à partir de <strong>{{ number_format($minPayout, 0, ',', ' ') }} FCFA</strong>.
-                    @if($pendingRelease > 0)
-                        <div class="mt-1 small text-muted">
-                            (Une partie est en attente de déblocage : {{ number_format($pendingRelease, 0, ',', ' ') }} FCFA)
-                        </div>
-                    @endif
+            @php
+                $available   = (int)($totals['available'] ?? 0);
+                $minPayout   = (int)($totals['min_payout'] ?? 10000);
+                $canRequest  = $available >= $minPayout;
+                $missingToMin = max(0, $minPayout - $available);
+                $lockedNet   = (int)($totals['locked_net_72h'] ?? 0);
+            @endphp
+
+            <form method="POST"
+                  action="{{ route('vendor.payouts.request') }}"
+                  class="row g-3">
+                @csrf
+
+                {{-- Montant --}}
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold">Montant à demander</label>
+                    <input type="number"
+                           name="amount"
+                           min="{{ $minPayout }}"
+                           max="{{ max($available, $minPayout) }}"
+                           value="{{ old('amount', $minPayout) }}"
+                           class="form-control"
+                           {{ $canRequest ? '' : 'disabled' }}
+                           required>
+
+                    <div class="form-text">
+                        Retirable actuellement :
+                        {{ number_format($available, 0, ',', ' ') }} FCFA
+                    </div>
                 </div>
-            @else
-                <form method="POST" action="{{ route('vendor.earnings.requestPayout') }}" class="row g-3">
-                    @csrf
 
-                    <div class="col-md-4">
-                        <label class="form-label fw-semibold">Montant à demander</label>
-                        <input type="number"
-                               name="amount"
-                               min="{{ $minPayout }}"
-                               max="{{ $available }}"
-                               value="{{ old('amount', min($available, $minPayout)) }}"
-                               class="form-control"
-                               required>
-                        <div class="form-text">
-                            Max : {{ number_format($available, 0, ',', ' ') }} FCFA
-                        </div>
+                {{-- Méthode (Wave uniquement) --}}
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold">Méthode</label>
+                    <select name="payout_method"
+                            class="form-select"
+                            {{ $canRequest ? '' : 'disabled' }}
+                            required>
+                        <option value="wave" selected>Wave</option>
+                    </select>
+                </div>
+
+                {{-- Numéro Wave --}}
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold">Numéro Wave</label>
+                    <input type="tel"
+                           name="payout_phone"
+                           value="{{ old('payout_phone') }}"
+                           class="form-control"
+                           placeholder="Ex: 07xxxxxxxx ou +22507xxxxxxxx"
+                           {{ $canRequest ? '' : 'disabled' }}
+                           required>
+                </div>
+
+                {{-- Footer form --}}
+                <div class="col-12 d-flex justify-content-between align-items-center flex-wrap gap-2">
+
+                    <div class="text-muted small">
+                        @if($canRequest)
+                            ✅ Tu peux demander un reversement maintenant.
+                        @else
+                            🔒 Reversement indisponible pour le moment.
+                            @if($available < $minPayout)
+                                Il te manque
+                                <strong>
+                                    {{ number_format($missingToMin, 0, ',', ' ') }} FCFA
+                                </strong>
+                                pour atteindre le minimum.
+                            @endif
+
+                            @if($lockedNet > 0)
+                                <span class="ms-1">
+                                    En attente de déblocage
+                                    ({{ $totals['delay_hours'] ?? 72 }}h) :
+                                    <strong>
+                                        {{ number_format($lockedNet, 0, ',', ' ') }} FCFA
+                                    </strong>.
+                                </span>
+                            @endif
+                        @endif
                     </div>
 
-                    <div class="col-md-4">
-                        <label class="form-label fw-semibold">Méthode</label>
-                        <select name="payout_method" class="form-select" required>
-                            <option value="" disabled {{ old('payout_method') ? '' : 'selected' }}>Choisir…</option>
-                            <option value="wave" {{ old('payout_method')==='wave' ? 'selected' : '' }}>Wave</option>
-                            <option value="orange" {{ old('payout_method')==='orange' ? 'selected' : '' }}>Orange Money</option>
-                            <option value="mtn" {{ old('payout_method')==='mtn' ? 'selected' : '' }}>MTN Money</option>
-                            <option value="moov" {{ old('payout_method')==='moov' ? 'selected' : '' }}>Moov Money</option>
-                            <option value="bank" {{ old('payout_method')==='bank' ? 'selected' : '' }}>Virement bancaire</option>
-                        </select>
-                    </div>
+                    <button class="btn btn-dark"
+                            {{ $canRequest ? '' : 'disabled' }}>
+                        <i class="bi bi-send"></i> Envoyer la demande
+                    </button>
 
-                    <div class="col-md-4">
-                        <label class="form-label fw-semibold">Compte / Numéro</label>
-                        <input type="text"
-                               name="payout_account"
-                               value="{{ old('payout_account') }}"
-                               class="form-control"
-                               placeholder="Ex: 07xxxxxxxx / RIB / IBAN…"
-                               required>
-                    </div>
+                </div>
+            </form>
 
-                    <div class="col-12 d-flex justify-content-end">
-                        <button class="btn btn-dark">
-                            <i class="bi bi-send"></i> Envoyer la demande
-                        </button>
-                    </div>
-                </form>
-            @endif
         </div>
     </div>
 
-    {{-- ✅ Historique des reversements --}}
+    {{-- ✅ Historique --}}
     <div class="card border-0 shadow-sm">
         <div class="card-header bg-white">
             <div class="fw-semibold">🧾 Historique des demandes</div>
@@ -185,13 +224,14 @@
                     <th>Date</th>
                     <th>Montant</th>
                     <th>Méthode</th>
-                    <th>Compte</th>
+                    <th>Téléphone</th>
                     <th>Statut</th>
                     <th>Note admin</th>
                 </tr>
                 </thead>
                 <tbody>
                 @forelse($payouts as $p)
+
                     @php
                         $badge = match($p->status) {
                             'pending'  => 'warning',
@@ -201,6 +241,7 @@
                             default    => 'secondary',
                         };
                     @endphp
+
                     <tr>
                         <td class="text-muted">
                             {{ optional($p->requested_at ?? $p->created_at)->format('d/m/Y H:i') }}
@@ -208,15 +249,22 @@
                         <td class="fw-semibold">
                             {{ number_format((int)$p->amount, 0, ',', ' ') }} FCFA
                         </td>
-                        <td class="text-muted">{{ strtoupper((string)$p->payout_method) }}</td>
-                        <td class="text-muted">{{ $p->payout_account }}</td>
+                        <td class="text-muted">
+                            {{ strtoupper((string)$p->payout_method) }}
+                        </td>
+                        <td class="text-muted">
+                            {{ $p->payout_account }}
+                        </td>
                         <td>
-                            <span class="badge text-bg-{{ $badge }}">{{ $p->status }}</span>
+                            <span class="badge text-bg-{{ $badge }}">
+                                {{ $p->status }}
+                            </span>
                         </td>
                         <td class="text-muted small" style="max-width:320px;">
                             {{ $p->admin_note ?? '—' }}
                         </td>
                     </tr>
+
                 @empty
                     <tr>
                         <td colspan="6" class="text-center text-muted py-4">
