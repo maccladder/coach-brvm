@@ -15,6 +15,18 @@
         </a>
     </div>
 
+    @php
+        $grossTotal     = (int)($totals['gross_total'] ?? 0);
+        $feeTotal       = (int)($totals['fee_total'] ?? 0);
+        $netTotal       = (int)($totals['net_total'] ?? 0);
+
+        $available      = (int)($totals['available'] ?? 0);
+        $pendingRelease = (int)($totals['pending_release'] ?? 0);
+
+        $minPayout      = (int)($totals['min_payout'] ?? 10000);
+        $delayHours     = (int)($totals['delay_hours'] ?? 72);
+    @endphp
+
     {{-- ✅ Totaux --}}
     <div class="row g-3 mb-4">
         <div class="col-md-3">
@@ -22,7 +34,7 @@
                 <div class="card-body">
                     <div class="text-muted small">💵 Argent encaissé (brut)</div>
                     <div class="fs-4 fw-bold">
-                        {{ number_format((int)($totals['gross'] ?? 0), 0, ',', ' ') }} FCFA
+                        {{ number_format($grossTotal, 0, ',', ' ') }} FCFA
                     </div>
                 </div>
             </div>
@@ -33,7 +45,7 @@
                 <div class="card-body">
                     <div class="text-muted small">🏦 Commission Coach BRVM (15%)</div>
                     <div class="fs-4 fw-bold text-danger">
-                        {{ number_format((int)($totals['commission'] ?? 0), 0, ',', ' ') }} FCFA
+                        {{ number_format($feeTotal, 0, ',', ' ') }} FCFA
                     </div>
                 </div>
             </div>
@@ -44,7 +56,10 @@
                 <div class="card-body">
                     <div class="text-muted small">✅ Montant net (théorique)</div>
                     <div class="fs-4 fw-bold text-success">
-                        {{ number_format((int)($totals['net'] ?? 0), 0, ',', ' ') }} FCFA
+                        {{ number_format($netTotal, 0, ',', ' ') }} FCFA
+                    </div>
+                    <div class="text-muted small mt-1">
+                        (visible immédiatement)
                     </div>
                 </div>
             </div>
@@ -53,12 +68,12 @@
         <div class="col-md-3">
             <div class="card border-0 shadow-sm h-100">
                 <div class="card-body">
-                    <div class="text-muted small">🟢 Disponible (après 72h)</div>
+                    <div class="text-muted small">🟢 Disponible (après {{ $delayHours }}h)</div>
                     <div class="fs-4 fw-bold">
-                        {{ number_format((int)($totals['available'] ?? 0), 0, ',', ' ') }} FCFA
+                        {{ number_format($available, 0, ',', ' ') }} FCFA
                     </div>
                     <div class="text-muted small mt-1">
-                        En attente de déblocage : {{ number_format((int)($totals['locked_72h'] ?? 0), 0, ',', ' ') }} FCFA
+                        En attente de déblocage : <strong>{{ number_format($pendingRelease, 0, ',', ' ') }} FCFA</strong>
                     </div>
                 </div>
             </div>
@@ -70,7 +85,7 @@
         <div class="card-header bg-white d-flex justify-content-between align-items-center">
             <div class="fw-semibold">📤 Demander un reversement</div>
             <span class="badge text-bg-light border">
-                Minimum : {{ number_format((int)($totals['min_payout'] ?? 10000), 0, ',', ' ') }} FCFA
+                Minimum : {{ number_format($minPayout, 0, ',', ' ') }} FCFA
             </span>
         </div>
 
@@ -96,15 +111,16 @@
                 </div>
             @endif
 
-            @php
-                $available = (int)($totals['available'] ?? 0);
-                $minPayout = (int)($totals['min_payout'] ?? 10000);
-            @endphp
-
+            {{-- ✅ Important : le bouton dépend de AVAILABLE seulement --}}
             @if($available < $minPayout)
                 <div class="alert alert-info mb-0">
                     Ton montant disponible est de <strong>{{ number_format($available, 0, ',', ' ') }} FCFA</strong>.
                     Tu pourras demander un reversement à partir de <strong>{{ number_format($minPayout, 0, ',', ' ') }} FCFA</strong>.
+                    @if($pendingRelease > 0)
+                        <div class="mt-1 small text-muted">
+                            (Une partie est en attente de déblocage : {{ number_format($pendingRelease, 0, ',', ' ') }} FCFA)
+                        </div>
+                    @endif
                 </div>
             @else
                 <form method="POST" action="{{ route('vendor.earnings.requestPayout') }}" class="row g-3">

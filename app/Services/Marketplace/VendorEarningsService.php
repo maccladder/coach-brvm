@@ -16,7 +16,7 @@ class VendorEarningsService
         $delayCutoff = now()->subHours(self::SECURITY_DELAY_HOURS);
 
         // ===========================
-        // 1) Ventes payées (BRUT)
+        // 1) Ventes payées (BRUT) - visibles immédiatement
         // ===========================
         $grossTotal = (int) DB::table('marketplace_purchases as mp')
             ->join('marketplace_products as p', 'p.id', '=', 'mp.product_id')
@@ -25,7 +25,7 @@ class VendorEarningsService
             ->sum('mp.amount');
 
         // ===========================
-        // 2) Ventes éligibles (>= 72h)
+        // 2) Ventes éligibles (>= 72h) - condition reversement
         // ===========================
         $grossEligible = (int) DB::table('marketplace_purchases as mp')
             ->join('marketplace_products as p', 'p.id', '=', 'mp.product_id')
@@ -36,11 +36,11 @@ class VendorEarningsService
             ->sum('mp.amount');
 
         // Commission (round)
-        $feeTotal = (int) round($grossTotal * self::COMMISSION_RATE);
-        $feeEligible = (int) round($grossEligible * self::COMMISSION_RATE);
+        $feeTotal     = (int) round($grossTotal * self::COMMISSION_RATE);
+        $feeEligible  = (int) round($grossEligible * self::COMMISSION_RATE);
 
-        $netTotal = max(0, $grossTotal - $feeTotal);
-        $netEligible = max(0, $grossEligible - $feeEligible);
+        $netTotal     = max(0, $grossTotal - $feeTotal);         // visible immédiatement
+        $netEligible  = max(0, $grossEligible - $feeEligible);   // disponible après 72h
 
         // ===========================
         // 3) Reversements (réservé + payé)
@@ -58,21 +58,27 @@ class VendorEarningsService
         // Disponible = netEligible - réservé - payé
         $available = max(0, $netEligible - $reserved - $paidOut);
 
+        // ✅ Affichage transparent : "en attente de déblocage (72h)"
+        $pendingRelease = max(0, $netTotal - $netEligible);
+
         return [
-            'gross_total'     => $grossTotal,
-            'fee_total'       => $feeTotal,
-            'net_total'       => $netTotal,
+            'gross_total'      => $grossTotal,
+            'fee_total'        => $feeTotal,
+            'net_total'        => $netTotal,
 
-            'gross_eligible'  => $grossEligible,
-            'fee_eligible'    => $feeEligible,
-            'net_eligible'    => $netEligible,
+            'gross_eligible'   => $grossEligible,
+            'fee_eligible'     => $feeEligible,
+            'net_eligible'     => $netEligible,
 
-            'reserved'        => $reserved,
-            'paid_out'        => $paidOut,
-            'available'       => $available,
+            'reserved'         => $reserved,
+            'paid_out'         => $paidOut,
+            'available'        => $available,
 
-            'min_payout'      => self::MIN_PAYOUT,
-            'delay_hours'     => self::SECURITY_DELAY_HOURS,
+            // ✅ NEW
+            'pending_release'  => $pendingRelease,
+
+            'min_payout'       => self::MIN_PAYOUT,
+            'delay_hours'      => self::SECURITY_DELAY_HOURS,
         ];
     }
 }
