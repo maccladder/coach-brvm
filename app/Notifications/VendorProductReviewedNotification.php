@@ -3,6 +3,7 @@
 namespace App\Notifications;
 
 use Illuminate\Notifications\Notification;
+use Illuminate\Notifications\Messages\MailMessage;
 
 class VendorProductReviewedNotification extends Notification
 {
@@ -16,7 +17,28 @@ class VendorProductReviewedNotification extends Notification
 
     public function via($notifiable): array
     {
-        return ['database'];
+        return ['database', 'mail'];
+    }
+
+    public function toMail($notifiable): MailMessage
+    {
+        $isApproved = $this->status === 'approved';
+
+        $subject = $isApproved
+            ? '✅ Produit approuvé — Coach BRVM'
+            : '⛔ Produit refusé — Coach BRVM';
+
+        $headline = $isApproved
+            ? 'Bonne nouvelle ! Votre produit a été approuvé.'
+            : 'Votre produit a été refusé.';
+
+        return (new MailMessage)
+            ->subject($subject)
+            ->greeting('Bonjour ' . ($notifiable->name ?? ''))
+            ->line($headline)
+            ->line("Produit : « {$this->productTitle} »")
+            ->line($this->message)
+            ->action('Voir le produit', $this->url);
     }
 
     public function toArray($notifiable): array
