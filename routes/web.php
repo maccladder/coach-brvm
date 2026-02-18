@@ -127,6 +127,10 @@ Route::prefix('client-bocs')->name('client-bocs.')->group(function () {
     Route::get('/create', [ClientBocController::class, 'create'])->name('create');
     Route::post('/', [ClientBocController::class, 'store'])->name('store');
 
+    Route::get('/latest/public', [ClientBocController::class, 'latestPublic'])
+    ->name('latest.public');
+
+
     Route::match(['GET', 'POST'], '/payment/return/{clientBoc}', [ClientBocController::class, 'paymentReturn'])
         ->name('payment.return');
 

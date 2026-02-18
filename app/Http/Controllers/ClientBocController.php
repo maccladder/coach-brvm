@@ -155,6 +155,25 @@ TXT;
     $clientBoc->save();
 }
 
+public function latestPublic()
+{
+    // ✅ La dernière BOC "disponible" est toujours J-1 (pas de BOC du jour J)
+    $boc = \App\Models\ClientBoc::where('is_public', true)
+        ->whereDate('boc_date', '<=', Carbon::yesterday()->toDateString())
+        ->orderByDesc('boc_date')
+        ->first();
+
+    if (!$boc) {
+        return redirect()->route('landing')->with(
+            'error',
+            "La dernière BOC disponible (J-1) n'est pas encore publiée."
+        );
+    }
+
+    return redirect()->route('client-bocs.show', $boc);
+}
+
+
 public function paymentReturn(
     ClientBoc $clientBoc,
     CinetpayService $cinetpay
@@ -227,6 +246,9 @@ public function paymentNotify(
     return response()->json(['message' => 'ok']);
 }
 
+
+
+
 public function processing(ClientBoc $clientBoc)
 {
     return view('client_bocs.processing', [
@@ -246,8 +268,20 @@ public function status(ClientBoc $clientBoc)
 
 public function bubbles(ClientBoc $clientBoc, BrvmBubbleService $bubbles)
 {
-    // 1️⃣ Vérifier qu’un PDF est bien stocké
-    if (!$clientBoc->stored_path) {
+    // ✅ PDF prioritaire = DailyBoc
+    $storagePath = null;
+
+    if (!empty($clientBoc->daily_boc_id)) {
+        $daily = \App\Models\DailyBoc::find($clientBoc->daily_boc_id);
+        $storagePath = $daily?->file_path; // ex: "bocs/xxxx.pdf"
+    }
+
+    // fallback si jamais (upload client)
+    if (!$storagePath) {
+        $storagePath = $clientBoc->stored_path;
+    }
+
+    if (!$storagePath) {
         return response()->json([
             'status'  => 'error',
             'message' => 'Aucun fichier PDF associé à ce BOC.',
@@ -256,10 +290,8 @@ public function bubbles(ClientBoc $clientBoc, BrvmBubbleService $bubbles)
         ], 404);
     }
 
-    // 2️⃣ Appeler le service qui utilise GPT-4.1
-    $results = $bubbles->extractFromBoc($clientBoc->stored_path);
+    $results = $bubbles->extractFromBoc($storagePath);
 
-    // 3️⃣ Retour propre vers ton front D3.js
     return response()->json([
         'status' => 'success',
         'count'  => count($results),
@@ -270,36 +302,68 @@ public function bubbles(ClientBoc $clientBoc, BrvmBubbleService $bubbles)
 
 
 
+
     /**
      * Afficher le résultat pour un BOC client.
      */
      public function show(
-        ClientBoc $clientBoc,
-        AiInterpreter $ai,
-        AiVoiceService $voice,
-        AvatarService $avatar
-    ) {
-        // 🔁 Sécurité : si le paiement est OK mais qu'on n'a pas encore l'analyse,
-        // on (re)génère tout de suite.
-        if ($clientBoc->status === 'paid' && empty($clientBoc->interpreted_markdown)) {
-            try {
-                $this->generateAnalysisForBoc($clientBoc, $ai, $voice, $avatar);
-                $clientBoc->refresh(); // recharge les champs depuis la base
-            } catch (\Throwable $e) {
-                \Log::error(
-                    'Erreur génération analyse BOC '.$clientBoc->id.' : '.$e->getMessage(),
-                    ['exception' => $e]
-                );
+    ClientBoc $clientBoc,
+    AiInterpreter $ai,
+    AiVoiceService $voice,
+    AvatarService $avatar
+) {
+    // ✅ On génère si :
+    // - c'est un BOC payé (ancienne logique)
+    // - OU c'est un BOC public gratuit
+    // - OU il est déjà "published" mais pas encore interprété (ex: ton cas)
+    $shouldGenerate = (
+        empty($clientBoc->interpreted_markdown)
+        && (
+            $clientBoc->status === 'paid'
+            || $clientBoc->status === 'published'
+            || (bool) $clientBoc->is_public
+        )
+    );
+
+    // ✅ Anti double génération (si plusieurs refresh en même temps)
+    if ($shouldGenerate && $clientBoc->status !== 'processing') {
+        try {
+            $clientBoc->status = 'processing';
+            $clientBoc->save();
+
+            $this->generateAnalysisForBoc($clientBoc, $ai, $voice, $avatar);
+
+            // Important: regenerateAnalysisForBoc() fait déjà save(),
+            // mais on refresh pour renvoyer les valeurs à la vue
+            $clientBoc->refresh();
+
+            // Une fois OK on remet publié
+            if ($clientBoc->status === 'processing') {
+                $clientBoc->status = 'published';
+                $clientBoc->save();
+                $clientBoc->refresh();
+            }
+        } catch (\Throwable $e) {
+            \Log::error(
+                'Erreur génération analyse BOC '.$clientBoc->id.' : '.$e->getMessage(),
+                ['exception' => $e]
+            );
+
+            // on évite de rester bloqué sur processing si ça a crash
+            if ($clientBoc->status === 'processing') {
+                $clientBoc->status = 'published';
+                $clientBoc->save();
             }
         }
-
-        $audioPath = $clientBoc->audio_path;
-
-        return view('client_bocs.show', [
-            'boc'       => $clientBoc,
-            'audioPath' => $audioPath,
-        ]);
     }
+
+    $audioPath = $clientBoc->audio_path;
+
+    return view('client_bocs.show', [
+        'boc'       => $clientBoc,
+        'audioPath' => $audioPath,
+    ]);
+}
 
 // pdf
 public function downloadPdf(Request $request, ClientBoc $clientBoc)

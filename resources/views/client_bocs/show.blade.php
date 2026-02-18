@@ -1,3 +1,4 @@
+{{-- resources/views/client_bocs/show.blade.php --}}
 @extends('layouts.app')
 
 @section('content')
@@ -17,6 +18,16 @@
           <h4 class="mb-1">{{ $boc->title }}</h4>
           <div class="text-muted small">
             BOC du {{ optional($boc->boc_date)->format('d/m/Y') }} · Coach BRVM
+          </div>
+
+          {{-- petit statut --}}
+          <div class="small mt-1">
+            @if(!empty($boc->interpreted_markdown))
+              <span class="badge bg-success-subtle text-success border">Analyse prête</span>
+            @else
+              <span class="badge bg-warning-subtle text-warning border">Analyse en cours</span>
+              <span class="text-muted">· auto-refresh…</span>
+            @endif
           </div>
         </div>
       </div>
@@ -64,9 +75,7 @@
         <div class="card shadow-sm h-100 border-0">
           <div class="card-header bg-white border-0 pb-0">
             <h6 class="mb-1">🎥 Avatar vidéo</h6>
-            <small class="text-muted">
-              Le coach commente ton BOC
-            </small>
+            <small class="text-muted">Le coach commente ton BOC</small>
           </div>
           <div class="card-body text-center">
             <video
@@ -85,16 +94,12 @@
       <div class="card shadow-sm border-0">
         <div class="card-header bg-white border-0">
           <h6 class="mb-1">📝 Interprétation détaillée</h6>
-          <small class="text-muted">
-            Analyse IA de ton BOC + conseils de lecture
-          </small>
+          <small class="text-muted">Analyse IA de ton BOC + conseils de lecture</small>
         </div>
 
         <div class="card-body">
           <pre class="p-3 bg-light rounded border small mb-0"
-               style="white-space:pre-wrap; font-family: 'JetBrains Mono','Fira Code',monospace;">
-{{ $boc->interpreted_markdown ?? 'Analyse en cours…' }}
-          </pre>
+               style="white-space:pre-wrap; font-family: 'JetBrains Mono','Fira Code',monospace;">{{ !empty($boc->interpreted_markdown) ? $boc->interpreted_markdown : 'Analyse en cours… Rafraîchis dans quelques secondes.' }}</pre>
         </div>
       </div>
     </div>
@@ -128,10 +133,17 @@
 @if($boc->interpreted_markdown)
   <script src="https://d3js.org/d3.v7.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+@else
+  {{-- d3/html2canvas pas nécessaires tant que l’analyse n’est pas prête --}}
 @endif
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
+
+  // ✅ Auto-refresh léger si l'analyse n'est pas encore prête
+  @if(empty($boc->interpreted_markdown))
+    setTimeout(() => window.location.reload(), 6000);
+  @endif
 
   // === AUDIO ===
   const btnAudio = document.getElementById('playAudioBtn');
@@ -171,7 +183,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let lastData = null;
 
   if (wrapper && bubblesDiv && window.d3) {
-    // Charger automatiquement les données au chargement de la page
+
     fetch('{{ route('client-bocs.bubbles', $boc) }}')
       .then(r => {
         if (!r.ok) throw new Error('HTTP ' + r.status);
@@ -205,23 +217,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
       document.addEventListener('fullscreenchange', () => {
         const isFs = !!document.fullscreenElement;
-        fullscreenBtn.textContent = isFs
-          ? '❌ Quitter le plein écran'
-          : '⛶ Plein écran';
-
-        if (lastData) {
-          drawBubbles(lastData);
-        }
+        fullscreenBtn.textContent = isFs ? '❌ Quitter le plein écran' : '⛶ Plein écran';
+        if (lastData) drawBubbles(lastData);
       });
 
       window.addEventListener('resize', () => {
-        if (lastData) {
-          drawBubbles(lastData);
-        }
+        if (lastData) drawBubbles(lastData);
       });
     }
 
-    // Fonction de dessin des bulles
     function drawBubbles(data) {
       const container = document.getElementById('brvm-bubbles');
       container.innerHTML = '';

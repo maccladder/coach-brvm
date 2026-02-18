@@ -26,7 +26,7 @@
                         C’est une plateforme qui regroupe <strong>toutes les infos utiles BRVM</strong> :
                         annonces, radar marché, annuaires sociétés/SGI, <strong>formations</strong>,
                         un <strong>portefeuille virtuel</strong> pour s’entraîner (sans risque),
-                        et maintenant une <strong>Marketplace</strong> pour acheter (et bientôt vendre) des contenus.
+                        et une <strong>Marketplace</strong> pour acheter (et bientôt vendre) des contenus.
                     </p>
 
                     <div class="d-flex flex-wrap gap-2 mb-3">
@@ -53,13 +53,13 @@
                         @endauth
                     </div>
 
-                    {{-- ✅ NOUVEAU : MARKETPLACE --}}
+                    {{-- ✅ MARKETPLACE --}}
                     <div class="alert alert-warning border-0 shadow-sm d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
                         <div>
-                            <div class="fw-semibold">🛍️ Nouveau : Marketplace Coach BRVM</div>
+                            <div class="fw-semibold">🛍️ Marketplace Coach BRVM</div>
                             <div class="small opacity-75">
                                 Achète des <strong>livres (PDF)</strong>, <strong>vidéos</strong> et <strong>logiciels</strong> en quelques secondes.
-                                <span class="d-block">Paiement sécurisé par <strong>Mobile Money via CinetPay</strong>.</span>
+                                <span class="d-block">Paiement sécurisé par <strong>Mobile Money</strong>.</span>
                             </div>
                         </div>
                         <div class="d-flex gap-2">
@@ -74,7 +74,7 @@
                         </div>
                     </div>
 
-                    {{-- ✅ NOUVEAU : MINI-COURS EN LIVRE --}}
+                    {{-- ✅ MINI-COURS EN LIVRE --}}
                     <div class="alert alert-primary border-0 shadow-sm d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
                         <div>
                             <div class="fw-semibold">📚 Mini-cours en livre (gratuit)</div>
@@ -91,7 +91,7 @@
                         <span class="me-3">✅ Infos & outils BRVM au même endroit</span>
                         <span class="me-3">✅ Formations pour monter en niveau</span>
                         <span class="me-3">✅ Simulation via portefeuille virtuel</span>
-                        <span>✅ Achats instantanés via Marketplace</span>
+                        <span>✅ Marketplace de contenus</span>
                     </div>
                 </div>
 
@@ -117,7 +117,6 @@
                                     <span class="badge bg-light text-dark border">Gratuit</span>
                                 </div>
 
-                                {{-- ✅ NOUVEAU : LIVRES --}}
                                 <div class="list-group-item d-flex justify-content-between align-items-center px-0">
                                     <div>
                                         <div class="fw-semibold">📚 Livres instructifs</div>
@@ -126,22 +125,12 @@
                                     <span class="badge bg-light text-dark border">Gratuit</span>
                                 </div>
 
-                                {{-- ✅ NOUVEAU : MARKETPLACE --}}
                                 <div class="list-group-item d-flex justify-content-between align-items-center px-0">
                                     <div>
                                         <div class="fw-semibold">🛍️ Marketplace</div>
                                         <div class="text-muted small">PDF, vidéos, logiciels (achat instantané)</div>
                                     </div>
                                     <span class="badge bg-warning-subtle text-warning border">Nouveau</span>
-                                </div>
-
-                                {{-- ✅ NOUVEAU : ÉTUDES & BUSINESS PLANS --}}
-                                <div class="list-group-item d-flex justify-content-between align-items-center px-0">
-                                    <div>
-                                        <div class="fw-semibold">📄 Études & Business plans</div>
-                                        <div class="text-muted small">PDF pro (marché, banque, projets)</div>
-                                    </div>
-                                    <span class="badge bg-info-subtle text-info border">Nouveau</span>
                                 </div>
 
                                 <div class="list-group-item d-flex justify-content-between align-items-center px-0">
@@ -170,7 +159,7 @@
                             </div>
 
                             <div class="alert alert-light border mt-3 mb-0 small">
-                                👉 Ensuite, tu peux utiliser l’IA ci-dessous pour analyser une BOC ou un état financier.
+                                👉 La <strong>dernière BOC disponible (J-1)</strong> est maintenant <strong>gratuite</strong> et visible directement depuis l’accueil.
                             </div>
                         </div>
                     </div>
@@ -180,35 +169,42 @@
         </div>
     </section>
 
-    {{-- HERO (TON BLOC IA ORIGINAL) --}}
+    {{-- HERO --}}
     <section class="py-5 py-lg-6 border-bottom" style="background: radial-gradient(circle at top left, #0d6efd15, #ffffff);">
         <div class="container" style="max-width: 1100px;">
             <div class="row align-items-center g-4">
-                {{-- Texte principal --}}
+
+                {{-- Texte --}}
                 <div class="col-lg-7">
                     <div class="d-flex align-items-center gap-2 mb-3">
                         <span class="badge rounded-pill bg-primary-subtle text-primary fw-semibold">
                             IA & Bourse Ouest-Africaine
                         </span>
                         <span class="badge rounded-pill bg-success-subtle text-success fw-semibold">
-                            Mobile Money • CinetPay
+                            Gratuit • BOC (J-1)
                         </span>
                     </div>
 
                     <h1 class="fw-bold mb-3" style="font-size: 2.4rem;">
-                        Coach BRVM – L’IA qui lit vos BOC et états financiers à votre place.
+                        Coach BRVM – l’IA qui résume la dernière BOC disponible (J-1) gratuitement.
                     </h1>
 
                     <p class="lead text-muted mb-4">
-                        Marre de décortiquer seul les <strong>BOC</strong> et les <strong>états financiers</strong> ?
-                        Uploadez votre document, payez par mobile money, et laissez votre coach virtuel
-                        vous expliquer, en texte, en audio et en vidéo.
+                        Marre de décortiquer seul les <strong>BOC</strong> ?
+                        Coach BRVM publie une <strong>interprétation gratuite</strong> de la dernière BOC disponible (J-1) :
+                        résumé, points clés, tendances et audio/vidéo (si dispo).
                     </p>
 
                     <div class="d-flex flex-wrap gap-3 mb-3">
-                        <a href="{{ route('client-bocs.create') }}" class="btn btn-primary btn-lg">
-                            📄 Analyser ma BOC (500&nbsp;FCFA)
-                        </a>
+                        @if(!empty($latestPublicBoc))
+                            <a href="{{ route('client-bocs.latest.public') }}" class="btn btn-primary btn-lg">
+                                📄 Voir la BOC du {{ \Carbon\Carbon::parse($latestPublicBoc->boc_date)->format('d/m/Y') }} (J-1)
+                            </a>
+                        @else
+                            <a href="{{ route('landing') }}" class="btn btn-primary btn-lg">
+                                📄 Dernière BOC (J-1) bientôt disponible
+                            </a>
+                        @endif
 
                         <a href="{{ route('client-financials.create') }}" class="btn btn-outline-secondary btn-lg">
                             📊 Analyser un état financier
@@ -220,13 +216,18 @@
                     </div>
 
                     <div class="text-muted small">
-                        <span class="me-3">✅ Analyse détaillée + résumé pédagogique</span>
-                        <span class="me-3">✅ Audio + avatar vidéo</span>
-                        <span>⏱️ Résultat en quelques instants après paiement</span>
+                        <span class="me-3">✅ BOC (J-1) : gratuit</span>
+                        <span class="me-3">✅ Résumé pédagogique</span>
+                        <span>✅ Audio + avatar vidéo (si disponible)</span>
+                    </div>
+
+                    <div class="mt-3 small text-muted">
+                        <i class="bi bi-info-circle me-1"></i>
+                        La BRVM ne publie pas de BOC le jour même : la dernière BOC disponible est celle de <strong>J-1</strong>.
                     </div>
                 </div>
 
-                {{-- Visuel / “mockup” --}}
+                {{-- Visuel --}}
                 <div class="col-lg-5">
                     <div class="card shadow-sm border-0">
                         <div class="card-body">
@@ -237,7 +238,7 @@
                                      style="width:58px;height:58px;object-fit:cover;">
                                 <div>
                                     <div class="fw-semibold">Coach BRVM</div>
-                                    <div class="text-muted small">Interprétation IA personnalisée</div>
+                                    <div class="text-muted small">Interprétation IA</div>
                                 </div>
                             </div>
 
@@ -259,7 +260,7 @@
                             </div>
 
                             <p class="small text-muted mb-2">
-                                Exemple de <strong>Bulletin Officiel de la Côte (BOC)</strong> tel que publié par la BRVM.
+                                Exemple de <strong>BOC</strong> tel que publié par la BRVM.
                                 Coach BRVM analyse précisément ce format de PDF (une BOC par jour).
                             </p>
 
@@ -293,35 +294,14 @@
             <div class="card border-0 shadow-sm">
                 <div class="card-body d-flex flex-wrap justify-content-between align-items-center gap-3">
                     <div>
-                        <div class="fw-semibold">🛍️ Nouveau : Marketplace Coach BRVM</div>
+                        <div class="fw-semibold">🛍️ Marketplace Coach BRVM</div>
                         <div class="text-muted small">
-                            PDF, vidéos, logiciels – achat instantané. Accès débloqué dès confirmation CinetPay.
+                            PDF, vidéos, logiciels – achat instantané. Accès dans “Mes achats” après paiement.
                         </div>
                     </div>
 
                     <a href="{{ route('marketplace.index') }}" class="btn btn-warning fw-semibold">
                         Ouvrir la Marketplace
-                    </a>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    {{-- ✅ NOUVEAU : CALLOUT Études & Business plans --}}
-    <section class="py-4 border-bottom bg-white">
-        <div class="container" style="max-width:1100px;">
-            <div class="card border-0 shadow-sm">
-                <div class="card-body d-flex flex-wrap justify-content-between align-items-center gap-3">
-                    <div>
-                        <div class="fw-semibold">📄 Nouveau : Études de marché & Business plans</div>
-                        <div class="text-muted small">
-                            Achète des <strong>PDF pro</strong> (études, business plans, dossiers banque).
-                            Accès immédiat dans <strong>Mes documents</strong> après paiement.
-                        </div>
-                    </div>
-
-                    <a href="{{ route('docs.public.index') }}" class="btn btn-outline-primary fw-semibold">
-                        Voir les documents →
                     </a>
                 </div>
             </div>
@@ -334,7 +314,7 @@
             <div class="card border-0 shadow-sm">
                 <div class="card-body d-flex flex-wrap justify-content-between align-items-center gap-3">
                     <div>
-                        <div class="fw-semibold">🔥 Nouveau : Radar Marché gratuit</div>
+                        <div class="fw-semibold">🔥 Radar Marché gratuit</div>
                         <div class="text-muted small">
                             Performance sur 7 jours + comparaison des sociétés BRVM en un coup d’œil.
                         </div>
@@ -353,7 +333,7 @@
             <div class="card border-0 shadow-sm">
                 <div class="card-body d-flex flex-wrap justify-content-between align-items-center gap-3">
                     <div>
-                        <div class="fw-semibold">⚡ Nouveau : Chocs de marché (par secteur)</div>
+                        <div class="fw-semibold">⚡ Chocs de marché (par secteur)</div>
                         <div class="text-muted small">
                             Comprends pourquoi une action BRVM peut monter ou chuter subitement, avec des exemples.
                         </div>
@@ -366,13 +346,13 @@
         </div>
     </section>
 
-    {{-- ✅ NOUVEAU : Module stratégies d’investissement --}}
+    {{-- ✅ Module stratégies --}}
     <section class="py-4 border-bottom bg-white">
         <div class="container" style="max-width:1100px;">
             <div class="card border-0 shadow-sm">
                 <div class="card-body d-flex flex-wrap justify-content-between align-items-center gap-3">
                     <div>
-                        <div class="fw-semibold">🧠 Nouveau : Techniques & stratégies d’investissement (BRVM)</div>
+                        <div class="fw-semibold">🧠 Techniques & stratégies d’investissement (BRVM)</div>
                         <div class="text-muted small">
                             Mean reversion, dividendes, suivi de tendance… avec les dangers à éviter
                             et les outils Coach BRVM pour appliquer.
@@ -469,7 +449,7 @@
             <div class="text-center mb-4">
                 <h2 class="fw-semibold mb-2">Comment ça marche&nbsp;?</h2>
                 <p class="text-muted mb-0">
-                    3 étapes simples pour transformer un PDF illisible en décisions plus claires.
+                    La <strong>dernière BOC disponible (J-1)</strong> est publiée gratuitement. Ensuite, tu peux aller plus loin avec les états financiers.
                 </p>
             </div>
 
@@ -478,10 +458,9 @@
                     <div class="card h-100 border-0 shadow-sm">
                         <div class="card-body text-center">
                             <div class="display-5 mb-3">1️⃣</div>
-                            <h5 class="fw-semibold mb-2">Uploader votre document</h5>
+                            <h5 class="fw-semibold mb-2">Voir la BOC (J-1)</h5>
                             <p class="text-muted small mb-0">
-                                BOC ou état financier, vous choisissez le fichier à analyser
-                                depuis votre ordinateur ou votre téléphone.
+                                Un clic et tu lis l’interprétation gratuite de la dernière BOC disponible (J-1).
                             </p>
                         </div>
                     </div>
@@ -491,10 +470,9 @@
                     <div class="card h-100 border-0 shadow-sm">
                         <div class="card-body text-center">
                             <div class="display-5 mb-3">2️⃣</div>
-                            <h5 class="fw-semibold mb-2">Payer par mobile money</h5>
+                            <h5 class="fw-semibold mb-2">Comprendre les mouvements</h5>
                             <p class="text-muted small mb-0">
-                                Paiement sécurisé via CinetPay (Orange Money, MTN, Wave, cartes…).
-                                Pour la BOC, à partir de <strong>500 FCFA</strong>.
+                                Résumé clair, points clés, et parfois audio/vidéo pour mieux retenir.
                             </p>
                         </div>
                     </div>
@@ -504,25 +482,29 @@
                     <div class="card h-100 border-0 shadow-sm">
                         <div class="card-body text-center">
                             <div class="display-5 mb-3">3️⃣</div>
-                            <h5 class="fw-semibold mb-2">Recevoir l’analyse IA</h5>
+                            <h5 class="fw-semibold mb-2">Aller plus loin (optionnel)</h5>
                             <p class="text-muted small mb-0">
-                                Vous obtenez une interprétation détaillée, un résumé, un audio
-                                et une vidéo de votre coach virtuel. Imprimable ou à garder par mail.
+                                Analyse d’états financiers, formations, portefeuille virtuel, marketplace…
                             </p>
                         </div>
                     </div>
                 </div>
             </div>
 
-            {{-- Mini bandeau marketplace (rappel) --}}
             <div class="mt-4">
-                <div class="alert alert-warning border-0 shadow-sm d-flex flex-wrap justify-content-between align-items-center gap-2 mb-0">
+                <div class="alert alert-primary border-0 shadow-sm d-flex flex-wrap justify-content-between align-items-center gap-2 mb-0">
                     <div class="fw-semibold">
-                        🛍️ Astuce : récupère tes PDF/vidéos/logiciels directement dans la Marketplace après paiement.
+                        📄 La dernière BOC disponible (J-1) est gratuite : consulte-la et partage-la à tes amis investisseurs.
                     </div>
-                    <a href="{{ route('marketplace.index') }}" class="btn btn-sm btn-dark fw-semibold">
-                        Voir la Marketplace →
-                    </a>
+                    @if(!empty($latestPublicBoc))
+                        <a href="{{ route('client-bocs.latest.public') }}" class="btn btn-sm btn-dark fw-semibold">
+                            Voir la BOC (J-1) →
+                        </a>
+                    @else
+                        <a href="{{ route('landing') }}" class="btn btn-sm btn-dark fw-semibold">
+                            BOC (J-1) bientôt →
+                        </a>
+                    @endif
                 </div>
             </div>
         </div>
@@ -534,7 +516,7 @@
             <div class="text-center mb-4">
                 <h2 class="fw-semibold mb-2">Deux services pour les investisseurs BRVM</h2>
                 <p class="text-muted mb-0">
-                    Commence simple avec l’analyse de BOC, puis passe aux états financiers complets.
+                    Commence gratuit avec la BOC (J-1), puis passe aux états financiers complets si besoin.
                 </p>
             </div>
 
@@ -543,24 +525,32 @@
                 <div class="col-md-6">
                     <div class="card h-100 border-0 shadow-sm">
                         <div class="card-body d-flex flex-column">
-                            <h5 class="fw-semibold mb-1">📄 Analyse de votre BOC</h5>
+                            <h5 class="fw-semibold mb-1">📄 Dernière BOC disponible (J-1) — gratuit</h5>
                             <p class="text-muted small mb-2">
-                                Idéal pour suivre rapidement votre portefeuille et les mouvements du jour.
+                                Idéal pour suivre rapidement le marché et les mouvements récents.
                             </p>
                             <ul class="small text-muted mb-3">
-                                <li>Lecture IA de votre BOC</li>
+                                <li>Interprétation gratuite de la dernière BOC disponible (J-1)</li>
                                 <li>Résumé clair en français simple</li>
-                                <li>Audio + avatar vidéo qui vous parle</li>
-                                <li>Envoi possible par e-mail</li>
+                                <li>Audio + avatar vidéo (si disponible)</li>
+                                <li>Partage facile</li>
                             </ul>
+
                             <div class="mt-auto d-flex justify-content-between align-items-center">
                                 <div>
-                                    <div class="fw-bold">500&nbsp;FCFA</div>
-                                    <div class="text-muted small">par BOC analysé</div>
+                                    <div class="fw-bold">0&nbsp;FCFA</div>
+                                    <div class="text-muted small">accès gratuit</div>
                                 </div>
-                                <a href="{{ route('client-bocs.create') }}" class="btn btn-outline-primary">
-                                    Commencer
-                                </a>
+
+                                @if(!empty($latestPublicBoc))
+                                    <a href="{{ route('client-bocs.latest.public') }}" class="btn btn-outline-primary">
+                                        Voir la BOC (J-1)
+                                    </a>
+                                @else
+                                    <a href="{{ route('landing') }}" class="btn btn-outline-primary">
+                                        BOC (J-1) bientôt disponible
+                                    </a>
+                                @endif
                             </div>
                         </div>
                     </div>
@@ -579,12 +569,12 @@
                                 <li>Décodage des chiffres clés</li>
                                 <li>Points forts / points de vigilance</li>
                                 <li>Résumé orienté investisseur de long terme</li>
-                                <li>Recommandations pédagogiques (pas de conseil d’investissement personnel)</li>
+                                <li>Analyse pédagogique (pas de conseil personnalisé)</li>
                             </ul>
                             <div class="mt-auto d-flex justify-content-between align-items-center">
                                 <div>
-                                    <div class="fw-bold">~ 1&nbsp;000&nbsp;FCFA</div>
-                                    <div class="text-muted small">par état financier (tarif indicatif)</div>
+                                    <div class="fw-bold">Payant</div>
+                                    <div class="text-muted small">selon le service</div>
                                 </div>
                                 <a href="{{ route('client-financials.create') }}" class="btn btn-outline-secondary">
                                     Analyser un état financier
@@ -621,7 +611,7 @@
                 <div class="col-lg-6">
                     <h2 class="fw-semibold mb-2">Formations BRVM pour monter en niveau</h2>
                     <p class="text-muted mb-3">
-                        En parallèle des analyses IA, tu peux te former sérieusement sur la BRVM :
+                        En parallèle de la BOC (J-1), tu peux te former sérieusement sur la BRVM :
                         cours débutant, cours intermédiaire, exemples concrets, cas pratiques…
                     </p>
                     <ul class="text-muted small mb-3">

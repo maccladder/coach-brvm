@@ -12,8 +12,14 @@ class ClientBoc extends Model
     protected $fillable = [
     'title',
     'boc_date',
-    'original_filename',
-    'stored_path',
+
+    // ✅ noms réels en DB (et utilisés par daily_bocs)
+    'file_path',
+    'original_name',
+
+    'daily_boc_id',
+    'is_public',
+
     'interpreted_markdown',
     'avatar_video_url',
     'audio_path',
