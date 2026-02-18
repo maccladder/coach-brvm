@@ -266,36 +266,34 @@ public function status(ClientBoc $clientBoc)
     ]);
 }
 
-public function bubbles(ClientBoc $clientBoc, BrvmBubbleService $bubbles)
+public function bubbles(ClientBoc $clientBoc)
 {
-    // ✅ PDF prioritaire = DailyBoc
-    $storagePath = null;
-
-    if (!empty($clientBoc->daily_boc_id)) {
-        $daily = \App\Models\DailyBoc::find($clientBoc->daily_boc_id);
-        $storagePath = $daily?->file_path; // ex: "bocs/xxxx.pdf"
-    }
-
-    // fallback si jamais (upload client)
-    if (!$storagePath) {
-        $storagePath = $clientBoc->stored_path;
-    }
-
-    if (!$storagePath) {
+    if (empty($clientBoc->daily_boc_id)) {
         return response()->json([
             'status'  => 'error',
-            'message' => 'Aucun fichier PDF associé à ce BOC.',
+            'message' => 'Aucune DailyBoc associée.',
             'count'   => 0,
             'data'    => [],
         ], 404);
     }
 
-    $results = $bubbles->extractFromBoc($storagePath);
+    $stocks = \App\Models\BocStock::where('daily_boc_id', $clientBoc->daily_boc_id)
+        ->orderByDesc('change')
+        ->get(['ticker', 'name', 'price', 'change'])
+        ->map(function ($s) {
+            return [
+                'ticker' => (string) $s->ticker,
+                'name'   => (string) ($s->name ?? $s->ticker),
+                'price'  => is_null($s->price) ? null : (float) $s->price,
+                'change' => is_null($s->change) ? 0.0 : (float) $s->change,
+            ];
+        })
+        ->values();
 
     return response()->json([
         'status' => 'success',
-        'count'  => count($results),
-        'data'   => $results,
+        'count'  => $stocks->count(),
+        'data'   => $stocks,
     ]);
 }
 

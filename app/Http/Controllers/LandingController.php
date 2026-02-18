@@ -11,26 +11,25 @@ class LandingController extends Controller
 {
     public function index()
     {
-        // 🔔 Annonces
         $annonces = Announcement::published()
             ->orderByDesc('published_at')
             ->orderByDesc('created_at')
             ->limit(3)
             ->get();
 
-        // 📅 Dernière date BOC dispo = J-1 (ou avant)
+        // ✅ Dernière date BOC dispo = J-1 (ou avant)
         $lastDaily = DailyBoc::whereDate('date_boc', '<=', Carbon::yesterday())
             ->orderByDesc('date_boc')
             ->first();
 
-        // 📄 Dernière BOC publique liée (ou fallback)
+        // ✅ Dernier ClientBoc public J-1 (lié à daily si possible)
         $latestPublicBoc = ClientBoc::query()
             ->where('is_public', 1)
             ->whereDate('boc_date', '<=', Carbon::yesterday())
             ->when($lastDaily, function ($q) use ($lastDaily) {
                 $q->where(function ($qq) use ($lastDaily) {
                     $qq->where('daily_boc_id', $lastDaily->id)
-                       ->orWhereNull('daily_boc_id'); // fallback si pas lié
+                       ->orWhereNull('daily_boc_id'); // fallback si ancien public non lié
                 });
             })
             ->orderByDesc('boc_date')
