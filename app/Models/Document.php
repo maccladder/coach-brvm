@@ -4,14 +4,15 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use App\Models\User;
-use App\Models\DocumentPurchase;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Document extends Model
 {
     use HasFactory;
 
     protected $fillable = [
+        'vendor_id',
+
         'title',
         'slug',
         'type',
@@ -20,12 +21,18 @@ class Document extends Model
         'price',
         'description',
         'file_path',
+
         'is_active',
+        'status',
+        'approved_at',
+        'approved_by',
+        'rejected_note',
     ];
 
     protected $casts = [
-        'is_active' => 'boolean',
-        'price'     => 'integer',
+        'is_active'    => 'boolean',
+        'price'        => 'integer',
+        'approved_at'  => 'datetime',
     ];
 
     /* =====================
@@ -36,12 +43,27 @@ class Document extends Model
         return $this->hasMany(DocumentPurchase::class);
     }
 
+    public function vendor(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'vendor_id');
+    }
+
+    public function approver(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'approved_by');
+    }
+
     /* =====================
      | Scopes
      ===================== */
     public function scopeActive($q)
     {
-        return $q->where('is_active', true);
+        return $q->where('is_active', true)->where('status', 'published');
+    }
+
+    public function scopePublished($q)
+    {
+        return $q->where('status', 'published');
     }
 
     /* =====================
@@ -53,5 +75,10 @@ class Document extends Model
             ->paid()
             ->where('user_id', $user->id)
             ->exists();
+    }
+
+    public function isVendorUploaded(): bool
+    {
+        return !is_null($this->vendor_id);
     }
 }

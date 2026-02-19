@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Document;
 use App\Models\MarketplaceProduct;
 use Illuminate\Http\Request;
 
@@ -9,8 +10,9 @@ class VendorDashboardController extends Controller
 {
     public function index(Request $request)
     {
-        $userId = $request->user()->id;
+        $userId = (int) $request->user()->id;
 
+        // ✅ Stats produits marketplace
         $stats = MarketplaceProduct::query()
             ->where('user_id', $userId)
             ->selectRaw("
@@ -21,6 +23,7 @@ class VendorDashboardController extends Controller
             ")
             ->first();
 
+        // ✅ Derniers produits
         $latest = MarketplaceProduct::query()
             ->with('category')
             ->where('user_id', $userId)
@@ -28,6 +31,13 @@ class VendorDashboardController extends Controller
             ->take(8)
             ->get();
 
-        return view('vendor.dashboard', compact('stats', 'latest'));
+        // ✅ NOUVEAU : Dernières études / documents du vendeur
+        $latestDocuments = Document::query()
+            ->where('vendor_id', $userId)
+            ->latest()
+            ->take(5)
+            ->get();
+
+        return view('vendor.dashboard', compact('stats', 'latest', 'latestDocuments'));
     }
 }

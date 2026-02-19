@@ -2,24 +2,23 @@
 
 use App\Http\Controllers\AdminAnalyticsController;
 use App\Http\Controllers\AdminAnnouncementController;
-use App\Http\Controllers\VendorEarningsController;
-
-
-
 use App\Http\Controllers\AdminController;
-use App\Http\Controllers\AdminCourseController;
 
+
+
+use App\Http\Controllers\AdminCourseController;
 use App\Http\Controllers\AdminEmailController;
+
 use App\Http\Controllers\AdminFinancialReportController;
 use App\Http\Controllers\AdminMarketController;
 use App\Http\Controllers\AdminNotificationController;
 use App\Http\Controllers\AdminPerformanceController;
 use App\Http\Controllers\AdminTopupController;
 use App\Http\Controllers\AdminUserController;
-
 use App\Http\Controllers\AdminVirtualWalletController;
 
 use App\Http\Controllers\AnnouncementController;
+
 use App\Http\Controllers\BookController;
 use App\Http\Controllers\ChocsMarcheController;
 use App\Http\Controllers\ClientBocController;
@@ -48,6 +47,8 @@ use App\Http\Controllers\SocieteController;
 use App\Http\Controllers\SummaryController;
 use App\Http\Controllers\UploadController;
 use App\Http\Controllers\VendorDashboardController;
+use App\Http\Controllers\VendorDocumentController;
+use App\Http\Controllers\VendorEarningsController;
 use App\Http\Controllers\VendorModeController;
 use App\Http\Controllers\VendorPayoutAdminController;
 use App\Http\Controllers\VendorProductController;
@@ -254,6 +255,14 @@ Route::post('/emails/send', [AdminEmailController::class, 'send'])
 Route::resource('documents', DocumentAdminController::class);
         Route::patch('documents/{document}/toggle', [DocumentAdminController::class, 'toggle'])
             ->name('documents.toggle');
+
+// ✅ NEW: validation admin
+Route::post('documents/{document}/approve', [DocumentAdminController::class, 'approve'])
+    ->name('documents.approve');
+
+Route::post('documents/{document}/reject', [DocumentAdminController::class, 'reject'])
+    ->name('documents.reject');
+
 
         // ✅ États financiers (ADMIN)
         Route::get('/financial-reports/{year}', [AdminFinancialReportController::class, 'index'])
@@ -663,6 +672,20 @@ Route::middleware('auth')->group(function () {
     Route::post('/switch-to-user', [VendorModeController::class, 'switchToUser'])
         ->name('switch.user');
 });
+
+Route::middleware(['auth','vendor.mode'])
+    ->prefix('vendor')
+    ->name('vendor.')
+    ->group(function () {
+
+        // autres routes vendor...
+         Route::post('documents/{document}/submit', [VendorDocumentController::class, 'submit'])
+        ->name('documents.submit');
+
+        Route::resource('documents', VendorDocumentController::class)->except(['show']);
+    });
+
+
 
 Route::middleware(['auth', 'vendor.mode'])->prefix('vendor')->name('vendor.')->group(function () {
     Route::get('/', function () {

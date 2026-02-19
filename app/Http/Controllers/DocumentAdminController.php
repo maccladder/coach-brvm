@@ -53,6 +53,32 @@ class DocumentAdminController extends Controller
             ->with('success', "Document ajouté : {$doc->title}");
     }
 
+    public function approve(Request $request, \App\Models\Document $document)
+{
+    $document->status      = 'published';
+    $document->is_active   = true;
+    $document->approved_at = now();
+    $document->approved_by = $request->user()->id;
+    $document->rejected_note = null;
+    $document->save();
+
+    return back()->with('success', '✅ Document approuvé et publié.');
+}
+
+public function reject(Request $request, \App\Models\Document $document)
+{
+    $data = $request->validate([
+        'rejected_note' => ['required','string','max:500'],
+    ]);
+
+    $document->status        = 'rejected';
+    $document->is_active     = false;
+    $document->rejected_note = $data['rejected_note'];
+    $document->save();
+
+    return back()->with('success', '⛔ Document rejeté.');
+}
+
     public function edit(Document $document)
     {
         $types = $this->types();
