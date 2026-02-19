@@ -249,6 +249,12 @@ Route::post('/emails/send', [AdminEmailController::class, 'send'])
         Route::get('/bocs', [AdminController::class, 'dailyBocsIndex'])->name('bocs.index');
         Route::post('/bocs', [AdminController::class, 'dailyBocsStore'])->name('bocs.store');
 
+        // ajout document admin
+
+Route::resource('documents', DocumentAdminController::class);
+        Route::patch('documents/{document}/toggle', [DocumentAdminController::class, 'toggle'])
+            ->name('documents.toggle');
+
         // ✅ États financiers (ADMIN)
         Route::get('/financial-reports/{year}', [AdminFinancialReportController::class, 'index'])
             ->name('financial_reports.index');
@@ -567,11 +573,11 @@ Route::middleware('auth')->group(function () {
 });
 
 
-Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
-    Route::resource('documents', DocumentAdminController::class);
-    Route::patch('documents/{document}/toggle', [DocumentAdminController::class, 'toggle'])
-        ->name('documents.toggle');
-});
+// Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
+//     Route::resource('documents', DocumentAdminController::class);
+//     Route::patch('documents/{document}/toggle', [DocumentAdminController::class, 'toggle'])
+//         ->name('documents.toggle');
+// });
 
 
 Route::get('/etudes-businessplans', [DocumentController::class, 'index'])->name('docs.public.index');
@@ -696,6 +702,8 @@ Route::middleware('admin.code')->prefix('admin')->name('admin.')->group(function
     Route::post('/notifications/{id}/read', [AdminNotificationController::class, 'read'])->name('notifications.read');
     Route::post('/notifications/read-all', [AdminNotificationController::class, 'readAll'])->name('notifications.readAll');
 });
+
+
 
 Route::middleware(['auth']) // + ton middleware admin
     ->prefix('admin')

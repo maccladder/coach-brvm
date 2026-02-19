@@ -10,42 +10,54 @@
         <div>
             <h2 class="fw-bold mb-1">Dashboard Administrateur</h2>
             <p class="text-muted mb-0">
-                Aperçu rapide des analyses effectuées par les utilisateurs.
+                Centre de pilotage : contenus, marketplace, stats et opérations.
             </p>
         </div>
 
         <div class="d-flex gap-2 flex-wrap">
-            {{-- ✅ NOUVEAU : Reversements vendeurs --}}
+
+            {{-- ✅ Documents (Études / Business plans / Dossiers) --}}
+            <a href="{{ route('admin.documents.index') }}"
+               class="btn btn-outline-dark fw-semibold">
+                📚 Documents (Études & Dossiers)
+            </a>
+
+            <a href="{{ route('admin.documents.create') }}"
+               class="btn btn-dark fw-semibold">
+                ➕ Ajouter un document
+            </a>
+
+            {{-- ✅ Reversements vendeurs --}}
             <a href="{{ route('admin.payouts.index') }}"
                class="btn btn-outline-dark fw-semibold">
                 💸 Reversements vendeurs
             </a>
 
-            {{-- ✅ NOUVEAU : Marketplace (Admin) --}}
+            {{-- ✅ Marketplace (Admin) --}}
             <a href="{{ route('admin.marketplace.index') }}"
                class="btn btn-outline-dark fw-semibold">
                 🛍️ Marketplace (Admin)
             </a>
 
-            {{-- 👉 Bouton Utilisateurs --}}
+            {{-- Utilisateurs --}}
             <a href="{{ route('admin.users.index') }}"
                class="btn btn-outline-secondary fw-semibold">
                 👥 Utilisateurs
             </a>
 
-            {{-- 👉 Bouton Emails --}}
+            {{-- Emails --}}
             <a href="{{ route('admin.emails.index') }}"
                class="btn btn-outline-success fw-semibold">
                 📧 Emails
             </a>
 
-            {{-- 👉 Bouton États financiers (archive upload) --}}
+            {{-- États financiers (archive upload) --}}
             <a href="{{ route('admin.financial_reports.index', ['year' => 2025]) }}"
                class="btn btn-outline-info fw-semibold">
                 📄 États financiers 2025
             </a>
 
-            {{-- 👉 Bouton Analytics --}}
+            {{-- Analytics --}}
             <a href="{{ route('admin.analytics.index') }}"
                class="btn btn-outline-primary fw-semibold">
                 📊 Analytics visiteurs
@@ -56,7 +68,38 @@
     {{-- 🔥 CARDS RAPIDES --}}
     <div class="row g-3 mb-4">
 
-        {{-- ✅ NOUVEAU : Reversements vendeurs --}}
+        {{-- ✅ Documents (Études / Business plans / Dossiers) --}}
+        <div class="col-md-4">
+            <a href="{{ route('admin.documents.index') }}" class="text-decoration-none">
+                <div class="card shadow-sm border-0 h-100 bg-light">
+                    <div class="card-body d-flex flex-column justify-content-center">
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <h5 class="fw-bold mb-0">📚 Documents</h5>
+                            <span class="badge bg-dark text-white fw-semibold">PDF</span>
+                        </div>
+
+                        <p class="small mb-0 text-muted">
+                            Gérer les études de marché, business plans et dossiers de financement (ajout, édition, activation).
+                        </p>
+
+                        <div class="mt-3 d-flex gap-2 flex-wrap">
+                            <span class="badge bg-white text-dark border">Étude de marché</span>
+                            <span class="badge bg-white text-dark border">Business plan</span>
+                            <span class="badge bg-white text-dark border">Financement</span>
+                        </div>
+
+                        <div class="mt-3">
+                            <a href="{{ route('admin.documents.create') }}"
+                               class="btn btn-sm btn-dark fw-semibold">
+                                ➕ Ajouter
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        {{-- ✅ Reversements vendeurs --}}
         <div class="col-md-4">
             <a href="{{ route('admin.payouts.index') }}" class="text-decoration-none">
                 <div class="card shadow-sm border-0 h-100 bg-dark text-white">
@@ -78,7 +121,7 @@
             </a>
         </div>
 
-        {{-- ✅ NOUVEAU : Marketplace (Admin) --}}
+        {{-- ✅ Marketplace (Admin) --}}
         <div class="col-md-4">
             <a href="{{ route('admin.marketplace.index') }}" class="text-decoration-none">
                 <div class="card shadow-sm border-0 h-100 bg-warning text-dark">
@@ -201,87 +244,14 @@
             </a>
         </div>
 
-        {{-- Total BOC --}}
-        <div class="col-md-4">
-            <div class="card shadow-sm border-0 h-100">
-                <div class="card-body">
-                    <h6 class="text-muted">BOC analysés</h6>
-                    <h3 class="fw-bold">
-                        {{ number_format($bocs->count(), 0, ',', ' ') }}
-                    </h3>
-                </div>
-            </div>
-        </div>
-
     </div>
 
-    {{-- SECTION BOC --}}
-    <div class="card shadow-sm border-0 mb-5">
-        <div class="card-body">
-            <h4 class="fw-semibold mb-3">Derniers BOC analysés</h4>
-
-            @if($bocs->isEmpty())
-                <p class="text-muted">Aucun BOC analysé pour l’instant.</p>
-            @else
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle">
-                        <thead>
-                            <tr>
-                                <th>Intitulé</th>
-                                <th>Status</th>
-                                <th>Montant</th>
-                                <th>Date</th>
-                                <th>Action</th>
-                            </tr>
-                        </thead>
-
-                        <tbody>
-                            @foreach($bocs as $boc)
-                                <tr>
-                                    <td>{{ $boc->title }}</td>
-                                    <td>
-                                        @switch($boc->status)
-                                            @case('paid')
-                                                <span class="badge bg-success">Payé</span>
-                                                @break
-                                            @case('pending')
-                                                <span class="badge bg-warning text-dark">En attente</span>
-                                                @break
-                                            @case('failed')
-                                                <span class="badge bg-danger">Échec</span>
-                                                @break
-                                            @case('abandoned')
-                                                <span class="badge bg-secondary">Abandonné</span>
-                                                @break
-                                            @default
-                                                <span class="badge bg-light text-dark">Inconnu</span>
-                                        @endswitch
-                                    </td>
-                                    <td>{{ number_format($boc->amount, 0, ',', ' ') }} FCFA</td>
-                                    <td>{{ $boc->created_at->format('d/m/Y H:i') }}</td>
-                                    <td>
-                                        <a href="{{ route('client-bocs.show', $boc->id) }}"
-                                           class="btn btn-sm btn-primary">
-                                            Voir l’analyse
-                                        </a>
-                                    </td>
-                                </tr>
-                            @endforeach
-                        </tbody>
-
-                    </table>
-                </div>
-            @endif
-        </div>
-    </div>
-
-    {{-- SECTION ÉTATS FINANCIERS (analyses clients) --}}
+    {{-- ✅ SECTION ÉTATS FINANCIERS (analyses clients) --}}
     <div class="card shadow-sm border-0">
         <div class="card-body">
             <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
                 <h4 class="fw-semibold mb-0">Derniers états financiers analysés</h4>
 
-                {{-- Petit raccourci vers l’archive upload --}}
                 <a href="{{ route('admin.financial_reports.index', ['year' => 2025]) }}"
                    class="btn btn-sm btn-outline-info fw-semibold">
                     📄 Ouvrir l’archive 2025
