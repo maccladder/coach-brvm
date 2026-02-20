@@ -17,74 +17,73 @@
     </div>
 
     {{-- ✅ Bloc vendeur rapide (même logique que marketplace/index) --}}
-@php
-    $isAuth   = auth()->check();
-    $isVendor = $isAuth && (bool) (auth()->user()->is_vendor ?? false);
-    $viewMode = session('view_mode', 'user'); // user|vendor
-@endphp
+    @php
+        $isAuth   = auth()->check();
+        $isVendor = $isAuth && (bool) (auth()->user()->is_vendor ?? false);
+        $viewMode = session('view_mode', 'user'); // user|vendor
+    @endphp
 
-<div class="alert alert-warning border-0 shadow-sm d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
-    <div>
-        <div class="fw-semibold">💼 Tu veux vendre tes produits ici ?</div>
-        <div class="small opacity-75">
-            Publie tes livres PDF, vidéos ou logiciels sur la marketplace Coach BRVM.
-            <span class="d-block">
-                ✉️ <a class="fw-semibold text-decoration-none" href="mailto:coachbrvm@gmail.com">coachbrvm@gmail.com</a>
-                • 📞 WhatsApp : <a class="fw-semibold text-decoration-none" href="tel:+2250788035432">+2250788035432</a>
-            </span>
+    <div class="alert alert-warning border-0 shadow-sm d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+        <div>
+            <div class="fw-semibold">💼 Tu veux vendre tes produits ici ?</div>
+            <div class="small opacity-75">
+                Publie tes livres PDF, vidéos ou logiciels sur la marketplace Coach BRVM.
+                <span class="d-block">
+                    ✉️ <a class="fw-semibold text-decoration-none" href="mailto:coachbrvm@gmail.com">coachbrvm@gmail.com</a>
+                    • 📞 WhatsApp : <a class="fw-semibold text-decoration-none" href="tel:+2250788035432">+2250788035432</a>
+                </span>
+            </div>
         </div>
-    </div>
 
-    <div class="d-flex flex-wrap gap-2 justify-content-end">
+        <div class="d-flex flex-wrap gap-2 justify-content-end">
 
-        {{-- ✅ CTA principal selon état --}}
-        @guest
-            <a class="btn btn-sm btn-primary fw-semibold" href="{{ route('login') }}">
-                Se connecter
-            </a>
-            <a class="btn btn-sm btn-outline-primary fw-semibold" href="{{ route('register') }}">
-                S’inscrire
-            </a>
-        @else
-            @if(!$isVendor)
-                <form method="POST" action="{{ route('vendor.become') }}">
-                    @csrf
-                    <button type="submit" class="btn btn-sm btn-dark fw-semibold">
-                        🛍️ Devenir vendeur
-                    </button>
-                </form>
+            {{-- ✅ CTA principal selon état --}}
+            @guest
+                <a class="btn btn-sm btn-primary fw-semibold" href="{{ route('login') }}">
+                    Se connecter
+                </a>
+                <a class="btn btn-sm btn-outline-primary fw-semibold" href="{{ route('register') }}">
+                    S’inscrire
+                </a>
             @else
-                @if($viewMode === 'user')
-                    <form method="POST" action="{{ route('switch.vendor') }}">
+                @if(!$isVendor)
+                    <form method="POST" action="{{ route('vendor.become') }}">
                         @csrf
                         <button type="submit" class="btn btn-sm btn-dark fw-semibold">
-                            🛍️ Passer en vue vendeur
+                            🛍️ Devenir vendeur
                         </button>
                     </form>
                 @else
-                    {{-- ✅ Déjà en mode vendeur : bouton qui garde/force la vue vendeur --}}
-                    <form method="POST" action="{{ route('switch.vendor') }}">
-                        @csrf
-                        <button type="submit" class="btn btn-sm btn-dark fw-semibold">
-                            🧾 Dashboard vendeur
-                        </button>
-                    </form>
+                    @if($viewMode === 'user')
+                        <form method="POST" action="{{ route('switch.vendor') }}">
+                            @csrf
+                            <button type="submit" class="btn btn-sm btn-dark fw-semibold">
+                                🛍️ Passer en vue vendeur
+                            </button>
+                        </form>
+                    @else
+                        {{-- ✅ Déjà en mode vendeur : bouton qui garde/force la vue vendeur --}}
+                        <form method="POST" action="{{ route('switch.vendor') }}">
+                            @csrf
+                            <button type="submit" class="btn btn-sm btn-dark fw-semibold">
+                                🧾 Dashboard vendeur
+                            </button>
+                        </form>
+                    @endif
                 @endif
-            @endif
-        @endguest
+            @endguest
 
-        {{-- ✅ On garde mail/whatsapp --}}
-        <a class="btn btn-sm btn-outline-dark fw-semibold"
-           href="mailto:coachbrvm@gmail.com?subject=Devenir%20vendeur%20sur%20la%20Marketplace%20Coach%20BRVM">
-            Envoyer un mail →
-        </a>
-        <a class="btn btn-sm btn-outline-dark fw-semibold"
-           href="https://wa.me/2250788035432" target="_blank" rel="noopener">
-            WhatsApp
-        </a>
+            {{-- ✅ On garde mail/whatsapp --}}
+            <a class="btn btn-sm btn-outline-dark fw-semibold"
+               href="mailto:coachbrvm@gmail.com?subject=Devenir%20vendeur%20sur%20la%20Marketplace%20Coach%20BRVM">
+                Envoyer un mail →
+            </a>
+            <a class="btn btn-sm btn-outline-dark fw-semibold"
+               href="https://wa.me/2250788035432" target="_blank" rel="noopener">
+                WhatsApp
+            </a>
+        </div>
     </div>
-</div>
-
 
     @php
         $typeLabel = match($product->type) {
@@ -98,13 +97,9 @@
         $wa = preg_replace('/[^0-9]/', '', (string) ($product->support_whatsapp ?? ''));
         $waText = rawurlencode("Bonjour, je suis intéressé par votre logiciel \"{$product->title}\" sur Coach BRVM Marketplace.");
 
-        // ==========================================================
         // ✅ STREAM ONLY : on n'affiche QUE le stream pour les vidéos
-        // ==========================================================
         $assetsToShow = $product->assets;
-
         if ($product->type === 'video') {
-            // On ne montre que le stream (Cloudflare) si présent
             $assetsToShow = $product->assets->filter(fn($a) => $a->kind === 'stream')->values();
         }
     @endphp
@@ -208,7 +203,11 @@
                                 {{-- ✅ Paystack --}}
                                 <form method="POST" action="{{ route('paystack.marketplace.buy', $product) }}">
                                     @csrf
-                                    <button type="submit" class="btn btn-dark">
+                                    <button type="submit"
+                                            class="btn btn-dark js-pay-btn"
+                                            data-mp-id="{{ $product->id }}"
+                                            data-mp-price="{{ (int) $product->price }}"
+                                            data-mp-currency="XOF">
                                         <i class="bi bi-shield-check"></i> Payer
                                     </button>
                                 </form>
@@ -221,7 +220,7 @@
                             </a>
                         @endguest
 
-                        {{-- ✅ Contacter le développeur : TOUJOURS visible (guest / payé / non payé) --}}
+                        {{-- ✅ Contacter le développeur : TOUJOURS visible --}}
                         @if($product->type === 'software' && !empty($wa))
                             <a class="btn btn-outline-success"
                                href="https://wa.me/{{ $wa }}?text={{ $waText }}"
@@ -271,7 +270,7 @@
                                         </div>
                                     </div>
 
-                                    {{-- ✅ 1 seul bouton "Accéder" (pas une boucle de "Débloquer") --}}
+                                    {{-- ✅ 1 seul bouton "Accéder" --}}
                                     @if(!empty($isOwned) && $isOwned)
                                         @if($product->type === 'video')
                                             <a href="{{ route('my.products.watch', $product) }}"
@@ -288,7 +287,11 @@
                                         @auth
                                             <form method="POST" action="{{ route('paystack.marketplace.buy', $product) }}">
                                                 @csrf
-                                                <button type="submit" class="btn btn-outline-dark btn-sm">
+                                                <button type="submit"
+                                                        class="btn btn-outline-dark btn-sm js-pay-btn"
+                                                        data-mp-id="{{ $product->id }}"
+                                                        data-mp-price="{{ (int) $product->price }}"
+                                                        data-mp-currency="XOF">
                                                     Débloquer
                                                 </button>
                                             </form>
@@ -372,3 +375,44 @@
 
 </div>
 @endsection
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    if (typeof fbq !== 'function') return;
+
+    // ✅ ViewContent (à l'ouverture de la page produit)
+    fbq('track', 'ViewContent', {
+        content_type: 'product',
+        content_ids: ['{{ $product->id }}'],
+        content_name: @json($product->title),
+        content_category: @json(optional($product->category)->name),
+        value: {{ (int) $product->price }},
+        currency: 'XOF'
+    });
+
+    // ✅ InitiateCheckout (au clic sur Payer / Débloquer)
+    document.querySelectorAll('.js-pay-btn').forEach(function(btn){
+        btn.addEventListener('click', function(){
+            if (btn.dataset.fired === '1') return; // anti double clic
+            btn.dataset.fired = '1';
+
+            const pid = btn.dataset.mpId;
+            const price = parseInt(btn.dataset.mpPrice || '0', 10) || 0;
+
+            fbq('track', 'InitiateCheckout', {
+                content_type: 'product',
+                content_ids: [pid],
+                value: price,
+                currency: 'XOF'
+            });
+        });
+    });
+
+    // ✅ Purchase (déclenché après retour Paystack via session flash)
+    @if(session()->has('fb_purchase'))
+        fbq('track', 'Purchase', @json(session('fb_purchase')));
+    @endif
+});
+</script>
+@endpush

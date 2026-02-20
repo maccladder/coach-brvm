@@ -448,6 +448,24 @@ class MarketplacePaymentController extends Controller
 
         $productSlug = data_get($payment->meta, 'product_slug');
 
+        $productId = (int) data_get($payment->meta, 'product_id');
+
+$product = $productId
+    ? \App\Models\MarketplaceProduct::with('category')->find($productId)
+    : null;
+
+$purchasePayload = [
+    'content_type'     => 'product',
+    'content_ids'      => [(string) ($product?->id ?? $productId)],
+    'content_name'     => (string) ($product?->title ?? data_get($payment->meta,'product_title','Produit')),
+    'content_category' => (string) ($product?->category?->name ?? ''),
+    'value'            => (int) $payment->amount_paid,
+    'currency'         => 'XOF',
+    'order_id'         => (string) $reference,
+];
+
+
+
         DB::transaction(function () use ($reference, $payment, $data) {
 
             $paymentLocked = Payment::where('id', $payment->id)->lockForUpdate()->first();
@@ -498,8 +516,9 @@ class MarketplacePaymentController extends Controller
 
         if ($productSlug) {
             return redirect()
-                ->route('marketplace.show', $productSlug)
-                ->with('success', "✅ Paiement Paystack confirmé. Produit débloqué.");
+    ->route('marketplace.show', $productSlug)
+    ->with('success', "✅ Paiement Paystack confirmé. Produit débloqué.")
+    ->with('fb_purchase', $purchasePayload);
         }
 
         return redirect()->route('my.products')->with('success', "✅ Paiement Paystack confirmé. Produit débloqué.");
