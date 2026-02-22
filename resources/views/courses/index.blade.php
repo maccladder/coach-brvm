@@ -1,3 +1,4 @@
+{{-- resources/views/courses/index.blade.php --}}
 @extends('layouts.app')
 
 @section('content')
@@ -96,20 +97,17 @@
                                     </a>
                                 @else
                                     <div class="d-flex gap-2">
-                                        {{-- CinetPay --}}
-                                        {{-- <form method="POST" action="{{ route('courses.buy', $course) }}">
-                                            @csrf
-                                            <button type="submit"
-                                                    class="btn btn-primary btn-sm rounded-pill px-3">
-                                                CinetPay
-                                            </button>
-                                        </form> --}}
 
                                         {{-- Paystack --}}
-                                        <form method="POST" action="{{ route('courses.buy.paystack', $course) }}">
+                                        <form method="POST"
+                                              action="{{ route('courses.buy.paystack', $course) }}"
+                                              class="js-paystack-form">
                                             @csrf
                                             <button type="submit"
-                                                    class="btn btn-dark btn-sm rounded-pill px-3">
+                                                    class="btn btn-dark btn-sm rounded-pill px-3 js-init-checkout"
+                                                    data-course-id="{{ $course->id }}"
+                                                    data-course-title="{{ e($course->title) }}"
+                                                    data-course-price="{{ (int) $course->price_fcfa }}">
                                                 Payer
                                             </button>
                                         </form>
@@ -136,4 +134,28 @@
     </div>
 
 </div>
+
+{{-- ✅ InitiateCheckout au clic sur "Payer" (Paystack) --}}
+@push('scripts')
+<script>
+document.addEventListener('submit', function (e) {
+  const form = e.target.closest('.js-paystack-form');
+  if (!form) return;
+
+  const btn = form.querySelector('.js-init-checkout');
+  if (!btn) return;
+
+  if (typeof fbq === 'function') {
+    fbq('track', 'InitiateCheckout', {
+      content_type: 'product',
+      content_ids: [String(btn.dataset.courseId)],
+      content_name: btn.dataset.courseTitle || '',
+      value: Number(btn.dataset.coursePrice || 0),
+      currency: 'XOF',
+      num_items: 1
+    });
+  }
+}, true);
+</script>
+@endpush
 @endsection

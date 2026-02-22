@@ -36,8 +36,6 @@
         </div>
 
         <div class="d-flex flex-wrap gap-2 justify-content-end">
-
-            {{-- ✅ CTA principal selon état --}}
             @guest
                 <a class="btn btn-sm btn-primary fw-semibold" href="{{ route('login') }}">
                     Se connecter
@@ -62,7 +60,6 @@
                             </button>
                         </form>
                     @else
-                        {{-- ✅ Déjà en mode vendeur : bouton qui garde/force la vue vendeur --}}
                         <form method="POST" action="{{ route('switch.vendor') }}">
                             @csrf
                             <button type="submit" class="btn btn-sm btn-dark fw-semibold">
@@ -73,7 +70,6 @@
                 @endif
             @endguest
 
-            {{-- ✅ On garde mail/whatsapp --}}
             <a class="btn btn-sm btn-outline-dark fw-semibold"
                href="mailto:coachbrvm@gmail.com?subject=Devenir%20vendeur%20sur%20la%20Marketplace%20Coach%20BRVM">
                 Envoyer un mail →
@@ -93,11 +89,9 @@
             default => ucfirst($product->type),
         };
 
-        // ✅ WhatsApp dev (visible pour TOUS si software + numéro)
         $wa = preg_replace('/[^0-9]/', '', (string) ($product->support_whatsapp ?? ''));
         $waText = rawurlencode("Bonjour, je suis intéressé par votre logiciel \"{$product->title}\" sur Coach BRVM Marketplace.");
 
-        // ✅ STREAM ONLY : on n'affiche QUE le stream pour les vidéos
         $assetsToShow = $product->assets;
         if ($product->type === 'video') {
             $assetsToShow = $product->assets->filter(fn($a) => $a->kind === 'stream')->values();
@@ -117,12 +111,25 @@
                         </span>
                     @endif
 
-                    <div class="ratio ratio-4x3 bg-light">
+                    {{-- ✅ ICI : on affiche toute l'image (contain) --}}
+                    <div class="bg-light d-flex align-items-center justify-content-center p-2"
+                         style="min-height: 360px;">
                         @if($product->cover_image_path)
-                            <img src="{{ asset('storage/'.$product->cover_image_path) }}"
-                                 alt="{{ $product->title }}"
-                                 class="w-100 h-100 d-block"
-                                 style="object-fit:cover; object-position:center;">
+                            <a href="{{ asset('storage/'.$product->cover_image_path) }}"
+                               target="_blank" rel="noopener"
+                               class="d-block w-100"
+                               title="Ouvrir l'image">
+                                <img src="{{ asset('storage/'.$product->cover_image_path) }}"
+                                     alt="{{ $product->title }}"
+                                     class="d-block mx-auto"
+                                     style="
+                                        width: 100%;
+                                        height: 360px;
+                                        object-fit: contain;   /* ✅ pas de crop */
+                                        object-position: center;
+                                        background: #f8f9fa;
+                                     ">
+                            </a>
                         @else
                             <div class="w-100 h-100 d-flex align-items-center justify-content-center text-muted">
                                 <div class="text-center">
@@ -188,7 +195,6 @@
                     <div class="d-flex flex-wrap gap-2">
                         @auth
                             @if(!empty($isOwned) && $isOwned)
-
                                 @if($product->type === 'video')
                                     <a href="{{ route('my.products.watch', $product) }}" class="btn btn-success">
                                         <i class="bi bi-play-circle"></i> Visualiser
@@ -198,9 +204,7 @@
                                         <i class="bi bi-download"></i> Télécharger
                                     </a>
                                 @endif
-
                             @else
-                                {{-- ✅ Paystack --}}
                                 <form method="POST" action="{{ route('paystack.marketplace.buy', $product) }}">
                                     @csrf
                                     <button type="submit"
@@ -220,7 +224,6 @@
                             </a>
                         @endguest
 
-                        {{-- ✅ Contacter le développeur : TOUJOURS visible --}}
                         @if($product->type === 'software' && !empty($wa))
                             <a class="btn btn-outline-success"
                                href="https://wa.me/{{ $wa }}?text={{ $waText }}"
@@ -270,7 +273,6 @@
                                         </div>
                                     </div>
 
-                                    {{-- ✅ 1 seul bouton "Accéder" --}}
                                     @if(!empty($isOwned) && $isOwned)
                                         @if($product->type === 'video')
                                             <a href="{{ route('my.products.watch', $product) }}"
@@ -308,7 +310,6 @@
                         @if(!empty($isOwned) && $isOwned)
                             <div class="alert alert-success border mt-3 mb-0">
                                 <i class="bi bi-shield-check"></i>
-
                                 @if($product->type === 'video')
                                     Produit déjà payé : tu peux le re-visualiser à tout moment depuis
                                     <a class="fw-semibold" href="{{ route('my.products') }}">Mes produits</a>.
@@ -381,7 +382,6 @@
 document.addEventListener('DOMContentLoaded', function () {
     if (typeof fbq !== 'function') return;
 
-    // ✅ ViewContent (à l'ouverture de la page produit)
     fbq('track', 'ViewContent', {
         content_type: 'product',
         content_ids: ['{{ $product->id }}'],
@@ -391,10 +391,9 @@ document.addEventListener('DOMContentLoaded', function () {
         currency: 'XOF'
     });
 
-    // ✅ InitiateCheckout (au clic sur Payer / Débloquer)
     document.querySelectorAll('.js-pay-btn').forEach(function(btn){
         btn.addEventListener('click', function(){
-            if (btn.dataset.fired === '1') return; // anti double clic
+            if (btn.dataset.fired === '1') return;
             btn.dataset.fired = '1';
 
             const pid = btn.dataset.mpId;
@@ -409,7 +408,6 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
-    // ✅ Purchase (déclenché après retour Paystack via session flash)
     @if(session()->has('fb_purchase'))
         fbq('track', 'Purchase', @json(session('fb_purchase')));
     @endif
