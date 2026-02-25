@@ -52,21 +52,18 @@
                         </button>
                     </form>
                 @else
-                    @if($viewMode === 'user')
-                        <form method="POST" action="{{ route('switch.vendor') }}">
-                            @csrf
+                    <form method="POST" action="{{ route('switch.vendor') }}">
+                        @csrf
+                        @if($viewMode === 'user')
                             <button type="submit" class="btn btn-sm btn-dark fw-semibold">
                                 🛍️ Passer en vue vendeur
                             </button>
-                        </form>
-                    @else
-                        <form method="POST" action="{{ route('switch.vendor') }}">
-                            @csrf
+                        @else
                             <button type="submit" class="btn btn-sm btn-dark fw-semibold">
                                 🧾 Dashboard vendeur
                             </button>
-                        </form>
-                    @endif
+                        @endif
+                    </form>
                 @endif
             @endguest
 
@@ -96,6 +93,9 @@
         if ($product->type === 'video') {
             $assetsToShow = $product->assets->filter(fn($a) => $a->kind === 'stream')->values();
         }
+
+        $previewUrls = $previewUrls ?? [];
+        $hasPreview = $product->type === 'book' && empty($isOwned) && !empty($previewUrls);
     @endphp
 
     <div class="card border-0 shadow-sm overflow-hidden">
@@ -112,8 +112,7 @@
                     @endif
 
                     {{-- ✅ ICI : on affiche toute l'image (contain) --}}
-                    <div class="bg-light d-flex align-items-center justify-content-center p-2"
-                         style="min-height: 360px;">
+                    <div class="bg-light d-flex align-items-center justify-content-center p-2" style="min-height: 360px;">
                         @if($product->cover_image_path)
                             <a href="{{ asset('storage/'.$product->cover_image_path) }}"
                                target="_blank" rel="noopener"
@@ -125,7 +124,7 @@
                                      style="
                                         width: 100%;
                                         height: 360px;
-                                        object-fit: contain;   /* ✅ pas de crop */
+                                        object-fit: contain;
                                         object-position: center;
                                         background: #f8f9fa;
                                      ">
@@ -153,6 +152,12 @@
                         @if($product->category)
                             <span class="badge text-bg-light border">
                                 <i class="bi bi-folder2-open"></i> {{ $product->category->name }}
+                            </span>
+                        @endif
+
+                        @if(!empty($product->pages_count) && $product->type === 'book')
+                            <span class="badge text-bg-light border">
+                                <i class="bi bi-file-earmark-text"></i> {{ (int)$product->pages_count }} pages
                             </span>
                         @endif
 
@@ -236,6 +241,28 @@
                             Continuer à explorer
                         </a>
                     </div>
+
+                    {{-- ✅ Aperçu (livres uniquement, si non acheté) --}}
+                    @if($hasPreview)
+                        <hr class="my-4">
+                        <h5 class="fw-bold mb-2">👀 Aperçu (5 premières pages)</h5>
+
+                        <div class="row g-2">
+                            @foreach($previewUrls as $url)
+                                <div class="col-6 col-md-4 col-lg-3">
+                                    <a href="{{ $url }}" target="_blank" rel="noopener" class="d-block">
+                                        <img src="{{ $url }}"
+                                             class="img-fluid rounded border"
+                                             alt="Aperçu PDF">
+                                    </a>
+                                </div>
+                            @endforeach
+                        </div>
+
+                        <div class="text-muted small mt-2">
+                            Aperçu basse résolution. Accès complet après achat.
+                        </div>
+                    @endif
 
                     <hr class="my-4">
 

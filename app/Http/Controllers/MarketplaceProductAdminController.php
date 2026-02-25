@@ -7,11 +7,12 @@ use App\Models\MarketplaceAsset;
 use App\Models\MarketplaceCategory;
 use App\Models\MarketplaceProduct;
 use App\Models\User;
-use App\Notifications\VendorProductReviewedNotification;
 use App\Notifications\UserNewMarketplaceContentNotification;
+use App\Notifications\VendorProductReviewedNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Imagick;
 
 class MarketplaceProductAdminController extends Controller
 {
@@ -98,7 +99,7 @@ class MarketplaceProductAdminController extends Controller
         return view('admin.marketplace.products.create', compact('categories'));
     }
 
-    public function store(Request $request)
+   public function store(Request $request)
     {
         $data = $request->validate([
             'category_id' => ['nullable', 'integer', 'exists:marketplace_categories,id'],
@@ -158,6 +159,7 @@ class MarketplaceProductAdminController extends Controller
             'status'           => $data['status'],
             'is_featured'      => (bool) ($data['is_featured'] ?? false),
             'cover_image_path' => $coverPath,
+            'pages_count'      => null, // ✅ unifié
         ]);
 
         if ($product->type === 'video') {
@@ -168,8 +170,11 @@ class MarketplaceProductAdminController extends Controller
                 'label'           => 'Vidéo',
                 'is_downloadable' => false,
             ]);
+
+            return redirect()->route('admin.marketplace.index')->with('success', 'Produit vidéo créé ✅');
         }
 
+        // book/software => fichier obligatoire
         if ($request->hasFile('file')) {
             $uploadedPath = $request->file('file')->store('marketplace/files', 'public');
 
@@ -179,13 +184,18 @@ class MarketplaceProductAdminController extends Controller
                 default    => 'Fichier',
             };
 
-            $product->assets()->create([
+            $fileAsset = $product->assets()->create([
                 'kind'            => 'file',
                 'path'            => $uploadedPath,
                 'url'             => null,
                 'label'           => $label,
                 'is_downloadable' => true,
             ]);
+
+            // ✅ pages_count + previews p1..p5 (UNIQUEMENT book)
+            if ($product->type === 'book') {
+                $this->generatePdfMetaAndPreviews($product, $fileAsset);
+            }
         }
 
         return redirect()->route('admin.marketplace.index')->with('success', 'Produit créé ✅');
@@ -214,9 +224,6 @@ class MarketplaceProductAdminController extends Controller
             'cover'       => ['nullable', 'image', 'max:' . self::MAX_COVER_KB],
             'file'        => ['nullable', 'file', 'max:' . self::MAX_FILE_KB],
             'cloudflare_video_id' => ['nullable', 'string', 'max:255'],
-        ], [], [
-            'file'  => 'fichier produit',
-            'cover' => 'image de couverture',
         ]);
 
         $data['support_whatsapp'] = $this->cleanWhatsapp($data['support_whatsapp'] ?? null);
@@ -227,7 +234,7 @@ class MarketplaceProductAdminController extends Controller
         if ($requiresFile && !$hasFileAsset && !$request->hasFile('file')) {
             $request->validate(['file' => ['required']], [
                 'file.required' => 'Le fichier produit est obligatoire pour ce type.',
-            ], ['file' => 'fichier produit']);
+            ]);
         }
 
         if ($request->hasFile('file')) {
@@ -266,6 +273,7 @@ class MarketplaceProductAdminController extends Controller
             'cover_image_path' => $coverPath,
         ]);
 
+        // ✅ Switch vidéo
         if ($product->type === 'video') {
             $videoId = trim((string) $request->input('cloudflare_video_id'));
 
@@ -281,9 +289,12 @@ class MarketplaceProductAdminController extends Controller
             }
 
             $product->assets()->where('kind', 'file')->delete();
+            $product->update(['pages_count' => null]);
+
             return back()->with('success', 'Produit mis à jour ✅');
         }
 
+        // ✅ si on remplace le fichier PDF/ZIP
         if ($request->hasFile('file')) {
             $uploadedPath = $request->file('file')->store('marketplace/files', 'public');
 
@@ -298,15 +309,78 @@ class MarketplaceProductAdminController extends Controller
                 $asset->update([
                     'path' => $uploadedPath, 'url' => null, 'label' => $label, 'is_downloadable' => true,
                 ]);
+                $fileAsset = $asset;
             } else {
-                $product->assets()->create([
+                $fileAsset = $product->assets()->create([
                     'kind' => 'file', 'path' => $uploadedPath, 'url' => null, 'label' => $label, 'is_downloadable' => true,
                 ]);
+            }
+
+            if ($product->type === 'book') {
+                $this->generatePdfMetaAndPreviews($product, $fileAsset, true);
+            } else {
+                $product->update(['pages_count' => null]);
             }
         }
 
         $product->assets()->where('kind', 'stream')->delete();
+
         return back()->with('success', 'Produit mis à jour ✅');
+    }
+
+    private function generatePdfMetaAndPreviews(MarketplaceProduct $product, MarketplaceAsset $fileAsset, bool $wipeOld = false): void
+    {
+        try {
+            if (!$fileAsset->path) return;
+
+            $disk = 'public';
+            $pdfPath = Storage::disk($disk)->path($fileAsset->path);
+
+            if (!file_exists($pdfPath)) return;
+
+            if ($wipeOld) {
+                // supprimer anciens previews fichiers p1..p5
+                Storage::disk($disk)->deleteDirectory("marketplace/previews/{$product->id}");
+            }
+
+            // 1) pages_count
+            $im = new \Imagick();
+            $im->pingImage($pdfPath);
+            $pages = (int) $im->getNumberImages();
+            $im->clear();
+            $im->destroy();
+
+            if ($pages <= 0) $pages = null;
+            $product->update(['pages_count' => $pages]);
+
+            // 2) previews p1..p5
+            $max = min(5, (int) ($pages ?: 5));
+            Storage::disk($disk)->makeDirectory("marketplace/previews/{$product->id}");
+
+            for ($i = 0; $i < $max; $i++) {
+                $img = new \Imagick();
+                $img->setResolution(150, 150);
+                $img->readImage($pdfPath . '[' . $i . ']');
+                $img->setImageFormat('jpeg');
+                $img->setImageCompressionQuality(85);
+                $img->stripImage();
+
+                // largeur max 1200
+                if ($img->getImageWidth() > 1200) {
+                    $img->resizeImage(1200, 0, \Imagick::FILTER_LANCZOS, 1);
+                }
+
+                $previewPath = "marketplace/previews/{$product->id}/p" . ($i + 1) . ".jpg";
+                Storage::disk($disk)->put($previewPath, $img->getImageBlob());
+
+                $img->clear();
+                $img->destroy();
+            }
+        } catch (\Throwable $e) {
+            Log::warning('PDF preview generation failed: '.$e->getMessage(), [
+                'product_id' => $product->id ?? null,
+            ]);
+        }
     }
 
     public function destroy(MarketplaceProduct $product)

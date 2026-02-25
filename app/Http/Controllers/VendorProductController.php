@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AdminNotification;
 use App\Models\MarketplaceCategory;
 use App\Models\MarketplaceProduct;
 use Illuminate\Http\Request;
@@ -10,10 +11,10 @@ use Illuminate\Support\Str;
 class VendorProductController extends Controller
 {
     // tailles (KB)
-    private const MAX_COVER_KB = 4096;    // 4MB
-    private const MAX_PDF_KB   = 51200;   // 50MB
-    private const MAX_ZIP_KB   = 409600;  // 400MB
-    private const MAX_VIDEO_KB = 512000;  // 500MB (ajuste si tu veux)
+    private const MAX_COVER_KB = 4096;     // 4MB
+    private const MAX_PDF_KB   = 51200;    // 50MB
+    private const MAX_ZIP_KB   = 409600;   // 400MB
+    private const MAX_VIDEO_KB = 512000;   // 500MB (ajuste si tu veux)
 
     private function cleanWhatsapp(?string $value): ?string
     {
@@ -27,10 +28,10 @@ class VendorProductController extends Controller
     private function typeLabel(string $type): string
     {
         return match ($type) {
-            'pdf'   => 'PDF',
-            'zip'   => 'ZIP',
-            'video' => 'Video',
-            default => strtoupper($type),
+            'book'     => 'PDF',
+            'software' => 'Logiciel',
+            'video'    => 'Vidéo',
+            default    => strtoupper($type),
         };
     }
 
@@ -53,7 +54,13 @@ class VendorProductController extends Controller
     public function create()
     {
         $categories = MarketplaceCategory::orderBy('name')->get();
-        $types = ['pdf' => 'PDF', 'video' => 'Vidéo', 'zip' => 'Fichier ZIP']; // service retiré (tu peux le remettre après)
+
+        // ✅ Harmonisé avec Admin: book/video/software
+        $types = [
+            'book'     => 'Livre (PDF)',
+            'video'    => 'Vidéo',
+            'software' => 'Logiciel (ZIP/RAR)',
+        ];
 
         return view('vendor.products.create', compact('categories', 'types'));
     }
@@ -63,13 +70,13 @@ class VendorProductController extends Controller
         $data = $request->validate([
             'category_id'      => ['required','integer','exists:marketplace_categories,id'],
             'title'            => ['required','string','max:160'],
-            'type'             => ['required','in:pdf,video,zip'],
+            'type'             => ['required','in:book,video,software'],
             'description'      => ['nullable','string'],
             'support_whatsapp' => ['nullable','string','max:30'],
             'price'            => ['required','numeric','min:0'],
             'cover_image'      => ['nullable','image','max:' . self::MAX_COVER_KB],
 
-            // ✅ NEW : fichier produit (optionnel au draft)
+            // fichier produit (optionnel au draft)
             'file'             => ['nullable','file'],
         ]);
 
@@ -77,11 +84,11 @@ class VendorProductController extends Controller
 
         // ✅ Validation conditionnelle du fichier selon type (si fourni)
         if ($request->hasFile('file')) {
-            if ($data['type'] === 'pdf') {
+            if ($data['type'] === 'book') {
                 $request->validate([
                     'file' => ['file','mimes:pdf','max:' . self::MAX_PDF_KB],
                 ], [], ['file' => 'fichier PDF']);
-            } elseif ($data['type'] === 'zip') {
+            } elseif ($data['type'] === 'software') {
                 $request->validate([
                     'file' => ['file','mimes:zip,rar','max:' . self::MAX_ZIP_KB],
                 ], [], ['file' => 'archive ZIP/RAR']);
@@ -106,7 +113,7 @@ class VendorProductController extends Controller
             $coverPath = $request->file('cover_image')->store('marketplace/covers', 'public');
         }
 
-        // create product
+        // create product (draft)
         $product = MarketplaceProduct::create([
             'user_id'          => $request->user()->id,
             'category_id'      => $data['category_id'],
@@ -119,9 +126,12 @@ class VendorProductController extends Controller
             'cover_image_path' => $coverPath,
             'status'           => 'draft',
             'is_featured'      => false,
+
+            // ✅ colonne unifiée
+            'pages_count'      => null,
         ]);
 
-        // ✅ NEW : create asset if file uploaded
+        // asset si fichier uploadé
         if ($request->hasFile('file')) {
             $uploadedPath = $request->file('file')->store('marketplace/files', 'public');
 
@@ -130,13 +140,13 @@ class VendorProductController extends Controller
                 'path'            => $uploadedPath,
                 'url'             => null,
                 'label'           => $this->typeLabel($product->type),
-                // vidéo: pas téléchargeable pour acheteurs (mais admin peut inspecter)
+                // vidéo: pas téléchargeable pour acheteurs
                 'is_downloadable' => $product->type !== 'video',
             ]);
         }
 
         return redirect()->route('vendor.products.edit', $product)
-            ->with('success', '✅ Produit créé (brouillon). Ajoute le fichier (PDF/ZIP/VIDÉO) puis soumets.');
+            ->with('success', '✅ Produit créé (brouillon). Ajoute le fichier + cover puis soumets.');
     }
 
     public function edit(Request $request, MarketplaceProduct $product)
@@ -145,7 +155,12 @@ class VendorProductController extends Controller
 
         $product->load('assets');
         $categories = MarketplaceCategory::orderBy('name')->get();
-        $types = ['pdf' => 'PDF', 'video' => 'Vidéo', 'zip' => 'Fichier ZIP'];
+
+        $types = [
+            'book'     => 'Livre (PDF)',
+            'video'    => 'Vidéo',
+            'software' => 'Logiciel (ZIP/RAR)',
+        ];
 
         return view('vendor.products.edit', compact('product', 'categories', 'types'));
     }
@@ -163,13 +178,11 @@ class VendorProductController extends Controller
         $data = $request->validate([
             'category_id'      => ['required','integer','exists:marketplace_categories,id'],
             'title'            => ['required','string','max:160'],
-            'type'             => ['required','in:pdf,video,zip'],
+            'type'             => ['required','in:book,video,software'],
             'description'      => ['nullable','string'],
             'support_whatsapp' => ['nullable','string','max:30'],
             'price'            => ['required','numeric','min:0'],
             'cover_image'      => ['nullable','image','max:' . self::MAX_COVER_KB],
-
-            // ✅ NEW
             'file'             => ['nullable','file'],
         ]);
 
@@ -177,11 +190,11 @@ class VendorProductController extends Controller
 
         // Validation conditionnelle si upload file
         if ($request->hasFile('file')) {
-            if ($data['type'] === 'pdf') {
+            if ($data['type'] === 'book') {
                 $request->validate([
                     'file' => ['file','mimes:pdf','max:' . self::MAX_PDF_KB],
                 ], [], ['file' => 'fichier PDF']);
-            } elseif ($data['type'] === 'zip') {
+            } elseif ($data['type'] === 'software') {
                 $request->validate([
                     'file' => ['file','mimes:zip,rar','max:' . self::MAX_ZIP_KB],
                 ], [], ['file' => 'archive ZIP/RAR']);
@@ -203,6 +216,7 @@ class VendorProductController extends Controller
         $product->support_whatsapp = $data['support_whatsapp'];
         $product->price            = $data['price'];
 
+        // si rejeté → repasse en draft
         if ($product->status === 'rejected') {
             $product->status = 'draft';
             $product->admin_note = null;
@@ -210,7 +224,7 @@ class VendorProductController extends Controller
 
         $product->save();
 
-        // ✅ NEW : remplacer/créer asset fichier
+        // remplacer/créer asset fichier
         if ($request->hasFile('file')) {
             $uploadedPath = $request->file('file')->store('marketplace/files', 'public');
 
@@ -233,7 +247,7 @@ class VendorProductController extends Controller
                 ]);
             }
         } else {
-            // si le vendor change le type, mets à jour le label/is_downloadable de l’asset existant (si présent)
+            // si type a changé, maj label/is_downloadable de l’asset existant
             $asset = $product->assets()->where('kind', 'file')->first();
             if ($asset) {
                 $asset->update([
@@ -247,46 +261,46 @@ class VendorProductController extends Controller
     }
 
     public function submit(Request $request, MarketplaceProduct $product)
-{
-    abort_unless($product->user_id === $request->user()->id, 403);
+    {
+        abort_unless($product->user_id === $request->user()->id, 403);
 
-    if (!in_array($product->status, ['draft','rejected'], true)) {
-        return back()->with('warning', 'Action impossible pour ce statut.');
+        if (!in_array($product->status, ['draft','rejected'], true)) {
+            return back()->with('warning', 'Action impossible pour ce statut.');
+        }
+
+        $product->load('assets');
+
+        if (!$product->title || !$product->category_id || $product->price === null || !$product->type) {
+            return back()->with('warning', 'Complète les infos principales avant de soumettre.');
+        }
+
+        if (!$product->cover_image_path) {
+            return back()->with('warning', 'Ajoute une image de couverture avant de soumettre.');
+        }
+
+        // Exiger un fichier (book/software/video)
+        $fileAsset = $product->assets->firstWhere('kind', 'file');
+        if (!$fileAsset) {
+            return back()->with('warning', 'Ajoute le fichier (PDF/ZIP/VIDÉO) avant de soumettre.');
+        }
+
+        $product->status = 'pending';
+        $product->submitted_at = now();
+        $product->admin_note = null;
+        $product->save();
+
+        // notif admin
+        if (class_exists(AdminNotification::class)) {
+            AdminNotification::create([
+                'type'    => 'product_pending',
+                'title'   => '🕒 Nouveau produit en attente',
+                'message' => $product->title,
+                'url'     => route('admin.marketplace.show', $product),
+                'read_at' => null,
+            ]);
+        }
+
+        return redirect()->route('vendor.products.index')
+            ->with('success', '✅ Produit soumis. En attente de validation admin.');
     }
-
-    $product->load('assets');
-
-    if (!$product->title || !$product->category_id || $product->price === null || !$product->type) {
-        return back()->with('warning', 'Complète les infos principales avant de soumettre.');
-    }
-
-    if (!$product->cover_image_path) {
-        return back()->with('warning', 'Ajoute une image de couverture avant de soumettre.');
-    }
-
-    // ✅ Exiger un fichier pour pdf/zip/video
-    $fileAsset = $product->assets->firstWhere('kind', 'file');
-    if (!$fileAsset) {
-        return back()->with('warning', 'Ajoute le fichier (PDF/ZIP/VIDÉO) avant de soumettre.');
-    }
-
-    $product->status = 'pending';
-    $product->submitted_at = now();
-    $product->admin_note = null;
-    $product->save();
-
-    // ✅ NOTIF ADMIN : nouveau produit en attente
-    if (class_exists(\App\Models\AdminNotification::class)) {
-        \App\Models\AdminNotification::create([
-            'type'    => 'product_pending',
-            'title'   => '🕒 Nouveau produit en attente',
-            'message' => $product->title,
-            'url'     => route('admin.marketplace.show', $product),
-            'read_at' => null,
-        ]);
-    }
-
-    return redirect()->route('vendor.products.index')
-        ->with('success', '✅ Produit soumis. En attente de validation admin.');
-}
 }
