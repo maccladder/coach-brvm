@@ -17,57 +17,58 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
 use App\Mail\PaymentReceivedMail;
 
+// ✅ NEW: mail activation software
+use App\Mail\SoftwareActivationMail;
+
 class MarketplacePaymentController extends Controller
 {
     public function __construct(private CinetpayService $cinetpay) {}
 
     private function notifyVendorPayment(string $transactionId): void
-{
-    try {
-        $payment = \App\Models\Payment::where('transaction_id', $transactionId)
-            ->with('user')
-            ->first();
+    {
+        try {
+            $payment = \App\Models\Payment::where('transaction_id', $transactionId)
+                ->with('user')
+                ->first();
 
-        if (!$payment) return;
+            if (!$payment) return;
 
-        $productId = (int) data_get($payment->meta, 'product_id');
-        if (!$productId) return;
+            $productId = (int) data_get($payment->meta, 'product_id');
+            if (!$productId) return;
 
-        $product = \App\Models\MarketplaceProduct::with('vendor')->find($productId);
-        if (!$product) return;
+            $product = \App\Models\MarketplaceProduct::with('vendor')->find($productId);
+            if (!$product) return;
 
-        $vendor = $product->vendor ?: (!empty($product->user_id) ? \App\Models\User::find($product->user_id) : null);
-        if (!$vendor) return;
+            $vendor = $product->vendor ?: (!empty($product->user_id) ? \App\Models\User::find($product->user_id) : null);
+            if (!$vendor) return;
 
-        // ✅ anti-doublon: si déjà envoyé pour cette transaction, on stop
-        $alreadySent = $vendor->notifications()
-            ->where('type', \App\Notifications\VendorPaymentReceivedNotification::class)
-            ->where('data->transaction_id', $transactionId)
-            ->exists();
+            // ✅ anti-doublon: si déjà envoyé pour cette transaction, on stop
+            $alreadySent = $vendor->notifications()
+                ->where('type', \App\Notifications\VendorPaymentReceivedNotification::class)
+                ->where('data->transaction_id', $transactionId)
+                ->exists();
 
-        if ($alreadySent) return;
+            if ($alreadySent) return;
 
-        $buyerName = $payment->user?->name ?? 'Un client';
-        $amount    = (int) $payment->amount_paid;
+            $buyerName = $payment->user?->name ?? 'Un client';
+            $amount    = (int) $payment->amount_paid;
 
-        $vendor->notify(new \App\Notifications\VendorPaymentReceivedNotification(
-            transactionId: $transactionId,
-            productId: $product->id,
-            productTitle: $product->title,
-            amount: $amount,
-            buyerName: $buyerName,
-            url: route('vendor.dashboard') // tu peux mettre vendor.products.index si tu veux
-        ));
+            $vendor->notify(new \App\Notifications\VendorPaymentReceivedNotification(
+                transactionId: $transactionId,
+                productId: $product->id,
+                productTitle: $product->title,
+                amount: $amount,
+                buyerName: $buyerName,
+                url: route('vendor.dashboard')
+            ));
 
-    } catch (\Throwable $e) {
-        \Illuminate\Support\Facades\Log::error('notifyVendorPayment error', [
-            'transaction_id' => $transactionId,
-            'error' => $e->getMessage(),
-        ]);
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('notifyVendorPayment error', [
+                'transaction_id' => $transactionId,
+                'error' => $e->getMessage(),
+            ]);
+        }
     }
-}
-
-
 
     private function notifyAdminPayment(string $transactionId): void
     {
@@ -81,7 +82,7 @@ class MarketplacePaymentController extends Controller
             'type'    => 'payment_marketplace',
             'title'   => 'Nouveau paiement marketplace',
             'message' => $title . ' — ' . number_format($amount, 0, ',', ' ') . ' FCFA',
-            'url'     => route('admin.dashboard'), // si tu as une page admin paiements, remplace ici
+            'url'     => route('admin.dashboard'),
             'read_at' => null,
         ]);
     }
@@ -314,7 +315,6 @@ class MarketplacePaymentController extends Controller
             }
         } else {
             if ($payment && $payment->status === 'paid') {
-                // ✅ sécurité: notif vendeur/admin si jamais IPN n'est pas passé
                 $this->notifyVendorPayment($transactionId);
                 $this->notifyAdminPayment($transactionId);
             }
@@ -447,24 +447,21 @@ class MarketplacePaymentController extends Controller
         }
 
         $productSlug = data_get($payment->meta, 'product_slug');
+        $productId   = (int) data_get($payment->meta, 'product_id');
 
-        $productId = (int) data_get($payment->meta, 'product_id');
+        $product = $productId
+            ? \App\Models\MarketplaceProduct::with('category')->find($productId)
+            : null;
 
-$product = $productId
-    ? \App\Models\MarketplaceProduct::with('category')->find($productId)
-    : null;
-
-$purchasePayload = [
-    'content_type'     => 'product',
-    'content_ids'      => [(string) ($product?->id ?? $productId)],
-    'content_name'     => (string) ($product?->title ?? data_get($payment->meta,'product_title','Produit')),
-    'content_category' => (string) ($product?->category?->name ?? ''),
-    'value'            => (int) $payment->amount_paid,
-    'currency'         => 'XOF',
-    'order_id'         => (string) $reference,
-];
-
-
+        $purchasePayload = [
+            'content_type'     => 'product',
+            'content_ids'      => [(string) ($product?->id ?? $productId)],
+            'content_name'     => (string) ($product?->title ?? data_get($payment->meta,'product_title','Produit')),
+            'content_category' => (string) ($product?->category?->name ?? ''),
+            'value'            => (int) $payment->amount_paid,
+            'currency'         => 'XOF',
+            'order_id'         => (string) $reference,
+        ];
 
         DB::transaction(function () use ($reference, $payment, $data) {
 
@@ -514,13 +511,50 @@ $purchasePayload = [
         $this->notifyVendorPayment($reference);
         $this->notifyAdminPayment($reference);
 
-        if ($productSlug) {
+        // ✅ SPECIAL FLOW (PAYSTACK ONLY): software du vendeur particulier (ID=59)
+        $specialVendorId = 59;
+        if ($product && $product->type === 'software' && (int) $product->user_id === $specialVendorId) {
+
+            // anti-doublon mail via meta
+            $meta = (array) ($payment->meta ?? []);
+            $alreadySent = (bool) data_get($meta, 'software_activation_mail_sent', false);
+
+            if (!$alreadySent) {
+                try {
+                    $payment->loadMissing('user');
+
+                    if (!empty($payment->user?->email)) {
+                        Mail::to($payment->user->email)->send(new SoftwareActivationMail($product));
+                    }
+
+                    $meta['software_activation_mail_sent'] = true;
+                    $payment->meta = $meta;
+                    $payment->save();
+
+                } catch (\Throwable $e) {
+                    Log::error('SoftwareActivationMail error', [
+                        'reference' => $reference,
+                        'product_id' => $product->id ?? null,
+                        'error' => $e->getMessage(),
+                    ]);
+                }
+            }
+
             return redirect()
-    ->route('marketplace.show', $productSlug)
-    ->with('success', "✅ Paiement Paystack confirmé. Produit débloqué.")
-    ->with('fb_purchase', $purchasePayload);
+                ->route('marketplace.activation', $product->id)
+                ->with('success', "✅ Paiement confirmé. Finalisez l’activation en demandant votre licence.")
+                ->with('fb_purchase', $purchasePayload);
         }
 
-        return redirect()->route('my.products')->with('success', "✅ Paiement Paystack confirmé. Produit débloqué.");
+        // default redirects
+        if ($productSlug) {
+            return redirect()
+                ->route('marketplace.show', $productSlug)
+                ->with('success', "✅ Paiement Paystack confirmé. Produit débloqué.")
+                ->with('fb_purchase', $purchasePayload);
+        }
+
+        return redirect()->route('my.products')
+            ->with('success', "✅ Paiement Paystack confirmé. Produit débloqué.");
     }
 }

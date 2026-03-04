@@ -89,6 +89,12 @@ Route::get('/livres/{book:slug}', [BookController::class, 'show'])->name('books.
 Route::get('/marketplace', [MarketplaceController::class, 'index'])->name('marketplace.index');
 Route::get('/marketplace/{slug}', [MarketplaceController::class, 'show'])->name('marketplace.show');
 
+// ✅ Activation software (après achat) — page d’instructions/licence
+Route::middleware('auth')->group(function () {
+    Route::get('/marketplace/{product}/activation', [MarketplaceController::class, 'activation'])
+        ->name('marketplace.activation');
+});
+
 // ✅ Landing avec controller (pour passer $latestAnnouncements au welcome)
 Route::get('/welcome', [LandingController::class, 'index'])->name('landing');
 

@@ -95,6 +95,27 @@ public function show(string $slug)
 
     return view('marketplace.show', compact('product', 'related', 'isOwned', 'previewUrls'));
 }
+
+public function activation(MarketplaceProduct $product)
+{
+    // ✅ sécurité : user doit avoir payé ce produit
+    $user = auth()->user();
+
+    $isOwned = $user->purchasedProducts()
+        ->where('marketplace_products.id', $product->id)
+        ->wherePivot('status', 'paid')
+        ->exists();
+
+    abort_unless($isOwned, 403);
+
+    // optionnel : whatsapp du support
+    $wa = preg_replace('/[^0-9]/', '', (string) ($product->support_whatsapp ?? ''));
+    $waText = rawurlencode("Bonjour, j'ai acheté \"{$product->title}\" sur Coach BRVM. Je veux activer ma licence.");
+
+    return view('marketplace.activation', compact('product', 'wa', 'waText'));
+}
+
+
 //     public function show($slug)
 // {
 //     $product = MarketplaceProduct::with(['category','assets'])->where('slug', $slug)->firstOrFail();
