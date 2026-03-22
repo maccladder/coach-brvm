@@ -4,23 +4,18 @@ namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Pagination\Paginator;
-
+use Illuminate\Support\Facades\View;
+use App\View\Composers\TickerComposer;
 
 class AppServiceProvider extends ServiceProvider
 {
-    /**
-     * Register any application services.
-     */
-    public function register(): void
-    {
-        //
-    }
+    public function register(): void {}
 
-    /**
-     * Bootstrap any application services.
-     */
     public function boot(): void
     {
-        Paginator::useBootstrapFive(); // ✅ ou useBootstrapFour()
+        Paginator::useBootstrapFive();
+
+        // ✅ Ticker BRVM — vrais cours injectés dans le layout
+        View::composer('layouts.app', TickerComposer::class);
     }
 }
