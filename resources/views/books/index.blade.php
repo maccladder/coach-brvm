@@ -1,311 +1,125 @@
+{{-- ════════ books/index.blade.php ════════ --}}
 @extends('layouts.app')
 
+@push('styles')
+<style>
+    .books-page { background:#060910;min-height:100vh; }
+    .books-hero { background:radial-gradient(ellipse 80% 50% at 50% 0%,rgba(201,168,76,.1) 0%,transparent 55%),#060910;border-bottom:1px solid rgba(201,168,76,.08);padding:48px 0 36px;position:relative;overflow:hidden; }
+    .books-hero-grid { position:absolute;inset:0;background-image:linear-gradient(rgba(201,168,76,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(201,168,76,.04) 1px,transparent 1px);background-size:56px 56px;mask-image:radial-gradient(ellipse 80% 70% at 50% 50%,black 0%,transparent 70%);pointer-events:none; }
+    .books-hero-tag { font-family:'Syne',sans-serif;font-size:11px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:#0FCFA4;display:flex;align-items:center;gap:10px;margin-bottom:14px; }
+    .books-hero-tag::before { content:'';width:28px;height:1px;background:#0FCFA4; }
+    .books-hero-title { font-family:'Playfair Display',serif;font-size:clamp(28px,5vw,48px);font-weight:900;color:#E8EAF0;line-height:1.08;margin-bottom:10px; }
+    .books-hero-title em { font-style:italic;color:#C9A84C; }
+    .books-search { background:#0C1120;border:1px solid rgba(201,168,76,.08);border-radius:4px;padding:18px 22px;margin-bottom:32px; }
+    .books-search input { background:rgba(6,9,16,.9) !important;border:1px solid rgba(255,255,255,.1) !important;color:#E8EAF0 !important;border-radius:3px !important;font-family:'DM Sans',sans-serif !important;font-size:14px !important;padding:12px 16px !important;width:100%;outline:none;transition:border-color .25s; }
+    .books-search input:focus { border-color:rgba(201,168,76,.4) !important;box-shadow:0 0 0 3px rgba(201,168,76,.07) !important; }
+    .books-search input::placeholder { color:#6B7590 !important; }
+
+    /* Livre card */
+    .book-item-card { text-decoration:none;color:inherit;display:block; }
+    .book-mock {
+        position:relative;height:220px;border-radius:6px;overflow:hidden;
+        display:grid;grid-template-columns:32px 1fr;
+        box-shadow:0 14px 32px rgba(0,0,0,.3);
+        transition:transform .2s,box-shadow .2s;
+    }
+    .book-item-card:hover .book-mock { transform:translateY(-4px) rotateX(1deg);box-shadow:0 20px 40px rgba(0,0,0,.4); }
+    .book-spine { background:linear-gradient(to bottom,var(--spine),#0b1220);position:relative; }
+    .book-spine::after { content:"";position:absolute;left:6px;right:6px;top:12px;bottom:12px;background:repeating-linear-gradient(to bottom,rgba(255,255,255,.15),rgba(255,255,255,.15) 2px,transparent 2px,transparent 8px);border-radius:10px;opacity:.3; }
+    .book-cover { background:linear-gradient(135deg,var(--cover),#111827);padding:16px;position:relative;display:flex;flex-direction:column;gap:8px; }
+    .book-cover::before { content:"";position:absolute;inset:0;background:radial-gradient(circle at 30% 30%,rgba(255,255,255,.15),transparent 55%);pointer-events:none; }
+    .book-top { position:relative;z-index:2;display:flex;justify-content:space-between;align-items:flex-start; }
+    .book-mini-pill { font-family:'Syne',sans-serif;font-size:9px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;padding:4px 8px;border-radius:100px;background:rgba(255,255,255,.18);color:rgba(255,255,255,.9);border:1px solid rgba(255,255,255,.22); }
+    .book-badge-free { font-family:'Syne',sans-serif;font-size:9px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;padding:3px 8px;border-radius:100px;background:rgba(15,207,164,.2);color:#0FCFA4;border:1px solid rgba(15,207,164,.3); }
+    .book-badge-prem { font-family:'Syne',sans-serif;font-size:9px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;padding:3px 8px;border-radius:100px;background:rgba(201,168,76,.2);color:#C9A84C;border:1px solid rgba(201,168,76,.3); }
+    .book-title-text { position:relative;z-index:2;color:#fff;font-weight:900;font-size:1rem;line-height:1.2;max-height:2.4em;overflow:hidden;text-shadow:0 4px 12px rgba(0,0,0,.3); }
+    .book-desc-text { position:relative;z-index:2;color:rgba(255,255,255,.8);font-size:.88rem;line-height:1.35;max-height:3.9em;overflow:hidden; }
+    .book-meta { position:relative;z-index:2;margin-top:auto;display:flex;align-items:center;justify-content:space-between; }
+    .book-meta span { font-size:.78rem;color:rgba(255,255,255,.5); }
+    .book-shine { position:absolute;inset:0;background:linear-gradient(120deg,transparent 0%,rgba(255,255,255,.2) 45%,transparent 60%);transform:translateX(-120%);transition:transform .5s;pointer-events:none; }
+    .book-item-card:hover .book-shine { transform:translateX(120%); }
+    .book-footer-text { padding:8px 2px 0;font-size:12px;color:#6B7590;font-family:'Syne',sans-serif; }
+
+    .cbr { opacity:0;transform:translateY(18px);transition:all .7s cubic-bezier(.16,1,.3,1); }
+    .cbr.on { opacity:1;transform:translateY(0); }
+</style>
+@endpush
+
 @section('content')
-<div class="container py-4">
-
-    {{-- Header --}}
-    <div class="books-hero mb-4">
-        <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
-            <div>
-                <div class="d-flex align-items-center gap-2 mb-2">
-                    <span class="badge rounded-pill bg-dark-subtle text-dark fw-semibold">Mini-cours</span>
-                    <span class="badge rounded-pill bg-primary-subtle text-primary fw-semibold">Gratuit & Premium</span>
+<div class="books-page">
+    <div class="books-hero">
+        <div class="books-hero-grid"></div>
+        <div class="container" style="max-width:1100px;position:relative;z-index:1;">
+            <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+                <div>
+                    <p class="books-hero-tag">Mini-cours</p>
+                    <h1 class="books-hero-title">📚 Livres <em>instructifs</em></h1>
+                    <p style="font-size:14px;color:#6B7590;font-weight:300;">Mini-cours à lire comme un livre, page par page.</p>
                 </div>
-                <h3 class="fw-bold mb-1">📚 Livres instructifs</h3>
-                <div class="text-muted">Mini-cours à lire comme un livre, page par page.</div>
+                <div class="d-flex gap-2">
+                    <a href="{{ route('landing') }}" style="display:inline-flex;align-items:center;gap:8px;background:transparent;color:#6B7590 !important;font-family:'Syne',sans-serif;font-weight:600;font-size:11px;letter-spacing:.06em;text-transform:uppercase;padding:9px 16px;border:1px solid rgba(255,255,255,.1);border-radius:3px;text-decoration:none;transition:all .3s;">← Accueil</a>
+                    <a href="{{ route('formations.brvm') }}" style="display:inline-flex;align-items:center;gap:8px;background:rgba(15,207,164,.1);color:#0FCFA4 !important;font-family:'Syne',sans-serif;font-weight:700;font-size:11px;letter-spacing:.06em;text-transform:uppercase;padding:9px 16px;border:1px solid rgba(15,207,164,.2);border-radius:3px;text-decoration:none;transition:all .3s;">🎓 Formations</a>
+                </div>
             </div>
-
-            <div class="d-flex flex-wrap gap-2">
-                <a href="{{ route('landing') }}" class="btn btn-outline-secondary">
-                    ← Accueil
-                </a>
-                <a href="{{ route('formations.brvm') }}" class="btn btn-outline-success">
-                    🎓 Formations
-                </a>
-            </div>
-        </div>
-
-        {{-- Search --}}
-        <div class="mt-3">
-            <div class="input-group input-group-lg">
-                <span class="input-group-text bg-white border-end-0">🔎</span>
-                <input id="bookSearch" type="text" class="form-control border-start-0"
-                       placeholder="Rechercher un livre (ex : dividendes, action, obligation...)">
-            </div>
-            <div class="small text-muted mt-1">Astuce : tape un mot-clé, la liste se filtre instantanément.</div>
         </div>
     </div>
 
-    {{-- Grid --}}
-    <div class="row g-4" id="booksGrid">
-        @foreach($books as $book)
-            @php
-                $palettes = [
-                    ['#0ea5e9', '#0369a1'], // bleu
-                    ['#22c55e', '#15803d'], // vert
-                    ['#f59e0b', '#b45309'], // orange
-                    ['#a855f7', '#6d28d9'], // violet
-                    ['#ef4444', '#991b1b'], // rouge
-                    ['#14b8a6', '#0f766e'], // teal
-                ];
-                $p = $palettes[$book->id % count($palettes)];
-                $c1 = $p[0];
-                $c2 = $p[1];
-            @endphp
+    <div class="container py-5" style="max-width:1100px;">
+        <div class="books-search cbr">
+            <input id="bookSearch" type="text" placeholder="🔎 Rechercher un livre (ex: dividendes, action, obligation…)">
+            <div style="font-size:12px;color:#6B7590;margin-top:6px;">Astuce : tape un mot-clé, la liste se filtre instantanément.</div>
+        </div>
 
-            <div class="col-12 col-sm-6 col-lg-4 book-item"
-                 data-title="{{ strtolower($book->title) }}"
-                 data-desc="{{ strtolower($book->description ?? '') }}">
-                <a href="{{ route('books.show', $book->slug) }}" class="text-decoration-none">
-                    <div class="book-card h-100">
-                        <div class="book-mock" style="--cover: {{ $c1 }}; --spine: {{ $c2 }};">
+        <div class="row g-4" id="booksGrid">
+            @php $palettes=[['#0ea5e9','#0369a1'],['#22c55e','#15803d'],['#f59e0b','#b45309'],['#a855f7','#6d28d9'],['#ef4444','#991b1b'],['#14b8a6','#0f766e']]; @endphp
+            @foreach($books as $book)
+                @php $p=$palettes[$book->id % count($palettes)]; @endphp
+                <div class="col-12 col-sm-6 col-lg-4 book-item cbr" data-title="{{ strtolower($book->title) }}" data-desc="{{ strtolower($book->description??'') }}">
+                    <a href="{{ route('books.show',$book->slug) }}" class="book-item-card">
+                        <div class="book-mock" style="--cover:{{ $p[0] }};--spine:{{ $p[1] }};">
                             <div class="book-spine"></div>
-
                             <div class="book-cover">
                                 <div class="book-top">
-                                    <div class="mini-pill">📖 Mini-cours</div>
-
-                                    <div class="book-badge">
-                                        @if($book->is_free)
-                                            <span class="badge bg-success">Gratuit</span>
-                                        @else
-                                            <span class="badge bg-warning text-dark">Premium</span>
-                                        @endif
-                                    </div>
+                                    <span class="book-mini-pill">📖 Mini-cours</span>
+                                    @if($book->is_free)<span class="book-badge-free">Gratuit</span>@else<span class="book-badge-prem">Premium</span>@endif
                                 </div>
-
-                                <div class="book-title">
-                                    {{ $book->title }}
-                                </div>
-
-                                @if(!empty($book->description))
-                                    <div class="book-desc">
-                                        {{ $book->description }}
-                                    </div>
-                                @else
-                                    <div class="book-desc">
-                                        Mini-cours BRVM : notions, exemples, erreurs à éviter.
-                                    </div>
-                                @endif
-
+                                <div class="book-title-text">{{ $book->title }}</div>
+                                <div class="book-desc-text">{{ $book->description ?? 'Mini-cours BRVM : notions, exemples, erreurs à éviter.' }}</div>
                                 <div class="book-meta">
-                                    <span class="text-white-50 small">⏱️ {{ $book->estimated_minutes }} min</span>
-                                    <span class="text-white-50 small">→ Ouvrir</span>
+                                    <span>⏱️ {{ $book->estimated_minutes }} min</span>
+                                    <span>→ Ouvrir</span>
                                 </div>
                             </div>
-
                             <div class="book-shine"></div>
                         </div>
+                        <div class="book-footer-text">Clique pour ouvrir →</div>
+                    </a>
+                </div>
+            @endforeach
+        </div>
 
-                        <div class="book-footer">
-                            <div class="text-muted small">Clique pour ouvrir →</div>
-                        </div>
-                    </div>
-                </a>
-            </div>
-        @endforeach
-    </div>
-
-    {{-- Empty state (search) --}}
-    <div id="emptyState" class="d-none">
-        <div class="alert alert-light border shadow-sm mt-4">
-            <div class="fw-semibold mb-1">Aucun livre trouvé</div>
-            <div class="text-muted small">Essaie un autre mot-clé (ex : “dividendes”, “obligation”, “action”).</div>
+        <div id="emptyState" class="d-none" style="text-align:center;padding:80px 20px;font-family:'Syne',sans-serif;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:#6B7590;">
+            <div style="font-size:32px;margin-bottom:12px;opacity:.4;">📚</div>
+            Aucun livre trouvé
         </div>
     </div>
 </div>
-
-<style>
-/* ===== Header / Hero ===== */
-.books-hero{
-    background: linear-gradient(135deg, rgba(13,110,253,.08), rgba(34,197,94,.08));
-    border: 1px solid rgba(0,0,0,.06);
-    border-radius: 18px;
-    padding: 18px;
-    box-shadow: 0 10px 24px rgba(0,0,0,.06);
-}
-.mini-pill{
-    font-size: .78rem;
-    font-weight: 700;
-    padding: 6px 10px;
-    border-radius: 999px;
-    background: rgba(255,255,255,.20);
-    color: rgba(255,255,255,.95);
-    border: 1px solid rgba(255,255,255,.25);
-}
-
-/* ====== CARTE LIVRE (INDEX) ====== */
-.book-card{
-    border-radius: 16px;
-}
-
-.book-mock{
-    position: relative;
-    height: 220px;
-    border-radius: 16px;
-    transform: translateZ(0);
-    transition: transform .18s ease, box-shadow .18s ease, filter .18s ease;
-    box-shadow: 0 14px 28px rgba(0,0,0,.10);
-    overflow: hidden;
-    display: grid;
-    grid-template-columns: 34px 1fr;
-    perspective: 1000px;
-}
-
-.book-mock:hover{
-    transform: translateY(-3px) rotateX(1deg);
-    box-shadow: 0 18px 38px rgba(0,0,0,.14);
-    filter: saturate(1.05);
-}
-
-/* Tranche (spine) */
-.book-spine{
-    background: linear-gradient(to bottom, var(--spine), #0b1220);
-    position: relative;
-}
-
-/* petits traits pour faire “pages” sur la tranche */
-.book-spine::after{
-    content:"";
-    position:absolute;
-    left:6px; right:6px; top:12px; bottom:12px;
-    background: repeating-linear-gradient(
-        to bottom,
-        rgba(255,255,255,.18),
-        rgba(255,255,255,.18) 2px,
-        transparent 2px,
-        transparent 8px
-    );
-    border-radius: 10px;
-    opacity: .35;
-}
-
-/* Couverture */
-.book-cover{
-    background: linear-gradient(135deg, var(--cover), #111827);
-    padding: 16px 16px 14px;
-    position: relative;
-    display:flex;
-    flex-direction:column;
-    gap:10px;
-}
-
-/* légère texture */
-.book-cover::before{
-    content:"";
-    position:absolute;
-    inset:0;
-    background:
-        radial-gradient(circle at 30% 30%, rgba(255,255,255,.18), transparent 55%),
-        radial-gradient(circle at 80% 20%, rgba(255,255,255,.10), transparent 55%),
-        linear-gradient(to right, rgba(255,255,255,.10), transparent 25%);
-    pointer-events:none;
-}
-
-.book-top{
-    position: relative;
-    z-index: 2;
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    gap:10px;
-}
-
-.book-badge{
-    position: relative;
-    z-index: 2;
-    display:flex;
-    justify-content:flex-end;
-}
-
-.book-title{
-    position: relative;
-    z-index: 2;
-    color:#fff;
-    font-weight: 900;
-    font-size: 1.10rem;
-    line-height: 1.2;
-    max-height: 2.4em;
-    overflow: hidden;
-    text-shadow: 0 8px 22px rgba(0,0,0,.25);
-}
-
-.book-desc{
-    position: relative;
-    z-index: 2;
-    color: rgba(255,255,255,.82);
-    font-size: .93rem;
-    line-height: 1.35;
-    max-height: 3.9em;
-    overflow: hidden;
-}
-
-.book-meta{
-    position: relative;
-    z-index: 2;
-    margin-top:auto;
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-}
-
-/* Brillance sur la couverture */
-.book-shine{
-    position:absolute;
-    inset:0;
-    background: linear-gradient(120deg, transparent 0%, rgba(255,255,255,.22) 45%, transparent 60%);
-    transform: translateX(-120%);
-    transition: transform .5s ease;
-    pointer-events:none;
-}
-.book-mock:hover .book-shine{
-    transform: translateX(120%);
-}
-
-/* Petit footer sous le livre */
-.book-footer{
-    padding: 10px 2px 0;
-}
-
-/* Search input polish */
-.input-group-lg .form-control,
-.input-group-lg .input-group-text{
-    border-radius: 14px;
-}
-.input-group-lg .input-group-text{
-    border-top-right-radius: 0;
-    border-bottom-right-radius: 0;
-}
-.input-group-lg .form-control{
-    border-top-left-radius: 0;
-    border-bottom-left-radius: 0;
-}
-</style>
-
-<script>
-(function () {
-    const input = document.getElementById('bookSearch');
-    const items = document.querySelectorAll('.book-item');
-    const emptyState = document.getElementById('emptyState');
-
-    function filter() {
-        const q = (input.value || '').trim().toLowerCase();
-        let visible = 0;
-
-        items.forEach(el => {
-            const t = el.dataset.title || '';
-            const d = el.dataset.desc || '';
-            const ok = !q || t.includes(q) || d.includes(q);
-            el.classList.toggle('d-none', !ok);
-            if (ok) visible++;
-        });
-
-        emptyState.classList.toggle('d-none', visible !== 0);
-    }
-
-    if (input) {
-        input.addEventListener('input', filter);
-    }
-})();
-</script>
 @endsection
+
+@push('scripts')
+<script>
+(function(){
+    const input=document.getElementById('bookSearch');
+    const items=document.querySelectorAll('.book-item');
+    const empty=document.getElementById('emptyState');
+    if(!input)return;
+    input.addEventListener('input',function(){
+        const q=(this.value||'').trim().toLowerCase();
+        let v=0;
+        items.forEach(el=>{const ok=!q||el.dataset.title.includes(q)||el.dataset.desc.includes(q);el.classList.toggle('d-none',!ok);if(ok)v++;});
+        empty.classList.toggle('d-none',v!==0);
+    });
+})();
+document.querySelectorAll('.cbr').forEach(el=>{new IntersectionObserver(([e])=>{if(e.isIntersecting)el.classList.add('on');},{threshold:.06}).observe(el);});
+</script>
+@endpush

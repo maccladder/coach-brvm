@@ -28,11 +28,44 @@
         * { box-sizing: border-box; }
         body { font-family: 'DM Sans', system-ui, sans-serif; background: #f0f2f7; color: #1a1f2e; }
 
-        /* TICKER */
-        .cb-ticker { background: var(--cb-dark); border-bottom: 1px solid var(--cb-border); height: 32px; overflow: hidden; display: flex; align-items: center; }
-        .cb-ticker-track { display: flex; gap: 52px; width: max-content; animation: cbTick 40s linear infinite; padding-left: 100%; }
-        @keyframes cbTick { from{transform:translateX(0)} to{transform:translateX(-50%)} }
-        .cb-ticker-item { font-family:'Syne',sans-serif; font-size:11px; font-weight:600; white-space:nowrap; display:flex; align-items:center; gap:7px; color:var(--cb-muted); }
+        /* ══ TICKER ══ */
+        .cb-ticker {
+            background: var(--cb-dark);
+            border-bottom: 1px solid var(--cb-border);
+            height: 34px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            cursor: default;
+        }
+        /* Pause complète quand la souris entre sur la barre */
+        .cb-ticker:hover .cb-ticker-track {
+            animation-play-state: paused;
+        }
+        .cb-ticker-track {
+            display: flex;
+            gap: 56px;
+            width: max-content;
+            animation: cbTick 90s linear infinite; /* 40s → 90s : défilement bien plus lent */
+            padding-left: 100%;
+        }
+        @keyframes cbTick {
+            from { transform: translateX(0); }
+            to   { transform: translateX(-50%); }
+        }
+        .cb-ticker-item {
+            font-family: 'Syne', sans-serif;
+            font-size: 11px;
+            font-weight: 600;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            color: var(--cb-muted);
+            transition: color .2s;
+        }
+        /* Mise en valeur légère de l'item sous la souris */
+        .cb-ticker-item:hover { color: var(--cb-text); }
         .cb-ticker-item .sym { color: var(--cb-gold); }
         .cb-ticker-item .up  { color: var(--cb-green); }
         .cb-ticker-item .dn  { color: var(--cb-red); }

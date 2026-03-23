@@ -20,57 +20,53 @@ use App\Services\BrvmMarketAiService; // adapte au bon service
 class VirtualWalletController extends Controller
 {
     public function index(BrvmActionsAiService $svc)
-    {
-        $user = auth()->user();
+{
+    $user = auth()->user();
 
-        $wallet = VirtualWallet::firstOrCreate(
-            ['user_id' => $user->id],
-            ['balance' => 0]
-        );
+    $wallet = VirtualWallet::firstOrCreate(
+        ['user_id' => $user->id],
+        ['balance' => 0]
+    );
 
-        // ✅ le bon appel (ton service EXISTE)
-        $market = $svc->fetchMarketTableFromSite(); // retourne un array de stocks
-        $prices = collect($market)->keyBy('ticker');
+    $market = $svc->fetchMarketTableFromSite();
+    $prices = collect($market)->keyBy('ticker');
 
-        // ⚠️ IMPORTANT: si ta table positions est liée au wallet, on filtre par wallet_id
-        // (si tu as plutôt user_id dans positions, je te donne l’autre ligne juste après)
-        $positionsDb = VirtualPosition::where('user_id', $user->id)->get();
+    $positionsDb = VirtualPosition::where('user_id', $user->id)->get();
 
+    $positions  = [];
+    $totalValue = 0;
 
-        $positions = [];
-        $totalValue = 0;
+    foreach ($positionsDb as $pos) {
+        $price = data_get($prices, $pos->ticker . '.close');
+        $value = ($price && $pos->qty) ? ($price * $pos->qty) : 0;
+        $totalValue += $value;
 
-        foreach ($positionsDb as $pos) {
-            $price = data_get($prices, $pos->ticker . '.close');
-            $value = ($price && $pos->qty) ? ($price * $pos->qty) : 0;
-
-            $totalValue += $value;
-
-            $history = VirtualWalletTransaction::where('user_id', $user->id)
-    ->orderByDesc('created_at')
-    ->limit(100)
-    ->get();
-
-            $positions[] = [
-                'ticker' => $pos->ticker,
-                'name' => $pos->name,
-                'qty' => (int) $pos->qty,
-                'avg_price' => (float) $pos->avg_price,
-                'price' => $price,
-                'value' => $value,
-            ];
-        }
-
-        return view('wallet.index', [
-            'wallet' => $wallet,
-            'positions' => $positions,
-            'market' => $market,
-            'totalValue' => $totalValue,
-            'netWorth' => $wallet->balance + $totalValue,
-            'history'    => $history,
-        ]);
+        $positions[] = [
+            'ticker'    => $pos->ticker,
+            'name'      => $pos->name,
+            'qty'       => (int)   $pos->qty,
+            'avg_price' => (float) $pos->avg_price,
+            'price'     => $price,
+            'value'     => $value,
+        ];
     }
 
+    // ✅ FIX : $history HORS du foreach
+    // → fonctionne même si l'utilisateur n'a aucune position
+    $history = VirtualWalletTransaction::where('user_id', $user->id)
+        ->orderByDesc('created_at')
+        ->limit(100)
+        ->get();
+
+    return view('wallet.index', [
+        'wallet'     => $wallet,
+        'positions'  => $positions,
+        'market'     => $market,
+        'totalValue' => $totalValue,
+        'netWorth'   => $wallet->balance + $totalValue,
+        'history'    => $history,
+    ]);
+}
 
     public function topupConfirm(Request $request)
 {
