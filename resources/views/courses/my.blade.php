@@ -53,6 +53,20 @@
     </div>
 </div>
 @endsection
+
 @push('scripts')
-<script>document.querySelectorAll('.cbr').forEach(el=>{new IntersectionObserver(([e])=>{if(e.isIntersecting)el.classList.add('on');},{threshold:.06}).observe(el);});</script>
+<script>
+document.querySelectorAll('.cbr').forEach(el => {
+    new IntersectionObserver(([e]) => {
+        if (e.isIntersecting) el.classList.add('on');
+    }, { threshold: .06 }).observe(el);
+});
+
+// ── Purchase pixel après retour Paystack ──
+@if(session()->has('fb_purchase'))
+    if (typeof fbq === 'function') {
+        fbq('track', 'Purchase', @json(session('fb_purchase')));
+    }
+@endif
+</script>
 @endpush

@@ -14,27 +14,16 @@ use Illuminate\Support\Str;
 
 class CoursePaymentController extends Controller
 {
-    /**
-     * Convertit n'importe quel retour (array|object|string) en array.
-     */
     private function toArray(mixed $value): array
     {
         if (is_array($value)) return $value;
-
-        if (is_string($value)) {
-            return ['_raw' => $value];
-        }
-
+        if (is_string($value)) return ['_raw' => $value];
         return json_decode(json_encode($value), true) ?? ['_raw' => $value];
     }
 
-    /**
-     * Extrait le status de manière robuste.
-     */
     private function extractStatus(mixed $check): string
     {
         $arr = $this->toArray($check);
-
         $candidates = [
             $arr['status'] ?? null,
             $arr['response'] ?? null,
@@ -44,17 +33,15 @@ class CoursePaymentController extends Controller
             $arr['transaction']['status'] ?? null,
             $arr['_raw'] ?? null,
         ];
-
         foreach ($candidates as $cand) {
             $cand = strtoupper(trim((string) $cand));
             if ($cand !== '') return $cand;
         }
-
         return '';
     }
 
     // ============================================================
-    // CinetPay (tu peux laisser si tu veux, sinon tu peux retirer)
+    // CinetPay
     // ============================================================
 
     public function buy(Course $course, Request $request, CinetpayService $cinetpay)
@@ -109,7 +96,6 @@ class CoursePaymentController extends Controller
                 'transaction_id' => $payment->transaction_id,
                 'error' => $e->getMessage(),
             ]);
-
             return back()->with('error', 'Impossible de générer le paiement CinetPay.');
         }
 
@@ -146,7 +132,6 @@ class CoursePaymentController extends Controller
                 'transaction_id' => $transactionId,
                 'error' => $e->getMessage(),
             ]);
-
             return redirect()->route('courses.index')
                 ->with('error', 'Paiement en cours de confirmation. Réessaie dans 1 minute.');
         }
@@ -156,12 +141,15 @@ class CoursePaymentController extends Controller
         if (in_array($status, ['ACCEPTED', 'SUCCESS', 'SUCCES'], true)) {
             $this->markCoursePaid($payment);
 
-            // ✅ Purchase pixel (flash) — pour éviter doublons
-            return redirect()->route('courses.my')->with('success', 'Paiement validé ✅ Votre cours est disponible.')
-                ->with('pixel_purchase', [
+            $courseId    = (int) data_get($payment->meta, 'course_id');
+            $courseTitle = optional(Course::find($courseId))->title ?? '';
+
+            return redirect()->route('courses.my')
+                ->with('success', 'Paiement validé ✅ Votre cours est disponible.')
+                ->with('fb_purchase', [
                     'content_type' => 'product',
-                    'content_ids'  => [ (string) data_get($payment->meta, 'course_id') ],
-                    'content_name' => (string) optional(Course::find(data_get($payment->meta, 'course_id')))->title,
+                    'content_ids'  => [(string) $courseId],
+                    'content_name' => (string) $courseTitle,
                     'value'        => (int) $payment->amount_paid,
                     'currency'     => 'XOF',
                     'num_items'    => 1,
@@ -177,14 +165,10 @@ class CoursePaymentController extends Controller
             ?? $request->get('cpm_trans_id')
             ?? $request->get('cpmTransId');
 
-        if (!$transactionId) {
-            return response('missing transaction_id', 400);
-        }
+        if (!$transactionId) return response('missing transaction_id', 400);
 
         $payment = Payment::where('transaction_id', $transactionId)->first();
-        if (!$payment) {
-            return response('payment not found', 404);
-        }
+        if (!$payment) return response('payment not found', 404);
 
         if ($payment->status === 'ACCEPTED' && $payment->credited_at) {
             return response('already ok', 200);
@@ -197,7 +181,6 @@ class CoursePaymentController extends Controller
                 'transaction_id' => $transactionId,
                 'error' => $e->getMessage(),
             ]);
-
             return response('ok', 200);
         }
 
@@ -212,14 +195,13 @@ class CoursePaymentController extends Controller
     }
 
     // ============================================================
-    // ✅ PAYSTACK (celui qu'on utilise)
+    // Paystack
     // ============================================================
 
     public function buyPaystack(Course $course, Request $request, PaystackService $paystack)
     {
         $user = $request->user();
 
-        // ✅ déjà acheté ?
         $already = CoursePurchase::where('user_id', $user->id)
             ->where('course_id', $course->id)
             ->whereNotNull('paid_at')
@@ -230,16 +212,13 @@ class CoursePaymentController extends Controller
                 ->with('success', 'Cours déjà acheté ✅');
         }
 
-        // ✅ purchase ensured
         $purchase = CoursePurchase::firstOrCreate(
             ['user_id' => $user->id, 'course_id' => $course->id],
             ['amount_fcfa' => (int) $course->price_fcfa]
         );
 
-        // ✅ reference unique
         $transactionId = 'COURSE-' . $course->id . '-' . $user->id . '-' . Str::upper(Str::random(10));
 
-        // ✅ log payment
         $payment = Payment::create([
             'user_id'        => $user->id,
             'transaction_id' => $transactionId,
@@ -260,7 +239,7 @@ class CoursePaymentController extends Controller
 
         $authUrl = $paystack->initialize([
             'email'        => $user->email,
-            'amount'       => (int) $payment->amount_paid, // ton PaystackService peut faire *100 dedans
+            'amount'       => (int) $payment->amount_paid,
             'reference'    => $payment->transaction_id,
             'callback_url' => $callbackUrl,
             'metadata'     => [
@@ -274,7 +253,6 @@ class CoursePaymentController extends Controller
         if (!$authUrl) {
             $payment->status = 'FAILED';
             $payment->save();
-
             return back()->with('error', "❌ Impossible d'initialiser Paystack.");
         }
 
@@ -287,8 +265,8 @@ class CoursePaymentController extends Controller
 
         Log::info('[COURSE][PAYSTACK_CALLBACK] hit', [
             'reference' => $reference,
-            'all' => $request->all(),
-            'url' => $request->fullUrl(),
+            'all'       => $request->all(),
+            'url'       => $request->fullUrl(),
         ]);
 
         if (!$reference) {
@@ -308,41 +286,35 @@ class CoursePaymentController extends Controller
         $payment = Payment::where('transaction_id', $reference)->first();
 
         if (!$payment) {
-            Log::error('[COURSE][PAYSTACK_CALLBACK] payment not found', ['reference' => $reference, 'data' => $data]);
+            Log::error('[COURSE][PAYSTACK_CALLBACK] payment not found', ['reference' => $reference]);
             return redirect()->route('courses.index')->with('error', 'Paiement introuvable en base.');
         }
 
-        // ✅ Sécurité montant (Paystack renvoie souvent amount en *100)
         $paid = (int) (($data['amount'] ?? 0) / 100);
         if ($paid <= 0 || $paid !== (int) $payment->amount_paid) {
             Log::error('[COURSE][PAYSTACK_CALLBACK] amount mismatch', [
                 'reference' => $reference,
                 'db_amount' => (int) $payment->amount_paid,
-                'paid' => $paid,
-                'raw_amount' => $data['amount'] ?? null,
+                'paid'      => $paid,
             ]);
             return redirect()->route('courses.index')->with('error', 'Montant Paystack invalide.');
         }
 
-        $courseTitle = null;
+        // ✅ FIX : on récupère courseId AVANT la transaction pour qu'il soit dans le bon scope
         $courseId    = (int) data_get($payment->meta, 'course_id');
-        if ($courseId) {
-            $courseTitle = optional(Course::find($courseId))->title;
-        }
+        $courseTitle = optional(Course::find($courseId))->title ?? '';
 
         DB::transaction(function () use ($payment, $reference, $data) {
 
-            // ✅ lock payment
             $paymentLocked = Payment::where('id', $payment->id)->lockForUpdate()->first();
 
-            // idempotent
             if ($paymentLocked->status === 'ACCEPTED' && $paymentLocked->credited_at) {
                 return;
             }
 
-            $paymentLocked->status = 'ACCEPTED';
+            $paymentLocked->status      = 'ACCEPTED';
             $paymentLocked->credited_at = $paymentLocked->credited_at ?? now();
-            $paymentLocked->meta = array_merge((array) ($paymentLocked->meta ?? []), [
+            $paymentLocked->meta        = array_merge((array) ($paymentLocked->meta ?? []), [
                 'paystack' => [
                     'reference' => $reference,
                     'channel'   => $data['channel'] ?? null,
@@ -351,70 +323,57 @@ class CoursePaymentController extends Controller
             ]);
             $paymentLocked->save();
 
-            // ✅ marquer purchase course paid
-            $meta = (array) ($paymentLocked->meta ?? []);
+            $meta       = (array) ($paymentLocked->meta ?? []);
             $purchaseId = $meta['purchase_id'] ?? null;
             $courseId   = $meta['course_id'] ?? null;
 
             $purchase = null;
-
             if ($purchaseId) {
                 $purchase = CoursePurchase::where('id', $purchaseId)->lockForUpdate()->first();
             }
-
             if (!$purchase && $courseId) {
                 $purchase = CoursePurchase::where('user_id', $paymentLocked->user_id)
                     ->where('course_id', $courseId)
                     ->lockForUpdate()
                     ->first();
             }
-
             if ($purchase && !$purchase->paid_at) {
-                $purchase->paid_at = now();
+                $purchase->paid_at     = now();
                 $purchase->payment_ref = $reference;
                 $purchase->save();
             }
         });
 
-        // ✅ Purchase Pixel (flash session) -> à déclencher côté blade de courses.my
+        // ✅ fb_purchase unifié (même clé que marketplace → même lecture dans les blades)
         return redirect()->route('courses.my')
             ->with('success', "✅ Paiement Paystack confirmé. Ton cours est disponible.")
-            ->with('pixel_purchase', [
+            ->with('fb_purchase', [
                 'content_type' => 'product',
-                'content_ids'  => [ (string) $courseId ],
-                'content_name' => (string) ($courseTitle ?? ''),
+                'content_ids'  => [(string) $courseId],
+                'content_name' => (string) $courseTitle,
                 'value'        => (int) $payment->amount_paid,
                 'currency'     => 'XOF',
                 'num_items'    => 1,
             ]);
     }
 
-    /**
-     * Marquer le paiement + l'achat comme payé (utilisé par CinetPay)
-     */
     private function markCoursePaid(Payment $payment): void
     {
         DB::transaction(function () use ($payment) {
             $payment->refresh();
 
-            if ($payment->status === 'ACCEPTED' && $payment->credited_at) {
-                return;
-            }
+            if ($payment->status === 'ACCEPTED' && $payment->credited_at) return;
 
-            $payment->status = 'ACCEPTED';
+            $payment->status      = 'ACCEPTED';
             $payment->credited_at = now();
             $payment->save();
 
-            $meta = $payment->meta ?? [];
+            $meta       = $payment->meta ?? [];
             $purchaseId = $meta['purchase_id'] ?? null;
-            $courseId = $meta['course_id'] ?? null;
+            $courseId   = $meta['course_id'] ?? null;
 
             $purchase = null;
-
-            if ($purchaseId) {
-                $purchase = CoursePurchase::find($purchaseId);
-            }
-
+            if ($purchaseId) $purchase = CoursePurchase::find($purchaseId);
             if (!$purchase && $courseId) {
                 $purchase = CoursePurchase::where('user_id', $payment->user_id)
                     ->where('course_id', $courseId)
@@ -422,7 +381,7 @@ class CoursePaymentController extends Controller
             }
 
             if ($purchase && !$purchase->paid_at) {
-                $purchase->paid_at = now();
+                $purchase->paid_at     = now();
                 $purchase->payment_ref = $payment->transaction_id;
                 $purchase->save();
             }
