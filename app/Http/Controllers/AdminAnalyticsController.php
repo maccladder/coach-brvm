@@ -46,12 +46,21 @@ class AdminAnalyticsController extends Controller
      */
     private function buildAnalyticsData(GoogleAnalyticsService $ga): array
     {
+        $month = $ga->monthStats();
+
         return [
             'todayUsers'        => $ga->todayUsers() ?? 0,
             'realtimeUsers'     => $ga->realtimeUsers() ?? 0,
             'topCountries'      => $ga->topCountries(5) ?? [],
             'topPages'          => $ga->topPages(7) ?? [],
             'avgEngagementSecs' => $ga->avgEngagementTime() ?? 0,
+            'timeline'          => $ga->last7DaysTimeline() ?? [],
+            'deviceCategories'  => $ga->deviceCategories() ?? [],
+            'trafficSources'    => $ga->trafficSources(6) ?? [],
+            'users30'           => $month['users30'] ?? 0,
+            'newUsers30'        => $month['newUsers30'] ?? 0,
+            'sessions30'        => $month['sessions30'] ?? 0,
+            'bounceRate'        => $month['bounceRate'] ?? 0.0,
         ];
     }
 
@@ -66,6 +75,13 @@ class AdminAnalyticsController extends Controller
             'topCountries'      => [],
             'topPages'          => [],
             'avgEngagementSecs' => 0,
+            'timeline'          => [],
+            'deviceCategories'  => [],
+            'trafficSources'    => [],
+            'users30'           => 0,
+            'newUsers30'        => 0,
+            'sessions30'        => 0,
+            'bounceRate'        => 0.0,
         ];
     }
 }

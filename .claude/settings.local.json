@@ -1,7 +1,12 @@
 {
   "permissions": {
     "allow": [
-      "Bash(xargs head:*)"
+      "Bash(xargs head:*)",
+      "Bash(php -l app/Services/GoogleAnalyticsService.php)",
+      "Bash(php -l app/Http/Controllers/AdminAnalyticsController.php)",
+      "Bash(php -l resources/views/admin/analytics/index.blade.php)",
+      "Bash(php -l resources/views/layouts/admin.blade.php)",
+      "Bash(php -l resources/views/admin/dashboard.blade.php)"
     ]
   }
 }

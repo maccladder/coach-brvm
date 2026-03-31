@@ -1,4 +1,4 @@
-{{-- resources/views/performances/index.blade.php (ou radar/index.blade.php) --}}
+{{-- resources/views/performances/index.blade.php --}}
 @extends('layouts.app')
 
 @push('styles')
@@ -58,6 +58,7 @@
         border-radius: 3px; text-decoration: none; transition: all .3s; cursor: pointer;
     }
     .cb-btn-outline:hover { border-color: #C9A84C; color: #C9A84C !important; background: rgba(201,168,76,.05); }
+    .cb-btn-outline.active { border-color: #C9A84C; color: #C9A84C !important; background: rgba(201,168,76,.08); }
 
     .cb-btn-green {
         display: inline-flex; align-items: center; gap: 8px;
@@ -68,6 +69,31 @@
         border-radius: 3px; cursor: pointer; transition: all .3s;
     }
     .cb-btn-green:hover { background: rgba(15,207,164,.16); border-color: rgba(15,207,164,.4); }
+
+    /* ── Style toggle ── */
+    .style-toggle {
+        display: inline-flex;
+        background: rgba(255,255,255,.04);
+        border: 1px solid rgba(255,255,255,.08);
+        border-radius: 4px;
+        overflow: hidden;
+    }
+    .style-toggle-btn {
+        display: inline-flex; align-items: center; gap: 6px;
+        padding: 7px 14px;
+        font-family: 'Syne', sans-serif; font-size: 11px;
+        font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
+        color: #6B7590; background: transparent; border: none;
+        cursor: pointer; transition: all .2s;
+    }
+    .style-toggle-btn:hover { color: #E8EAF0; background: rgba(255,255,255,.04); }
+    .style-toggle-btn.active {
+        color: #C9A84C;
+        background: rgba(201,168,76,.1);
+        border-left: 1px solid rgba(201,168,76,.2);
+        border-right: 1px solid rgba(201,168,76,.2);
+    }
+    .style-toggle-btn:first-child { border-right: 1px solid rgba(255,255,255,.06); }
 
     /* ── Card de base ── */
     .radar-card {
@@ -146,10 +172,17 @@
         background: #060910;
         border-radius: 3px;
         overflow: hidden;
+        transition: background .3s;
     }
 
-    #brvm-bubbles:fullscreen {
-        background: #060910;
+    /* Mode crypto : fond noir pur comme cryptobubbles */
+    #brvm-bubbles.mode-crypto {
+        background: #000;
+    }
+
+    #brvm-bubbles:fullscreen,
+    #brvm-bubbles.mode-crypto:fullscreen {
+        background: #000;
         padding: 12px;
     }
 
@@ -232,7 +265,6 @@
             </div>
 
             <div class="radar-card-body">
-                {{-- Selector --}}
                 <div class="row g-3 align-items-end mb-4">
                     <div class="col-lg-10">
                         <label class="radar-select-label">Choisir une ou plusieurs sociétés</label>
@@ -254,7 +286,6 @@
                     </div>
                 </div>
 
-                {{-- Chart --}}
                 <div class="chart-wrap">
                     <canvas id="perfChart"></canvas>
                 </div>
@@ -274,7 +305,18 @@
                         Variations du jour · Chargement en cours…
                     </div>
                 </div>
-                <div class="d-flex gap-2">
+                <div class="d-flex align-items-center gap-2 flex-wrap">
+
+                    {{-- Toggle style --}}
+                    <div class="style-toggle" title="Changer le style des bulles">
+                        <button class="style-toggle-btn active" id="btn-style-solid" title="Bulles solides (style BRVM)">
+                            <i class="bi bi-circle-fill" style="font-size:11px;"></i> Solide
+                        </button>
+                        <button class="style-toggle-btn" id="btn-style-crypto" title="Bulles transparentes (style CryptoBubbles)">
+                            <i class="bi bi-circle" style="font-size:11px;"></i> Crypto
+                        </button>
+                    </div>
+
                     <button id="btn-bubbles-reload" class="cb-btn-green">
                         <i class="bi bi-arrow-clockwise"></i> Rafraîchir
                     </button>
@@ -428,19 +470,73 @@ const loader        = document.getElementById('bubbles-loader');
 const fullscreenBtn = document.getElementById('btn-bubbles-fullscreen');
 const reloadBtn     = document.getElementById('btn-bubbles-reload');
 const bocDateLabel  = document.getElementById('marketBocDate');
+const btnSolid      = document.getElementById('btn-style-solid');
+const btnCrypto     = document.getElementById('btn-style-crypto');
 
 let lastBubbleData = null;
+let currentStyle   = 'solid'; // 'solid' | 'crypto'
 
-function colorFn(d){
+/* ── Couleurs selon style ── */
+function colorFn(d) {
     const c = Number(d.change ?? 0);
+    if (currentStyle === 'crypto') {
+        // Style CryptoBubbles : transparent avec bordure colorée
+        if (c > 0.1)  return 'rgba(31,191,74,0)';
+        if (c < -0.1) return 'rgba(229,57,53,0)';
+        return 'rgba(80,80,80,0)';
+    }
+    // Style solide classique
     if (c > 0.1)  return '#1fbf4a';
     if (c < -0.1) return '#e53935';
     return '#444';
 }
 
-function drawBubbles(data){
-    // Supprimer SVG précédent mais garder le loader masqué
+function strokeFn(d) {
+    const c = Number(d.change ?? 0);
+    if (c > 0.1)  return '#1fbf4a';
+    if (c < -0.1) return '#e53935';
+    return '#555';
+}
+
+function strokeWidthFn(d) {
+    return currentStyle === 'crypto' ? 2 : 1.5;
+}
+
+function fillOpacityFn(d) {
+    if (currentStyle === 'crypto') {
+        const abs = Math.abs(Number(d.change ?? 0));
+        // Plus la variation est forte, plus la bulle est légèrement colorée
+        return Math.min(0.18, abs * 0.03);
+    }
+    return 0.88;
+}
+
+function textColorFn(d) {
+    const c = Number(d.change ?? 0);
+    if (currentStyle === 'crypto') {
+        if (c > 0.1)  return '#1fbf4a';
+        if (c < -0.1) return '#e53935';
+        return '#aaa';
+    }
+    return '#fff';
+}
+
+function subTextColorFn(d) {
+    const c = Number(d.change ?? 0);
+    if (currentStyle === 'crypto') {
+        if (c > 0.1)  return 'rgba(31,191,74,.9)';
+        if (c < -0.1) return 'rgba(229,57,53,.9)';
+        return 'rgba(170,170,170,.8)';
+    }
+    return 'rgba(255,255,255,.85)';
+}
+
+/* ── Draw ── */
+function drawBubbles(data) {
     bubblesDiv.querySelectorAll('svg').forEach(s => s.remove());
+
+    // Fond selon style
+    bubblesDiv.classList.toggle('mode-crypto', currentStyle === 'crypto');
 
     if (!Array.isArray(data) || data.length === 0) {
         bubblesDiv.innerHTML = `
@@ -458,6 +554,17 @@ function drawBubbles(data){
         .append('svg')
         .attr('width', width)
         .attr('height', height);
+
+    // Fond dégradé subtil en mode crypto
+    if (currentStyle === 'crypto') {
+        const defs = svg.append('defs');
+        const grad = defs.append('radialGradient')
+            .attr('id', 'bgGrad')
+            .attr('cx', '50%').attr('cy', '50%').attr('r', '60%');
+        grad.append('stop').attr('offset', '0%').attr('stop-color', '#0a0a14');
+        grad.append('stop').attr('offset', '100%').attr('stop-color', '#000');
+        svg.append('rect').attr('width', width).attr('height', height).attr('fill', 'url(#bgGrad)');
+    }
 
     const maxAbs = d3.max(data, d => Math.abs(Number(d.change ?? 0))) || 1;
 
@@ -486,19 +593,29 @@ function drawBubbles(data){
                 .on('end',   (e,d) => { if(!e.active) sim.alphaTarget(0); d.fx=null; d.fy=null; })
         );
 
-    /* Cercle */
+    /* Halo externe en mode crypto */
+    if (currentStyle === 'crypto') {
+        node.append('circle')
+            .attr('r', d => d.radius + 4)
+            .attr('fill', 'none')
+            .attr('stroke', d => strokeFn(d))
+            .attr('stroke-width', 0.5)
+            .attr('stroke-opacity', 0.2);
+    }
+
+    /* Cercle principal */
     node.append('circle')
         .attr('r', d => d.radius)
         .attr('fill', d => colorFn(d))
-        .attr('stroke', 'rgba(255,255,255,.15)')
-        .attr('stroke-width', 1.5)
-        .attr('fill-opacity', .88);
+        .attr('stroke', d => strokeFn(d))
+        .attr('stroke-width', d => strokeWidthFn(d))
+        .attr('fill-opacity', d => fillOpacityFn(d));
 
     /* Ticker */
     node.append('text')
         .attr('text-anchor', 'middle')
         .attr('dy', '-0.25em')
-        .style('fill', '#fff')
+        .style('fill', d => textColorFn(d))
         .style('font-family', "'Syne', sans-serif")
         .style('font-weight', '700')
         .style('pointer-events', 'none')
@@ -509,9 +626,9 @@ function drawBubbles(data){
     node.append('text')
         .attr('text-anchor', 'middle')
         .attr('dy', '1.2em')
-        .style('fill', 'rgba(255,255,255,.85)')
+        .style('fill', d => subTextColorFn(d))
         .style('font-family', "'DM Sans', sans-serif")
-        .style('font-weight', '500')
+        .style('font-weight', currentStyle === 'crypto' ? '600' : '500')
         .style('pointer-events', 'none')
         .style('font-size', d => Math.max(9, Math.min(d.radius / 3.5, 14)) + 'px')
         .text(d => `${d.change >= 0 ? '+' : ''}${d.change.toFixed(1)}%`);
@@ -530,10 +647,25 @@ function drawBubbles(data){
         .on('tick', () => node.attr('transform', d => `translate(${d.x},${d.y})`));
 }
 
+/* ── Toggle style ── */
+btnSolid.addEventListener('click', () => {
+    currentStyle = 'solid';
+    btnSolid.classList.add('active');
+    btnCrypto.classList.remove('active');
+    if (lastBubbleData) drawBubbles(lastBubbleData);
+});
+
+btnCrypto.addEventListener('click', () => {
+    currentStyle = 'crypto';
+    btnCrypto.classList.add('active');
+    btnSolid.classList.remove('active');
+    if (lastBubbleData) drawBubbles(lastBubbleData);
+});
+
+/* ── Load data ── */
 async function loadLatestBubbles(){
     bocDateLabel.textContent = 'Variations du jour · Chargement en cours…';
 
-    // Afficher loader
     bubblesDiv.querySelectorAll('svg').forEach(s => s.remove());
     if (!loader.parentNode) bubblesDiv.prepend(loader);
     loader.style.display = 'flex';
@@ -591,12 +723,10 @@ document.addEventListener('fullscreenchange', () => {
     }
 });
 
-/* Reload + resize */
 reloadBtn?.addEventListener('click', loadLatestBubbles);
 window.addEventListener('resize', () => { if(lastBubbleData) drawBubbles(lastBubbleData); });
 window.addEventListener('orientationchange', () => { if(lastBubbleData) drawBubbles(lastBubbleData); });
 
-/* Init */
 loadLatestBubbles();
 
 /* Scroll reveal */

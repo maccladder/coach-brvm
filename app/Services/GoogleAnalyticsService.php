@@ -170,6 +170,156 @@ class GoogleAnalyticsService
         }
     }
 
+    /** 📅 Visiteurs jour par jour sur les 7 derniers jours */
+    public function last7DaysTimeline(): array
+    {
+        try {
+            $response = $this->client->runReport(new RunReportRequest([
+                'property'    => $this->property,
+                'date_ranges' => [
+                    new DateRange(['start_date' => '6daysAgo', 'end_date' => 'today']),
+                ],
+                'dimensions' => [
+                    new Dimension(['name' => 'date']),
+                ],
+                'metrics' => [
+                    new Metric(['name' => 'activeUsers']),
+                ],
+            ]));
+
+            $rows = $response->getRows();
+            if (!$rows || count($rows) === 0) return [];
+
+            $data = [];
+            foreach ($rows as $row) {
+                $rawDate = $row->getDimensionValues()[0]->getValue() ?? '';
+                $users   = (int) ($row->getMetricValues()[0]->getValue() ?? 0);
+                // Format YYYYMMDD → DD/MM
+                if (strlen($rawDate) === 8) {
+                    $label = substr($rawDate, 6, 2) . '/' . substr($rawDate, 4, 2);
+                } else {
+                    $label = $rawDate;
+                }
+                $data[] = ['date' => $label, 'users' => $users];
+            }
+
+            // Trier par date brute croissante
+            usort($data, fn($a, $b) => strcmp($a['date'], $b['date']));
+
+            return $data;
+        } catch (Throwable $e) {
+            return [];
+        }
+    }
+
+    /** 📱 Répartition par type d'appareil (7 derniers jours) */
+    public function deviceCategories(): array
+    {
+        try {
+            $response = $this->client->runReport(new RunReportRequest([
+                'property'    => $this->property,
+                'date_ranges' => [
+                    new DateRange(['start_date' => '7daysAgo', 'end_date' => 'today']),
+                ],
+                'dimensions' => [
+                    new Dimension(['name' => 'deviceCategory']),
+                ],
+                'metrics' => [
+                    new Metric(['name' => 'activeUsers']),
+                ],
+            ]));
+
+            $rows = $response->getRows();
+            if (!$rows || count($rows) === 0) return [];
+
+            $data = [];
+            foreach ($rows as $row) {
+                $device = $row->getDimensionValues()[0]->getValue() ?? '';
+                $users  = (int) ($row->getMetricValues()[0]->getValue() ?? 0);
+                if ($device !== '') {
+                    $data[] = ['device' => $device, 'users' => $users];
+                }
+            }
+
+            return $data;
+        } catch (Throwable $e) {
+            return [];
+        }
+    }
+
+    /** 🔗 Sources de trafic (7 derniers jours) */
+    public function trafficSources(int $limit = 6): array
+    {
+        try {
+            $response = $this->client->runReport(new RunReportRequest([
+                'property'    => $this->property,
+                'date_ranges' => [
+                    new DateRange(['start_date' => '7daysAgo', 'end_date' => 'today']),
+                ],
+                'dimensions' => [
+                    new Dimension(['name' => 'sessionDefaultChannelGroup']),
+                ],
+                'metrics' => [
+                    new Metric(['name' => 'sessions']),
+                    new Metric(['name' => 'activeUsers']),
+                ],
+                'limit' => $limit,
+            ]));
+
+            $rows = $response->getRows();
+            if (!$rows || count($rows) === 0) return [];
+
+            $data = [];
+            foreach ($rows as $row) {
+                $channel  = $row->getDimensionValues()[0]->getValue() ?? '';
+                $sessions = (int) ($row->getMetricValues()[0]->getValue() ?? 0);
+                $users    = (int) ($row->getMetricValues()[1]->getValue() ?? 0);
+                if ($channel !== '') {
+                    $data[] = ['channel' => $channel, 'sessions' => $sessions, 'users' => $users];
+                }
+            }
+
+            return $data;
+        } catch (Throwable $e) {
+            return [];
+        }
+    }
+
+    /** 📆 Utilisateurs sur 30 jours + nouveaux utilisateurs */
+    public function monthStats(): array
+    {
+        try {
+            $response = $this->client->runReport(new RunReportRequest([
+                'property'    => $this->property,
+                'date_ranges' => [
+                    new DateRange(['start_date' => '29daysAgo', 'end_date' => 'today']),
+                ],
+                'metrics' => [
+                    new Metric(['name' => 'activeUsers']),
+                    new Metric(['name' => 'newUsers']),
+                    new Metric(['name' => 'sessions']),
+                    new Metric(['name' => 'bounceRate']),
+                ],
+            ]));
+
+            $rows = $response->getRows();
+            if (!$rows || count($rows) === 0) {
+                return ['users30' => 0, 'newUsers30' => 0, 'sessions30' => 0, 'bounceRate' => 0.0];
+            }
+
+            $mv = $rows[0]->getMetricValues();
+
+            return [
+                'users30'    => (int)   ($mv[0]->getValue() ?? 0),
+                'newUsers30' => (int)   ($mv[1]->getValue() ?? 0),
+                'sessions30' => (int)   ($mv[2]->getValue() ?? 0),
+                'bounceRate' => round((float) ($mv[3]->getValue() ?? 0) * 100, 1),
+            ];
+        } catch (Throwable $e) {
+            return ['users30' => 0, 'newUsers30' => 0, 'sessions30' => 0, 'bounceRate' => 0.0];
+        }
+    }
+
     /**
      * Helper: récupère proprement une valeur métrique [rowIndex][metricIndex]
      */
