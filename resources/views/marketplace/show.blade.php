@@ -579,6 +579,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Facebook Pixel
     if (typeof fbq !== 'function') return;
+
+    // ViewContent au chargement de la page produit
     fbq('track', 'ViewContent', {
         content_type: 'product',
         content_ids: ['{{ $product->id }}'],
@@ -588,19 +590,27 @@ document.addEventListener('DOMContentLoaded', function () {
         currency: 'XOF'
     });
 
-    document.querySelectorAll('.js-pay-btn').forEach(function(btn){
-        btn.addEventListener('click', function(){
+    // ── InitiateCheckout au clic sur "Payer maintenant" / "Débloquer" ──
+    // e.preventDefault() bloque la redirection immédiate vers Paystack
+    // setTimeout de 400ms laisse le temps au pixel d'envoyer l'événement à Meta
+    // puis form.submit() déclenche la redirection normalement
+    document.querySelectorAll('.js-pay-btn').forEach(function(btn) {
+        btn.addEventListener('click', function(e) {
             if (btn.dataset.fired === '1') return;
             btn.dataset.fired = '1';
+            e.preventDefault();
+            var form = btn.closest('form');
             fbq('track', 'InitiateCheckout', {
                 content_type: 'product',
                 content_ids: [btn.dataset.mpId],
                 value: parseInt(btn.dataset.mpPrice || '0', 10) || 0,
                 currency: 'XOF'
             });
+            setTimeout(function() { form.submit(); }, 400);
         });
     });
 
+    // Purchase après retour Paystack (via session Laravel)
     @if(session()->has('fb_purchase'))
         fbq('track', 'Purchase', @json(session('fb_purchase')));
     @endif

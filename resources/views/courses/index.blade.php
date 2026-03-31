@@ -74,7 +74,13 @@
                                     @else
                                         <form method="POST" action="{{ route('courses.buy.paystack',$course) }}" class="js-paystack-form">
                                             @csrf
-                                            <button type="submit" class="cb-btn-gold js-init-checkout" data-course-id="{{ $course->id }}" data-course-title="{{ e($course->title) }}" data-course-price="{{ (int)$course->price_fcfa }}">Payer</button>
+                                            <button type="submit"
+                                                    class="cb-btn-gold js-init-checkout"
+                                                    data-course-id="{{ $course->id }}"
+                                                    data-course-title="{{ e($course->title) }}"
+                                                    data-course-price="{{ (int)$course->price_fcfa }}">
+                                                Payer
+                                            </button>
                                         </form>
                                     @endif
                                 @else
@@ -94,7 +100,39 @@
 
 @push('scripts')
 <script>
-document.addEventListener('submit',function(e){const form=e.target.closest('.js-paystack-form');if(!form)return;const btn=form.querySelector('.js-init-checkout');if(!btn||typeof fbq!=='function')return;fbq('track','InitiateCheckout',{content_type:'product',content_ids:[String(btn.dataset.courseId)],content_name:btn.dataset.courseTitle||'',value:Number(btn.dataset.coursePrice||0),currency:'XOF',num_items:1});},true);
-document.querySelectorAll('.cbr').forEach(el=>{new IntersectionObserver(([e])=>{if(e.isIntersecting)el.classList.add('on');},{threshold:.06}).observe(el);});
+document.addEventListener('DOMContentLoaded', function () {
+
+    // Scroll reveal
+    document.querySelectorAll('.cbr').forEach(function(el) {
+        new IntersectionObserver(function([e]) {
+            if (e.isIntersecting) el.classList.add('on');
+        }, { threshold: .06 }).observe(el);
+    });
+
+    // ── InitiateCheckout au clic sur "Payer" ──
+    // e.preventDefault() bloque la redirection immédiate vers Paystack
+    // setTimeout 400ms laisse le temps au pixel d'envoyer l'événement à Meta
+    // puis form.submit() déclenche la redirection normalement
+    document.querySelectorAll('.js-init-checkout').forEach(function(btn) {
+        btn.addEventListener('click', function(e) {
+            if (btn.dataset.fired === '1') return;
+            btn.dataset.fired = '1';
+            e.preventDefault();
+            var form = btn.closest('form');
+            if (typeof fbq === 'function') {
+                fbq('track', 'InitiateCheckout', {
+                    content_type: 'product',
+                    content_ids: [String(btn.dataset.courseId)],
+                    content_name: btn.dataset.courseTitle || '',
+                    value: Number(btn.dataset.coursePrice || 0),
+                    currency: 'XOF',
+                    num_items: 1
+                });
+            }
+            setTimeout(function() { form.submit(); }, 400);
+        });
+    });
+
+});
 </script>
 @endpush
