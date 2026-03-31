@@ -10,6 +10,7 @@ use App\Models\User;
 use App\Notifications\UserNewMarketplaceContentNotification;
 use App\Notifications\VendorProductReviewedNotification;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Imagick;
@@ -330,20 +331,19 @@ class MarketplaceProductAdminController extends Controller
 
     private function generatePdfMetaAndPreviews(MarketplaceProduct $product, MarketplaceAsset $fileAsset, bool $wipeOld = false): void
     {
+        if (!$fileAsset->path) return;
+
+        $disk    = 'public';
+        $pdfPath = Storage::disk($disk)->path($fileAsset->path);
+
+        if (!file_exists($pdfPath)) return;
+
+        if ($wipeOld) {
+            Storage::disk($disk)->deleteDirectory("marketplace/previews/{$product->id}");
+        }
+
+        // 1) pages_count
         try {
-            if (!$fileAsset->path) return;
-
-            $disk = 'public';
-            $pdfPath = Storage::disk($disk)->path($fileAsset->path);
-
-            if (!file_exists($pdfPath)) return;
-
-            if ($wipeOld) {
-                // supprimer anciens previews fichiers p1..p5
-                Storage::disk($disk)->deleteDirectory("marketplace/previews/{$product->id}");
-            }
-
-            // 1) pages_count
             $im = new \Imagick();
             $im->pingImage($pdfPath);
             $pages = (int) $im->getNumberImages();
@@ -352,12 +352,17 @@ class MarketplaceProductAdminController extends Controller
 
             if ($pages <= 0) $pages = null;
             $product->update(['pages_count' => $pages]);
+        } catch (\Throwable $e) {
+            Log::warning('PDF meta (pages_count) failed: ' . $e->getMessage(), ['product_id' => $product->id]);
+            $pages = null;
+        }
 
-            // 2) previews p1..p5
-            $max = min(5, (int) ($pages ?: 5));
-            Storage::disk($disk)->makeDirectory("marketplace/previews/{$product->id}");
+        // 2) previews p1..p5 — chaque page est indépendante
+        $max = min(5, (int) ($pages ?: 5));
+        Storage::disk($disk)->makeDirectory("marketplace/previews/{$product->id}");
 
-            for ($i = 0; $i < $max; $i++) {
+        for ($i = 0; $i < $max; $i++) {
+            try {
                 $img = new \Imagick();
                 $img->setResolution(150, 150);
                 $img->readImage($pdfPath . '[' . $i . ']');
@@ -365,7 +370,6 @@ class MarketplaceProductAdminController extends Controller
                 $img->setImageCompressionQuality(85);
                 $img->stripImage();
 
-                // largeur max 1200
                 if ($img->getImageWidth() > 1200) {
                     $img->resizeImage(1200, 0, \Imagick::FILTER_LANCZOS, 1);
                 }
@@ -375,11 +379,9 @@ class MarketplaceProductAdminController extends Controller
 
                 $img->clear();
                 $img->destroy();
+            } catch (\Throwable $e) {
+                Log::warning("PDF preview page {$i} failed: " . $e->getMessage(), ['product_id' => $product->id]);
             }
-        } catch (\Throwable $e) {
-            Log::warning('PDF preview generation failed: '.$e->getMessage(), [
-                'product_id' => $product->id ?? null,
-            ]);
         }
     }
 

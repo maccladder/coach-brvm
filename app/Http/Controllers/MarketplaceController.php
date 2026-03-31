@@ -71,14 +71,13 @@ public function show(string $slug)
     }
 
     // ✅ URLs d’aperçu PDF (p1..p5) - seulement book et seulement si pas acheté
+    // On vérifie l’existence des fichiers directement (indépendant de pages_count)
     $previewUrls = [];
-    if ($product->type === 'book' && !$isOwned) {
-        $max = min(5, (int) ($product->pages_count ?? 0));
-
-        for ($i = 1; $i <= $max; $i++) {
+    if ($product->type === ‘book’ && !$isOwned) {
+        for ($i = 1; $i <= 5; $i++) {
             $path = "marketplace/previews/{$product->id}/p{$i}.jpg";
-            if (Storage::disk('public')->exists($path)) {
-                $previewUrls[] = asset('storage/' . $path);
+            if (Storage::disk(‘public’)->exists($path)) {
+                $previewUrls[] = asset(‘storage/’ . $path);
             }
         }
     }
