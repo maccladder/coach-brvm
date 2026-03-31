@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\NewProductPendingMail;
 use App\Models\AdminNotification;
 use App\Models\MarketplaceCategory;
 use App\Models\MarketplaceProduct;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 
 class VendorProductController extends Controller
@@ -289,7 +291,7 @@ class VendorProductController extends Controller
         $product->admin_note = null;
         $product->save();
 
-        // notif admin
+        // notif admin (base de données)
         if (class_exists(AdminNotification::class)) {
             AdminNotification::create([
                 'type'    => 'product_pending',
@@ -299,6 +301,10 @@ class VendorProductController extends Controller
                 'read_at' => null,
             ]);
         }
+
+        // notif admin (email)
+        Mail::to(['maccladder@gmail.com', 'ghislainkouadiodjaha@gmail.com'])
+            ->send(new NewProductPendingMail($product));
 
         return redirect()->route('vendor.products.index')
             ->with('success', '✅ Produit soumis. En attente de validation admin.');
