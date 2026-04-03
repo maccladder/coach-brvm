@@ -10,7 +10,11 @@
     <title>🎮 {{ $product->title }} — Coach BRVM</title>
     <style>
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-        html, body { background: #060910; height: 100%; overflow: hidden; font-family: 'Syne', system-ui, sans-serif; }
+        html { height: 100%; height: -webkit-fill-available; }
+        body { background: #060910; height: 100%; overflow: hidden;
+               /* Bloque le scroll rebond iOS Safari */
+               position: fixed; width: 100%;
+               font-family: 'Syne', system-ui, sans-serif; }
 
         /* ── Barre de contrôle ── */
         #game-bar {
@@ -80,6 +84,22 @@
 
         #saving-indicator { position: fixed; top: 50px; right: 12px; z-index: 150; font-size: 10px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; color: #6B7590; opacity: 0; transition: opacity .3s; }
         #saving-indicator.show { opacity: 1; }
+
+        /* ── Mobile : le jeu affiche déjà son propre écran de fin ── */
+        /* Détection touch (plus fiable que max-width) */
+        @media (hover: none) and (pointer: coarse) {
+            #score-toast      { display: none !important; }
+            #saving-indicator { display: none !important; }
+            #game-bar { height: 36px; padding: 0 10px; }
+            .game-bar-title { display: none; }
+            #game-frame { top: 36px; height: calc(100% - 36px); }
+            #bar-toggle.up { top: 36px; }
+        }
+        /* Fallback largeur écran */
+        @media (max-width: 900px) {
+            #score-toast      { display: none !important; }
+            #saving-indicator { display: none !important; }
+        }
     </style>
 </head>
 <body>
