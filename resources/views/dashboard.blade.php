@@ -82,9 +82,14 @@
             <div class="col-md-4 cbr cbr3">
                 <div class="dash-card">
                     <span class="dash-card-icon">📄</span>
-                    <div class="dash-card-title">Mes analyses</div>
-                    <div class="dash-card-desc">BOC & états financiers commandés. Disponible prochainement.</div>
-                    <span class="dash-card-btn disabled">Bientôt disponible</span>
+                    <div class="dash-card-title">
+                        Mes analyses
+                        @if(!empty($myAnalysesCount) && $myAnalysesCount > 0)
+                            <span style="font-size:.75rem;background:var(--cb-gold);color:#060910;border-radius:999px;padding:1px 8px;margin-left:6px;font-weight:700;">{{ $myAnalysesCount }}</span>
+                        @endif
+                    </div>
+                    <div class="dash-card-desc">BOC & états financiers commandés et analysés par l'IA.</div>
+                    <a href="{{ route('client-financials.index') }}" class="dash-card-btn">Ouvrir →</a>
                 </div>
             </div>
             <div class="col-md-4 cbr cbr4">

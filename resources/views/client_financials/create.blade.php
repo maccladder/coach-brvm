@@ -7,8 +7,8 @@
             <h2 class="mb-3">Analyser des états financiers</h2>
             <p class="text-muted">
                 Uploade les états financiers de ton entreprise. Après le paiement,
-                l’IA ressortira les points clés : chiffre d’affaires, bénéfice net,
-                capacité d’autofinancement, dettes et trésorerie.
+                l'IA ressortira les points clés : chiffre d'affaires, bénéfice net,
+                capacité d'autofinancement, dettes et trésorerie.
             </p>
 
             @if ($errors->any())
@@ -55,20 +55,29 @@
                            value="{{ old('financial_date') }}">
                 </div>
 
+                @guest
+                <div class="mb-3">
+                    <label class="form-label">Votre adresse email *</label>
+                    <input type="email" name="client_email" class="form-control"
+                           placeholder="vous@exemple.com"
+                           value="{{ old('client_email') }}" required>
+                    <div class="form-text">Nécessaire pour le paiement et le suivi de votre analyse.</div>
+                </div>
+                @endguest
+
                 <div class="mb-4">
-                    <label class="form-label">Fichier des états financiers (PDF, Excel, etc.) *</label>
-                    <input type="file" name="file" class="form-control" required>
-                    <div class="form-text">
-                        Taille max 10 Mo.
-                    </div>
+                    <label class="form-label">Fichier des états financiers (PDF, Excel) *</label>
+                    <input type="file" name="file" class="form-control"
+                           accept=".pdf,.xlsx,.xls,.csv" required>
+                    <div class="form-text">Formats acceptés : PDF, Excel. Taille max 10 Mo.</div>
                 </div>
 
                 <div class="d-flex justify-content-between align-items-center">
                     <div class="text-muted small">
-                        Montant du test : {{ env('CINETPAY_TEST_AMOUNT', 1000) }} FCFA
+                        Montant : {{ env('PAYSTACK_PRICE_FINANCIAL', 1000) }} FCFA
                     </div>
                     <button type="submit" class="btn btn-primary">
-                        Payer et lancer l’analyse
+                        Payer et lancer l'analyse
                     </button>
                 </div>
             </form>

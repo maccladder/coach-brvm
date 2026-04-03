@@ -394,7 +394,7 @@ class MarketplaceProductAdminController extends Controller
    public function approve(Request $request, MarketplaceProduct $product)
 {
     if ($product->status !== 'pending') {
-        return back()->with('warning', 'Ce produit n’est pas en attente.');
+        return back()->with('warning', "Ce produit n'est pas en attente.");
     }
 
     $product->load(['assets', 'vendor']);
@@ -406,7 +406,7 @@ class MarketplaceProductAdminController extends Controller
 
     // ✅ Sécurité PDF/ZIP : on exige un fichier
     if (!$product->assets->firstWhere('kind', 'file')) {
-        return back()->with('warning', 'Impossible d’approuver: aucun fichier attaché (PDF/ZIP).');
+        return back()->with('warning', "Impossible d'approuver: aucun fichier attaché (PDF/ZIP).");
     }
 
     // ✅ Publication (PDF/ZIP)
@@ -426,7 +426,7 @@ class MarketplaceProductAdminController extends Controller
             productId: $product->id,
             productTitle: $product->title,
             status: 'approved',
-            message: "🎉 Félicitations ! Ton produit « {$product->title} » a été approuvé par l’admin et est maintenant visible sur la marketplace.",
+            message: "🎉 Félicitations ! Ton produit « {$product->title} » a été approuvé par l'admin et est maintenant visible sur la marketplace.",
             url: $publicUrl
         ));
     }
@@ -463,7 +463,7 @@ class MarketplaceProductAdminController extends Controller
     public function reject(Request $request, MarketplaceProduct $product)
 {
     if ($product->status !== 'pending') {
-        return back()->with('warning', 'Ce produit n’est pas en attente.');
+        return back()->with('warning', "Ce produit n'est pas en attente.");
     }
 
     $data = $request->validate([
@@ -486,7 +486,7 @@ class MarketplaceProductAdminController extends Controller
             productId: $product->id,
             productTitle: $product->title,
             status: 'rejected',
-            message: "⛔ Ton produit « {$product->title} » a été rejeté par l’admin.\nMotif : {$data['admin_note']}\n👉 Corrige puis soumets à nouveau.",
+            message: "⛔ Ton produit « {$product->title} » a été rejeté par l'admin.\nMotif : {$data['admin_note']}\n👉 Corrige puis soumets à nouveau.",
             url: route('vendor.products.edit', $product)
         ));
     }
@@ -516,7 +516,7 @@ public function publishForm(MarketplaceProduct $product)
 
     if ($product->status !== 'pending') {
         return redirect()->route('admin.marketplace.show', $product)
-            ->with('warning', 'Ce produit n’est pas en attente.');
+            ->with('warning', "Ce produit n'est pas en attente.");
     }
 
     // ✅ il faut au moins le mp4 du vendeur (asset file)
@@ -541,7 +541,7 @@ public function publish(Request $request, MarketplaceProduct $product)
     }
 
     if ($product->status !== 'pending') {
-        return back()->with('warning', 'Ce produit n’est pas en attente.');
+        return back()->with('warning', "Ce produit n'est pas en attente.");
     }
 
     // ✅ doit avoir le mp4 vendeur pour inspection
@@ -558,7 +558,7 @@ public function publish(Request $request, MarketplaceProduct $product)
 
     $videoId = trim((string) $data['cloudflare_video_id']);
 
-    // ✅ créer/maj l’asset stream
+    // ✅ créer/maj l'asset stream
     $streamAsset = $product->assets()->where('kind', 'stream')->first();
     if ($streamAsset) {
         $streamAsset->update([

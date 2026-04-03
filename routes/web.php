@@ -163,11 +163,8 @@ Route::prefix('client-financials')->name('client-financials.')->group(function (
     Route::get('/create', [ClientFinancialController::class, 'create'])->name('create');
     Route::post('/', [ClientFinancialController::class, 'store'])->name('store');
 
-    Route::match(['GET', 'POST'], '/payment/return/{clientFinancial}', [ClientFinancialController::class, 'paymentReturn'])
-        ->name('payment.return');
-
-    Route::post('/payment/notify', [ClientFinancialController::class, 'paymentNotify'])
-        ->name('payment.notify');
+    Route::get('/payment/callback', [ClientFinancialController::class, 'paystackCallback'])
+        ->name('payment.callback');
 
     Route::get('/{clientFinancial}/processing', [ClientFinancialController::class, 'processing'])->name('processing');
     Route::get('/{clientFinancial}/status', [ClientFinancialController::class, 'status'])->name('status');
@@ -482,7 +479,10 @@ Route::get('/aide/glossaire', [GlossaireController::class, 'index'])
 
 
 Route::get('/dashboard', function () {
-    return view('dashboard');
+    $myAnalysesCount = \App\Models\ClientFinancial::where('user_id', auth()->id())
+        ->whereIn('status', ['paid', 'published'])
+        ->count();
+    return view('dashboard', compact('myAnalysesCount'));
 })->middleware(['auth'])->name('dashboard');
 
 
