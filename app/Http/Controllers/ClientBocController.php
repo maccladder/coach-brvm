@@ -28,7 +28,7 @@ class ClientBocController extends Controller
     }
 
     /**
-     * Formulaire d’upload d’un BOC client.
+     * Formulaire d\'upload d\'un BOC client.
      */
     public function create()
     {
@@ -54,7 +54,7 @@ class ClientBocController extends Controller
     // 1) Stocker le fichier BOC
     $storedPath = $file->store('uploads/client_bocs');
 
-    // 2) Créer l’enregistrement BOC en statut "pending"
+    // 2) Créer l\'enregistrement BOC en statut "pending"
     $clientBoc = new ClientBoc();
     $clientBoc->title             = $request->input('title') ?: 'BOC client du '.$bocDate;
     $clientBoc->boc_date          = $bocDate;
@@ -80,12 +80,12 @@ class ClientBocController extends Controller
     ]);
 
     if (!$paymentUrl) {
-        // Échec d’init de paiement
+        // Échec d\'init de paiement
         $clientBoc->status = 'failed';
         $clientBoc->save();
 
         return back()
-            ->with('error', 'Impossible d’initier le paiement. Réessaie plus tard.');
+            ->with('error', 'Impossible d\'initier le paiement. Réessaie plus tard.');
     }
 
     // 5) Rediriger le client vers la page de paiement CinetPay
@@ -100,7 +100,7 @@ private function generateAnalysisForBoc(
 ): void {
     $bocDate = $clientBoc->boc_date->toDateString();
 
-    // 1) Construire les données pour l’IA
+    // 1) Construire les données pour l\'IA
     $analyses = [[
         'title'     => $clientBoc->title,
         'file_path' => $clientBoc->stored_path,
@@ -112,7 +112,7 @@ private function generateAnalysisForBoc(
     $interpretation = $ai->interpret($analyses, $statements, $bocDate);
     $clientBoc->interpreted_markdown = $interpretation;
 
-    // 3) Texte raccourci pour l’avatar
+    // 3) Texte raccourci pour l\'avatar
     $plain = $interpretation ?? '';
     $plain = preg_replace('/^\s*#+\s*/m', '', $plain);
     $plain = preg_replace('/^\s*[-*]\s+/m', '', $plain);
@@ -131,8 +131,8 @@ Bonjour, je suis ton coach BRVM.
 Voici les principaux enseignements de ton BOC du {$bocDate} :
 {$mainSummary}
 
-N’oublie pas : ceci n’est pas un conseil d’investissement personnalisé.
-Analyse toujours toi-même les entreprises et n’investis que l’argent que tu peux te permettre de perdre.
+N\'oublie pas : ceci n\'est pas un conseil d\'investissement personnalisé.
+Analyse toujours toi-même les entreprises et n\'investis que l\'argent que tu peux te permettre de perdre.
 TXT;
 
     $textForAvatar = mb_substr($textForAvatar, 0, 900);
@@ -166,7 +166,7 @@ public function latestPublic()
     if (!$boc) {
         return redirect()->route('landing')->with(
             'error',
-            "La dernière BOC disponible (J-1) n'est pas encore publiée."
+            "La dernière BOC disponible (J-1) n\'est pas encore publiée."
         );
     }
 
@@ -183,7 +183,7 @@ public function paymentReturn(
 
     if ($status === 'ACCEPTED') {
 
-        // 2) Marquer le BOC comme "paid" si ce n'est pas déjà fait
+        // 2) Marquer le BOC comme "paid" si ce n\'est pas déjà fait
         if ($clientBoc->status !== 'paid') {
             $clientBoc->status = 'paid';
             $clientBoc->save();
@@ -311,8 +311,8 @@ public function bubbles(ClientBoc $clientBoc)
     AvatarService $avatar
 ) {
     // ✅ On génère si :
-    // - c'est un BOC payé (ancienne logique)
-    // - OU c'est un BOC public gratuit
+    // - c\'est un BOC payé (ancienne logique)
+    // - OU c\'est un BOC public gratuit
     // - OU il est déjà "published" mais pas encore interprété (ex: ton cas)
     $shouldGenerate = (
         empty($clientBoc->interpreted_markdown)
@@ -366,7 +366,7 @@ public function bubbles(ClientBoc $clientBoc)
 // pdf
 public function downloadPdf(Request $request, ClientBoc $clientBoc)
 {
-    // 1) Récupérer l’image base64 envoyée par le front
+    // 1) Récupérer l\'image base64 envoyée par le front
     $chartBase64 = $request->input('chart_image');
 
     $chartPath = null;
@@ -388,7 +388,7 @@ public function downloadPdf(Request $request, ClientBoc $clientBoc)
     // 3) Préparer le contenu texte
     $markdown = $clientBoc->interpreted_markdown ?? 'Analyse non disponible.';
 
-    // 4) Générer le PDF à partir d’une vue Blade
+    // 4) Générer le PDF à partir d\'une vue Blade
     $pdf = Pdf::loadView('client_bocs.pdf', [
         'boc'       => $clientBoc,
         'markdown'  => $markdown,

@@ -198,6 +198,7 @@
     .mp-chip-book     { background:rgba(99,179,237,.08);  color:#63B3ED; border:1px solid rgba(99,179,237,.2); }
     .mp-chip-video    { background:rgba(252,129,74,.08);  color:#FC814A; border:1px solid rgba(252,129,74,.2); }
     .mp-chip-software { background:rgba(160,120,255,.08); color:#B090FF; border:1px solid rgba(160,120,255,.2); }
+    .mp-chip-game     { background:rgba(120,80,255,.08);  color:#A070FF; border:1px solid rgba(120,80,255,.2); }
     .mp-chip-cat      { background:rgba(255,255,255,.05); color:#6B7590; border:1px solid rgba(255,255,255,.08); }
 
     .mp-card-title {
@@ -363,6 +364,7 @@
                         <option value="book"     @selected(request('type')==='book')>📘 Livre (PDF)</option>
                         <option value="video"    @selected(request('type')==='video')>🎬 Vidéo</option>
                         <option value="software" @selected(request('type')==='software')>🧩 Logiciel</option>
+                        <option value="game"     @selected(request('type')==='game')>🎮 Jeu</option>
                     </select>
                 </div>
                 <div class="col-md-3">
@@ -408,12 +410,14 @@
                             'book'     => '📘 Livre PDF',
                             'video'    => '🎬 Vidéo',
                             'software' => '🧩 Logiciel',
+                            'game'     => '🎮 Jeu',
                             default    => ucfirst($p->type),
                         };
                         $chipClass = match($p->type) {
                             'book'     => 'mp-chip-book',
                             'video'    => 'mp-chip-video',
                             'software' => 'mp-chip-software',
+                            'game'     => 'mp-chip-game',
                             default    => 'mp-chip-cat',
                         };
                         $isOwnedCard = auth()->check()
@@ -473,7 +477,11 @@
                                     </div>
                                     <div class="mp-card-actions">
                                         @if($isOwnedCard)
-                                            @if($p->type === 'video')
+                                            @if($p->type === 'game')
+                                                <a href="{{ route('my.products.play', $p) }}" class="mp-btn-sm mp-btn-dl">
+                                                    🎮 Jouer
+                                                </a>
+                                            @elseif($p->type === 'video')
                                                 <a href="{{ route('my.products.watch', $p) }}" class="mp-btn-sm mp-btn-dl">
                                                     <i class="bi bi-play-circle"></i> Voir
                                                 </a>

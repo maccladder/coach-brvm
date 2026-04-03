@@ -329,9 +329,10 @@
                             <li><a class="dropdown-item" href="{{ route('courses.my') }}">🎓 Mes cours</a></li>
                             <li><a class="dropdown-item" href="{{ route('marketplace.index') }}">🛍️ Marketplace</a></li>
                             <li><a class="dropdown-item" href="{{ route('my.products') }}">🧾 Mes produits</a></li>
+                            <li><a class="dropdown-item" href="{{ route('my.products') }}?type=game">🎮 Mes jeux</a></li>
                             <li><a class="dropdown-item" href="{{ route('documents.mine') }}">🧾 Mes documents</a></li>
                             <li><a class="dropdown-item" href="{{ route('wallet.index') }}">💼 Mon portefeuille</a></li>
-                            <li><a class="dropdown-item" href="#">📄 Mes analyses</a></li>
+                            <li><a class="dropdown-item" href="{{ route('client-financials.index') }}">📄 Mes analyses</a></li>
                             @php
                                 $isVendor = (bool)(auth()->user()->is_vendor ?? false);
                                 $viewMode = session('view_mode', 'user');

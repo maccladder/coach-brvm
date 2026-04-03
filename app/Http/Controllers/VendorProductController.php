@@ -33,8 +33,37 @@ class VendorProductController extends Controller
             'book'     => 'PDF',
             'software' => 'Logiciel',
             'video'    => 'Vidéo',
+            'game'     => 'Jeu HTML',
             default    => strtoupper($type),
         };
+    }
+
+    /**
+     * Sanitise le HTML d'un jeu : supprime les <script src="http..."> externes
+     * et les <iframe src="http..."> imbriquées. Le sandbox de l'iframe parent
+     * assure la protection principale.
+     */
+    private function sanitizeGameHtml(string $html): string
+    {
+        // Supprimer <script src="https?://..."> (scripts externes)
+        $html = preg_replace(
+            '/<script\b[^>]*\bsrc\s*=\s*["\']https?:\/\/[^"\']*["\'][^>]*>.*?<\/script>/si',
+            '',
+            $html
+        );
+        // Supprimer <link rel="stylesheet" href="https?://..."> externes
+        $html = preg_replace(
+            '/<link\b[^>]*\bhref\s*=\s*["\']https?:\/\/[^"\']*["\'][^>]*\/?>/si',
+            '',
+            $html
+        );
+        // Supprimer les iframes imbriquées pointant vers des URLs externes
+        $html = preg_replace(
+            '/<iframe\b[^>]*\bsrc\s*=\s*["\']https?:\/\/[^"\']*["\'][^>]*>.*?<\/iframe>/si',
+            '',
+            $html
+        );
+        return $html;
     }
 
     public function index(Request $request)
@@ -57,11 +86,11 @@ class VendorProductController extends Controller
     {
         $categories = MarketplaceCategory::orderBy('name')->get();
 
-        // ✅ Harmonisé avec Admin: book/video/software
         $types = [
             'book'     => 'Livre (PDF)',
             'video'    => 'Vidéo',
             'software' => 'Logiciel (ZIP/RAR)',
+            'game'     => 'Jeu (HTML)',
         ];
 
         return view('vendor.products.create', compact('categories', 'types'));
@@ -72,19 +101,20 @@ class VendorProductController extends Controller
         $data = $request->validate([
             'category_id'      => ['required','integer','exists:marketplace_categories,id'],
             'title'            => ['required','string','max:160'],
-            'type'             => ['required','in:book,video,software'],
+            'type'             => ['required','in:book,video,software,game'],
             'description'      => ['nullable','string'],
             'support_whatsapp' => ['nullable','string','max:30'],
             'price'            => ['required','numeric','min:0'],
             'cover_image'      => ['nullable','image','max:' . self::MAX_COVER_KB],
 
-            // fichier produit (optionnel au draft)
+            // fichier produit (optionnel au draft, sauf game qui passe par game_html_file)
             'file'             => ['nullable','file'],
+            'game_html_file'   => ['nullable','file','mimes:html','max:10240'], // 10 MB max
         ]);
 
         $data['support_whatsapp'] = $this->cleanWhatsapp($data['support_whatsapp'] ?? null);
 
-        // ✅ Validation conditionnelle du fichier selon type (si fourni)
+        // Validation conditionnelle du fichier selon type (si fourni)
         if ($request->hasFile('file')) {
             if ($data['type'] === 'book') {
                 $request->validate([
@@ -115,6 +145,13 @@ class VendorProductController extends Controller
             $coverPath = $request->file('cover_image')->store('marketplace/covers', 'public');
         }
 
+        // Lire et sanitiser le HTML du jeu si fourni
+        $gameHtml = null;
+        if ($data['type'] === 'game' && $request->hasFile('game_html_file')) {
+            $rawHtml = file_get_contents($request->file('game_html_file')->getRealPath());
+            $gameHtml = $this->sanitizeGameHtml($rawHtml);
+        }
+
         // create product (draft)
         $product = MarketplaceProduct::create([
             'user_id'          => $request->user()->id,
@@ -128,12 +165,11 @@ class VendorProductController extends Controller
             'cover_image_path' => $coverPath,
             'status'           => 'draft',
             'is_featured'      => false,
-
-            // ✅ colonne unifiée
             'pages_count'      => null,
+            'game_html'        => $gameHtml,
         ]);
 
-        // asset si fichier uploadé
+        // asset si fichier uploadé (book / software / video)
         if ($request->hasFile('file')) {
             $uploadedPath = $request->file('file')->store('marketplace/files', 'public');
 
@@ -142,7 +178,6 @@ class VendorProductController extends Controller
                 'path'            => $uploadedPath,
                 'url'             => null,
                 'label'           => $this->typeLabel($product->type),
-                // vidéo: pas téléchargeable pour acheteurs
                 'is_downloadable' => $product->type !== 'video',
             ]);
         }
@@ -162,6 +197,7 @@ class VendorProductController extends Controller
             'book'     => 'Livre (PDF)',
             'video'    => 'Vidéo',
             'software' => 'Logiciel (ZIP/RAR)',
+            'game'     => 'Jeu (HTML)',
         ];
 
         return view('vendor.products.edit', compact('product', 'categories', 'types'));
@@ -180,12 +216,13 @@ class VendorProductController extends Controller
         $data = $request->validate([
             'category_id'      => ['required','integer','exists:marketplace_categories,id'],
             'title'            => ['required','string','max:160'],
-            'type'             => ['required','in:book,video,software'],
+            'type'             => ['required','in:book,video,software,game'],
             'description'      => ['nullable','string'],
             'support_whatsapp' => ['nullable','string','max:30'],
             'price'            => ['required','numeric','min:0'],
             'cover_image'      => ['nullable','image','max:' . self::MAX_COVER_KB],
             'file'             => ['nullable','file'],
+            'game_html_file'   => ['nullable','file','mimes:html','max:10240'],
         ]);
 
         $data['support_whatsapp'] = $this->cleanWhatsapp($data['support_whatsapp'] ?? null);
@@ -218,6 +255,12 @@ class VendorProductController extends Controller
         $product->support_whatsapp = $data['support_whatsapp'];
         $product->price            = $data['price'];
 
+        // Mise à jour du HTML de jeu si un nouveau fichier est fourni
+        if ($data['type'] === 'game' && $request->hasFile('game_html_file')) {
+            $rawHtml = file_get_contents($request->file('game_html_file')->getRealPath());
+            $product->game_html = $this->sanitizeGameHtml($rawHtml);
+        }
+
         // si rejeté → repasse en draft
         if ($product->status === 'rejected') {
             $product->status = 'draft';
@@ -226,7 +269,7 @@ class VendorProductController extends Controller
 
         $product->save();
 
-        // remplacer/créer asset fichier
+        // remplacer/créer asset fichier (book / software / video)
         if ($request->hasFile('file')) {
             $uploadedPath = $request->file('file')->store('marketplace/files', 'public');
 
@@ -248,8 +291,8 @@ class VendorProductController extends Controller
                     'is_downloadable' => $product->type !== 'video',
                 ]);
             }
-        } else {
-            // si type a changé, maj label/is_downloadable de l’asset existant
+        } elseif ($data['type'] !== 'game') {
+            // si type a changé, maj label/is_downloadable de l'asset existant
             $asset = $product->assets()->where('kind', 'file')->first();
             if ($asset) {
                 $asset->update([
@@ -280,10 +323,16 @@ class VendorProductController extends Controller
             return back()->with('warning', 'Ajoute une image de couverture avant de soumettre.');
         }
 
-        // Exiger un fichier (book/software/video)
-        $fileAsset = $product->assets->firstWhere('kind', 'file');
-        if (!$fileAsset) {
-            return back()->with('warning', 'Ajoute le fichier (PDF/ZIP/VIDÉO) avant de soumettre.');
+        // Exiger un fichier ou du HTML selon le type
+        if ($product->type === 'game') {
+            if (empty($product->game_html)) {
+                return back()->with('warning', 'Upload le fichier HTML du jeu avant de soumettre.');
+            }
+        } else {
+            $fileAsset = $product->assets->firstWhere('kind', 'file');
+            if (!$fileAsset) {
+                return back()->with('warning', 'Ajoute le fichier (PDF/ZIP/VIDÉO) avant de soumettre.');
+            }
         }
 
         $product->status = 'pending';

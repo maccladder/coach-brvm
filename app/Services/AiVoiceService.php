@@ -19,7 +19,7 @@ class AiVoiceService
     }
 
     /**
-     * Génère un MP3 à partir d’un texte (markdown possible).
+     * Génère un MP3 à partir d'un texte (markdown possible).
      *
      * @param  string $markdown   Texte ou markdown à lire à voix haute
      * @param  string $baseName   Préfixe du fichier (ex: 'clientfinancial-25')
@@ -39,7 +39,7 @@ class AiVoiceService
         $text = preg_replace("/\n{2,}/", "\n", $text);
         $text = trim($text);
 
-        // Pour éviter d’envoyer un roman à l’API
+        // Pour éviter d'envoyer un roman à l'API
         $text = mb_substr($text, 0, 4000);
 
         if ($text === '') {

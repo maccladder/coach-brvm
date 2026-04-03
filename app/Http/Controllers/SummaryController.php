@@ -26,7 +26,7 @@ class SummaryController extends Controller
         return redirect()->route('summaries.show', ['date' => $today]);
     }
 
-    /** ✅ Affiche un résumé pour n’importe quelle date */
+    /** ✅ Affiche un résumé pour n'importe quelle date */
     public function showDate(string $date, AiVoiceService $voiceService)
     {
         $day     = Carbon::parse($date)->startOfDay();
@@ -76,7 +76,7 @@ class SummaryController extends Controller
 
         $txt .= "**Analyses importées :**\n";
         if ($analysesModels->isEmpty()) {
-            $txt .= "- Aucune analyse importée aujourd’hui.\n";
+            $txt .= "- Aucune analyse importée aujourd'hui.\n";
         } else {
             foreach ($analysesModels as $a) {
                 $txt .= "- {$a->title} ({$a->as_of_date->format('d/m/Y')})\n";
@@ -85,7 +85,7 @@ class SummaryController extends Controller
 
         $txt .= "\n**États financiers publiés :**\n";
         if ($statementsModels->isEmpty()) {
-            $txt .= "- Aucun état financier publié aujourd’hui.\n";
+            $txt .= "- Aucun état financier publié aujourd'hui.\n";
         } else {
             foreach ($statementsModels as $s) {
                 $label = match ($s->statement_type) {
@@ -98,7 +98,7 @@ class SummaryController extends Controller
             }
         }
 
-        // 2) Données pour l’IA texte
+        // 2) Données pour l'IA texte
         $analyses = $analysesModels->map(fn($a) => [
             'title'     => $a->title,
             'file_path' => $a->file_path,
@@ -117,7 +117,7 @@ class SummaryController extends Controller
         $txt           .= "\n\n---\n\n### Interprétation (IA)\n\n{$interpretation}\n";
 
         /**
-         * 4) Préparer un texte COURT et propre pour l’avatar
+         * 4) Préparer un texte COURT et propre pour l'avatar
          */
         $interpretationPlain = $interpretation ?? '';
 
@@ -138,21 +138,21 @@ class SummaryController extends Controller
         $mainLines   = array_slice($lines, 0, 4);
         $mainSummary = implode(' ', $mainLines);
 
-        // Texte final pour l’avatar
+        // Texte final pour l'avatar
         $textForAvatar = <<<TXT
 Bonjour, ici ton coach BRVM.
 
-Voici l’essentiel de la séance du {$target} :
+Voici l'essentiel de la séance du {$target} :
 {$mainSummary}
 
-N’oublie pas : ceci n’est pas un conseil d’investissement personnalisé.
-Analyse toujours toi-même les entreprises et n’investis que l’argent que tu peux te permettre de perdre.
+N'oublie pas : ceci n'est pas un conseil d'investissement personnalisé.
+Analyse toujours toi-même les entreprises et n'investis que l'argent que tu peux te permettre de perdre.
 TXT;
 
-        // sécurité : on coupe si c’est trop long pour la TTS
+        // sécurité : on coupe si c'est trop long pour la TTS
         $textForAvatar = mb_substr($textForAvatar, 0, 900);
 
-        // 5) Générer la vidéo via AvatarService (peut retourner null en cas d’erreur)
+        // 5) Générer la vidéo via AvatarService (peut retourner null en cas d'erreur)
         $avatarVideoUrl = $avatarService->generateTalkingHead($textForAvatar);
 
         // 6) Upsert DailySummary
@@ -165,7 +165,7 @@ TXT;
         $summary->summary_markdown = $txt;
         $summary->signals          = []; // à remplir plus tard si tu veux
 
-        // On ne remplace l’URL que si on en a une nouvelle
+        // On ne remplace l'URL que si on en a une nouvelle
         if ($avatarVideoUrl) {
             $summary->avatar_video_url = $avatarVideoUrl;
         }

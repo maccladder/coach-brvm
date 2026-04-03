@@ -62,7 +62,7 @@ class AdminEmailController extends Controller
                 $sent++;
             } catch (\Throwable $e) {
                 $failed++;
-                // option: logger l’erreur
+                // option: logger l'erreur
                 Log::error('Admin email failed', [
                     'user_id' => $user->id,
                     'email' => $user->email,

@@ -62,8 +62,8 @@ class RegenerateClientBocAnalysis extends Command
         $textForAvatar = "Bonjour, je suis ton coach BRVM.\n\n"
             ."Voici les principaux enseignements de ton BOC du {$bocDate} :\n"
             ."{$mainSummary}\n\n"
-            ."N’oublie pas : ceci n’est pas un conseil d’investissement personnalisé.\n"
-            ."Analyse toujours toi-même les entreprises et n’investis que l’argent que tu peux te permettre de perdre.";
+            ."N'oublie pas : ceci n'est pas un conseil d'investissement personnalisé.\n"
+            ."Analyse toujours toi-même les entreprises et n'investis que l'argent que tu peux te permettre de perdre.";
 
         $textForAvatar = mb_substr($textForAvatar, 0, 900);
 

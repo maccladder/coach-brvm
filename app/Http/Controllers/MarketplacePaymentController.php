@@ -542,7 +542,7 @@ class MarketplacePaymentController extends Controller
 
             return redirect()
                 ->route('marketplace.activation', $product->id)
-                ->with('success', "✅ Paiement confirmé. Finalisez l’activation en demandant votre licence.")
+                ->with('success', "✅ Paiement confirmé. Finalisez l'activation en demandant votre licence.")
                 ->with('fb_purchase', $purchasePayload);
         }
 

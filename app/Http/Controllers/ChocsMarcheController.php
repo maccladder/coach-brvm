@@ -20,7 +20,7 @@ class ChocsMarcheController extends Controller
                 'Extension réseau (4G/5G) avec gains de parts de marché',
             ],
             'down' => [
-                'Nouvelles taxes / décisions de l’État',
+                'Nouvelles taxes / décisions de l\'État',
                 'Concurrence agressive (prix, promos)',
                 'Investissements lourds (capex) qui réduisent les bénéfices',
                 'Problèmes réglementaires (licences, sanctions)',
@@ -34,7 +34,7 @@ class ChocsMarcheController extends Controller
         'banques' => [
             'title' => 'Banques',
             'up' => [
-                'Baisse des créances douteuses (NPL) + meilleure qualité d’actifs',
+                'Baisse des créances douteuses (NPL) + meilleure qualité d\'actifs',
                 'Croissance du crédit bien maîtrisée',
                 'Résultats en hausse (PNB, bénéfice net)',
                 'Dividendes attractifs / régularité',
@@ -43,13 +43,13 @@ class ChocsMarcheController extends Controller
             'down' => [
                 'Hausse des impayés / créances douteuses',
                 'Crise économique / ralentissement (baisse activité)',
-                'Exposition trop forte à quelques gros clients / à l’État',
+                'Exposition trop forte à quelques gros clients / à l\'État',
                 'Hausse des charges, provisionnements massifs',
                 'Choc de change / taux (selon contextes)',
             ],
             'examples' => [
                 ['label' => 'SGBCI / BICICI', 'note' => 'Le marché réagit fortement aux résultats annuels, aux provisions et au niveau de dividendes.'],
-                ['label' => 'BOA / Ecobank', 'note' => 'Sensibles au cycle économique : quand l’économie ralentit, les risques de défaut augmentent.'],
+                ['label' => 'BOA / Ecobank', 'note' => 'Sensibles au cycle économique : quand l\'économie ralentit, les risques de défaut augmentent.'],
             ],
         ],
 
@@ -71,7 +71,7 @@ class ChocsMarcheController extends Controller
                 'Instabilité sociale / logistique (transport, ports)',
             ],
             'examples' => [
-                ['label' => 'PALMCI', 'note' => 'Très sensible au prix de l’huile de palme et aux volumes. Forte volatilité en période de cycle des matières premières.'],
+                ['label' => 'PALMCI', 'note' => 'Très sensible au prix de l\'huile de palme et aux volumes. Forte volatilité en période de cycle des matières premières.'],
                 ['label' => 'SAPH / SOGB', 'note' => 'Réagit souvent au prix du caoutchouc/palmier + à la qualité de la campagne agricole.'],
             ],
         ],
@@ -80,21 +80,21 @@ class ChocsMarcheController extends Controller
             'title' => 'Eau & Électricité (services publics)',
             'up' => [
                 'Révision des tarifs (hausse réglementée)',
-                'Subventions / apurements de dettes par l’État',
+                'Subventions / apurements de dettes par l\'État',
                 'Baisse des pertes techniques / amélioration recouvrement',
                 'Investissements réseau qui améliorent la qualité de service',
                 'Croissance de la demande (urbanisation)',
             ],
             'down' => [
                 'Blocage politique des tarifs (pression sociale)',
-                'Retards de paiement de l’État / arriérés',
-                'Hausse des coûts d’exploitation (énergie, maintenance)',
+                'Retards de paiement de l\'État / arriérés',
+                'Hausse des coûts d\'exploitation (énergie, maintenance)',
                 'Dégradation des infrastructures (pannes majeures)',
                 'Endettement élevé / pression sur la trésorerie',
             ],
             'examples' => [
                 ['label' => 'SODECI', 'note' => 'Souvent stable, mais sensible aux décisions tarifaires et aux arriérés (cash).'],
-                ['label' => 'CIE', 'note' => 'Impact des coûts de production/achat d’énergie + décisions de régulation.'],
+                ['label' => 'CIE', 'note' => 'Impact des coûts de production/achat d\'énergie + décisions de régulation.'],
             ],
         ],
 
@@ -109,14 +109,14 @@ class ChocsMarcheController extends Controller
             ],
             'down' => [
                 'Hausse du coût énergie/carburant (marges compressées)',
-                'Baisse du pouvoir d’achat (demande en recul)',
+                'Baisse du pouvoir d\'achat (demande en recul)',
                 'Concurrence/importations plus agressives',
-                'Arrêts d’usine / incidents industriels',
-                'Tensions sur l’approvisionnement (matières, transport)',
+                'Arrêts d\'usine / incidents industriels',
+                'Tensions sur l\'approvisionnement (matières, transport)',
             ],
             'examples' => [
-                ['label' => 'CIMAF/valeurs ciment (selon cote)', 'note' => 'Le marché réagit aux cycles BTP et aux marges liées à l’énergie.'],
-                ['label' => 'Industries locales', 'note' => 'Quand l’État lance des projets, le secteur peut accélérer fortement.'],
+                ['label' => 'CIMAF/valeurs ciment (selon cote)', 'note' => 'Le marché réagit aux cycles BTP et aux marges liées à l\'énergie.'],
+                ['label' => 'Industries locales', 'note' => 'Quand l\'État lance des projets, le secteur peut accélérer fortement.'],
             ],
         ],
 
@@ -126,18 +126,18 @@ class ChocsMarcheController extends Controller
                 'Hausse de la consommation (croissance économique)',
                 'Nouvelles ouvertures / expansion géographique',
                 'Amélioration de la marge (mix produits, coûts logistiques)',
-                'Baisse de l’inflation / stabilisation des prix',
+                'Baisse de l\'inflation / stabilisation des prix',
                 'Stratégies marketing efficaces (parts de marché)',
             ],
             'down' => [
-                'Inflation (baisse du pouvoir d’achat)',
+                'Inflation (baisse du pouvoir d\'achat)',
                 'Hausse du coût import/logistique (fx, transport)',
-                'Ruptures de stock / problèmes d’approvisionnement',
+                'Ruptures de stock / problèmes d\'approvisionnement',
                 'Concurrence forte (guerre des prix)',
                 'Taxes sur produits (boissons, alcool, sucre…) selon pays',
             ],
             'examples' => [
-                ['label' => 'Distribution (ex: CFAO/retail selon cote)', 'note' => 'Très lié au pouvoir d’achat : quand ça se tend, le marché peut corriger vite.'],
+                ['label' => 'Distribution (ex: CFAO/retail selon cote)', 'note' => 'Très lié au pouvoir d\'achat : quand ça se tend, le marché peut corriger vite.'],
                 ['label' => 'Biens de conso', 'note' => 'Les résultats trimestriels déclenchent souvent des mouvements rapides.'],
             ],
         ],
@@ -180,7 +180,7 @@ class ChocsMarcheController extends Controller
                 'Pression concurrentielle sur les prix',
             ],
             'examples' => [
-                ['label' => 'Logistique/transport coté (selon BRVM)', 'note' => 'Bouge souvent quand les volumes d’échanges et la stabilité logistique changent.'],
+                ['label' => 'Logistique/transport coté (selon BRVM)', 'note' => 'Bouge souvent quand les volumes d\'échanges et la stabilité logistique changent.'],
             ],
         ],
     ];

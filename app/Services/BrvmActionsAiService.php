@@ -100,7 +100,7 @@ class BrvmActionsAiService
         $close  = $toNumber($cells[5] ?? null);
         $change = $toNumber($cells[6] ?? null, true);
 
-        // règle prix d’achat
+        // règle prix d'achat
         $buyPrice = ($open > 0) ? $open : (($close > 0) ? $close : $prev);
 
         $stocks[] = [

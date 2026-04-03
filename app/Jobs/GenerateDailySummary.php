@@ -49,7 +49,7 @@ class GenerateDailySummary implements ShouldQueue
             // Fallback si le service Python n'est pas prêt
             $md  = "# Résumé du {$today->toDateString()}\n";
             $md .= $analyses->isEmpty()
-                ? "- Aucune analyse importée aujourd’hui.\n"
+                ? "- Aucune analyse importée aujourd'hui.\n"
                 : "## Analyses du jour\n". $analyses->pluck('title')->map(fn($t)=>"- **$t**")->implode("\n");
             $signals = [];
         }

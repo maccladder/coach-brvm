@@ -12,11 +12,15 @@ class MarketplaceMyProductsController extends Controller
     {
         $user = $request->user();
 
-        $products = $user->purchasedProducts()
+        $query = $user->purchasedProducts()
             ->with('category')
-            ->wherePivot('status', 'paid')
-            ->latest('marketplace_purchases.created_at')
-            ->get();
+            ->wherePivot('status', 'paid');
+
+        if (request()->filled('type')) {
+            $query->where('marketplace_products.type', request('type'));
+        }
+
+        $products = $query->latest('marketplace_purchases.created_at')->get();
 
         return view('my-products', compact('products'));
     }
@@ -60,7 +64,58 @@ class MarketplaceMyProductsController extends Controller
         return Storage::disk($disk)->download($asset->path, $downloadName);
     }
 
-    // ✅ NOUVEAU : visualiser une vidéo Cloudflare Stream
+    /**
+     * Sert le HTML brut du jeu (utilisé comme src de l'iframe).
+     * Vérifie l'achat avant de délivrer le contenu.
+     */
+    public function gameHtml(Request $request, MarketplaceProduct $product)
+    {
+        $user = $request->user();
+
+        $hasAccess = $user->purchasedProducts()
+            ->where('marketplace_products.id', $product->id)
+            ->wherePivot('status', 'paid')
+            ->exists();
+
+        if (!$hasAccess) {
+            abort(403);
+        }
+
+        if ($product->type !== 'game' || empty($product->game_html)) {
+            abort(404);
+        }
+
+        return response($product->game_html, 200)
+            ->header('Content-Type', 'text/html; charset=UTF-8')
+            ->header('X-Frame-Options', 'SAMEORIGIN')
+            ->header('Cache-Control', 'no-store');
+    }
+
+    public function play(Request $request, MarketplaceProduct $product)
+    {
+        $user = $request->user();
+
+        $hasAccess = $user->purchasedProducts()
+            ->where('marketplace_products.id', $product->id)
+            ->wherePivot('status', 'paid')
+            ->exists();
+
+        if (!$hasAccess) {
+            abort(403, "Accès refusé : produit non acheté.");
+        }
+
+        if ($product->type !== 'game') {
+            abort(404, "Ce produit n'est pas un jeu.");
+        }
+
+        if (empty($product->game_html)) {
+            abort(404, "Fichier de jeu introuvable.");
+        }
+
+        return view('my-products-play', compact('product'));
+    }
+
+    // visualiser une vidéo Cloudflare Stream
     public function watch(Request $request, MarketplaceProduct $product)
     {
         $user = $request->user();
@@ -78,7 +133,7 @@ class MarketplaceMyProductsController extends Controller
             abort(404, "Ce produit n'est pas une vidéo.");
         }
 
-        // ✅ On récupère l’asset stream (url = video_id)
+        // ✅ On récupère l'asset stream (url = video_id)
         $streamAsset = $product->assets()
             ->where('kind', 'stream')
             ->latest()

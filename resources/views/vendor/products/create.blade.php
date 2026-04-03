@@ -109,12 +109,25 @@
                             <div class="vd-help">Obligatoire uniquement au moment de "Soumettre".</div>
                         </div>
 
-                        <div class="col-12">
+                        {{-- Champ fichier standard (book / software / video) --}}
+                        <div class="col-12" id="fieldFile">
                             <label class="vd-label">Fichier du produit <span style="color:#6B7590;">(optionnel au draft)</span></label>
                             <input name="file" type="file" class="vd-file-input form-control" id="fileInput">
                             @error('file')<div class="vd-error">{{ $message }}</div>@enderror
                             <div class="vd-help" id="fileHelp">
                                 PDF → .pdf | ZIP → .zip/.rar | Vidéo → .mp4/.mov/.m4v/.avi<br>
+                                Obligatoire au moment de "Soumettre".
+                            </div>
+                        </div>
+
+                        {{-- Champ HTML du jeu (affiché uniquement si type = game) --}}
+                        <div class="col-12" id="fieldGameHtml" style="display:none;">
+                            <label class="vd-label">Fichier HTML du jeu <span style="color:#6B7590;">(optionnel au draft)</span></label>
+                            <input name="game_html_file" type="file" accept=".html,text/html" class="vd-file-input form-control" id="gameHtmlInput">
+                            @error('game_html_file')<div class="vd-error">{{ $message }}</div>@enderror
+                            <div class="vd-help">
+                                Upload un fichier <strong>.html</strong> tout-en-un (HTML + CSS + JS inline).<br>
+                                Le jeu sera joué directement dans le navigateur. Max 10 Mo.<br>
                                 Obligatoire au moment de "Soumettre".
                             </div>
                         </div>
@@ -135,15 +148,22 @@
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-    const sel = document.getElementById('typeSelect');
-    const fileHelp = document.getElementById('fileHelp');
-    const fileInput = document.getElementById('fileInput');
+    const sel           = document.getElementById('typeSelect');
+    const fileHelp      = document.getElementById('fileHelp');
+    const fileInput     = document.getElementById('fileInput');
+    const fieldFile     = document.getElementById('fieldFile');
+    const fieldGameHtml = document.getElementById('fieldGameHtml');
+
     function refresh() {
         const t = sel.value;
-        if(t==='pdf'){fileInput.accept='application/pdf';fileHelp.innerHTML='Type PDF : fichier <strong>.pdf</strong> · Obligatoire à la soumission.';}
-        else if(t==='zip'){fileInput.accept='.zip,.rar,application/zip,application/x-rar-compressed';fileHelp.innerHTML='Type ZIP : fichier <strong>.zip</strong> ou <strong>.rar</strong> · Obligatoire à la soumission.';}
-        else if(t==='video'){fileInput.accept='video/mp4,video/quicktime,video/x-m4v,video/x-msvideo';fileHelp.innerHTML='Type Vidéo : <strong>.mp4/.mov/.m4v/.avi</strong> · Tu pourras ensuite le mettre sur Cloudflare.';}
-        else{fileInput.accept='';fileHelp.textContent='Ajoute un fichier correspondant au type choisi.';}
+        const isGame = t === 'game';
+        fieldFile.style.display     = isGame ? 'none' : '';
+        fieldGameHtml.style.display = isGame ? ''     : 'none';
+
+        if (t === 'book')     { fileInput.accept = 'application/pdf'; fileHelp.innerHTML = 'Type PDF : fichier <strong>.pdf</strong> · Obligatoire à la soumission.'; }
+        else if (t === 'software') { fileInput.accept = '.zip,.rar,application/zip,application/x-rar-compressed'; fileHelp.innerHTML = 'Type ZIP : <strong>.zip</strong> ou <strong>.rar</strong> · Obligatoire à la soumission.'; }
+        else if (t === 'video')   { fileInput.accept = 'video/mp4,video/quicktime,video/x-m4v,video/x-msvideo'; fileHelp.innerHTML = 'Type Vidéo : <strong>.mp4/.mov/.m4v/.avi</strong> · Tu pourras ensuite le mettre sur Cloudflare.'; }
+        else { fileInput.accept = ''; }
     }
     sel.addEventListener('change', refresh);
     refresh();

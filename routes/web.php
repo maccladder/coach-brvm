@@ -61,7 +61,7 @@ use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
-| Page d’accueil
+| Page d'accueil
 |--------------------------------------------------------------------------
 */
 
@@ -89,7 +89,7 @@ Route::get('/livres/{book:slug}', [BookController::class, 'show'])->name('books.
 Route::get('/marketplace', [MarketplaceController::class, 'index'])->name('marketplace.index');
 Route::get('/marketplace/{slug}', [MarketplaceController::class, 'show'])->name('marketplace.show');
 
-// ✅ Activation software (après achat) — page d’instructions/licence
+// ✅ Activation software (après achat) — page d'instructions/licence
 Route::middleware('auth')->group(function () {
     Route::get('/marketplace/{product}/activation', [MarketplaceController::class, 'activation'])
         ->name('marketplace.activation');
@@ -344,12 +344,12 @@ Route::prefix('topups')->name('topups.')->group(function () {
 |--------------------------------------------------------------------------
 | Portfolio virtuel (Breeze auth)
 |--------------------------------------------------------------------------
-| Ici c’est le portefeuille des utilisateurs "normaux" (user_id)
+| Ici c'est le portefeuille des utilisateurs "normaux" (user_id)
 | On protège avec auth (Breeze).
 |--------------------------------------------------------------------------
 |
 | ⚠️ Si tu n'as pas encore ces controllers/routes, tu peux laisser ce bloc vide
-| pour le moment. Mais c’est ici qu’on va travailler pour le wallet user.
+| pour le moment. Mais c'est ici qu'on va travailler pour le wallet user.
 */
 
 Route::middleware(['auth'])->group(function () {
@@ -551,9 +551,22 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/mon-espace/mes-produits/{product}/download', [MarketplaceMyProductsController::class, 'download'])
         ->name('my.products.download');
 
-    // ✅ NOUVEAU : regarder une vidéo achetée (Cloudflare Stream)
     Route::get('/mon-espace/mes-produits/{product}/watch', [MarketplaceMyProductsController::class, 'watch'])
         ->name('my.products.watch');
+
+    Route::get('/mon-espace/mes-produits/{product}/play', [MarketplaceMyProductsController::class, 'play'])
+        ->name('my.products.play');
+
+    Route::get('/mon-espace/mes-produits/{product}/game-html', [MarketplaceMyProductsController::class, 'gameHtml'])
+        ->name('my.products.game-html');
+
+    // Score d'une partie (appelé en fetch/AJAX depuis la page play)
+    Route::post('/api/games/{product}/score', [\App\Http\Controllers\GameScoreController::class, 'store'])
+        ->name('games.score.store');
+
+    // Classement du jeu
+    Route::get('/games/{product}/leaderboard', [\App\Http\Controllers\GameScoreController::class, 'leaderboard'])
+        ->name('games.leaderboard');
 
 });
 
@@ -695,7 +708,7 @@ Route::middleware(['auth','vendor.mode'])
 
 Route::middleware(['auth', 'vendor.mode'])->prefix('vendor')->name('vendor.')->group(function () {
     Route::get('/', function () {
-        return view('vendor.dashboard'); // on la créera à l’étape 4
+        return view('vendor.dashboard'); // on la créera à l'étape 4
     })->name('dashboard');
 });
 

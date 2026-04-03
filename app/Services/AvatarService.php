@@ -19,7 +19,7 @@ class AvatarService
     }
 
     /**
-     * Génère une vidéo d’avatar parlant le texte donné et retourne l’URL finale.
+     * Génère une vidéo d\'avatar parlant le texte donné et retourne l\'URL finale.
      *
      * @param  string  $text
      * @return string|null
@@ -73,15 +73,15 @@ class AvatarService
             $talkId = $data['id'] ?? null;
 
             if (!$talkId) {
-                Log::warning('AvatarService: pas d’ID retourné par D-ID', $data ?? []);
+                Log::warning('AvatarService: pas d\'ID retourné par D-ID', $data ?? []);
                 return null;
             }
 
             Log::info("AvatarService: talk créé, id={$talkId}");
 
             // 2) Polling pour attendre la vidéo
-            //    40 tentatives * 3s = ~120 secondes d'attente max
-            $maxTries = 40;    // avant c'était 18
+            //    40 tentatives * 3s = ~120 secondes d\'attente max
+            $maxTries = 40;    // avant c\'était 18
             $delayMs  = 3000;  // 3 sec entre polls
 
             for ($i = 0; $i < $maxTries; $i++) {

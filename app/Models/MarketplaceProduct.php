@@ -10,7 +10,8 @@ class MarketplaceProduct extends Model
         'user_id',
         'category_id','title','slug','type','description',
         'support_whatsapp',
-        'price','pages_count', // ✅ AJOUT
+        'price','pages_count',
+        'game_html',
         'cover_image_path','status','is_featured',
         'submitted_at','reviewed_at','admin_note',
     ];

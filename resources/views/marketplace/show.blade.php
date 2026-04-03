@@ -270,7 +270,7 @@
         $waText = rawurlencode("Bonjour, je suis intéressé par \"{$product->title}\" sur Coach BRVM Marketplace.");
         $assetsToShow = $product->type === 'video'
             ? $product->assets->filter(fn($a) => $a->kind === 'stream')->values()
-            : $product->assets;
+            : ($product->type === 'game' ? collect() : $product->assets);
         $previewUrls = $previewUrls ?? [];
         $hasPreview  = $product->type === 'book' && empty($isOwned) && !empty($previewUrls);
     @endphp
@@ -343,7 +343,11 @@
                 {{-- CTA principal --}}
                 @auth
                     @if(!empty($isOwned))
-                        @if($product->type === 'video')
+                        @if($product->type === 'game')
+                            <a href="{{ route('my.products.play', $product) }}" class="cb-btn-success" style="width:100%;justify-content:center;">
+                                🎮 Jouer maintenant
+                            </a>
+                        @elseif($product->type === 'video')
                             <a href="{{ route('my.products.watch', $product) }}" class="cb-btn-success" style="width:100%;justify-content:center;">
                                 <i class="bi bi-play-circle"></i> Visualiser maintenant
                             </a>
@@ -385,7 +389,9 @@
                             text-transform:uppercase;color:#6B7590;text-align:center;">
                     Après achat :
                     <strong style="color:#E8EAF0;">
-                        {{ $product->type === 'video' ? 'Lecture en ligne' : 'Téléchargement immédiat' }}
+                        @if($product->type === 'game') Jeu en ligne · sans téléchargement
+                        @elseif($product->type === 'video') Lecture en ligne
+                        @else Téléchargement immédiat @endif
                     </strong>
                 </div>
             </div>
@@ -421,7 +427,9 @@
 
                     <div class="mp-delivery-box">
                         <i class="bi bi-lightning-charge"></i>
-                        {{ $product->type === 'video' ? 'Lecture en ligne immédiate après achat' : 'Téléchargement immédiat après achat' }}
+                        @if($product->type === 'game') Jeu en ligne · jouable dans le navigateur après achat
+                        @elseif($product->type === 'video') Lecture en ligne immédiate après achat
+                        @else Téléchargement immédiat après achat @endif
                     </div>
 
                     {{-- Aperçu PDF --}}
@@ -440,6 +448,7 @@
                     @endif
 
                     {{-- Assets --}}
+                    @if($product->type !== 'game')
                     <div class="mp-section-title" style="margin-top:24px;">Ce que tu reçois</div>
 
                     @if($assetsToShow->isEmpty())
@@ -466,7 +475,11 @@
                                 </div>
 
                                 @if(!empty($isOwned))
-                                    @if($product->type === 'video')
+                                    @if($product->type === 'game')
+                                        <a href="{{ route('my.products.play', $product) }}" class="cb-btn-green" style="font-size:11px;padding:7px 14px;">
+                                            🎮 Jouer
+                                        </a>
+                                    @elseif($product->type === 'video')
                                         <a href="{{ route('my.products.watch', $product) }}" class="cb-btn-green" style="font-size:11px;padding:7px 14px;">
                                             <i class="bi bi-play-circle"></i> Voir
                                         </a>
@@ -497,13 +510,16 @@
                             </div>
                         @endforeach
                     @endif
+                    @endif {{-- /type !== game --}}
 
                     {{-- Owned success --}}
                     @if(!empty($isOwned))
                         <div class="mp-owned-box">
                             <i class="bi bi-shield-check" style="color:#0FCFA4;"></i>
                             Produit déjà payé —
-                            @if($product->type === 'video')
+                            @if($product->type === 'game')
+                                rejoue-y à tout moment depuis
+                            @elseif($product->type === 'video')
                                 re-visualise-le à tout moment depuis
                             @else
                                 re-télécharge-le à tout moment depuis

@@ -25,7 +25,7 @@ class CinetpayService
     }
 
     /**
-     * Crée un paiement et retourne l’URL de redirection CinetPay
+     * Crée un paiement et retourne l'URL de redirection CinetPay
      */
     public function createPayment(array $data): ?string
     {
@@ -84,8 +84,8 @@ class CinetpayService
     }
 
     /**
-     * Vérifie le statut d’un paiement.
-     * Retourne par ex. "ACCEPTED", "REFUSED", "PENDING" ou null en cas d’erreur.
+     * Vérifie le statut d'un paiement.
+     * Retourne par ex. "ACCEPTED", "REFUSED", "PENDING" ou null en cas d'erreur.
      */
     public function checkPayment(?string $transactionId): ?string
     {
@@ -142,7 +142,7 @@ class CinetpayService
             $p['apikey'] = '***';
         }
         if (!empty($p['site_id'])) {
-            // site_id n’est pas ultra secret, mais on peut le masquer partiellement
+            // site_id n'est pas ultra secret, mais on peut le masquer partiellement
             $p['site_id'] = substr((string) $p['site_id'], 0, 2) . '***';
         }
 

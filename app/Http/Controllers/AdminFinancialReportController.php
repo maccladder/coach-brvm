@@ -56,7 +56,7 @@ class AdminFinancialReportController extends Controller
             ['status' => 'pending']
         );
 
-        // Supprimer l’ancien fichier
+        // Supprimer l'ancien fichier
         if ($report->file_path && Storage::disk('public')->exists($report->file_path)) {
             Storage::disk('public')->delete($report->file_path);
         }

@@ -303,7 +303,7 @@ class AdminController extends Controller
         $interpretation = $ai->interpret($analyses, $statements, $bocDate);
         $clientBoc->interpreted_markdown = $interpretation;
 
-        // Texte raccourci pour l’avatar
+        // Texte raccourci pour l'avatar
         $plain = $interpretation ?? '';
         $plain = preg_replace('/^\s*#+\s*/m', '', $plain);
         $plain = preg_replace('/^\s*[-*]\s+/m', '', $plain);
@@ -322,8 +322,8 @@ Bonjour, je suis ton coach BRVM.
 Voici les principaux enseignements de ton BOC du {$bocDate} :
 {$mainSummary}
 
-N’oublie pas : ceci n’est pas un conseil d’investissement personnalisé.
-Analyse toujours toi-même les entreprises et n’investis que l’argent que tu peux te permettre de perdre.
+N'oublie pas : ceci n'est pas un conseil d'investissement personnalisé.
+Analyse toujours toi-même les entreprises et n'investis que l'argent que tu peux te permettre de perdre.
 TXT;
 
         $textForAvatar = mb_substr($textForAvatar, 0, 900);
@@ -345,7 +345,7 @@ TXT;
         $clientBoc->save();
     }
 
-    /** ✅ Upload d’une BOC + extraction + publication public */
+    /** ✅ Upload d'une BOC + extraction + publication public */
     public function dailyBocsStore(
         Request $request,
         BrvmBubbleService $bubble,

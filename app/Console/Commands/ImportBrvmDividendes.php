@@ -13,7 +13,7 @@ class ImportBrvmDividendes extends Command
                             {storagePath : Chemin du PDF sur le disk public (ex: bocs/BOC_20251202.pdf)}
                             {--date= : Date de référence du BOC (YYYY-MM-DD) ex: 2025-12-02}';
 
-    protected $description = 'Importe les infos dividendes (pages 3-4) d’un BOC et les stocke en base';
+    protected $description = "Importe les infos dividendes (pages 3-4) d'un BOC et les stocke en base";
 
     public function handle(BrvmDividendeService $service): int
     {

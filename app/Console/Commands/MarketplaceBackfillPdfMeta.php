@@ -19,7 +19,7 @@ class MarketplaceBackfillPdfMeta extends Command
     public function handle(): int
     {
         if (!extension_loaded('imagick')) {
-            $this->error('❌ Imagick n’est pas chargé (extension PHP).');
+            $this->error('❌ Imagick n\'est pas chargé (extension PHP).');
             return self::FAILURE;
         }
 

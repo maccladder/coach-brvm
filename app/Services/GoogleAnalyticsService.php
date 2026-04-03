@@ -25,7 +25,7 @@ class GoogleAnalyticsService
         $this->property = 'properties/' . trim((string) env('GA_PROPERTY_ID'));
     }
 
-    /** 👥 Visiteurs aujourd’hui */
+    /** 👥 Visiteurs aujourd'hui */
     public function todayUsers(): int
     {
         try {
@@ -102,7 +102,7 @@ class GoogleAnalyticsService
         }
     }
 
-    /** ⏱️ Durée moyenne d’engagement (en secondes, 7 derniers jours) */
+    /** ⏱️ Durée moyenne d'engagement (en secondes, 7 derniers jours) */
     public function avgEngagementTime(): int
     {
         try {

@@ -170,7 +170,7 @@ public function topupPay(Request $request, CinetpayService $cinetpay)
         // on incrémente le cash
         $wallet->increment('balance', $amount);
 
-        // on log l’historique
+        // on log l'historique
         VirtualWalletTransaction::create([
             'user_id' => $user->id,
             'type'    => 'topup',

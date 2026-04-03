@@ -65,6 +65,14 @@
             </div>
             <div class="col-md-4 cbr cbr3">
                 <div class="dash-card">
+                    <span class="dash-card-icon">🎮</span>
+                    <div class="dash-card-title">Mes jeux</div>
+                    <div class="dash-card-desc">Jeux achetés sur la Marketplace. Joue directement dans ton navigateur.</div>
+                    <a href="{{ route('my.products') }}?type=game" class="dash-card-btn">Jouer →</a>
+                </div>
+            </div>
+            <div class="col-md-4 cbr cbr3">
+                <div class="dash-card">
                     <span class="dash-card-icon">💼</span>
                     <div class="dash-card-title">Mon portefeuille</div>
                     <div class="dash-card-desc">Solde virtuel, positions et historique de tes transactions.</div>

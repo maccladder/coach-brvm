@@ -160,7 +160,8 @@
                                 <div class="vd-help">Obligatoire pour soumettre.</div>
                             </div>
 
-                            <div class="col-12">
+                            {{-- Fichier standard (book / software / video) --}}
+                            <div class="col-12" id="fieldFile">
                                 <label class="vd-label">Fichier du produit</label>
                                 <input name="file" type="file" class="vd-file-input form-control" id="fileInput">
                                 @error('file')<div class="vd-error">{{ $message }}</div>@enderror
@@ -177,6 +178,25 @@
                                     <div class="vd-help">Aucun fichier encore — ajoute un PDF/ZIP/Vidéo avant de soumettre.</div>
                                 @endif
                                 <div class="vd-help" id="fileHelp">PDF → .pdf | ZIP → .zip/.rar | Vidéo → .mp4/.mov/.m4v/.avi</div>
+                            </div>
+
+                            {{-- HTML du jeu (affiché uniquement si type = game) --}}
+                            <div class="col-12" id="fieldGameHtml" style="display:none;">
+                                <label class="vd-label">Fichier HTML du jeu</label>
+                                <input name="game_html_file" type="file" accept=".html,text/html" class="vd-file-input form-control" id="gameHtmlInput">
+                                @error('game_html_file')<div class="vd-error">{{ $message }}</div>@enderror
+                                @if($product->type === 'game' && $product->game_html)
+                                    <div class="vd-file-current">
+                                        <div class="vd-file-current-label">Jeu HTML actuel</div>
+                                        <div style="font-size:12px;color:#6B7590;margin-top:3px;">
+                                            {{ number_format(strlen($product->game_html) / 1024, 1) }} Ko de HTML stocké.
+                                            Upload un nouveau fichier pour remplacer.
+                                        </div>
+                                    </div>
+                                @else
+                                    <div class="vd-help">Aucun jeu encore — upload le fichier <strong>.html</strong> avant de soumettre.</div>
+                                @endif
+                                <div class="vd-help">Fichier <strong>.html</strong> tout-en-un · Max 10 Mo.</div>
                             </div>
 
                         </div>
@@ -198,17 +218,25 @@
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-    const sel = document.getElementById('typeSelect');
-    const fileHelp = document.getElementById('fileHelp');
-    const fileInput = document.getElementById('fileInput');
+    const sel           = document.getElementById('typeSelect');
+    const fileHelp      = document.getElementById('fileHelp');
+    const fileInput     = document.getElementById('fileInput');
+    const fieldFile     = document.getElementById('fieldFile');
+    const fieldGameHtml = document.getElementById('fieldGameHtml');
+
     function refresh() {
+        if (!sel) return;
         const t = sel.value;
-        if(t==='pdf'){fileInput.accept='application/pdf';fileHelp.innerHTML='Type PDF : fichier <strong style="color:#9AA3B8;">.pdf</strong>';}
-        else if(t==='zip'){fileInput.accept='.zip,.rar,application/zip,application/x-rar-compressed';fileHelp.innerHTML='Type ZIP : fichier <strong style="color:#9AA3B8;">.zip</strong> / <strong style="color:#9AA3B8;">.rar</strong>';}
-        else if(t==='video'){fileInput.accept='video/mp4,video/quicktime,video/x-m4v,video/x-msvideo';fileHelp.innerHTML='Type Vidéo : <strong style="color:#9AA3B8;">.mp4 / .mov / .m4v / .avi</strong>';}
-        else{fileInput.accept='';fileHelp.textContent='Ajoute un fichier correspondant au type choisi.';}
+        const isGame = t === 'game';
+        fieldFile.style.display     = isGame ? 'none' : '';
+        fieldGameHtml.style.display = isGame ? ''     : 'none';
+
+        if (t === 'book')     { fileInput.accept = 'application/pdf'; fileHelp.innerHTML = 'Type PDF : fichier <strong style="color:#9AA3B8;">.pdf</strong>'; }
+        else if (t === 'software') { fileInput.accept = '.zip,.rar,application/zip,application/x-rar-compressed'; fileHelp.innerHTML = 'Type ZIP : <strong style="color:#9AA3B8;">.zip</strong> / <strong style="color:#9AA3B8;">.rar</strong>'; }
+        else if (t === 'video')   { fileInput.accept = 'video/mp4,video/quicktime,video/x-m4v,video/x-msvideo'; fileHelp.innerHTML = 'Type Vidéo : <strong style="color:#9AA3B8;">.mp4 / .mov / .m4v / .avi</strong>'; }
+        else { fileInput.accept = ''; }
     }
-    if(sel){ sel.addEventListener('change', refresh); refresh(); }
+    if (sel) { sel.addEventListener('change', refresh); refresh(); }
 });
 document.querySelectorAll('.cbr').forEach(el=>{new IntersectionObserver(([e])=>{if(e.isIntersecting)el.classList.add('on');},{threshold:.06}).observe(el);});
 </script>

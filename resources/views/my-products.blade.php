@@ -66,6 +66,17 @@
     .myp-chip-book  { background:rgba(99,179,237,.08);  color:#63B3ED; border:1px solid rgba(99,179,237,.2); }
     .myp-chip-video { background:rgba(252,129,74,.08);  color:#FC814A; border:1px solid rgba(252,129,74,.2); }
     .myp-chip-soft  { background:rgba(160,120,255,.08); color:#B090FF; border:1px solid rgba(160,120,255,.2); }
+    .myp-chip-game  { background:rgba(120,80,255,.08);  color:#A070FF; border:1px solid rgba(120,80,255,.2); }
+
+    .cb-btn-purple {
+        display:inline-flex; align-items:center; gap:7px;
+        background:rgba(120,80,255,.12); color:#A070FF !important;
+        font-family:'Syne',sans-serif; font-weight:700;
+        font-size:11px; letter-spacing:.06em; text-transform:uppercase;
+        padding:7px 14px; border:1px solid rgba(120,80,255,.25);
+        border-radius:3px; text-decoration:none; transition:all .3s;
+    }
+    .cb-btn-purple:hover { background:rgba(120,80,255,.2); border-color:rgba(120,80,255,.45); }
 
     .myp-card-actions { display: flex; flex-wrap: wrap; gap: 8px; }
 
@@ -123,7 +134,7 @@
                     <p class="myp-hero-tag">Mon espace</p>
                     <h1 class="myp-hero-title">🧾 Mes produits</h1>
                     <p style="font-size:14px;color:#6B7590;font-weight:300;margin-top:4px;">
-                        Tes achats — livres, vidéos et logiciels.
+                        Tes achats — livres, vidéos, logiciels et jeux.
                     </p>
                 </div>
                 <a href="{{ route('marketplace.index') }}" class="cb-btn-gold">
@@ -152,11 +163,13 @@
                         $chipClass = match($p->type) {
                             'video'    => 'myp-chip-video',
                             'software' => 'myp-chip-soft',
+                            'game'     => 'myp-chip-game',
                             default    => 'myp-chip-book',
                         };
                         $typeLabel = match($p->type) {
                             'video'    => '🎬 Vidéo',
                             'software' => '🧩 Logiciel',
+                            'game'     => '🎮 Jeu',
                             default    => '📘 Livre PDF',
                         };
                     @endphp
@@ -184,7 +197,12 @@
                                 </div>
 
                                 <div class="myp-card-actions">
-                                    @if($p->type === 'video')
+                                    @if($p->type === 'game')
+                                        <a href="{{ route('my.products.play', $p) }}"
+                                           class="cb-btn-purple">
+                                            🎮 Jouer
+                                        </a>
+                                    @elseif($p->type === 'video')
                                         <a href="{{ route('my.products.watch', $p) }}"
                                            class="cb-btn-green">
                                             ▶ Visualiser
@@ -202,7 +220,11 @@
                                     </a>
                                 </div>
 
-                                @if($p->type === 'video')
+                                @if($p->type === 'game')
+                                    <div style="font-size:11px;color:#6B7590;margin-top:8px;font-family:'Syne',sans-serif;letter-spacing:.06em;">
+                                        🔒 Jouer en ligne · sans téléchargement
+                                    </div>
+                                @elseif($p->type === 'video')
                                     <div style="font-size:11px;color:#6B7590;margin-top:8px;font-family:'Syne',sans-serif;letter-spacing:.06em;">
                                         🔒 Lecture en ligne · sans téléchargement
                                     </div>

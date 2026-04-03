@@ -17,7 +17,7 @@ class AdminAnalyticsController extends Controller
         try {
             $data = $this->buildAnalyticsData($ga);
         } catch (Throwable $e) {
-            // Sécurité : en cas d’erreur GA, on ne casse pas l’admin
+            // Sécurité : en cas d'erreur GA, on ne casse pas l'admin
             $data = $this->emptyAnalyticsData();
         }
 
