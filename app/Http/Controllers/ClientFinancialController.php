@@ -37,7 +37,7 @@ class ClientFinancialController extends Controller
             'company'        => ['required', 'string', 'max:255'],
             'period'         => ['required', 'string', 'max:255'],
             'financial_date' => ['nullable', 'date'],
-            'client_email'   => ['required_unless:user,' . (auth()->id() ?? 'null'), 'nullable', 'email', 'max:255'],
+            'client_email'   => [auth()->check() ? 'nullable' : 'required', 'nullable', 'email', 'max:255'],
             'file'           => ['required', 'file', 'mimes:pdf,xlsx,xls,csv', 'max:10240'],
         ]);
 
