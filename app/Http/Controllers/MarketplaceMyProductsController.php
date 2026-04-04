@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\GamePremiumUnlock;
 use App\Models\MarketplaceProduct;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -112,7 +113,12 @@ class MarketplaceMyProductsController extends Controller
             abort(404, "Fichier de jeu introuvable.");
         }
 
-        return view('my-products-play', compact('product'));
+        $isPremiumUnlocked = GamePremiumUnlock::where('user_id', $user->id)
+            ->where('product_id', $product->id)
+            ->where('feature', 'premium_chars')
+            ->exists();
+
+        return view('my-products-play', compact('product', 'isPremiumUnlocked'));
     }
 
     // visualiser une vidéo Cloudflare Stream

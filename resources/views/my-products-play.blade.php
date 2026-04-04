@@ -187,11 +187,58 @@
             if (req) req.call(frame);
         });
 
+        // ── Déverrouillage des persos premium ────────────────
+        const PREMIUM_KEY      = 'abidjan_run_premium_chars_{{ $product->id }}';
+        const VERIFY_PREMIUM_URL = '{{ route('games.verify-premium', $product) }}';
+        // Statut DB passé par le contrôleur (source de vérité)
+        const PREMIUM_UNLOCKED_DB = {{ $isPremiumUnlocked ? 'true' : 'false' }};
+
+        function notifyGameOfUnlock() {
+            frame.contentWindow.postMessage({ type: 'CHARS_UNLOCKED' }, '*');
+        }
+
+        // Si déjà déverrouillé en DB → on notifie dès que l'iframe est chargée
+        // (localStorage comme cache rapide, DB comme source de vérité)
+        if (PREMIUM_UNLOCKED_DB || localStorage.getItem(PREMIUM_KEY) === '1') {
+            if (PREMIUM_UNLOCKED_DB) localStorage.setItem(PREMIUM_KEY, '1'); // sync cache
+            frame.addEventListener('load', notifyGameOfUnlock);
+        }
+
         // ── Réception du score via postMessage ────────────────
         window.addEventListener('message', function (event) {
             if (event.source !== frame.contentWindow) return;
 
             const data = event.data;
+
+            // Paiement Paystack in-game → vérification serveur
+            if (data && data.type === 'ABIDJAN_RUN_PREMIUM_UNLOCKED' && data.ref) {
+                fetch(VERIFY_PREMIUM_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': CSRF_TOKEN,
+                        'Accept': 'application/json',
+                    },
+                    body: JSON.stringify({ ref: data.ref, feature: 'premium_chars' }),
+                })
+                .then(r => r.json())
+                .then(res => {
+                    if (res.unlocked) {
+                        localStorage.setItem(PREMIUM_KEY, '1');
+                        notifyGameOfUnlock();
+                    }
+                })
+                .catch(() => {});
+                return;
+            }
+
+            // Déverrouillage sans paiement (flow legacy / test)
+            if (data && data.type === 'UNLOCK_PREMIUM_CHARS') {
+                localStorage.setItem(PREMIUM_KEY, '1');
+                notifyGameOfUnlock();
+                return;
+            }
+
             // Accepter 'SCORE' (générique) et 'ABIDJAN_RUN_SCORE' (spécifique au jeu)
             if (!data || (data.type !== 'SCORE' && data.type !== 'ABIDJAN_RUN_SCORE')) return;
 

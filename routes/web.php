@@ -568,6 +568,10 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/games/{product}/leaderboard', [\App\Http\Controllers\GameScoreController::class, 'leaderboard'])
         ->name('games.leaderboard');
 
+    // Déverrouillage premium in-game (paiement Paystack depuis l'iframe)
+    Route::post('/games/{product}/verify-premium', [\App\Http\Controllers\GameScoreController::class, 'verifyPremiumUnlock'])
+        ->name('games.verify-premium');
+
 });
 
 

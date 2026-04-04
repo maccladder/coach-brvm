@@ -2,9 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\GamePremiumUnlock;
 use App\Models\GameScore;
 use App\Models\MarketplaceProduct;
+use App\Services\PaystackService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class GameScoreController extends Controller
 {
@@ -64,6 +67,90 @@ class GameScoreController extends Controller
             'rank'       => $rank,
             'is_new_best'=> $data['score'] >= $best,
         ]);
+    }
+
+    /**
+     * POST /games/{product}/verify-premium
+     * Vérifie un paiement Paystack in-game et enregistre le déverrouillage premium.
+     */
+    public function verifyPremiumUnlock(Request $request, MarketplaceProduct $product, PaystackService $paystack)
+    {
+        $user = $request->user();
+
+        // L'utilisateur doit avoir acheté le jeu
+        $hasAccess = $user->purchasedProducts()
+            ->where('marketplace_products.id', $product->id)
+            ->wherePivot('status', 'paid')
+            ->exists();
+
+        if (!$hasAccess) {
+            return response()->json(['error' => 'Accès refusé'], 403);
+        }
+
+        if ($product->type !== 'game') {
+            return response()->json(['error' => 'Produit invalide'], 422);
+        }
+
+        $request->validate([
+            'ref'     => ['required', 'string', 'max:100'],
+            'feature' => ['sometimes', 'string', 'max:50'],
+        ]);
+
+        $ref     = (string) $request->input('ref');
+        $feature = (string) ($request->input('feature', 'premium_chars'));
+
+        // Déjà déverrouillé → renvoyer directement
+        $existing = GamePremiumUnlock::where('user_id', $user->id)
+            ->where('product_id', $product->id)
+            ->where('feature', $feature)
+            ->first();
+
+        if ($existing) {
+            return response()->json(['unlocked' => true, 'already' => true]);
+        }
+
+        // Vérification Paystack côté serveur (la clé secrète ne quitte jamais le serveur)
+        $data = $paystack->verify($ref);
+
+        if (!$data) {
+            Log::warning('GamePremiumUnlock: Paystack verify failed', [
+                'user_id'    => $user->id,
+                'product_id' => $product->id,
+                'ref'        => $ref,
+            ]);
+            return response()->json(['error' => 'Vérification Paystack échouée'], 402);
+        }
+
+        if (($data['status'] ?? null) !== 'success') {
+            return response()->json(['error' => 'Paiement non validé : ' . ($data['status'] ?? 'unknown')], 402);
+        }
+
+        // Montant reçu (Paystack retourne en kobo-like, /100 pour XOF)
+        $amountPaid = (int) (($data['amount'] ?? 0) / 100);
+
+        // Enregistrement (ignoré si doublon de ref grâce au unique index)
+        try {
+            GamePremiumUnlock::create([
+                'user_id'     => $user->id,
+                'product_id'  => $product->id,
+                'feature'     => $feature,
+                'paystack_ref'=> $ref,
+                'amount'      => $amountPaid,
+                'unlocked_at' => now(),
+            ]);
+        } catch (\Illuminate\Database\UniqueConstraintViolationException $e) {
+            // Ref ou (user, product, feature) déjà présent — OK quand même
+        }
+
+        Log::info('GamePremiumUnlock: unlocked', [
+            'user_id'    => $user->id,
+            'product_id' => $product->id,
+            'feature'    => $feature,
+            'amount'     => $amountPaid,
+            'ref'        => $ref,
+        ]);
+
+        return response()->json(['unlocked' => true, 'amount' => $amountPaid]);
     }
 
     /**
