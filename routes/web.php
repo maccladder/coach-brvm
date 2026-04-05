@@ -572,6 +572,10 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/games/{product}/verify-premium', [\App\Http\Controllers\GameScoreController::class, 'verifyPremiumUnlock'])
         ->name('games.verify-premium');
 
+    // Initialisation paiement premium (server-side, retourne l'authorization_url)
+    Route::post('/games/{product}/init-premium-payment', [\App\Http\Controllers\GameScoreController::class, 'initPremiumPayment'])
+        ->name('games.init-premium-payment');
+
     // Callback Paystack pour mobile (redirect flow)
     Route::get('/games/{product}/premium-callback', [\App\Http\Controllers\GameScoreController::class, 'premiumCallback'])
         ->name('games.premium-callback');

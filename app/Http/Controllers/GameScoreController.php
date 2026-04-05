@@ -154,6 +154,61 @@ class GameScoreController extends Controller
     }
 
     /**
+     * POST /games/{product}/init-premium-payment
+     * Initialise une transaction Paystack côté serveur et retourne l'authorization_url.
+     */
+    public function initPremiumPayment(Request $request, MarketplaceProduct $product, PaystackService $paystack)
+    {
+        $user = $request->user();
+
+        $hasAccess = $user
+            ? $user->purchasedProducts()
+                ->where('marketplace_products.id', $product->id)
+                ->wherePivot('status', 'paid')
+                ->exists()
+            : false;
+
+        if (!$hasAccess) {
+            return response()->json(['error' => 'Accès refusé'], 403);
+        }
+
+        if ($product->type !== 'game') {
+            return response()->json(['error' => 'Produit invalide'], 422);
+        }
+
+        // Déjà déverrouillé → pas besoin de payer
+        $existing = GamePremiumUnlock::where('user_id', $user->id)
+            ->where('product_id', $product->id)
+            ->where('feature', 'premium_chars')
+            ->first();
+
+        if ($existing) {
+            return response()->json(['already_unlocked' => true]);
+        }
+
+        $ref = 'ABRUN_PREM_' . round(microtime(true) * 1000);
+
+        $url = $paystack->initialize([
+            'email'        => $user->email,
+            'amount'       => 1000, // 1000 XOF (service * 100 = 100000 kobo)
+            'currency'     => 'XOF',
+            'reference'    => $ref,
+            'callback_url' => route('games.premium-callback', $product),
+            'metadata'     => [
+                'product_id' => $product->id,
+                'feature'    => 'premium_chars',
+                'user_id'    => $user->id,
+            ],
+        ]);
+
+        if (!$url) {
+            return response()->json(['error' => 'Erreur initialisation paiement'], 500);
+        }
+
+        return response()->json(['url' => $url]);
+    }
+
+    /**
      * GET /games/{product}/premium-callback
      * Callback Paystack pour mobile (redirect flow) — vérifie et sauvegarde le déverrouillage.
      */
