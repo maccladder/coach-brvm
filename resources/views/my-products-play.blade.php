@@ -131,7 +131,7 @@
     {{-- Iframe jeu --}}
     <iframe
         id="game-frame"
-        sandbox="allow-scripts allow-same-origin allow-pointer-lock allow-forms"
+        sandbox="allow-scripts allow-same-origin allow-pointer-lock allow-forms allow-popups allow-popups-to-escape-sandbox"
         allow="fullscreen"
         allowfullscreen
         src="{{ route('my.products.game-html', $product) }}"
