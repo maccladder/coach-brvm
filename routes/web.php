@@ -633,6 +633,12 @@ Route::post('/documents/payment/cinetpay/notify', [DocumentPaymentController::cl
 
 
 
+// Faux inline.js Paystack pour proxy de paiement sandbox-safe
+Route::get('/paystack-inline-mock.js', function () {
+    $js = 'window.PaystackPop={setup:function(o){try{window.parent.postMessage({type:"GAME_REQUEST_PAYMENT",char:(o.metadata&&o.metadata.char)||null},"*")}catch(e){}return{openIframe:function(){},openPopup:function(){}}}};';
+    return response($js, 200, ['Content-Type' => 'application/javascript', 'Cache-Control' => 'no-store']);
+})->name('paystack.mock-inline');
+
 Route::get('/test/paystack', [PaystackTestController::class, 'form'])->name('paystack.test');
 Route::post('/test/paystack/start', [PaystackTestController::class, 'start'])->name('paystack.start');
 Route::get('/paystack/callback', [PaystackTestController::class, 'callback'])->name('paystack.callback');

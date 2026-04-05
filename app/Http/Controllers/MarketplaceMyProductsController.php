@@ -86,45 +86,14 @@ class MarketplaceMyProductsController extends Controller
             abort(404);
         }
 
-        // Inject a sandbox-safe payment proxy at the TOP of <head>:
-        // Hooks Document.prototype.createElement to intercept when Paystack loads,
-        // then replaces PaystackPop.setup so the payment opens in the parent (outside sandbox).
-        $proxyScript = <<<'SCRIPT'
-<script>
-/* sandbox-payment-proxy v3: intercept PaystackPop.setup via createElement hook */
-(function () {
-    var _origCreate = Document.prototype.createElement;
-    Document.prototype.createElement = function (tagName) {
-        var el = _origCreate.apply(this, arguments);
-        if (typeof tagName === 'string' && tagName.toLowerCase() === 'script') {
-            el.addEventListener('load', function () {
-                if (window.PaystackPop && !window.PaystackPop.__sbprox) {
-                    window.PaystackPop.__sbprox = true;
-                    window.PaystackPop.setup = function (opts) {
-                        try {
-                            window.parent.postMessage({
-                                type: 'GAME_REQUEST_PAYMENT',
-                                char: (opts.metadata && opts.metadata.char) || null
-                            }, '*');
-                        } catch (e) {}
-                        return { openIframe: function () {}, openPopup: function () {} };
-                    };
-                }
-            });
-        }
-        return el;
-    };
-})();
-</script>
-SCRIPT;
-        $html = $product->game_html;
-        if (str_contains($html, '<head>')) {
-            $html = str_replace('<head>', '<head>' . "\n" . $proxyScript, $html);
-        } elseif (str_contains($html, '<body>')) {
-            $html = str_replace('<body>', '<body>' . "\n" . $proxyScript, $html);
-        } else {
-            $html = $proxyScript . "\n" . $html;
-        }
+        // Remplace l'URL de Paystack inline.js par notre faux script proxy.
+        // Le faux script intercepte PaystackPop.setup et délègue au parent (hors sandbox).
+        $mockUrl = route('paystack.mock-inline');
+        $html = str_replace(
+            ['https://js.paystack.co/v1/inline.js', "https://js.paystack.co/v1/inline.js"],
+            $mockUrl,
+            $product->game_html
+        );
 
         return response($html, 200)
             ->header('Content-Type', 'text/html; charset=UTF-8')
