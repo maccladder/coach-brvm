@@ -287,6 +287,7 @@
                     amount: 100000,
                     currency: 'XOF',
                     ref: ref,
+                    callback_url: '{{ route('games.premium-callback', $product) }}',
                     metadata: { char: char, feature: 'premium_chars' },
                     onSuccess: function (transaction) {
                         fetch(VERIFY_PREMIUM_URL, {

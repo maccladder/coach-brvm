@@ -572,6 +572,10 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/games/{product}/verify-premium', [\App\Http\Controllers\GameScoreController::class, 'verifyPremiumUnlock'])
         ->name('games.verify-premium');
 
+    // Callback Paystack pour mobile (redirect flow)
+    Route::get('/games/{product}/premium-callback', [\App\Http\Controllers\GameScoreController::class, 'premiumCallback'])
+        ->name('games.premium-callback');
+
 });
 
 

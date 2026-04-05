@@ -154,6 +154,66 @@ class GameScoreController extends Controller
     }
 
     /**
+     * GET /games/{product}/premium-callback
+     * Callback Paystack pour mobile (redirect flow) — vérifie et sauvegarde le déverrouillage.
+     */
+    public function premiumCallback(Request $request, MarketplaceProduct $product, PaystackService $paystack)
+    {
+        $user = $request->user();
+
+        $hasAccess = $user
+            ? $user->purchasedProducts()
+                ->where('marketplace_products.id', $product->id)
+                ->wherePivot('status', 'paid')
+                ->exists()
+            : false;
+
+        if (!$hasAccess) {
+            return redirect()->route('my.products.play', $product);
+        }
+
+        $reference = (string) $request->query('reference', $request->query('trxref', ''));
+
+        if ($reference) {
+            $existing = GamePremiumUnlock::where('user_id', $user->id)
+                ->where('product_id', $product->id)
+                ->where('feature', 'premium_chars')
+                ->first();
+
+            if (!$existing) {
+                $data = $paystack->verify($reference);
+
+                if ($data && ($data['status'] ?? null) === 'success') {
+                    $amountPaid = (int) (($data['amount'] ?? 0) / 100);
+
+                    try {
+                        GamePremiumUnlock::create([
+                            'user_id'      => $user->id,
+                            'product_id'   => $product->id,
+                            'feature'      => 'premium_chars',
+                            'paystack_ref' => $reference,
+                            'amount'       => $amountPaid,
+                            'unlocked_at'  => now(),
+                        ]);
+
+                        Log::info('GamePremiumUnlock (mobile callback): unlocked', [
+                            'user_id'    => $user->id,
+                            'product_id' => $product->id,
+                            'ref'        => $reference,
+                            'amount'     => $amountPaid,
+                        ]);
+                    } catch (\Illuminate\Database\UniqueConstraintViolationException $e) {
+                        // déjà enregistré
+                    }
+                }
+            }
+        }
+
+        // Redirige vers la page de jeu — le contrôleur play() relira l'unlock en DB
+        return redirect()->route('my.products.play', $product);
+    }
+
+    /**
      * GET /games/{product}/leaderboard
      * Top 20 scores (meilleur score par joueur) + score du joueur connecte.
      */
