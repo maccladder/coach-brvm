@@ -86,29 +86,45 @@ class MarketplaceMyProductsController extends Controller
             abort(404);
         }
 
-        // Inject a sandbox-safe payment proxy: delegates Paystack to the parent page
+        // Inject a sandbox-safe payment proxy at the TOP of <head>:
+        // Hooks Document.prototype.createElement to intercept when Paystack loads,
+        // then replaces PaystackPop.setup so the payment opens in the parent (outside sandbox).
         $proxyScript = <<<'SCRIPT'
 <script>
-/* sandbox-payment-proxy: intercept payWithPaystack() and forward to parent */
+/* sandbox-payment-proxy v3: intercept PaystackPop.setup via createElement hook */
 (function () {
-    function installProxy() {
-        if (typeof window.payWithPaystack === 'function') {
-            window.payWithPaystack = function () {
-                window.parent.postMessage({
-                    type: 'GAME_REQUEST_PAYMENT',
-                    char: window.pendingPremiumChar || null
-                }, '*');
-            };
+    var _origCreate = Document.prototype.createElement;
+    Document.prototype.createElement = function (tagName) {
+        var el = _origCreate.apply(this, arguments);
+        if (typeof tagName === 'string' && tagName.toLowerCase() === 'script') {
+            el.addEventListener('load', function () {
+                if (window.PaystackPop && !window.PaystackPop.__sbprox) {
+                    window.PaystackPop.__sbprox = true;
+                    window.PaystackPop.setup = function (opts) {
+                        try {
+                            window.parent.postMessage({
+                                type: 'GAME_REQUEST_PAYMENT',
+                                char: (opts.metadata && opts.metadata.char) || null
+                            }, '*');
+                        } catch (e) {}
+                        return { openIframe: function () {}, openPopup: function () {} };
+                    };
+                }
+            });
         }
-    }
-    installProxy();
-    window.addEventListener('load', installProxy);
+        return el;
+    };
 })();
 </script>
 SCRIPT;
-        $html = str_contains($product->game_html, '</body>')
-            ? str_replace('</body>', $proxyScript . "\n</body>", $product->game_html)
-            : $product->game_html . $proxyScript;
+        $html = $product->game_html;
+        if (str_contains($html, '<head>')) {
+            $html = str_replace('<head>', '<head>' . "\n" . $proxyScript, $html);
+        } elseif (str_contains($html, '<body>')) {
+            $html = str_replace('<body>', '<body>' . "\n" . $proxyScript, $html);
+        } else {
+            $html = $proxyScript . "\n" . $html;
+        }
 
         return response($html, 200)
             ->header('Content-Type', 'text/html; charset=UTF-8')
