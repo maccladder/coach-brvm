@@ -20,15 +20,15 @@ class PaystackTestController extends Controller
             'amount' => ['required','integer','min:100'],
         ]);
 
-        $reference = 'PS_' . Str::uuid()->toString(); // référence unique
+        $reference = 'PS_' . Str::uuid()->toString();
 
-        $url = $paystack->createPayment([
-            'transaction_id' => $reference,
-            'amount'         => (int) $request->amount,
-            'currency'       => 'XOF',
-            'customer_email' => $request->email,
-            'return_url'     => route('paystack.callback'), // callback
-            'metadata'       => [
+        $url = $paystack->initialize([
+            'email'        => $request->email,
+            'amount'       => (int) $request->amount,
+            'currency'     => 'XOF',
+            'reference'    => $reference,
+            'callback_url' => route('paystack.callback'),
+            'metadata'     => [
                 'type'   => 'paystack_test',
                 'amount' => (int) $request->amount,
             ],
@@ -43,9 +43,9 @@ class PaystackTestController extends Controller
 
     public function callback(Request $request, PaystackService $paystack)
     {
-        $reference = (string) $request->query('reference', '');
+        $reference = (string) $request->query('reference', $request->query('trxref', ''));
 
-        $result = $paystack->checkPayment($reference);
+        $result = $reference ? $paystack->verify($reference) : null;
 
         return view('payments.paystack_result', [
             'reference' => $reference,
