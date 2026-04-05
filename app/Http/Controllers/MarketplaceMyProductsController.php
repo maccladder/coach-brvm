@@ -86,7 +86,31 @@ class MarketplaceMyProductsController extends Controller
             abort(404);
         }
 
-        return response($product->game_html, 200)
+        // Inject a sandbox-safe payment proxy: delegates Paystack to the parent page
+        $proxyScript = <<<'SCRIPT'
+<script>
+/* sandbox-payment-proxy: intercept payWithPaystack() and forward to parent */
+(function () {
+    function installProxy() {
+        if (typeof window.payWithPaystack === 'function') {
+            window.payWithPaystack = function () {
+                window.parent.postMessage({
+                    type: 'GAME_REQUEST_PAYMENT',
+                    char: window.pendingPremiumChar || null
+                }, '*');
+            };
+        }
+    }
+    installProxy();
+    window.addEventListener('load', installProxy);
+})();
+</script>
+SCRIPT;
+        $html = str_contains($product->game_html, '</body>')
+            ? str_replace('</body>', $proxyScript . "\n</body>", $product->game_html)
+            : $product->game_html . $proxyScript;
+
+        return response($html, 200)
             ->header('Content-Type', 'text/html; charset=UTF-8')
             ->header('X-Frame-Options', 'SAMEORIGIN')
             ->header('Cache-Control', 'no-store');

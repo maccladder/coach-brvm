@@ -210,7 +210,13 @@
 
             const data = event.data;
 
-            // Paiement Paystack in-game → vérification serveur
+            // Game demande un paiement premium → on l'ouvre depuis le parent (hors sandbox)
+            if (data && data.type === 'GAME_REQUEST_PAYMENT') {
+                openPaystackFromParent(data.char);
+                return;
+            }
+
+            // Paiement Paystack in-game → vérification serveur (legacy)
             if (data && data.type === 'ABIDJAN_RUN_PREMIUM_UNLOCKED' && data.ref) {
                 fetch(VERIFY_PREMIUM_URL, {
                     method: 'POST',
@@ -270,6 +276,51 @@
             })
             .catch(() => { saving.classList.remove('show'); });
         });
+
+        // ── Paiement Paystack depuis le parent (hors sandbox) ────────────
+        function openPaystackFromParent(char) {
+            function doOpen() {
+                var ref = 'ABRUN_PREM_' + Date.now();
+                var handler = window.PaystackPop.setup({
+                    key: 'pk_live_ac37325aef51c38e909ae9013cdfbe8d636a1abe',
+                    email: '{{ auth()->user()->email }}',
+                    amount: 100000,
+                    currency: 'XOF',
+                    ref: ref,
+                    metadata: { char: char, feature: 'premium_chars' },
+                    onSuccess: function (transaction) {
+                        fetch(VERIFY_PREMIUM_URL, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': CSRF_TOKEN,
+                                'Accept': 'application/json',
+                            },
+                            body: JSON.stringify({ ref: transaction.reference, feature: 'premium_chars' }),
+                        })
+                        .then(r => r.json())
+                        .then(res => {
+                            if (res.unlocked) {
+                                localStorage.setItem(PREMIUM_KEY, '1');
+                                notifyGameOfUnlock();
+                            }
+                        })
+                        .catch(() => {});
+                    },
+                    onCancel: function () {},
+                });
+                handler.openIframe();
+            }
+
+            if (window.PaystackPop) {
+                doOpen();
+            } else {
+                var s = document.createElement('script');
+                s.src = 'https://js.paystack.co/v1/inline.js';
+                s.onload = doOpen;
+                document.head.appendChild(s);
+            }
+        }
 
         function showToast(score, distance, coins, rank, isNewBest) {
             document.getElementById('toast-score-val').textContent = score.toLocaleString('fr-FR');
