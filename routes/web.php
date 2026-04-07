@@ -308,6 +308,10 @@ Route::post('/{product}/publish', [MarketplaceProductAdminController::class, 'pu
 
     Route::post('/{product}/approve', [MarketplaceProductAdminController::class, 'approve'])->name('approve');
     Route::post('/{product}/reject', [MarketplaceProductAdminController::class, 'reject'])->name('reject');
+
+    // 🎮 Test admin du jeu (adminMode forcé à true, sans vérif achat)
+    Route::get('/{product}/play', [MarketplaceProductAdminController::class, 'playAdmin'])->name('play');
+    Route::get('/{product}/game-html', [MarketplaceProductAdminController::class, 'gameHtmlAdmin'])->name('game-html');
 });
 
 // ✅ Catégories (ADMIN)

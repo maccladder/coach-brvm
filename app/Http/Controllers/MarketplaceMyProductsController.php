@@ -95,6 +95,11 @@ class MarketplaceMyProductsController extends Controller
             $product->game_html
         );
 
+        // Injecte le flag admin côté serveur — le placeholder __ADMIN_MODE__ n'apparaît
+        // jamais dans le HTML servi, donc le secret n'est pas exposé aux joueurs.
+        $isAdmin = session('is_admin') ? 'true' : 'false';
+        $html = str_replace('__ADMIN_MODE__', $isAdmin, $html);
+
         return response($html, 200)
             ->header('Content-Type', 'text/html; charset=UTF-8')
             ->header('X-Frame-Options', 'SAMEORIGIN')

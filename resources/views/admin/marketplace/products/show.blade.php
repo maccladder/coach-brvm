@@ -100,6 +100,11 @@
                             <a class="btn btn-outline-dark" target="_blank" href="{{ route('marketplace.show', $product->slug) }}">
                                 🌍 Voir côté public
                             </a>
+                            @if($product->type === 'game' && !empty($product->game_html))
+                                <a class="btn btn-warning" target="_blank" href="{{ route('admin.marketplace.play', $product) }}">
+                                    🎮 Tester le jeu
+                                </a>
+                            @endif
                         </div>
 
                     </div>

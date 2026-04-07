@@ -441,6 +441,37 @@ class MarketplaceProductAdminController extends Controller
         return back()->with('success', 'Produit supprimé ✅');
     }
 
+    public function playAdmin(MarketplaceProduct $product)
+    {
+        if ($product->type !== 'game' || empty($product->game_html)) {
+            abort(404, "Ce produit n'est pas un jeu ou n'a pas de HTML.");
+        }
+
+        return view('admin.marketplace.products.play', compact('product'));
+    }
+
+    public function gameHtmlAdmin(MarketplaceProduct $product)
+    {
+        if ($product->type !== 'game' || empty($product->game_html)) {
+            abort(404);
+        }
+
+        $mockUrl = route('paystack.mock-inline');
+        $html = str_replace(
+            ['https://js.paystack.co/v1/inline.js'],
+            $mockUrl,
+            $product->game_html
+        );
+
+        // Force adminMode = true — l'admin n'a pas besoin d'acheter le jeu
+        $html = str_replace('__ADMIN_MODE__', 'true', $html);
+
+        return response($html, 200)
+            ->header('Content-Type', 'text/html; charset=UTF-8')
+            ->header('X-Frame-Options', 'SAMEORIGIN')
+            ->header('Cache-Control', 'no-store');
+    }
+
    public function approve(Request $request, MarketplaceProduct $product)
 {
     if ($product->status !== 'pending') {
