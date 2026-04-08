@@ -437,6 +437,10 @@ class MarketplaceProductAdminController extends Controller
 
     public function destroy(MarketplaceProduct $product)
     {
+        if (!session('is_admin')) {
+            abort(403, 'Action réservée aux administrateurs.');
+        }
+
         $product->delete();
         return back()->with('success', 'Produit supprimé ✅');
     }
@@ -550,6 +554,10 @@ class MarketplaceProductAdminController extends Controller
 
     public function reject(Request $request, MarketplaceProduct $product)
 {
+    if (!session('is_admin')) {
+        abort(403, 'Action réservée aux administrateurs.');
+    }
+
     if ($product->status !== 'pending') {
         return back()->with('warning', "Ce produit n'est pas en attente.");
     }

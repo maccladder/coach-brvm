@@ -5,12 +5,12 @@ namespace App\Http\Middleware;
 use Closure;
 use Illuminate\Http\Request;
 
-class AdminCodeMiddleware
+class StagiaireCodeMiddleware
 {
     public function handle(Request $request, Closure $next)
     {
-        if (!session('is_admin') && !session('is_stagiaire')) {
-            return redirect()->route('admin.login.form')
+        if (!session('is_stagiaire') && !session('is_admin')) {
+            return redirect()->route('stagiaire.login.form')
                 ->with('error', 'Authentification requise.');
         }
 

@@ -61,6 +61,10 @@ class MarketplaceCategoryAdminController extends Controller
 
     public function destroy(MarketplaceCategory $marketplace_category)
     {
+        if (!session('is_admin')) {
+            abort(403, 'Action réservée aux administrateurs.');
+        }
+
         $marketplace_category->delete();
         return back()->with('success', 'Catégorie supprimée ✅');
     }

@@ -128,6 +128,10 @@ public function reject(Request $request, \App\Models\Document $document)
 
     public function destroy(Document $document)
     {
+        if (!session('is_admin')) {
+            abort(403, 'Action réservée aux administrateurs.');
+        }
+
         // (Option) Empêcher suppression si déjà vendu
         if ($document->purchases()->exists()) {
             return back()->with('error', "Impossible : ce document a déjà des ventes.");

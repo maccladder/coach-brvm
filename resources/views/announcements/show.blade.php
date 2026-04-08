@@ -218,33 +218,59 @@
             <div class="ann-article-excerpt">{{ $announcement->excerpt }}</div>
         @endif
 
-        {{-- Pièce jointe --}}
-        @if($announcement->attachment_url)
+        {{-- Pièces jointes multiples --}}
+        @php
+            $attachments = $announcement->attachments ?? collect();
+            $images = $attachments->where('type', 'image');
+            $docs   = $attachments->whereIn('type', ['pdf', 'doc']);
+        @endphp
+
+        {{-- Galerie images --}}
+        @if($images->count())
+            @foreach($images as $img)
+            <div class="ann-attachment">
+                <img src="{{ $img->url }}" alt="{{ $img->original_name }}" class="ann-attachment-img">
+                <div class="ann-attachment-footer">
+                    <span class="ann-attachment-label">🖼️ {{ $img->original_name }}</span>
+                    <a href="{{ $img->url }}" download="{{ $img->original_name }}"
+                       class="cb-btn-outline" style="font-size:11px;padding:7px 14px;">
+                        <i class="bi bi-download"></i> Télécharger
+                    </a>
+                </div>
+            </div>
+            @endforeach
+        @endif
+
+        {{-- Documents PDF / DOC --}}
+        @foreach($docs as $doc)
+        <div class="ann-pdf-box">
+            <span class="ann-pdf-label">
+                <i class="bi bi-file-earmark-{{ $doc->type === 'pdf' ? 'pdf' : 'word' }}"></i>
+                {{ $doc->original_name }}
+            </span>
+            <a href="{{ $doc->url }}" download="{{ $doc->original_name }}"
+               class="cb-btn-gold" style="font-size:11px;padding:9px 18px;">
+                <i class="bi bi-download"></i> Télécharger
+            </a>
+        </div>
+        @endforeach
+
+        {{-- Rétrocompat : ancienne pièce jointe unique --}}
+        @if(!$attachments->count() && $announcement->attachment_url)
             @if($announcement->attachment_type === 'image')
                 <div class="ann-attachment">
-                    <img src="{{ $announcement->attachment_url }}"
-                         alt="Pièce jointe"
-                         class="ann-attachment-img">
+                    <img src="{{ $announcement->attachment_url }}" alt="Pièce jointe" class="ann-attachment-img">
                     <div class="ann-attachment-footer">
                         <span class="ann-attachment-label">🖼️ Pièce jointe</span>
-                        <a href="{{ $announcement->attachment_url }}"
-                           target="_blank"
-                           class="cb-btn-outline" style="font-size:11px;padding:7px 14px;">
-                            Ouvrir l'image →
-                        </a>
+                        <a href="{{ $announcement->attachment_url }}" target="_blank"
+                           class="cb-btn-outline" style="font-size:11px;padding:7px 14px;">Ouvrir →</a>
                     </div>
                 </div>
-
             @elseif($announcement->attachment_type === 'pdf')
                 <div class="ann-pdf-box">
-                    <span class="ann-pdf-label">
-                        <i class="bi bi-file-earmark-pdf"></i>
-                        Pièce jointe PDF disponible
-                    </span>
-                    <a href="{{ $announcement->attachment_url }}"
-                       target="_blank"
-                       class="cb-btn-gold" style="font-size:11px;padding:9px 18px;">
-                        <i class="bi bi-download"></i> Ouvrir le PDF
+                    <span class="ann-pdf-label"><i class="bi bi-file-earmark-pdf"></i> PDF disponible</span>
+                    <a href="{{ $announcement->attachment_url }}" target="_blank" class="cb-btn-gold" style="font-size:11px;padding:9px 18px;">
+                        <i class="bi bi-download"></i> Ouvrir
                     </a>
                 </div>
             @endif

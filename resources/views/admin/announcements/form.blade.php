@@ -1,6 +1,4 @@
-@php
-  $a = $announcement;
-@endphp
+@php $a = $announcement; @endphp
 
 <div class="mb-3">
     <label class="form-label fw-semibold">Titre</label>
@@ -20,7 +18,7 @@
     @error('content') <div class="text-danger small">{{ $message }}</div> @enderror
 </div>
 
-<div class="row g-3">
+<div class="row g-3 mb-4">
     <div class="col-md-4">
         <label class="form-label fw-semibold">Publié ?</label>
         <select name="is_published" class="form-select">
@@ -28,37 +26,63 @@
             <option value="0" {{ !old('is_published', $a->is_published ?? true) ? 'selected' : '' }}>Non</option>
         </select>
     </div>
-
     <div class="col-md-8">
         <label class="form-label fw-semibold">Date/heure de publication (optionnel)</label>
         <input type="datetime-local" name="published_at" class="form-control"
                value="{{ old('published_at', isset($a->published_at) ? $a->published_at->format('Y-m-d\TH:i') : '') }}">
-        <div class="text-muted small">Si vide: l’annonce est visible dès maintenant (si “Publié = Oui”).</div>
+        <div class="text-muted small">Si vide : visible dès maintenant (si "Publié = Oui").</div>
     </div>
 </div>
 
 <hr class="my-4">
 
-<div class="mb-3">
-    <label class="form-label fw-semibold">Pièce jointe (image/pdf) (optionnel)</label>
-    <input type="file" name="attachment" class="form-control" accept=".jpg,.jpeg,.png,.webp,.pdf">
-    @error('attachment') <div class="text-danger small">{{ $message }}</div> @enderror
-
-    @if(!empty($a?->attachment_url))
-        <div class="mt-2">
-            <div class="text-muted small">Actuelle :</div>
-            @if($a->attachment_type === 'image')
-                <img src="{{ $a->attachment_url }}" class="img-fluid rounded border mt-1" style="max-height:220px;">
-            @else
-                <a class="btn btn-sm btn-outline-primary mt-1" target="_blank" href="{{ $a->attachment_url }}">📄 Voir PDF</a>
-            @endif
-
-            <div class="form-check mt-2">
-                <input class="form-check-input" type="checkbox" name="remove_attachment" value="1" id="remove_attachment">
-                <label class="form-check-label" for="remove_attachment">Supprimer la pièce jointe</label>
+{{-- ── Pièces jointes existantes ── --}}
+@if(!empty($a) && $a->attachments?->count())
+<div class="mb-4">
+    <label class="form-label fw-semibold">Fichiers actuels</label>
+    <div class="row g-2">
+        @foreach($a->attachments as $att)
+        <div class="col-sm-6 col-md-4">
+            <div class="border rounded p-2 bg-light d-flex flex-column gap-1">
+                @if($att->is_image)
+                    <img src="{{ $att->url }}" class="img-fluid rounded" style="max-height:140px;object-fit:cover;">
+                @else
+                    <div class="d-flex align-items-center gap-2 py-2">
+                        <i class="bi bi-file-earmark-{{ $att->type === 'pdf' ? 'pdf text-danger' : 'word text-primary' }} fs-3"></i>
+                        <span class="small text-truncate">{{ $att->original_name }}</span>
+                    </div>
+                @endif
+                <div class="d-flex align-items-center justify-content-between mt-1">
+                    <a href="{{ $att->url }}" target="_blank" class="btn btn-sm btn-outline-secondary">
+                        <i class="bi bi-eye"></i>
+                    </a>
+                    <div class="form-check mb-0">
+                        <input class="form-check-input" type="checkbox"
+                               name="remove_ids[]" value="{{ $att->id }}"
+                               id="remove_{{ $att->id }}">
+                        <label class="form-check-label text-danger small" for="remove_{{ $att->id }}">
+                            Supprimer
+                        </label>
+                    </div>
+                </div>
             </div>
         </div>
-    @endif
+        @endforeach
+    </div>
+</div>
+@endif
+
+{{-- ── Nouveaux fichiers ── --}}
+<div class="mb-4">
+    <label class="form-label fw-semibold">
+        {{ !empty($a) && $a->attachments?->count() ? 'Ajouter des fichiers' : 'Fichiers (images / PDF / docs)' }}
+    </label>
+    <input type="file" name="files[]" class="form-control"
+           accept=".jpg,.jpeg,.png,.webp,.gif,.pdf,.doc,.docx"
+           multiple>
+    <div class="text-muted small mt-1">Plusieurs fichiers acceptés · jpg, png, webp, gif, pdf, doc, docx · 20 Mo max/fichier</div>
+    @error('files')   <div class="text-danger small">{{ $message }}</div> @enderror
+    @error('files.*') <div class="text-danger small">{{ $message }}</div> @enderror
 </div>
 
 <div class="d-flex gap-2">

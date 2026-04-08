@@ -188,8 +188,17 @@
                         </div>
                     </div>
 
-                    {{-- Logout --}}
+                    {{-- Logout admin --}}
                     <form action="{{ route('admin.logout') }}" method="POST" class="d-flex">
+                        @csrf
+                        <button class="btn btn-outline-light btn-sm">
+                            Se déconnecter
+                        </button>
+                    </form>
+                @elseif(session('is_stagiaire'))
+                    <span class="badge bg-warning text-dark me-1">Stagiaire</span>
+                    {{-- Logout stagiaire --}}
+                    <form action="{{ route('stagiaire.logout') }}" method="POST" class="d-flex">
                         @csrf
                         <button class="btn btn-outline-light btn-sm">
                             Se déconnecter

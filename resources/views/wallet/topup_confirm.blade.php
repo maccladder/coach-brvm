@@ -28,8 +28,6 @@
 
     /* Boutons paiement */
     .pay-btn { display:inline-flex;align-items:center;justify-content:center;gap:10px;font-family:'Syne',sans-serif;font-weight:800;font-size:13px;letter-spacing:.08em;text-transform:uppercase;padding:14px 28px;border:none;border-radius:3px;cursor:pointer;transition:all .3s; }
-    .pay-btn-cinetpay { background:linear-gradient(135deg,#0FCFA4,#0a9e7d);color:#050810 !important; }
-    .pay-btn-cinetpay:hover { box-shadow:0 8px 24px rgba(15,207,164,.3);transform:translateY(-1px); }
     .pay-btn-paystack { background:linear-gradient(135deg,#C9A84C,#9B6B15);color:#050810 !important; }
     .pay-btn-paystack:hover { box-shadow:0 8px 24px rgba(201,168,76,.3);transform:translateY(-1px); }
     .pay-btn-cancel { display:inline-flex;align-items:center;gap:8px;background:transparent;color:#6B7590 !important;font-family:'Syne',sans-serif;font-weight:600;font-size:12px;letter-spacing:.07em;text-transform:uppercase;padding:13px 20px;border:1px solid rgba(255,255,255,.1);border-radius:3px;text-decoration:none;transition:all .3s; }
@@ -79,19 +77,11 @@
                 {{-- Boutons paiement --}}
                 <div class="pay-actions">
 
-                    <form method="POST" action="{{ route('wallet.topup.pay') }}">
-                        @csrf
-                        <input type="hidden" name="payment_id" value="{{ $payment->id }}">
-                        <button type="submit" class="pay-btn pay-btn-cinetpay">
-                            💳 CinetPay
-                        </button>
-                    </form>
-
                     <form method="POST" action="{{ route('wallet.topup.paystack') }}">
                         @csrf
                         <input type="hidden" name="payment_id" value="{{ $payment->id }}">
                         <button type="submit" class="pay-btn pay-btn-paystack">
-                            🔐 Paystack
+                            Payer
                         </button>
                     </form>
 

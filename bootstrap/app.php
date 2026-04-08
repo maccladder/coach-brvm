@@ -44,8 +44,9 @@ return Application::configure(basePath: dirname(__DIR__))
          * 🔐 Middleware Admin (code secret) + 🛍️ Vendor mode
          */
         $middleware->alias([
-            'admin.code'   => \App\Http\Middleware\AdminCodeMiddleware::class,
-            'vendor.mode'  => \App\Http\Middleware\EnsureVendorMode::class,
+            'admin.code'     => \App\Http\Middleware\AdminCodeMiddleware::class,
+            'stagiaire.code' => \App\Http\Middleware\StagiaireCodeMiddleware::class,
+            'vendor.mode'    => \App\Http\Middleware\EnsureVendorMode::class,
         ]);
 
         // $middleware->append(\App\Http\Middleware\TestMiddleware::class);

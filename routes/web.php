@@ -52,6 +52,7 @@ use App\Http\Controllers\VendorEarningsController;
 use App\Http\Controllers\VendorModeController;
 use App\Http\Controllers\VendorPayoutAdminController;
 use App\Http\Controllers\VendorProductController;
+use App\Http\Controllers\StagiaireController;
 use App\Http\Controllers\VirtualWalletController;
 use App\Services\BrvmActionsAiService;
 use App\Services\BrvmMarketAiService;
@@ -342,6 +343,19 @@ Route::prefix('topups')->name('topups.')->group(function () {
         // ✅ Annonces ADMIN (CRUD)
         Route::resource('announcements', AdminAnnouncementController::class)->except(['show']);
     });
+});
+
+/*
+|--------------------------------------------------------------------------
+| Stagiaire
+|--------------------------------------------------------------------------
+*/
+Route::prefix('stagiaire')->name('stagiaire.')->group(function () {
+    Route::get('/login',  [StagiaireController::class, 'showLoginForm'])->name('login.form');
+    Route::post('/login', [StagiaireController::class, 'login'])->name('login');
+    Route::post('/logout', [StagiaireController::class, 'logout'])
+        ->middleware('stagiaire.code')
+        ->name('logout');
 });
 
 /*

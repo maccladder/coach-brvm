@@ -25,6 +25,8 @@ class AnnouncementController extends Controller
             abort(404);
         }
 
+        $announcement->load('attachments');
+
         return view('announcements.show', compact('announcement'));
     }
 }

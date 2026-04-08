@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Carbon;
 
 class Announcement extends Model
@@ -22,6 +23,11 @@ class Announcement extends Model
         'is_published' => 'boolean',
         'published_at' => 'datetime',
     ];
+
+    public function attachments(): HasMany
+    {
+        return $this->hasMany(AnnouncementAttachment::class)->orderBy('sort');
+    }
 
     public function scopePublished(Builder $query): Builder
     {

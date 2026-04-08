@@ -40,12 +40,14 @@
                     <button class="btn btn-success">✅ Approuver</button>
                 </form>
 
+                @if(session('is_admin'))
                 <form method="POST" action="{{ route('admin.marketplace.reject', $product) }}" class="d-flex gap-2">
                     @csrf
                     <input type="text" name="admin_note" class="form-control"
                            placeholder="Motif (obligatoire)" required style="max-width:300px;">
                     <button class="btn btn-outline-danger">⛔ Rejeter</button>
                 </form>
+                @endif
             </div>
         @endif
     </div>

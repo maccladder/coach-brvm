@@ -9,6 +9,7 @@ use Illuminate\Notifications\Notifiable;
 use App\Models\VirtualWallet;
 use App\Models\VirtualPosition;
 use App\Models\VirtualWalletTransaction;
+use App\Notifications\ResetPasswordNotification;
 
 class User extends Authenticatable
 {
@@ -25,6 +26,11 @@ class User extends Authenticatable
         'email',
         'password',
     ];
+
+    public function sendPasswordResetNotification($token): void
+    {
+        $this->notify(new ResetPasswordNotification($token));
+    }
 
    public function virtualWallet()
 {
