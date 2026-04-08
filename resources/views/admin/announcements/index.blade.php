@@ -43,10 +43,12 @@
                             </td>
                             <td class="text-end">
                                 <a href="{{ route('admin.announcements.edit', $a->id) }}" class="btn btn-sm btn-outline-primary">Modifier</a>
+                                @if(session('is_admin'))
                                 <form action="{{ route('admin.announcements.destroy', $a->id) }}" method="POST" class="d-inline">
                                     @csrf @method('DELETE')
                                     <button class="btn btn-sm btn-outline-danger" onclick="return confirm('Supprimer cette annonce ?')">Supprimer</button>
                                 </form>
+                                @endif
                             </td>
                         </tr>
                     @empty

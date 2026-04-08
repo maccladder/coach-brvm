@@ -46,6 +46,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'admin.code'     => \App\Http\Middleware\AdminCodeMiddleware::class,
             'stagiaire.code' => \App\Http\Middleware\StagiaireCodeMiddleware::class,
+            'stagiaire.log'  => \App\Http\Middleware\StagiaireActivityLogger::class,
             'vendor.mode'    => \App\Http\Middleware\EnsureVendorMode::class,
         ]);
 

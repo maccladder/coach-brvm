@@ -172,12 +172,14 @@
                                     Modifier
                                 </a>
 
+                                @if(session('is_admin'))
                                 <form action="{{ route('admin.marketplace.destroy', $p) }}" method="POST" class="d-inline"
                                       onsubmit="return confirm('Supprimer ce produit ?');">
                                     @csrf
                                     @method('DELETE')
                                     <button class="btn btn-sm btn-outline-danger">Supprimer</button>
                                 </form>
+                                @endif
                             </td>
                         </tr>
                     @empty

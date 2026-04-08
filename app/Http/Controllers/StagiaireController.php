@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\StagiaireLog;
 use Illuminate\Http\Request;
 
 class StagiaireController extends Controller
@@ -25,11 +26,15 @@ class StagiaireController extends Controller
 
         session(['is_stagiaire' => true]);
 
+        StagiaireLog::record('login', 'Connexion au panel stagiaire', 'stagiaire.login', 'POST');
+
         return redirect()->route('admin.dashboard');
     }
 
     public function logout(Request $request)
     {
+        StagiaireLog::record('logout', 'Déconnexion du panel stagiaire', 'stagiaire.logout', 'POST');
+
         $request->session()->forget('is_stagiaire');
 
         return redirect()->route('stagiaire.login.form')

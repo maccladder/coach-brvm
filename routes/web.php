@@ -53,6 +53,7 @@ use App\Http\Controllers\VendorModeController;
 use App\Http\Controllers\VendorPayoutAdminController;
 use App\Http\Controllers\VendorProductController;
 use App\Http\Controllers\StagiaireController;
+use App\Http\Controllers\StagiaireLogController;
 use App\Http\Controllers\VirtualWalletController;
 use App\Services\BrvmActionsAiService;
 use App\Services\BrvmMarketAiService;
@@ -240,7 +241,7 @@ Route::get('/users', [AdminUserController::class, 'index'])
 Route::post('/emails/send', [AdminEmailController::class, 'send'])
     ->name('emails.send');
 
-    Route::middleware('admin.code')->group(function () {
+    Route::middleware(['admin.code', 'stagiaire.log'])->group(function () {
 
         Route::post('/logout', [AdminController::class, 'logout'])->name('logout');
         Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
@@ -342,6 +343,10 @@ Route::prefix('topups')->name('topups.')->group(function () {
 
         // ✅ Annonces ADMIN (CRUD)
         Route::resource('announcements', AdminAnnouncementController::class)->except(['show']);
+
+        // 📋 Logs stagiaire (admin only)
+        Route::get('/stagiaire/logs', [StagiaireLogController::class, 'index'])->name('stagiaire.logs');
+        Route::post('/stagiaire/logs/clear', [StagiaireLogController::class, 'clear'])->name('stagiaire.logs.clear');
     });
 });
 

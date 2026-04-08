@@ -16,6 +16,7 @@
                 ← Retour
             </a>
 
+            @if(session('is_admin'))
             {{-- ✅ DELETE form séparé (PAS imbriqué) --}}
             <form id="deleteForm"
                   action="{{ route('admin.marketplace.destroy', $product) }}"
@@ -27,6 +28,7 @@
                     Supprimer
                 </button>
             </form>
+            @endif
         </div>
     </div>
 

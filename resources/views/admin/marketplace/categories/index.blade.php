@@ -48,6 +48,7 @@
                                     <a href="{{ route('admin.marketplace-categories.edit', $c) }}"
                                        class="btn btn-sm btn-outline-primary">Modifier</a>
 
+                                    @if(session('is_admin'))
                                     <form action="{{ route('admin.marketplace-categories.destroy', $c) }}"
                                           method="POST" class="d-inline"
                                           onsubmit="return confirm('Supprimer cette catégorie ?');">
@@ -55,6 +56,7 @@
                                         @method('DELETE')
                                         <button class="btn btn-sm btn-outline-danger">Supprimer</button>
                                     </form>
+                                    @endif
                                 </td>
                             </tr>
                         @empty

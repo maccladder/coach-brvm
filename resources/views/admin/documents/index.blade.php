@@ -56,6 +56,7 @@
                                     </button>
                                 </form>
 
+                                @if(session('is_admin'))
                                 <form action="{{ route('admin.documents.destroy', $doc) }}" method="POST" class="d-inline"
                                       onsubmit="return confirm('Supprimer ce document ?')">
                                     @csrf @method('DELETE')
@@ -63,6 +64,7 @@
                                         Supprimer
                                     </button>
                                 </form>
+                                @endif
                             </td>
                         </tr>
                     @empty
