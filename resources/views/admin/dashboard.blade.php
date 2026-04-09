@@ -132,6 +132,9 @@
         <a href="{{ route('admin.analytics.index') }}">
             <i class="bi bi-bar-chart-line"></i> Analytics visiteurs
         </a>
+        <a href="{{ route('admin.books.index') }}">
+            <i class="bi bi-book"></i> Livres
+        </a>
     </div>
 
     {{-- ── CARDS RAPIDES ───────────────────────────────────── --}}
@@ -310,6 +313,30 @@
             </a>
         </div>
         @endif
+
+        {{-- Livres & Études de marché --}}
+        <div class="col-6 col-md-4 col-lg-3">
+            <div class="dash-card h-100" style="border-color: rgba(13,110,253,.2);">
+                <div class="card-body">
+                    <div class="d-flex align-items-start gap-3 mb-3">
+                        <div class="card-icon" style="background:linear-gradient(135deg,#0d6efd22,#20c99722);border:1px solid rgba(13,110,253,.2);">📚</div>
+                        <span class="badge ms-auto" style="background:#0d6efd22;color:#0d6efd;border:1px solid rgba(13,110,253,.25);">Livres</span>
+                    </div>
+                    <div class="fw-bold mb-1" style="color:#0d6efd;">Études & Mini-livres</div>
+                    <p class="small mb-3 text-muted">Études de marché, guides, contenus paginés.</p>
+                    <div class="d-flex gap-1">
+                        <a href="{{ route('admin.books.index') }}" class="btn btn-sm fw-semibold"
+                           style="background:#0d6efd22;color:#0d6efd;border:1px solid rgba(13,110,253,.25);">
+                            <i class="bi bi-list-ul me-1"></i>Gérer
+                        </a>
+                        <a href="{{ route('admin.books.create') }}" class="btn btn-sm fw-semibold"
+                           style="background:#0d6efd;color:#fff;">
+                            <i class="bi bi-plus-lg me-1"></i>Ajouter
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
 
     </div>
 

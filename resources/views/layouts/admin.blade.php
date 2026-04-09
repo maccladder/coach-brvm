@@ -111,6 +111,10 @@
                 </li>
 
                 <li class="nav-item">
+                    <a class="nav-link" href="{{ route('admin.books.index') }}">📚 Livres</a>
+                </li>
+
+                <li class="nav-item">
                     <a class="nav-link" href="{{ route('landing') }}">← Site public</a>
                 </li>
 

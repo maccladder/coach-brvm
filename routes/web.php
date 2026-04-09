@@ -19,6 +19,7 @@ use App\Http\Controllers\AdminVirtualWalletController;
 
 use App\Http\Controllers\AnnouncementController;
 
+use App\Http\Controllers\AdminBookController;
 use App\Http\Controllers\BookController;
 use App\Http\Controllers\ChocsMarcheController;
 use App\Http\Controllers\ClientBocController;
@@ -347,6 +348,11 @@ Route::prefix('topups')->name('topups.')->group(function () {
         // 📋 Logs stagiaire (admin only)
         Route::get('/stagiaire/logs', [StagiaireLogController::class, 'index'])->name('stagiaire.logs');
         Route::post('/stagiaire/logs/clear', [StagiaireLogController::class, 'clear'])->name('stagiaire.logs.clear');
+
+        // 📚 Livres & Études de marché (admin CRUD)
+        Route::resource('books', AdminBookController::class);
+        Route::post('books/{book}/pages', [AdminBookController::class, 'storePage'])->name('books.pages.store');
+        Route::delete('books/{book}/pages/{page}', [AdminBookController::class, 'destroyPage'])->name('books.pages.destroy');
     });
 });
 
