@@ -114,11 +114,6 @@
                     <a class="nav-link" href="{{ route('landing') }}">← Site public</a>
                 </li>
 
-                @if(session('is_admin'))
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ route('admin.stagiaire.logs') }}">📋 Logs stagiaire</a>
-                </li>
-                @endif
 
             </ul>
 

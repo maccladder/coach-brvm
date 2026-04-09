@@ -295,6 +295,22 @@
             </a>
         </div>
 
+        {{-- Logs stagiaire (admin only) --}}
+        @if(session('is_admin'))
+        <div class="col-6 col-md-4 col-lg-3">
+            <a href="{{ route('admin.stagiaire.logs') }}" class="dash-card" style="border-color: rgba(255,140,0,.25);">
+                <div class="card-body">
+                    <div class="d-flex align-items-start gap-3 mb-3">
+                        <div class="card-icon" style="background:rgba(255,140,0,.1);border:1px solid rgba(255,140,0,.25);">📋</div>
+                        <span class="badge ms-auto" style="background:rgba(255,140,0,.15);color:#ff8c00;border:1px solid rgba(255,140,0,.3);">Stagiaire</span>
+                    </div>
+                    <div class="fw-bold mb-1" style="color:#e07800;">Logs stagiaire</div>
+                    <p class="small mb-0 text-muted">Activité journalière : connexions, actions effectuées.</p>
+                </div>
+            </a>
+        </div>
+        @endif
+
     </div>
 
     {{-- ── SECTION ÉTATS FINANCIERS ANALYSÉS ──────────────── --}}

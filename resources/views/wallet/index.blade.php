@@ -179,7 +179,7 @@
                             @csrf
                             <input type="number" name="amount_paid"
                                    class="w-input form-control flex-1"
-                                   min="1000" step="500" value="10000" required>
+                                   min="1000" step="500" value="1000" required>
                             <button type="submit" class="cb-btn-green">Recharger</button>
                         </form>
                         <div class="w-hint">Ex : 100 000 FCFA</div>
