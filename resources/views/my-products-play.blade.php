@@ -245,8 +245,8 @@
                 return;
             }
 
-            // Accepter 'SCORE' (générique) et 'ABIDJAN_RUN_SCORE' (spécifique au jeu)
-            if (!data || (data.type !== 'SCORE' && data.type !== 'ABIDJAN_RUN_SCORE')) return;
+            // Accepter 'SCORE' (générique), 'ABIDJAN_RUN_SCORE', 'GBAKA_RUSH_SCORE'
+            if (!data || (data.type !== 'SCORE' && data.type !== 'ABIDJAN_RUN_SCORE' && data.type !== 'GBAKA_RUSH_SCORE')) return;
 
             const score    = parseInt(data.score    ?? 0, 10);
             const distance = parseInt(data.distance ?? 0, 10);

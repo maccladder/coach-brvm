@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//tmp/claude/c--wamp64-www-coach-brvm/05c90191-dc49-4da5-a145-20039457be12/tasks/**)"
+    ]
+  }
+}
