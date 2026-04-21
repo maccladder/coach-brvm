@@ -91,7 +91,16 @@
                         Classement par montant net (FCFA)
                     </p>
                 </div>
-                <a href="{{ route('societes.index') }}" class="cb-btn-outline">← Sociétés</a>
+                <div class="d-flex align-items-center gap-2 flex-wrap">
+                    @foreach($years as $y)
+                        <a href="{{ route('dividendes.index', ['year' => $y]) }}"
+                           class="cb-btn-outline{{ $y == $year ? ' active' : '' }}"
+                           style="{{ $y == $year ? 'border-color:#C9A84C;color:#C9A84C!important;background:rgba(201,168,76,.08);' : '' }}">
+                            {{ $y }}
+                        </a>
+                    @endforeach
+                    <a href="{{ route('societes.index') }}" class="cb-btn-outline">← Sociétés</a>
+                </div>
             </div>
         </div>
     </div>

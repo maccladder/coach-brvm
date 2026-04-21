@@ -9,13 +9,13 @@ class DividendeController extends Controller
 {
     public function index(Request $request)
     {
-        $year = (int) $request->query('year', 2025); // par défaut 2025
+        $years = [2026, 2025];
+        $year  = (int) $request->query('year', 2026);
 
         $dividendes = BrvmDividende::query()
             ->whereNotNull('dividende_net')
             ->where('dividende_net', '>', 0)
-            ->whereNotNull('date_paiement')
-            ->whereYear('date_paiement', $year)          // ✅ FILTRE ANNÉE
+            ->where('year', $year)
             ->orderByDesc('dividende_net')
             ->get();
 
@@ -29,6 +29,6 @@ class DividendeController extends Controller
             return $row;
         });
 
-        return view('dividendes.index', compact('dividendes', 'total', 'year'));
+        return view('dividendes.index', compact('dividendes', 'total', 'year', 'years'));
     }
 }

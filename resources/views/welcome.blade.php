@@ -632,6 +632,65 @@
 </div>
 
 {{-- ══════════════════════════════════════
+     MARKETPLACE BANNER
+══════════════════════════════════════ --}}
+<section style="background:#060910; border-top:1px solid rgba(201,168,76,.08); border-bottom:1px solid rgba(201,168,76,.08); padding:56px 0;">
+    <div class="container" style="max-width:1100px;">
+        <div class="cbr" style="
+            background: linear-gradient(135deg, rgba(201,168,76,.07) 0%, rgba(12,17,32,.9) 60%);
+            border: 1px solid rgba(201,168,76,.22);
+            border-radius: 6px;
+            padding: clamp(32px, 5vw, 56px) clamp(28px, 5vw, 56px);
+            position: relative; overflow: hidden;
+        ">
+            {{-- Deco orb --}}
+            <div style="position:absolute;top:-60px;right:-60px;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle, rgba(201,168,76,.09) 0%, transparent 70%);pointer-events:none;"></div>
+
+            <div class="row align-items-center g-4">
+                <div class="col-lg-8">
+                    <span style="display:inline-flex;align-items:center;gap:8px;font-family:'Syne',sans-serif;font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#C9A84C;background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.22);padding:5px 14px;border-radius:100px;margin-bottom:18px;">
+                        ✦ Nouveau
+                    </span>
+                    <h2 style="font-family:'Playfair Display',serif;font-size:clamp(24px,3.5vw,38px);font-weight:900;color:#E8EAF0;line-height:1.1;margin-bottom:14px;">
+                        La <em style="color:#C9A84C;font-style:italic;">Marketplace</em> Coach BRVM
+                    </h2>
+                    <p style="font-size:15px;color:#6B7590;line-height:1.75;max-width:520px;font-weight:300;margin-bottom:0;">
+                        PDF, études de marché, logiciels, vidéos, jeux éducatifs —
+                        des ressources sélectionnées pour <strong style="color:#E8EAF0;font-weight:500;">investir mieux à la BRVM</strong>.
+                    </p>
+                </div>
+                <div class="col-lg-4 d-flex flex-column flex-sm-row flex-lg-column gap-2 align-items-start align-items-lg-end">
+                    <a href="{{ route('marketplace.index') }}" style="
+                        display:inline-flex;align-items:center;gap:8px;
+                        background:linear-gradient(135deg,#C9A84C,#9B6B15);
+                        color:#050810 !important; font-family:'Syne',sans-serif;
+                        font-weight:800;font-size:13px;letter-spacing:.06em;text-transform:uppercase;
+                        padding:13px 26px;border-radius:3px;text-decoration:none;
+                        transition:all .3s;white-space:nowrap;
+                    "
+                    onmouseover="this.style.boxShadow='0 10px 32px rgba(201,168,76,.35)';this.style.transform='translateY(-2px)'"
+                    onmouseout="this.style.boxShadow='';this.style.transform=''">
+                        🛍️ Découvrir la Marketplace
+                    </a>
+                    <a href="{{ route('marketplace.index') }}" style="
+                        display:inline-flex;align-items:center;gap:8px;
+                        background:transparent;color:#C9A84C !important;
+                        font-family:'Syne',sans-serif;font-weight:600;font-size:12px;
+                        letter-spacing:.07em;text-transform:uppercase;
+                        padding:12px 20px;border-radius:3px;text-decoration:none;
+                        border:1px solid rgba(201,168,76,.25);transition:all .3s;white-space:nowrap;
+                    "
+                    onmouseover="this.style.background='rgba(201,168,76,.08)'"
+                    onmouseout="this.style.background='transparent'">
+                        Voir les produits →
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+{{-- ══════════════════════════════════════
      BOC HIGHLIGHT
 ══════════════════════════════════════ --}}
 <section class="cb-sec cb-sec-alt">

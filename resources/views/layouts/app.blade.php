@@ -78,6 +78,9 @@
         .cb-navbar .nav-link:hover { color:var(--cb-text) !important; }
         .cb-navbar .nav-link::after { content:''; position:absolute; bottom:0; left:14px; right:14px; height:2px; background:var(--cb-gold); transform:scaleX(0); transition:transform .25s; }
         .cb-navbar .nav-link:hover::after { transform:scaleX(1); }
+        .cb-navbar .nav-link-market { color:var(--cb-gold) !important; background:rgba(201,168,76,.07); border:1px solid rgba(201,168,76,.2); border-radius:3px; margin:auto 4px; padding:7px 14px !important; }
+        .cb-navbar .nav-link-market:hover { background:rgba(201,168,76,.14); color:var(--cb-gold) !important; }
+        .cb-navbar .nav-link-market::after { display:none; }
         .cb-navbar .dropdown-toggle::after { border-top-color:var(--cb-muted); margin-left:5px; }
         .cb-navbar .dropdown-menu { background:var(--cb-dark2); border:1px solid var(--cb-border); border-radius:6px; padding:8px; box-shadow:0 16px 48px rgba(0,0,0,.5); min-width:240px; }
         .cb-navbar .dropdown-item { font-family:'DM Sans',sans-serif; font-size:13.5px; color:var(--cb-muted); border-radius:4px; padding:9px 14px; transition:all .2s; }
@@ -239,6 +242,9 @@
                         <li><hr class="dropdown-divider"></li>
                         <li><span class="dropdown-item disabled">🧠 Parcours guidé (bientôt)</span></li>
                     </ul>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link nav-link-market" href="{{ route('marketplace.index') }}">🛍️ Marketplace</a>
                 </li>
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">Aide</a>

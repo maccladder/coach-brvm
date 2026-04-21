@@ -10,6 +10,7 @@ class BrvmDividende extends Model
 
     protected $fillable = [
         'ticker',
+        'year',
         'societe',
         'dividende_net',
         'date_paiement',
@@ -20,6 +21,7 @@ class BrvmDividende extends Model
     ];
 
     protected $casts = [
+        'year' => 'integer',
         'date_paiement' => 'date',
         'boc_date_reference' => 'date',
         'dividende_net' => 'decimal:2',

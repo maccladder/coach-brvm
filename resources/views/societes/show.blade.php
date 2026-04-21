@@ -141,7 +141,7 @@
                                 elseif ($rank<=20)  $badge=['✅ Top 20','rank-20'];
                             }
                         @endphp
-                        @if($isRanked2025 && $badge)
+                        @if($isRanked && $badge)
                             <span class="rank-badge {{ $badge[1] }}">{{ $badge[0] }}</span>
                         @endif
                     </div>
@@ -178,7 +178,7 @@
                             <div class="div-rank-label">Rang dividende {{ $rankingYear }}</div>
                             <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
                                 <div style="font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:#E8EAF0;">
-                                    @if($isRanked2025 && $rank && $totalPayeurs)
+                                    @if($isRanked && $rank && $totalPayeurs)
                                         {{ $rank }} / {{ $totalPayeurs }} <span style="font-family:'DM Sans',sans-serif;font-size:13px;color:#1fbf4a;margin-left:4px;">✅</span>
                                     @else
                                         <span style="font-size:13px;color:#6B7590;font-family:'DM Sans',sans-serif;">

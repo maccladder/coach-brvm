@@ -9,7 +9,7 @@ class AnnouncementController extends Controller
     public function index()
     {
         $announcements = Announcement::published()
-            ->orderByDesc('published_at')
+            ->orderByRaw('COALESCE(published_at, created_at) DESC')
             ->orderByDesc('id')
             ->paginate(10);
 
