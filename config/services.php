@@ -14,6 +14,17 @@ return [
     |
     */
 
+    'claude' => [
+        'api_key' => env('CLAUDE_API_KEY'),
+        'model'   => env('CLAUDE_MODEL', 'claude-haiku-4-5-20251001'),
+        'url'     => env('CLAUDE_API_URL', 'https://api.anthropic.com/v1/messages'),
+    ],
+
+    'lettreci' => [
+        'price'    => (int) env('LETTRECI_PRICE', 5000),
+        'currency' => env('LETTRECI_CURRENCY', 'XOF'),
+    ],
+
     'openai' => [
         'key' => env('OPENAI_API_KEY'),
 

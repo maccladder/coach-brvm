@@ -110,6 +110,14 @@ private function generateAnalysisForBoc(
 
     // 2) Interprétation
     $interpretation = $ai->interpret($analyses, $statements, $bocDate);
+
+    // Si l'IA retourne une chaîne d'erreur, on lève une exception
+    // pour que le catch du show() nettoie proprement (status=failed, markdown=null)
+    if (str_starts_with($interpretation, '_Interprétation IA indisponible')
+        || str_starts_with($interpretation, '_Aucune interprétation car')) {
+        throw new \RuntimeException('AiInterpreter error: ' . $interpretation);
+    }
+
     $clientBoc->interpreted_markdown = $interpretation;
 
     // 3) Texte raccourci pour l\'avatar
@@ -310,32 +318,36 @@ public function bubbles(ClientBoc $clientBoc)
     AiVoiceService $voice,
     AvatarService $avatar
 ) {
-    // ✅ On génère si :
-    // - c\'est un BOC payé (ancienne logique)
-    // - OU c\'est un BOC public gratuit
-    // - OU il est déjà "published" mais pas encore interprété (ex: ton cas)
+    // Détecte les chaînes d'erreur retournées par AiInterpreter (non-vide mais invalide)
+    $hasAiError = !empty($clientBoc->interpreted_markdown)
+        && (
+            str_starts_with($clientBoc->interpreted_markdown, '_Interprétation IA indisponible')
+            || str_starts_with($clientBoc->interpreted_markdown, '_Aucune interprétation car')
+        );
+
+    // Génère si : markdown vide/null OU contient une chaîne d'erreur connue OU status=failed
     $shouldGenerate = (
-        empty($clientBoc->interpreted_markdown)
+        (empty($clientBoc->interpreted_markdown) || $hasAiError || $clientBoc->status === 'failed')
         && (
             $clientBoc->status === 'paid'
             || $clientBoc->status === 'published'
+            || $clientBoc->status === 'failed'
             || (bool) $clientBoc->is_public
         )
     );
 
-    // ✅ Anti double génération (si plusieurs refresh en même temps)
+    // Anti double génération
     if ($shouldGenerate && $clientBoc->status !== 'processing') {
         try {
+            // Nettoie l'éventuelle chaîne d'erreur avant de regénérer
+            $clientBoc->interpreted_markdown = null;
             $clientBoc->status = 'processing';
             $clientBoc->save();
 
             $this->generateAnalysisForBoc($clientBoc, $ai, $voice, $avatar);
 
-            // Important: regenerateAnalysisForBoc() fait déjà save(),
-            // mais on refresh pour renvoyer les valeurs à la vue
             $clientBoc->refresh();
 
-            // Une fois OK on remet publié
             if ($clientBoc->status === 'processing') {
                 $clientBoc->status = 'published';
                 $clientBoc->save();
@@ -347,11 +359,10 @@ public function bubbles(ClientBoc $clientBoc)
                 ['exception' => $e]
             );
 
-            // on évite de rester bloqué sur processing si ça a crash
-            if ($clientBoc->status === 'processing') {
-                $clientBoc->status = 'published';
-                $clientBoc->save();
-            }
+            // Nettoie le markdown (ne pas laisser une chaîne d'erreur) et marque failed
+            $clientBoc->interpreted_markdown = null;
+            $clientBoc->status = 'failed';
+            $clientBoc->save();
         }
     }
 

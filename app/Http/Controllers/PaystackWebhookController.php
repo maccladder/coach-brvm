@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\LettreCIAccess;
 use App\Services\Payments\PaystackWalletTopupService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -35,7 +36,22 @@ class PaystackWebhookController extends Controller
         ]);
 
         if ($event === 'charge.success') {
-            // ✅ Délégation métier
+            $reference = (string) ($data['reference'] ?? '');
+
+            // ✅ LettreCI
+            if (str_starts_with($reference, 'LETTRECI_')) {
+                $access = LettreCIAccess::where('payment_ref', $reference)->first();
+                if ($access && $access->status === 'pending') {
+                    $access->update([
+                        'status'  => 'active',
+                        'paid_at' => now(),
+                    ]);
+                    Log::info('LettreCI access activated via webhook', ['reference' => $reference]);
+                }
+                return response()->json(['status' => 'ok'], 200);
+            }
+
+            // ✅ Délégation wallet
             $walletTopup->handleChargeSuccess($data);
         }
 

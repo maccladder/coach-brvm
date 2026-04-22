@@ -395,6 +395,60 @@
             </div>
         </form>
 
+        {{-- ── LettreCI card ── --}}
+        <div class="row g-3 mb-2 cbr">
+            <div class="col-md-6 col-lg-4">
+                @php
+                    $hasLettreCI = auth()->check() && \App\Models\LettreCIAccess::hasActiveAccess(auth()->user());
+                    $lciPrice = number_format(config('services.lettreci.price', 5000), 0, ',', ' ');
+                @endphp
+                <a href="{{ route('lettreci.showcase') }}" class="mp-card" style="border-color:rgba(201,168,76,.18);">
+                    {{-- Cover IA --}}
+                    <div class="mp-card-img" style="background:linear-gradient(145deg,#0d0a00 0%,#1a1200 40%,#0C1120 100%); position:relative; overflow:hidden;">
+                        @if($hasLettreCI)
+                            <span class="mp-badge-owned">✓ Accès actif</span>
+                        @else
+                            <span class="mp-badge-featured" style="background:rgba(201,168,76,.9);color:#060910;">✨ NOUVEAU</span>
+                        @endif
+                        {{-- Decorative grid --}}
+                        <div style="position:absolute;inset:0;background-image:linear-gradient(rgba(201,168,76,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(201,168,76,.06) 1px,transparent 1px);background-size:28px 28px;mask-image:radial-gradient(ellipse 80% 80% at 50% 50%,black 0%,transparent 80%);pointer-events:none;"></div>
+                        {{-- Orb --}}
+                        <div style="position:absolute;width:140px;height:140px;top:-40px;right:-40px;background:rgba(201,168,76,.08);border-radius:50%;filter:blur(40px);pointer-events:none;"></div>
+                        <div class="mp-card-img-placeholder" style="position:relative;z-index:1;">
+                            <span style="font-size:46px;filter:drop-shadow(0 0 20px rgba(201,168,76,.4));">📄</span>
+                            <span style="font-family:'Syne',sans-serif;font-size:10px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:#C9A84C;margin-top:10px;">IA · Lettres officielles</span>
+                            <span style="font-family:'Syne',sans-serif;font-size:9px;color:#6B7590;margin-top:4px;letter-spacing:.05em;">15 modèles · Claude Haiku</span>
+                        </div>
+                    </div>
+                    {{-- Body --}}
+                    <div class="mp-card-body">
+                        <div class="mp-card-chips">
+                            <span class="mp-chip" style="background:rgba(201,168,76,.08);color:#C9A84C;border:1px solid rgba(201,168,76,.2);">🤖 Outil IA</span>
+                            <span class="mp-chip" style="background:rgba(15,207,164,.07);color:#0FCFA4;border:1px solid rgba(15,207,164,.18);">15 types</span>
+                        </div>
+                        <div class="mp-card-title" style="font-family:'Playfair Display',serif;font-size:16px;font-weight:900;">LettreCI</div>
+                        <div class="mp-card-desc">Lettres administratives générées par IA en 30 secondes — démission, bail, mise en demeure, motivation et bien plus.</div>
+                        <div class="mp-card-footer">
+                            <div>
+                                @if($hasLettreCI)
+                                    <span class="mp-card-price owned">✓ Accès actif</span>
+                                @else
+                                    <span class="mp-card-price">{{ $lciPrice }} FCFA · À vie</span>
+                                @endif
+                            </div>
+                            <div class="mp-card-actions">
+                                @if($hasLettreCI)
+                                    <a href="{{ route('lettreci.dashboard') }}" class="mp-btn-sm mp-btn-dl" onclick="event.stopPropagation()">Ouvrir</a>
+                                @else
+                                    <a href="{{ route('lettreci.showcase') }}" class="mp-btn-sm mp-btn-dl" onclick="event.stopPropagation()">Découvrir</a>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+
         {{-- ── PRODUITS ── --}}
         @if($products->isEmpty())
             <div class="mp-empty cbr">

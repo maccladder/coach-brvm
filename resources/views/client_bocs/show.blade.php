@@ -121,6 +121,10 @@
                         <div style="margin-top:8px;">
                             @if(!empty($boc->interpreted_markdown))
                                 <span class="boc-badge-ok">✅ Analyse prête</span>
+                            @elseif($boc->status === 'failed')
+                                <span class="boc-badge-wait" style="background:rgba(255,107,107,.1);color:#FF6B6B;border-color:rgba(255,107,107,.2);">⚠️ Analyse indisponible</span>
+                            @elseif($boc->status === 'processing')
+                                <span class="boc-badge-wait">⏳ Génération en cours…</span>
                             @else
                                 <span class="boc-badge-wait">⏳ Analyse en cours…</span>
                             @endif
@@ -184,7 +188,23 @@
                         <div class="boc-card-sub">Analyse IA · conseils de lecture</div>
                     </div>
                     <div class="boc-card-body">
-                        <pre class="boc-analysis-pre">{{ !empty($boc->interpreted_markdown) ? $boc->interpreted_markdown : 'Analyse en cours… Rafraîchis dans quelques secondes.' }}</pre>
+                        @if(!empty($boc->interpreted_markdown))
+                            <pre class="boc-analysis-pre">{{ $boc->interpreted_markdown }}</pre>
+                        @elseif($boc->status === 'failed')
+                            <div style="padding:24px;text-align:center;color:#FF6B6B;font-family:'Syne',sans-serif;font-size:13px;line-height:1.7;">
+                                ⚠️ L'analyse IA n'a pas pu être générée pour ce BOC.<br>
+                                <span style="color:#6B7590;font-size:12px;">Contactez le support ou revenez plus tard.</span>
+                            </div>
+                        @elseif($boc->status === 'processing')
+                            <div style="padding:24px;text-align:center;color:#C9A84C;font-family:'Syne',sans-serif;font-size:13px;line-height:1.7;">
+                                ⏳ Analyse IA en cours de génération…<br>
+                                <span style="color:#6B7590;font-size:12px;">Cette page se rafraîchit automatiquement dans quelques secondes.</span>
+                            </div>
+                        @else
+                            <div style="padding:24px;text-align:center;color:#6B7590;font-family:'Syne',sans-serif;font-size:13px;line-height:1.7;">
+                                ⏳ Analyse en cours de génération… Rafraîchis dans quelques secondes.
+                            </div>
+                        @endif
                     </div>
                 </div>
             </div>
@@ -232,8 +252,8 @@
 <script>
 document.addEventListener('DOMContentLoaded', () => {
 
-    @if(empty($boc->interpreted_markdown))
-        setTimeout(() => window.location.reload(), 6000);
+    @if(empty($boc->interpreted_markdown) && $boc->status !== 'failed')
+        setTimeout(() => window.location.reload(), 8000);
     @endif
 
     // ══ AUDIO ══

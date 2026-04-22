@@ -1,7 +1,11 @@
 {
   "permissions": {
     "allow": [
-      "Read(//tmp/claude/c--wamp64-www-coach-brvm/05c90191-dc49-4da5-a145-20039457be12/tasks/**)"
+      "Read(//tmp/claude/c--wamp64-www-coach-brvm/05c90191-dc49-4da5-a145-20039457be12/tasks/**)",
+      "Bash(git commit *)",
+      "Bash(php -r \"require 'vendor/autoload.php'; echo 'PHP OK';\")",
+      "Bash(grep -B 5 -A 30 'interpreted_markdown = $interpretation' /c/wamp64/www/coach-brvm/app/Http/Controllers/AdminController.php)",
+      "Bash(sqlite3 /c/wamp64/www/coach-brvm/database/database.sqlite \"SELECT id, title, status, interpreted_markdown, avatar_video_url, audio_path, stored_path FROM client_bocs WHERE id = 72;\")"
     ]
   }
 }

@@ -88,8 +88,9 @@ Route::get('/auth/google/callback', [GoogleController::class, 'callback'])->name
 Route::get('/livres', [BookController::class, 'index'])->name('books.index');
 Route::get('/livres/{book:slug}', [BookController::class, 'show'])->name('books.show');
 
-// ✅ Marketplace (PUBLIC)
+// ✅ Marketplace (PUBLIC) — route spécifique AVANT le wildcard {slug}
 Route::get('/marketplace', [MarketplaceController::class, 'index'])->name('marketplace.index');
+Route::get('/marketplace/lettreci', [\App\Http\Controllers\LettreCI\LettreCIController::class, 'showcase'])->name('lettreci.showcase');
 Route::get('/marketplace/{slug}', [MarketplaceController::class, 'show'])->name('marketplace.show');
 
 // ✅ Activation software (après achat) — page d'instructions/licence
@@ -809,6 +810,33 @@ Route::middleware(['auth']) // + ton middleware admin
 Route::middleware(['auth'])->prefix('vendor')->name('vendor.')->group(function () {
     Route::get('/earnings', [VendorEarningsController::class, 'index'])->name('earnings');
     Route::post('/payouts/request', [VendorEarningsController::class, 'requestPayout'])->name('payouts.request');
+});
+
+// ═══════════════════════════════════════════════════════
+// LettreCI
+// ═══════════════════════════════════════════════════════
+use App\Http\Controllers\LettreCI\LettreCIController;
+use App\Http\Controllers\LettreCI\LettreGeneratorController;
+use App\Http\Controllers\LettreCI\LettrePaymentController;
+
+Route::middleware('auth')->prefix('lettreci')->name('lettreci.')->group(function () {
+    Route::get('/', [LettreCIController::class, 'landing'])->name('landing');
+    Route::post('/acheter', [LettrePaymentController::class, 'checkout'])->name('checkout');
+    Route::get('/paiement/callback', [LettrePaymentController::class, 'callback'])->name('payment.callback');
+
+    Route::middleware('lettreci.access')->group(function () {
+        Route::get('/dashboard', [LettreCIController::class, 'dashboard'])->name('dashboard');
+        Route::get('/historique', [LettreCIController::class, 'history'])->name('history');
+        Route::get('/nouvelle', [LettreGeneratorController::class, 'chooseType'])->name('new');
+        Route::get('/nouvelle/{slug}', [LettreGeneratorController::class, 'showForm'])->name('form');
+        Route::post('/nouvelle/{slug}', [LettreGeneratorController::class, 'submitForm'])
+            ->middleware('throttle:letter-generation')->name('submit');
+        Route::get('/generation/{letter}', [LettreGeneratorController::class, 'generating'])->name('generating');
+        Route::get('/generation/{letter}/status', [LettreGeneratorController::class, 'status'])->name('status');
+        Route::get('/lettre/{letter}', [LettreGeneratorController::class, 'preview'])->name('preview');
+        Route::patch('/lettre/{letter}', [LettreGeneratorController::class, 'update'])->name('update');
+        Route::get('/lettre/{letter}/pdf', [LettreGeneratorController::class, 'downloadPdf'])->name('pdf');
+    });
 });
 
 require __DIR__.'/auth.php';
