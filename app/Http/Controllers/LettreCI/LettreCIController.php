@@ -40,7 +40,10 @@ class LettreCIController extends Controller
             ->take(5)
             ->get();
 
-        return view('lettre-ci.dashboard', compact('count', 'recent'));
+        return view('lettre-ci.dashboard', [
+            'letterCount'   => $count,
+            'recentLetters' => $recent,
+        ]);
     }
 
     public function history(Request $request)
