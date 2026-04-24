@@ -14,6 +14,11 @@ return [
     |
     */
 
+    'paystack' => [
+        'secret'   => env('PAYSTACK_SECRET_KEY'),
+        'base_url' => env('PAYSTACK_BASE_URL', 'https://api.paystack.co'),
+    ],
+
     'claude' => [
         'api_key' => env('CLAUDE_API_KEY'),
         'model'   => env('CLAUDE_MODEL', 'claude-haiku-4-5-20251001'),

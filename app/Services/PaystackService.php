@@ -13,8 +13,8 @@ class PaystackService
 
     public function __construct(?Client $http = null)
     {
-        $this->secretKey = (string) env('PAYSTACK_SECRET_KEY', '');
-        $this->baseUrl   = (string) env('PAYSTACK_BASE_URL', 'https://api.paystack.co');
+        $this->secretKey = (string) config('services.paystack.secret', '');
+        $this->baseUrl   = (string) config('services.paystack.base_url', 'https://api.paystack.co');
 
         $this->http = $http ?: new Client([
             'base_uri' => $this->baseUrl,
