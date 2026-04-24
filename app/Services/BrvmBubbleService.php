@@ -55,7 +55,7 @@ class BrvmBubbleService
         }
 
         // 3️⃣ Appel OpenAI pour structurer le tableau
-        $apiKey = env('OPENAI_API_KEY');
+        $apiKey = config('services.openai.key');
 
         if (!$apiKey) {
             Log::error('BrvmBubbleService: pas de OPENAI_API_KEY dans .env');
@@ -108,7 +108,7 @@ SYS;
             $response = Http::withToken($apiKey)
                 ->timeout(60)
                 ->post('https://api.openai.com/v1/chat/completions', [
-                    'model'       => env('OPENAI_BUBBLE_MODEL', 'gpt-4.1-mini'),
+                    'model'       => config('services.openai.bubble_model', 'gpt-4.1-mini'),
                     'temperature' => 0.2,
                     'messages'    => [
                         ['role' => 'system', 'content' => $systemPrompt],

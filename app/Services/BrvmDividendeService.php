@@ -49,7 +49,7 @@ class BrvmDividendeService
         }
 
         // 2) OpenAI
-        $apiKey = env('OPENAI_API_KEY');
+        $apiKey = config('services.openai.key');
         if (!$apiKey) {
             Log::error('BrvmDividendeService: missing OPENAI_API_KEY');
             return [];
@@ -97,7 +97,7 @@ SYS;
             $response = Http::withToken($apiKey)
                 ->timeout(90)
                 ->post('https://api.openai.com/v1/chat/completions', [
-                    'model' => env('OPENAI_DIVIDENDE_MODEL', 'gpt-4.1-mini'),
+                    'model' => config('services.openai.dividende_model', 'gpt-4.1-mini'),
                     'temperature' => 0.1,
                     'messages' => [
                         ['role' => 'system', 'content' => $systemPrompt],

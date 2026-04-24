@@ -37,8 +37,9 @@ return [
         'boc_model'    => env('OPENAI_BOC_MODEL', 'gpt-4.1-mini'),
         'market_model' => env('OPENAI_MARKET_MODEL', 'gpt-4.1-mini'),
         'bubble_model' => env('OPENAI_BUBBLE_MODEL', 'gpt-4.1-mini'),
-        'tts_model'    => env('OPENAI_TTS_MODEL', 'gpt-4o-mini-tts'),
-        'tts_voice'    => env('OPENAI_TTS_VOICE', 'alloy'),
+        'tts_model'       => env('OPENAI_TTS_MODEL', 'gpt-4o-mini-tts'),
+        'tts_voice'       => env('OPENAI_TTS_VOICE', 'alloy'),
+        'dividende_model' => env('OPENAI_DIVIDENDE_MODEL', 'gpt-4.1-mini'),
     ],
 
     'tawk' => [
