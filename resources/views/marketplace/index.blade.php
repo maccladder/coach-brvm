@@ -404,45 +404,13 @@
                 @endphp
                 <a href="{{ route('lettreci.showcase') }}" class="mp-card" style="border-color:rgba(201,168,76,.18);">
                     {{-- Cover LettreCI --}}
-                    <div class="mp-card-img" style="background:linear-gradient(145deg,#080c18 0%,#0e1525 50%,#0a0e1a 100%);position:relative;overflow:hidden;min-height:175px;">
+                    <div class="mp-card-img" style="position:relative;overflow:hidden;">
                         @if($hasLettreCI)
                             <span class="mp-badge-owned">✓ Accès actif</span>
                         @else
                             <span class="mp-badge-featured" style="background:rgba(201,168,76,.92);color:#060910;">✨ NOUVEAU</span>
                         @endif
-                        {{-- Glow orbs --}}
-                        <div style="position:absolute;width:180px;height:180px;top:-60px;left:-40px;background:radial-gradient(circle,rgba(201,168,76,.12) 0%,transparent 70%);pointer-events:none;"></div>
-                        <div style="position:absolute;width:120px;height:120px;bottom:-30px;right:-20px;background:radial-gradient(circle,rgba(15,207,164,.08) 0%,transparent 70%);pointer-events:none;"></div>
-                        {{-- Simulated letter document --}}
-                        <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:1;">
-                            <div style="width:108px;background:rgba(255,255,255,.04);border:1px solid rgba(201,168,76,.2);border-radius:4px;padding:12px 10px;box-shadow:0 8px 32px rgba(0,0,0,.4),0 0 0 1px rgba(201,168,76,.06);transform:rotate(-2deg);">
-                                {{-- Header bar --}}
-                                <div style="height:6px;background:linear-gradient(90deg,#C9A84C,#9B6B15);border-radius:2px;margin-bottom:10px;"></div>
-                                {{-- Text lines --}}
-                                <div style="height:3px;background:rgba(232,234,240,.18);border-radius:2px;margin-bottom:5px;width:85%;"></div>
-                                <div style="height:3px;background:rgba(232,234,240,.12);border-radius:2px;margin-bottom:5px;width:70%;"></div>
-                                <div style="height:3px;background:rgba(232,234,240,.18);border-radius:2px;margin-bottom:5px;width:90%;"></div>
-                                <div style="height:3px;background:rgba(232,234,240,.12);border-radius:2px;margin-bottom:8px;width:60%;"></div>
-                                {{-- Body lines --}}
-                                <div style="height:2px;background:rgba(232,234,240,.08);border-radius:2px;margin-bottom:4px;"></div>
-                                <div style="height:2px;background:rgba(232,234,240,.08);border-radius:2px;margin-bottom:4px;width:92%;"></div>
-                                <div style="height:2px;background:rgba(232,234,240,.08);border-radius:2px;margin-bottom:4px;width:78%;"></div>
-                                {{-- Signature --}}
-                                <div style="margin-top:8px;display:flex;align-items:center;gap:5px;">
-                                    <div style="height:2px;width:28px;background:rgba(15,207,164,.4);border-radius:2px;"></div>
-                                    <div style="width:18px;height:18px;border-radius:50%;background:rgba(201,168,76,.15);border:1px solid rgba(201,168,76,.3);display:flex;align-items:center;justify-content:center;">
-                                        <span style="font-size:9px;">✓</span>
-                                    </div>
-                                </div>
-                            </div>
-                            {{-- Second doc behind --}}
-                            <div style="position:absolute;width:108px;height:90px;background:rgba(255,255,255,.02);border:1px solid rgba(201,168,76,.1);border-radius:4px;transform:rotate(3deg) translate(12px,8px);z-index:-1;"></div>
-                        </div>
-                        {{-- Bottom label --}}
-                        <div style="position:absolute;bottom:0;left:0;right:0;padding:8px 12px;background:linear-gradient(transparent,rgba(6,9,16,.9));display:flex;align-items:center;justify-content:space-between;z-index:2;">
-                            <span style="font-family:'Syne',sans-serif;font-size:9px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:#C9A84C;">IA · Lettres officielles</span>
-                            <span style="font-family:'Syne',sans-serif;font-size:9px;color:#6B7590;">15 modèles</span>
-                        </div>
+                        <img src="{{ asset('img/lettreci-cover.png') }}" alt="LettreCI" style="width:100%;height:100%;object-fit:cover;object-position:center;display:block;">
                     </div>
                     {{-- Body --}}
                     <div class="mp-card-body">
