@@ -22,8 +22,8 @@ class BackfillBocStocks extends Command
 
         $q = DailyBoc::query()->orderBy('date_boc');
 
-        if ($from) $q->where('date_boc', '>=', $from);
-        if ($to)   $q->where('date_boc', '<=', $to);
+        if ($from) $q->whereDate('date_boc', '>=', $from);
+        if ($to)   $q->whereDate('date_boc', '<=', $to);
 
         $bocs = $q->get();
 
