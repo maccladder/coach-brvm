@@ -13,9 +13,9 @@ class LettreGeneratorController extends Controller
     public function chooseType()
     {
         $categories = config('lettreci_templates.categories');
-        $types      = config('lettreci_templates.types');
+        $templates  = config('lettreci_templates.types');
 
-        return view('lettre-ci.types', compact('categories', 'types'));
+        return view('lettre-ci.types', compact('categories', 'templates'));
     }
 
     public function showForm(string $slug)
