@@ -14,6 +14,14 @@ return [
     |
     */
 
+    'did' => [
+        'api_key'           => env('DID_API_KEY'),
+        'base_url'          => env('DID_BASE_URL', 'https://api.d-id.com'),
+        'avatar_source_url' => env('AVATAR_SOURCE_URL'),
+        'voice_provider'    => env('DID_VOICE_PROVIDER', 'microsoft'),
+        'voice_id'          => env('DID_VOICE_ID', 'fr-FR-HenriNeural'),
+    ],
+
     'paystack' => [
         'secret'   => env('PAYSTACK_SECRET_KEY'),
         'base_url' => env('PAYSTACK_BASE_URL', 'https://api.paystack.co'),

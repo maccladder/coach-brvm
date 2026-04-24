@@ -12,8 +12,7 @@ class AvatarService
     public function __construct(?Client $http = null)
     {
         $this->http = $http ?: new Client([
-            'base_uri' => env('DID_BASE_URL', 'https://api.d-id.com'),
-            // ⏳ Timeout HTTP plus long (3 minutes)
+            'base_uri' => config('services.did.base_url', 'https://api.d-id.com'),
             'timeout'  => 180,
         ]);
     }
@@ -26,21 +25,20 @@ class AvatarService
      */
     public function generateTalkingHead(string $text): ?string
     {
-        $sourceUrl = env('AVATAR_SOURCE_URL');
+        $sourceUrl = config('services.did.avatar_source_url');
         if (!$sourceUrl) {
             Log::warning('AvatarService: AVATAR_SOURCE_URL manquant');
             return null;
         }
 
-        $apiKey = env('DID_API_KEY');
+        $apiKey = config('services.did.api_key');
         if (!$apiKey) {
             Log::warning('AvatarService: DID_API_KEY manquant');
             return null;
         }
 
-        // 🔊 Voix masculine FR naturelle
-        $voiceProvider = env('DID_VOICE_PROVIDER', 'microsoft');
-        $voiceId       = env('DID_VOICE_ID', 'fr-FR-HenriNeural');
+        $voiceProvider = config('services.did.voice_provider', 'microsoft');
+        $voiceId       = config('services.did.voice_id', 'fr-FR-HenriNeural');
 
         // Payload envoyé à D-ID
         $payload = [
