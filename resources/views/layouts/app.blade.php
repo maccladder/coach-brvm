@@ -339,6 +339,9 @@
                             <li><a class="dropdown-item" href="{{ route('documents.mine') }}">🧾 Mes documents</a></li>
                             <li><a class="dropdown-item" href="{{ route('wallet.index') }}">💼 Mon portefeuille</a></li>
                             <li><a class="dropdown-item" href="{{ route('client-financials.index') }}">📄 Mes analyses</a></li>
+                            @if(\App\Models\LettreCIAccess::hasActiveAccess(auth()->user()))
+                            <li><a class="dropdown-item" href="{{ route('lettreci.dashboard') }}">✉️ Mes lettres</a></li>
+                            @endif
                             @php
                                 $isVendor = (bool)(auth()->user()->is_vendor ?? false);
                                 $viewMode = session('view_mode', 'user');

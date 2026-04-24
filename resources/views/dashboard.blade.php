@@ -108,6 +108,16 @@
                     <a href="{{ route('radar.index') }}" class="dash-card-btn">Ouvrir →</a>
                 </div>
             </div>
+            @if(\App\Models\LettreCIAccess::hasActiveAccess(auth()->user()))
+            <div class="col-md-4 cbr cbr2">
+                <div class="dash-card" style="border-color:rgba(201,168,76,.2);">
+                    <span class="dash-card-icon">✉️</span>
+                    <div class="dash-card-title" style="color:var(--cb-gold);">Mes lettres</div>
+                    <div class="dash-card-desc">Lettres administratives générées par IA — démission, bail, motivation et plus.</div>
+                    <a href="{{ route('lettreci.dashboard') }}" class="dash-card-btn">Ouvrir →</a>
+                </div>
+            </div>
+            @endif
         </div>
     </div>
 </div>
