@@ -52,13 +52,12 @@ class AiVoiceService
 
             $resp = $this->http->post('audio/speech', [
                 'headers' => [
-                    'Authorization' => 'Bearer ' . env('OPENAI_API_KEY'),
+                    'Authorization' => 'Bearer ' . config('services.openai.key'),
                     'Content-Type'  => 'application/json',
                 ],
                 'json' => [
-                    // modèle & voix configurables via .env
-                    'model' => env('OPENAI_TTS_MODEL', 'gpt-4o-mini-tts'),
-                    'voice' => env('OPENAI_TTS_VOICE', 'alloy'),
+                    'model' => config('services.openai.tts_model', 'gpt-4o-mini-tts'),
+                    'voice' => config('services.openai.tts_voice', 'alloy'),
                     'input' => $text,
                     'format' => 'mp3',
                 ],

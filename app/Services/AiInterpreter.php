@@ -132,11 +132,11 @@ USR;
         try {
             $resp = $this->http->post('chat/completions', [
                 'headers' => [
-                    'Authorization' => 'Bearer ' . env('OPENAI_API_KEY'),
+                    'Authorization' => 'Bearer ' . config('services.openai.key'),
                     'Content-Type'  => 'application/json',
                 ],
                 'json' => [
-                    'model'       => env('OPENAI_MARKET_MODEL', 'gpt-4.1-mini'),
+                    'model'       => config('services.openai.market_model', 'gpt-4.1-mini'),
                     'temperature' => 0.4,
                     'max_tokens'  => 900,
                     'messages'    => [
@@ -292,11 +292,11 @@ USR;
         try {
             $resp = $this->http->post('chat/completions', [
                 'headers' => [
-                    'Authorization' => 'Bearer ' . env('OPENAI_API_KEY'),
+                    'Authorization' => 'Bearer ' . config('services.openai.key'),
                     'Content-Type'  => 'application/json',
                 ],
                 'json' => [
-                    'model'       => env('OPENAI_MARKET_MODEL', 'gpt-4.1-mini'),
+                    'model'       => config('services.openai.market_model', 'gpt-4.1-mini'),
                     'temperature' => 0.3,   // sérieux / analytique
                     'max_tokens'  => 900,
                     'messages'    => [
