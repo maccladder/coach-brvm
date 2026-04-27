@@ -18,11 +18,11 @@ class GoogleAnalyticsService
     public function __construct()
     {
         $this->client = new BetaAnalyticsDataClient([
-            'credentials' => base_path(env('GA_CREDENTIALS_PATH')),
+            'credentials' => base_path(config('services.google_analytics.credentials_path')),
         ]);
 
         // IMPORTANT: GA_PROPERTY_ID = 463914808 (pas le stream id)
-        $this->property = 'properties/' . trim((string) env('GA_PROPERTY_ID'));
+        $this->property = 'properties/' . trim((string) config('services.google_analytics.property_id'));
     }
 
     /** 👥 Visiteurs aujourd'hui */

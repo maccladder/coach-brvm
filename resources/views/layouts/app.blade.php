@@ -113,6 +113,41 @@
         .market-badge-owned { position:absolute; top:12px; left:12px; z-index:30; display:inline-flex; align-items:center; gap:.35rem; padding:.35rem .65rem; font-size:.80rem; font-weight:700; border-radius:999px; color:#fff; background:rgba(25,135,84,.95); box-shadow:0 10px 24px rgba(0,0,0,.18); backdrop-filter:blur(6px); }
         .cb-page { min-height:calc(100vh - 92px); }
 
+        /* Floating WhatsApp Diaspora button */
+        .cb-wa-float {
+            position: fixed; bottom: 24px; right: 20px; z-index: 9990;
+            display: flex; align-items: center; gap: 8px;
+            background: #25D366; color: #fff !important; text-decoration: none !important;
+            padding: 11px 18px 11px 13px; border-radius: 50px;
+            font-family: 'Syne', sans-serif; font-size: 12px; font-weight: 700; letter-spacing: .04em;
+            box-shadow: 0 4px 18px rgba(37,211,102,.35);
+            animation: cbWaFloatPulse 2.8s ease-in-out infinite;
+            transition: transform .2s, background .2s;
+        }
+        .cb-wa-float i { font-size: 19px; line-height: 1; }
+        .cb-wa-float:hover { background: #1ebe5a; transform: scale(1.05) translateY(-2px); animation: none; box-shadow: 0 8px 28px rgba(37,211,102,.5); }
+        @keyframes cbWaFloatPulse {
+            0%, 100% { box-shadow: 0 4px 18px rgba(37,211,102,.35); }
+            50% { box-shadow: 0 4px 30px rgba(37,211,102,.6), 0 0 0 8px rgba(37,211,102,.1); }
+        }
+        @media (max-width: 576px) {
+            .cb-wa-float span.cb-wa-float-label { display: none; }
+            .cb-wa-float { padding: 12px; border-radius: 50%; }
+        }
+
+        /* Navbar diaspora dot */
+        .cb-nav-diaspora { color: #25D366 !important; }
+        .cb-nav-diaspora::after { background: #25D366 !important; }
+        .cb-diaspora-blink {
+            display: inline-block; width: 6px; height: 6px; border-radius: 50%;
+            background: #25D366; vertical-align: middle; margin-right: 4px;
+            animation: cbNavDot 1.4s ease-in-out infinite;
+        }
+        @keyframes cbNavDot {
+            0%, 100% { opacity: 1; }
+            50% { opacity: .2; }
+        }
+
         @media (max-width:991px) {
             .cb-navbar .dropdown-menu { background:var(--cb-dark3); border:none; border-left:2px solid var(--cb-border); border-radius:0; margin-left:8px; padding:4px 0; }
             .cb-navbar .nav-link::after { display:none; }
@@ -245,6 +280,11 @@
                 </li>
                 <li class="nav-item">
                     <a class="nav-link nav-link-market" href="{{ route('marketplace.index') }}">🛍️ Marketplace</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link cb-nav-diaspora" href="{{ route('diaspora') }}">
+                        <span class="cb-diaspora-blink"></span>Diaspora
+                    </a>
                 </li>
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">Aide</a>
@@ -399,12 +439,22 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 @stack('scripts')
 
+{{-- Floating WhatsApp Diaspora --}}
+<a href="{{ route('diaspora') }}"
+   class="cb-wa-float"
+   title="Investir depuis la diaspora — En savoir plus">
+    <i class="bi bi-whatsapp"></i>
+    <span class="cb-wa-float-label">Diaspora ?</span>
+</a>
+
+{{-- Tawk.to désactivé
 @if(config('services.tawk.widget_id'))
 <script>
     var Tawk_API=Tawk_API||{},Tawk_LoadStart=new Date();
     (function(){var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];s1.async=true;s1.src="https://embed.tawk.to/{{ config('services.tawk.widget_id') }}";s1.charset='UTF-8';s1.setAttribute('crossorigin','*');s0.parentNode.insertBefore(s1,s0);})();
 </script>
 @endif
+--}}
 
 </body>
 </html>

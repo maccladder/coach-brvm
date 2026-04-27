@@ -398,6 +398,38 @@
     }
     .cb-social-btn:hover { border-color: #C9A84C; color: #C9A84C !important; background: rgba(201,168,76,.06); }
 
+    /* Diaspora section */
+    .cb-diaspora-badge {
+        display: inline-flex; align-items: center; gap: 8px;
+        font-family: 'Syne', sans-serif; font-size: 11px; font-weight: 700;
+        letter-spacing: .14em; text-transform: uppercase; color: #25D366;
+        border: 1px solid rgba(37,211,102,.3); border-radius: 100px;
+        padding: 6px 16px; margin-bottom: 20px;
+    }
+    .cb-diaspora-dot {
+        width: 7px; height: 7px; border-radius: 50%; background: #25D366;
+        animation: cbDiasporaBlink 1.4s ease-in-out infinite;
+        flex-shrink: 0;
+    }
+    @keyframes cbDiasporaBlink {
+        0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(37,211,102,.5); }
+        50% { opacity: .4; box-shadow: 0 0 0 5px rgba(37,211,102,0); }
+    }
+    .cb-wa-cta {
+        display: inline-flex; align-items: center; gap: 10px;
+        background: #25D366; color: #fff !important; text-decoration: none;
+        padding: 14px 32px; border-radius: 4px;
+        font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; letter-spacing: .06em;
+        transition: all .3s;
+        animation: cbWaGlow 2.5s ease-in-out infinite;
+    }
+    .cb-wa-cta i { font-size: 20px; }
+    .cb-wa-cta:hover { background: #1ebe5a; transform: translateY(-2px); box-shadow: 0 8px 28px rgba(37,211,102,.45); }
+    @keyframes cbWaGlow {
+        0%, 100% { box-shadow: 0 4px 20px rgba(37,211,102,.25); }
+        50% { box-shadow: 0 4px 36px rgba(37,211,102,.55), 0 0 0 6px rgba(37,211,102,.08); }
+    }
+
     /* CTA finale */
     .cb-cta-finale {
         padding: clamp(100px, 14vw, 180px) 0;
@@ -983,6 +1015,57 @@
                     </div>
                 </div>
             </div>
+        </div>
+    </div>
+</section>
+
+{{-- ══════════════════════════════════════
+     DIASPORA
+══════════════════════════════════════ --}}
+<section style="background:linear-gradient(180deg,#060910 0%,#071210 60%,#060910 100%); padding:clamp(64px,10vw,120px) 0; position:relative; overflow:hidden;" class="cbr">
+    <div style="position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at 50% 50%, rgba(37,211,102,.06) 0%, transparent 65%);"></div>
+    <div class="container" style="max-width:860px; position:relative;">
+        <div style="border:1px solid rgba(37,211,102,.2); border-radius:8px; padding:clamp(32px,5vw,56px) clamp(24px,5vw,56px); background:rgba(37,211,102,.025); text-align:center;">
+
+            <div class="cb-diaspora-badge cbr">
+                <span class="cb-diaspora-dot"></span>
+                Investir depuis la diaspora
+            </div>
+
+            <h2 style="font-family:'Playfair Display',serif; font-size:clamp(26px,4vw,38px); font-weight:700; color:#E8EAF0; margin:0 0 14px;" class="cbr cbr2">
+                Tu es à l'étranger et tu veux<br>investir à la <span style="color:#25D366;">BRVM</span> ?
+            </h2>
+
+            <p style="font-size:clamp(14px,2vw,16px); color:#6B7590; line-height:1.85; max-width:600px; margin:0 auto 28px;" class="cbr">
+                Coach BRVM <strong style="color:#E8EAF0;">n'est pas une SGI</strong>. Nous t'accompagnons pas à pas dans les démarches
+                d'ouverture de ton compte-titres auprès d'une <strong style="color:#E8EAF0;">SGI agréée BRVM</strong> — que tu sois en Europe, en Amérique, ou ailleurs.
+                Tout se fait en ligne, <strong style="color:#E8EAF0;">moyennant une commission minime</strong>.
+            </p>
+
+            <div class="d-flex flex-wrap justify-content-center gap-3 mb-4 cbr cbr2">
+                <div style="background:rgba(255,255,255,.04); border:1px solid rgba(37,211,102,.12); border-radius:6px; padding:14px 20px; text-align:left; min-width:220px; flex:1; max-width:280px;">
+                    <div style="font-size:20px; margin-bottom:6px;">🌍</div>
+                    <div style="font-family:'Syne',sans-serif; font-size:11px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:#25D366; margin-bottom:4px;">Qui peut en bénéficier</div>
+                    <p style="font-size:13px; color:#9BA3B8; margin:0; line-height:1.65;">Diaspora africaine, Européens, Américains... Toute personne hors UEMOA souhaitant investir à la BRVM.</p>
+                </div>
+                <div style="background:rgba(255,255,255,.04); border:1px solid rgba(37,211,102,.12); border-radius:6px; padding:14px 20px; text-align:left; min-width:220px; flex:1; max-width:280px;">
+                    <div style="font-size:20px; margin-bottom:6px;">📋</div>
+                    <div style="font-family:'Syne',sans-serif; font-size:11px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:#25D366; margin-bottom:4px;">Ce qu'on fait</div>
+                    <p style="font-size:13px; color:#9BA3B8; margin:0; line-height:1.65;">Identification de la SGI, accompagnement du dossier, suivi jusqu'à l'activation de ton compte-titres.</p>
+                </div>
+                <div style="background:rgba(255,255,255,.04); border:1px solid rgba(37,211,102,.12); border-radius:6px; padding:14px 20px; text-align:left; min-width:220px; flex:1; max-width:280px;">
+                    <div style="font-size:20px; margin-bottom:6px;">💰</div>
+                    <div style="font-family:'Syne',sans-serif; font-size:11px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:#25D366; margin-bottom:4px;">Notre modèle</div>
+                    <p style="font-size:13px; color:#9BA3B8; margin:0; line-height:1.65;">Commission minime, uniquement à l'ouverture réussie. Zéro frais si le compte n'est pas activé.</p>
+                </div>
+            </div>
+
+            <a href="{{ route('diaspora') }}" class="cb-wa-cta">
+                <i class="bi bi-whatsapp"></i> En savoir plus &amp; nous contacter
+            </a>
+            <p style="font-size:11px; color:rgba(107,117,144,.5); margin-top:14px; font-family:'Syne',sans-serif; letter-spacing:.08em; text-transform:uppercase;">
+                Réponse sous 24h &nbsp;·&nbsp; 100% en ligne &nbsp;·&nbsp; Commission minime
+            </p>
         </div>
     </div>
 </section>

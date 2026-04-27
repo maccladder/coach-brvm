@@ -69,6 +69,11 @@ return [
 
 
 
+    'google_analytics' => [
+        'credentials_path' => env('GA_CREDENTIALS_PATH'),
+        'property_id'      => env('GA_PROPERTY_ID'),
+    ],
+
     'postmark' => [
         'token' => env('POSTMARK_TOKEN'),
     ],

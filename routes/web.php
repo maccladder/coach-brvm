@@ -447,6 +447,7 @@ Route::view('/contact', 'sections.contact')->name('contact');
 Route::view('/conditions', 'sections.conditions')->name('conditions');
 Route::view('/confidentialite', 'sections.confidentialite')->name('confidentialite');
 Route::view('/notre-histoire', 'sections.notre-histoire')->name('notre.histoire');
+Route::view('/diaspora', 'sections.diaspora')->name('diaspora');
 
 /*
 |--------------------------------------------------------------------------
