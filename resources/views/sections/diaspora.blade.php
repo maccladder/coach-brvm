@@ -313,7 +313,7 @@
                     Envoie-nous un message WhatsApp. On t'explique tout, on évalue ta situation
                     et on t'accompagne de A à Z jusqu'à l'activation de ton compte-titres.
                 </p>
-                <a href="https://wa.me/2250767123451?text=Bonjour%2C%20je%20suis%20en%20diaspora%20et%20je%20voudrais%20investir%20%C3%A0%20la%20BRVM.%20Pouvez-vous%20m%27accompagner%20%3F"
+                <a href="https://wa.me/2250574023351?text=Bonjour%2C%20je%20suis%20en%20diaspora%20et%20je%20voudrais%20investir%20%C3%A0%20la%20BRVM.%20Pouvez-vous%20m%27accompagner%20%3F"
                    target="_blank" rel="noopener"
                    class="dia-wa-btn">
                     <i class="bi bi-whatsapp"></i> Nous contacter sur WhatsApp
