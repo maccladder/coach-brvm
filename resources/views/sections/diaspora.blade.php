@@ -143,8 +143,7 @@
                             (Société de Gestion et d'Intermédiation). Nous ne gérons pas ton argent
                             et nous ne passons pas d'ordres en bourse à ta place.
                             Nous t'<strong>accompagnons uniquement dans les démarches administratives</strong>
-                            d'ouverture de compte-titres, <strong>moyennant une commission minime</strong>
-                            uniquement à l'ouverture réussie.
+                            d'ouverture de compte-titres auprès d'une SGI agréée.
                         </div>
                     </div>
                 </div>
@@ -159,10 +158,6 @@
                             <div class="d-flex align-items-center gap-3">
                                 <span style="color:#25D366;font-size:18px;">✓</span>
                                 <span style="font-size:14px;color:#9BA3B8;">Valable depuis n'importe quel pays</span>
-                            </div>
-                            <div class="d-flex align-items-center gap-3">
-                                <span style="color:#25D366;font-size:18px;">✓</span>
-                                <span style="font-size:14px;color:#9BA3B8;">Commission minime, résultat garanti</span>
                             </div>
                             <div class="d-flex align-items-center gap-3">
                                 <span style="color:#25D366;font-size:18px;">✓</span>
@@ -206,8 +201,8 @@
                 <div class="col-md-4">
                     <div class="dia-card">
                         <div class="dia-card-icon">💼</div>
-                        <div class="dia-card-title">Tu veux investir sans intermédiaire coûteux</div>
-                        <p class="dia-card-desc">Pas de frais exorbitants. Notre commission est minime et ne s'applique qu'une fois ton compte-titres activé et opérationnel.</p>
+                        <div class="dia-card-title">Tu veux un accompagnement sérieux</div>
+                        <p class="dia-card-desc">Un suivi personnalisé, des réponses claires à chaque étape, et un accompagnement humain jusqu'à ce que ton compte soit activé.</p>
                     </div>
                 </div>
             </div>
@@ -254,7 +249,7 @@
                         <div class="dia-step-num">04</div>
                         <div>
                             <div class="dia-step-title">Suivi jusqu'à l'activation</div>
-                            <p class="dia-step-desc">On suit ton dossier avec la SGI et on t'informe à chaque étape. Notre commission minime n'est due qu'une fois ton compte activé.</p>
+                            <p class="dia-step-desc">On suit ton dossier avec la SGI et on t'informe à chaque étape jusqu'à ce que ton compte soit pleinement activé.</p>
                         </div>
                     </div>
                     <div class="dia-step">
@@ -280,10 +275,6 @@
                 <div class="dia-faq-item">
                     <div class="dia-faq-q">C'est quoi une SGI et pourquoi en ai-je besoin ? <span>+</span></div>
                     <p class="dia-faq-a">Une SGI (Société de Gestion et d'Intermédiation) est un courtier agréé par la BRVM. C'est l'intermédiaire obligatoire pour acheter ou vendre des actions en bourse. Sans compte-titres chez une SGI, tu ne peux pas investir à la BRVM.</p>
-                </div>
-                <div class="dia-faq-item">
-                    <div class="dia-faq-q">Combien coûte votre accompagnement ? <span>+</span></div>
-                    <p class="dia-faq-a">Notre commission est minime et ne s'applique qu'une seule fois, lorsque ton compte-titres est activé et opérationnel. Si le compte n'est pas ouvert pour une raison indépendante de ta volonté, tu ne paies rien.</p>
                 </div>
                 <div class="dia-faq-item">
                     <div class="dia-faq-q">Quels documents sont généralement requis ? <span>+</span></div>
@@ -319,7 +310,7 @@
                     <i class="bi bi-whatsapp"></i> Nous contacter sur WhatsApp
                 </a>
                 <p style="font-size:11px;color:rgba(107,117,144,.5);margin-top:20px;font-family:'Syne',sans-serif;letter-spacing:.1em;text-transform:uppercase;">
-                    Réponse sous 24h &nbsp;·&nbsp; 100% en ligne &nbsp;·&nbsp; Commission minime
+                    Réponse sous 24h &nbsp;·&nbsp; 100% en ligne &nbsp;·&nbsp; Accompagnement personnalisé
                 </p>
             </div>
         </div>
