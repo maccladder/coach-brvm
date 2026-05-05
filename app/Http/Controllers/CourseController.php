@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AdminGrant;
 use App\Models\Course;
+use App\Models\CoursePurchase;
 use App\Services\CloudflareStream;
 use Illuminate\Http\Request;
 
@@ -18,13 +20,18 @@ class CourseController extends Controller
 {
     $userId = $request->user()->id;
 
-    $courses = Course::query()
-        ->whereHas('purchases', function ($q) use ($userId) {
-            $q->where('user_id', $userId)
-              ->whereNotNull('paid_at');
-        })
-        ->latest()
-        ->get();
+    $purchasedIds = CoursePurchase::where('user_id', $userId)
+        ->whereNotNull('paid_at')
+        ->pluck('course_id');
+
+    $grantedIds = AdminGrant::where('user_id', $userId)
+        ->where('grantable_type', Course::class)
+        ->active()
+        ->pluck('grantable_id');
+
+    $allIds = $purchasedIds->merge($grantedIds)->unique();
+
+    $courses = Course::whereIn('id', $allIds)->latest()->get();
 
     return view('courses.my', compact('courses'));
 }
@@ -33,10 +40,13 @@ class CourseController extends Controller
     {
         $course = Course::where('slug', $slug)->firstOrFail();
 
-        $hasAccess = $request->user()->coursePurchases()
-            ->where('course_id', $course->id)
-            ->whereNotNull('paid_at')
-            ->exists();
+        $user = $request->user();
+
+        $hasAccess = $user->coursePurchases()
+                ->where('course_id', $course->id)
+                ->whereNotNull('paid_at')
+                ->exists()
+            || $course->isGrantedTo($user);
 
         abort_unless($hasAccess, 403, "Cours non acheté.");
 

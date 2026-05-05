@@ -2,13 +2,14 @@
 
 namespace App\Models;
 
+use App\Traits\HasAdminGrants;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Document extends Model
 {
-    use HasFactory;
+    use HasFactory, HasAdminGrants;
 
     protected $fillable = [
         'vendor_id',
@@ -72,9 +73,10 @@ class Document extends Model
     public function isBoughtBy(User $user): bool
     {
         return $this->purchases()
-            ->paid()
-            ->where('user_id', $user->id)
-            ->exists();
+                ->paid()
+                ->where('user_id', $user->id)
+                ->exists()
+            || $this->isGrantedTo($user);
     }
 
     public function isVendorUploaded(): bool

@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AdminGrant;
 use App\Models\Document;
+use App\Models\DocumentPurchase;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -64,15 +66,24 @@ class DocumentController extends Controller
     /**
      * ✅ Mes documents = uniquement ceux achetés (paid)
      */
-    public function myDocuments(Request $request)
+    public function myDocuments()
     {
-        $types = $this->types;
+        $types  = $this->types;
+        $userId = auth()->id();
 
-        $documents = Document::query()
+        $purchasedIds = DocumentPurchase::paid()
+            ->where('user_id', $userId)
+            ->pluck('document_id');
+
+        $grantedIds = AdminGrant::where('user_id', $userId)
+            ->where('grantable_type', Document::class)
             ->active()
-            ->whereHas('purchases', function ($q) {
-                $q->paid()->where('user_id', auth()->id());
-            })
+            ->pluck('grantable_id');
+
+        $allIds = $purchasedIds->merge($grantedIds)->unique();
+
+        $documents = Document::active()
+            ->whereIn('id', $allIds)
             ->latest()
             ->paginate(12);
 

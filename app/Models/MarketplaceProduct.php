@@ -2,10 +2,12 @@
 
 namespace App\Models;
 
+use App\Traits\HasAdminGrants;
 use Illuminate\Database\Eloquent\Model;
 
 class MarketplaceProduct extends Model
 {
+    use HasAdminGrants;
     protected $fillable = [
         'user_id',
         'category_id','title','slug','type','description',

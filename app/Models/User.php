@@ -3,7 +3,9 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Models\AdminGrant;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use App\Models\VirtualWallet;
@@ -81,6 +83,31 @@ public function purchasedProducts()
     return $this->belongsToMany(\App\Models\MarketplaceProduct::class, 'marketplace_purchases', 'user_id', 'product_id')
         ->withPivot(['status','paid_at','amount','provider','provider_ref'])
         ->withTimestamps();
+}
+
+public function adminGrants(): HasMany
+{
+    return $this->hasMany(AdminGrant::class);
+}
+
+/**
+ * Vérifie si cet utilisateur a accès à un item via un AdminGrant actif.
+ * Accepte un modèle Eloquent (Course, MarketplaceProduct, Document…)
+ * ou la chaîne 'lettreci' pour le module LettreCI.
+ *
+ * @param  \Illuminate\Database\Eloquent\Model|string  $grantable
+ */
+public function hasAccessTo(mixed $grantable): bool
+{
+    if ($grantable === 'lettreci') {
+        return AdminGrant::hasLettreCIAccess($this);
+    }
+
+    return AdminGrant::where('user_id', $this->id)
+        ->where('grantable_type', get_class($grantable))
+        ->where('grantable_id', $grantable->id)
+        ->active()
+        ->exists();
 }
 
     /**

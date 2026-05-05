@@ -2,10 +2,12 @@
 
 namespace App\Models;
 
+use App\Traits\HasAdminGrants;
 use Illuminate\Database\Eloquent\Model;
 
 class Course extends Model
 {
+    use HasAdminGrants;
 
      protected $fillable = [
         'title',

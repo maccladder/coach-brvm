@@ -354,6 +354,16 @@ Route::prefix('topups')->name('topups.')->group(function () {
         Route::resource('books', AdminBookController::class);
         Route::post('books/{book}/pages', [AdminBookController::class, 'storePage'])->name('books.pages.store');
         Route::delete('books/{book}/pages/{page}', [AdminBookController::class, 'destroyPage'])->name('books.pages.destroy');
+
+        // 🎁 Attributions gratuites admin
+        Route::prefix('grants')->name('grants.')->group(function () {
+            Route::get('/user-search', [\App\Http\Controllers\Admin\AdminGrantController::class, 'userSearch'])->name('user-search');
+            Route::get('/items', [\App\Http\Controllers\Admin\AdminGrantController::class, 'items'])->name('items');
+            Route::get('/', [\App\Http\Controllers\Admin\AdminGrantController::class, 'index'])->name('index');
+            Route::post('/', [\App\Http\Controllers\Admin\AdminGrantController::class, 'store'])->name('store');
+            Route::post('/{grant}/revoke', [\App\Http\Controllers\Admin\AdminGrantController::class, 'revoke'])->name('revoke');
+            Route::post('/{grant}/restore', [\App\Http\Controllers\Admin\AdminGrantController::class, 'restore'])->name('restore');
+        });
     });
 });
 

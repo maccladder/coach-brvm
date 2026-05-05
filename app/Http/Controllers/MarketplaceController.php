@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AdminGrant;
 use App\Models\MarketplaceProduct;
 use App\Models\MarketplaceCategory;
 use Illuminate\Http\Request;
@@ -34,14 +35,21 @@ public function index(Request $request)
 
     $categories = MarketplaceCategory::orderBy('name')->get();
 
-    // ✅ IDs des produits déjà achetés (paid) par l'user connecté
+    // IDs des produits accessibles (achetés OU grantés)
     $ownedIds = [];
-    if (auth()->check() && method_exists(auth()->user(), 'purchasedProducts')) {
-        $ownedIds = auth()->user()
-            ->purchasedProducts()
+    if (auth()->check()) {
+        $user = auth()->user();
+
+        $purchasedIds = $user->purchasedProducts()
             ->wherePivot('status', 'paid')
-            ->pluck('marketplace_products.id')
-            ->all();
+            ->pluck('marketplace_products.id');
+
+        $grantedIds = AdminGrant::where('user_id', $user->id)
+            ->where('grantable_type', MarketplaceProduct::class)
+            ->active()
+            ->pluck('grantable_id');
+
+        $ownedIds = $purchasedIds->merge($grantedIds)->unique()->values()->all();
     }
 
     return view('marketplace.index', compact('products', 'categories', 'ownedIds'));
@@ -60,14 +68,15 @@ public function show(string $slug)
         ->where('slug', $slug)
         ->firstOrFail();
 
-    // ✅ Est-ce que l'utilisateur a déjà acheté ?
+    // Est-ce que l'utilisateur a accès (acheté OU granté) ?
     $isOwned = false;
-    if (auth()->check() && method_exists(auth()->user(), 'purchasedProducts')) {
-        $isOwned = auth()->user()
-            ->purchasedProducts()
-            ->where('marketplace_products.id', $product->id)
-            ->wherePivot('status', 'paid')
-            ->exists();
+    if (auth()->check()) {
+        $user = auth()->user();
+        $isOwned = $user->purchasedProducts()
+                ->where('marketplace_products.id', $product->id)
+                ->wherePivot('status', 'paid')
+                ->exists()
+            || $product->isGrantedTo($user);
     }
 
     // ✅ URLs d'aperçu PDF (p1..p5) - seulement book et seulement si pas acheté
@@ -101,9 +110,10 @@ public function activation(MarketplaceProduct $product)
     $user = auth()->user();
 
     $isOwned = $user->purchasedProducts()
-        ->where('marketplace_products.id', $product->id)
-        ->wherePivot('status', 'paid')
-        ->exists();
+            ->where('marketplace_products.id', $product->id)
+            ->wherePivot('status', 'paid')
+            ->exists()
+        || $product->isGrantedTo($user);
 
     abort_unless($isOwned, 403);
 

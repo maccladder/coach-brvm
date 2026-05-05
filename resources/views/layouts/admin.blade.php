@@ -115,6 +115,10 @@
                 </li>
 
                 <li class="nav-item">
+                    <a class="nav-link" href="{{ route('admin.grants.index') }}">🎁 Attributions</a>
+                </li>
+
+                <li class="nav-item">
                     <a class="nav-link" href="{{ route('landing') }}">← Site public</a>
                 </li>
 
