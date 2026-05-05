@@ -80,48 +80,31 @@
             <ul class="navbar-nav me-auto mb-2 mb-lg-0">
 
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ route('admin.dashboard') }}">🏠 Dashboard</a>
+                    <a class="nav-link" href="{{ route('admin.dashboard') }}">Dashboard</a>
                 </li>
 
-                {{-- <li class="nav-item">
-                    <a class="nav-link" href="{{ route('admin.users.index') }}">👥 Utilisateurs</a>
-                </li> --}}
-
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ route('admin.bocs.index') }}">📊 BOC journalières</a>
-                </li>
-
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ route('admin.financial_reports.index', ['year' => 2025]) }}">📄 États financiers</a>
-                </li>
-
-                {{-- 🎓 FORMATIONS --}}
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" role="button"
                        data-bs-toggle="dropdown" aria-expanded="false">
-                        🎓 Formations
+                        Menu
                     </a>
                     <ul class="dropdown-menu shadow-sm">
-                        <li><a class="dropdown-item" href="{{ route('admin.courses.dashboard') }}">📊 Dashboard formations</a></li>
-                        <li><a class="dropdown-item" href="{{ route('admin.courses.purchases') }}">🧾 Achats</a></li>
-                        <li><a class="dropdown-item" href="{{ route('admin.courses.buyers') }}">👥 Utilisateurs (acheteurs)</a></li>
+                        <li><a class="dropdown-item" href="{{ route('admin.bocs.index') }}">📊 BOC journalières</a></li>
+                        <li><a class="dropdown-item" href="{{ route('admin.financial_reports.index', ['year' => 2025]) }}">📄 États financiers</a></li>
                         <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item" href="{{ route('admin.courses.index') }}">🎥 Cours</a></li>
+                        <li><a class="dropdown-item" href="{{ route('admin.courses.dashboard') }}">🎓 Formations – Dashboard</a></li>
+                        <li><a class="dropdown-item" href="{{ route('admin.courses.purchases') }}">🧾 Formations – Achats</a></li>
+                        <li><a class="dropdown-item" href="{{ route('admin.courses.index') }}">🎥 Formations – Cours</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="{{ route('admin.books.index') }}">📚 Livres</a></li>
+                        <li><a class="dropdown-item" href="{{ route('admin.grants.index') }}">🎁 Attributions</a></li>
+                        <li><a class="dropdown-item" href="{{ route('admin.emails.index') }}">📧 Envoyer un email</a></li>
                     </ul>
-                </li>
-
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ route('admin.books.index') }}">📚 Livres</a>
-                </li>
-
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ route('admin.grants.index') }}">🎁 Attributions</a>
                 </li>
 
                 <li class="nav-item">
                     <a class="nav-link" href="{{ route('landing') }}">← Site public</a>
                 </li>
-
 
             </ul>
 
