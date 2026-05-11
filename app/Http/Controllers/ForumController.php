@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\ForumReplyNotification;
 use App\Models\ForumCategory;
 use App\Models\ForumLike;
 use App\Models\ForumPost;
 use App\Models\ForumTopic;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 
 class ForumController extends Controller
@@ -115,11 +117,25 @@ class ForumController extends Controller
 
         $request->validate(['body' => 'required|string|max:5000']);
 
-        ForumPost::create([
+        $post = ForumPost::create([
             'forum_topic_id' => $topic->id,
             'user_id'        => auth()->id(),
             'body'           => $request->body,
         ]);
+
+        if ($topic->user_id !== auth()->id()) {
+            $topic->loadMissing('user');
+            if ($topic->user?->email) {
+                $post->load('user');
+                Mail::to($topic->user->email)->send(
+                    new ForumReplyNotification(
+                        $topic,
+                        $post,
+                        route('forum.topic', [$categorySlug, $topicSlug])
+                    )
+                );
+            }
+        }
 
         return redirect()
             ->route('forum.topic', [$categorySlug, $topicSlug])
