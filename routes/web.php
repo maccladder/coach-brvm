@@ -458,6 +458,27 @@ Route::view('/conditions', 'sections.conditions')->name('conditions');
 Route::view('/confidentialite', 'sections.confidentialite')->name('confidentialite');
 Route::view('/notre-histoire', 'sections.notre-histoire')->name('notre.histoire');
 Route::view('/diaspora', 'sections.diaspora')->name('diaspora');
+Route::view('/financement', 'sections.financement')->name('financement');
+Route::view('/formation-presentielle', 'sections.formation-presentielle')->name('formation.presentielle');
+
+// ──────────────────────────────────────────────────
+// Forum communautaire
+// ──────────────────────────────────────────────────
+Route::prefix('forum')->name('forum.')->group(function () {
+    Route::get('/', [\App\Http\Controllers\ForumController::class, 'index'])->name('index');
+
+    // Routes authentifiées définies avant les wildcards pour éviter les conflits
+    Route::middleware('auth')->group(function () {
+        Route::post('/post/{post}/liker', [\App\Http\Controllers\ForumController::class, 'likePost'])->name('post.like');
+        Route::get('/{category}/nouveau', [\App\Http\Controllers\ForumController::class, 'createTopic'])->name('topic.create');
+        Route::post('/{category}/nouveau', [\App\Http\Controllers\ForumController::class, 'storeTopic'])->name('topic.store');
+        Route::post('/{category}/{topic}/repondre', [\App\Http\Controllers\ForumController::class, 'storePost'])->name('post.store');
+    });
+
+    // Routes publiques en lecture (wildcards en dernier)
+    Route::get('/{category}', [\App\Http\Controllers\ForumController::class, 'category'])->name('category');
+    Route::get('/{category}/{topic}', [\App\Http\Controllers\ForumController::class, 'topic'])->name('topic');
+});
 
 /*
 |--------------------------------------------------------------------------

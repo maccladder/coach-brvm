@@ -532,7 +532,7 @@
             <div class="col-lg-7">
                 <div class="cb-hero-badge">
                     <span class="cb-hero-badge-dot"></span>
-                    Plateforme BRVM · Beta privée ouverte
+                    Plateforme BRVM · Accès ouvert
                 </div>
 
                 <p style="font-family:'Syne',sans-serif;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:#C9A84C;margin-bottom:16px;">
@@ -822,12 +822,12 @@
                 </div>
             </div>
             <div class="col-md-6 cbr">
-                <div class="cb-callout h-100 d-flex justify-content-between align-items-center gap-3 flex-wrap">
+                <div class="cb-callout h-100 d-flex justify-content-between align-items-center gap-3 flex-wrap" style="border-color:rgba(201,168,76,.18);">
                     <div>
-                        <div class="cb-callout-title">🧠 Stratégies d'investissement</div>
-                        <div class="cb-callout-desc">Mean reversion, dividendes, suivi de tendance — avec les outils Coach BRVM pour appliquer.</div>
+                        <div class="cb-callout-title">💬 Forum communautaire</div>
+                        <div class="cb-callout-desc">Échangez avec les autres investisseurs BRVM — analyses, questions, actualités et expériences partagées.</div>
                     </div>
-                    <a href="{{ route('aide.strategies') }}" class="cb-cta-outline" style="white-space:nowrap;">Ouvrir →</a>
+                    <a href="{{ route('forum.index') }}" class="cb-cta-primary" style="white-space:nowrap;">Rejoindre →</a>
                 </div>
             </div>
             <div class="col-md-6 cbr cbr2">
@@ -1020,6 +1020,162 @@
 </section>
 
 {{-- ══════════════════════════════════════
+     SERVICES — Financement + Formation présentielle
+══════════════════════════════════════ --}}
+<section class="cb-sec" style="background:#060910;">
+    <div class="container" style="max-width:1100px;">
+        <div class="cbr">
+            <p class="cb-sec-tag">Services Coach BRVM</p>
+            <h2 class="cb-sec-title">Bien plus qu'une plateforme — <em>un accompagnement</em></h2>
+            <div class="cb-divider"></div>
+        </div>
+        <div class="row g-3 mt-2 cbr cbr2">
+
+            {{-- Financement --}}
+            <div class="col-md-6">
+                <div style="
+                    background:#0C1120; border:1px solid rgba(37,211,102,.15);
+                    border-radius:6px; padding:clamp(28px,4vw,40px); height:100%;
+                    display:flex; flex-direction:column; transition:border-color .3s;
+                " onmouseover="this.style.borderColor='rgba(37,211,102,.3)'" onmouseout="this.style.borderColor='rgba(37,211,102,.15)'">
+                    <div style="font-size:36px; margin-bottom:16px;">💰</div>
+                    <p style="font-family:'Syne',sans-serif;font-size:10px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:#25D366;margin-bottom:10px;">Facilitation de financement</p>
+                    <h3 style="font-family:'Playfair Display',serif;font-size:clamp(18px,2.5vw,24px);font-weight:700;color:#E8EAF0;line-height:1.25;margin-bottom:12px;">
+                        Besoin d'un prêt pour concrétiser votre projet ?
+                    </h3>
+                    <p style="font-size:14px;color:#6B7590;line-height:1.75;margin-bottom:24px;flex-grow:1;">
+                        Coach BRVM joue le rôle de <strong style="color:#E8EAF0;">facilitateur</strong> entre les particuliers
+                        et des structures financières agréées. Mise en relation gratuite, réponse sous 24h.
+                    </p>
+                    <a href="{{ route('financement') }}" style="
+                        display:inline-flex;align-items:center;gap:8px;
+                        background:transparent;color:#25D366 !important;
+                        font-family:'Syne',sans-serif;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+                        padding:11px 22px;border-radius:4px;text-decoration:none;
+                        border:1px solid rgba(37,211,102,.35);transition:all .3s;align-self:flex-start;
+                    "
+                    onmouseover="this.style.background='rgba(37,211,102,.08)';this.style.borderColor='rgba(37,211,102,.6)'"
+                    onmouseout="this.style.background='transparent';this.style.borderColor='rgba(37,211,102,.35)'">
+                        En savoir plus →
+                    </a>
+                </div>
+            </div>
+
+            {{-- Formation présentielle --}}
+            <div class="col-md-6">
+                <div style="
+                    background:#0C1120; border:1px solid rgba(201,168,76,.15);
+                    border-radius:6px; padding:clamp(28px,4vw,40px); height:100%;
+                    display:flex; flex-direction:column; transition:border-color .3s;
+                " onmouseover="this.style.borderColor='rgba(201,168,76,.35)'" onmouseout="this.style.borderColor='rgba(201,168,76,.15)'">
+                    <div style="font-size:36px; margin-bottom:16px;">🎓</div>
+                    <p style="font-family:'Syne',sans-serif;font-size:10px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:#C9A84C;margin-bottom:10px;">Formation en présentiel</p>
+                    <h3 style="font-family:'Playfair Display',serif;font-size:clamp(18px,2.5vw,24px);font-weight:700;color:#E8EAF0;line-height:1.25;margin-bottom:12px;">
+                        Maîtrisez la BRVM avec une formation en présentiel
+                    </h3>
+                    <p style="font-size:14px;color:#6B7590;line-height:1.75;margin-bottom:24px;flex-grow:1;">
+                        Sessions animées par des experts, adaptées à tous les niveaux — du débutant à l'investisseur confirmé.
+                        <strong style="color:#E8EAF0;">Attestation délivrée</strong> à l'issue.
+                    </p>
+                    <a href="{{ route('formation.presentielle') }}" style="
+                        display:inline-flex;align-items:center;gap:8px;
+                        background:linear-gradient(135deg,#C9A84C,#9B6B15);
+                        color:#050810 !important;font-family:'Syne',sans-serif;
+                        font-weight:800;font-size:12px;letter-spacing:.06em;text-transform:uppercase;
+                        padding:11px 22px;border-radius:4px;text-decoration:none;
+                        transition:all .3s;align-self:flex-start;
+                    "
+                    onmouseover="this.style.boxShadow='0 8px 24px rgba(201,168,76,.3)';this.style.transform='translateY(-2px)'"
+                    onmouseout="this.style.boxShadow='';this.style.transform=''">
+                        En savoir plus →
+                    </a>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+{{-- ══════════════════════════════════════
+     FORUM COMMUNAUTAIRE
+══════════════════════════════════════ --}}
+<section class="cb-sec cb-sec-alt">
+    <div class="container" style="max-width:1100px;">
+        <div class="row g-5 align-items-center">
+
+            <div class="col-lg-5 cbr">
+                <p class="cb-sec-tag">Forum</p>
+                <h2 class="cb-sec-title">La communauté des <em>investisseurs BRVM</em></h2>
+                <div class="cb-divider"></div>
+                <p style="font-size:15px;color:#6B7590;line-height:1.75;font-weight:300;margin-bottom:28px;">
+                    Échangez, posez vos questions, partagez vos analyses avec une communauté d'investisseurs passionnés.
+                    La lecture est libre — publiez en vous connectant.
+                </p>
+                <a href="{{ route('forum.index') }}" class="cb-cta-primary">💬 Rejoindre la communauté</a>
+            </div>
+
+            <div class="col-lg-7 cbr cbr2">
+                <div class="row g-2">
+                    <div class="col-6">
+                        <a href="{{ route('forum.category', 'analyses') }}" style="
+                            display:block; background:#060910; border:1px solid rgba(201,168,76,.1);
+                            border-radius:6px; padding:22px 20px; text-decoration:none;
+                            transition:border-color .3s, transform .3s;
+                        "
+                        onmouseover="this.style.borderColor='rgba(201,168,76,.3)';this.style.transform='translateY(-3px)'"
+                        onmouseout="this.style.borderColor='rgba(201,168,76,.1)';this.style.transform=''">
+                            <div style="font-size:24px;margin-bottom:10px;">📊</div>
+                            <div style="font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:#E8EAF0;margin-bottom:4px;">Analyses</div>
+                            <div style="font-size:12px;color:#6B7590;line-height:1.5;">Fondamentales, techniques, revues de sociétés</div>
+                        </a>
+                    </div>
+                    <div class="col-6">
+                        <a href="{{ route('forum.category', 'questions-debutants') }}" style="
+                            display:block; background:#060910; border:1px solid rgba(201,168,76,.1);
+                            border-radius:6px; padding:22px 20px; text-decoration:none;
+                            transition:border-color .3s, transform .3s;
+                        "
+                        onmouseover="this.style.borderColor='rgba(201,168,76,.3)';this.style.transform='translateY(-3px)'"
+                        onmouseout="this.style.borderColor='rgba(201,168,76,.1)';this.style.transform=''">
+                            <div style="font-size:24px;margin-bottom:10px;">💡</div>
+                            <div style="font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:#E8EAF0;margin-bottom:4px;">Questions débutants</div>
+                            <div style="font-size:12px;color:#6B7590;line-height:1.5;">Posez toutes vos questions sans hésiter</div>
+                        </a>
+                    </div>
+                    <div class="col-6">
+                        <a href="{{ route('forum.category', 'actualites-brvm') }}" style="
+                            display:block; background:#060910; border:1px solid rgba(201,168,76,.1);
+                            border-radius:6px; padding:22px 20px; text-decoration:none;
+                            transition:border-color .3s, transform .3s;
+                        "
+                        onmouseover="this.style.borderColor='rgba(201,168,76,.3)';this.style.transform='translateY(-3px)'"
+                        onmouseout="this.style.borderColor='rgba(201,168,76,.1)';this.style.transform=''">
+                            <div style="font-size:24px;margin-bottom:10px;">📰</div>
+                            <div style="font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:#E8EAF0;margin-bottom:4px;">Actualités BRVM</div>
+                            <div style="font-size:12px;color:#6B7590;line-height:1.5;">Infos, événements, nouvelles du marché</div>
+                        </a>
+                    </div>
+                    <div class="col-6">
+                        <a href="{{ route('forum.category', 'experiences-investisseurs') }}" style="
+                            display:block; background:#060910; border:1px solid rgba(201,168,76,.1);
+                            border-radius:6px; padding:22px 20px; text-decoration:none;
+                            transition:border-color .3s, transform .3s;
+                        "
+                        onmouseover="this.style.borderColor='rgba(201,168,76,.3)';this.style.transform='translateY(-3px)'"
+                        onmouseout="this.style.borderColor='rgba(201,168,76,.1)';this.style.transform=''">
+                            <div style="font-size:24px;margin-bottom:10px;">💼</div>
+                            <div style="font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:#E8EAF0;margin-bottom:4px;">Expériences d'investisseurs</div>
+                            <div style="font-size:12px;color:#6B7590;line-height:1.5;">Témoignages, stratégies, retours d'expérience</div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+{{-- ══════════════════════════════════════
      DIASPORA
 ══════════════════════════════════════ --}}
 <section style="background:linear-gradient(180deg,#060910 0%,#071210 60%,#060910 100%); padding:clamp(64px,10vw,120px) 0; position:relative; overflow:hidden;" class="cbr">
@@ -1039,7 +1195,7 @@
             <p style="font-size:clamp(14px,2vw,16px); color:#6B7590; line-height:1.85; max-width:600px; margin:0 auto 28px;" class="cbr">
                 Coach BRVM <strong style="color:#E8EAF0;">n'est pas une SGI</strong>. Nous t'accompagnons pas à pas dans les démarches
                 d'ouverture de ton compte-titres auprès d'une <strong style="color:#E8EAF0;">SGI agréée BRVM</strong> — que tu sois en Europe, en Amérique, ou ailleurs.
-                Tout se fait en ligne, <strong style="color:#E8EAF0;">moyennant une commission minime</strong>.
+                Tout se fait en ligne, de A à Z.
             </p>
 
             <div class="d-flex flex-wrap justify-content-center gap-3 mb-4 cbr cbr2">
@@ -1054,9 +1210,9 @@
                     <p style="font-size:13px; color:#9BA3B8; margin:0; line-height:1.65;">Identification de la SGI, accompagnement du dossier, suivi jusqu'à l'activation de ton compte-titres.</p>
                 </div>
                 <div style="background:rgba(255,255,255,.04); border:1px solid rgba(37,211,102,.12); border-radius:6px; padding:14px 20px; text-align:left; min-width:220px; flex:1; max-width:280px;">
-                    <div style="font-size:20px; margin-bottom:6px;">💰</div>
-                    <div style="font-family:'Syne',sans-serif; font-size:11px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:#25D366; margin-bottom:4px;">Notre modèle</div>
-                    <p style="font-size:13px; color:#9BA3B8; margin:0; line-height:1.65;">Commission minime, uniquement à l'ouverture réussie. Zéro frais si le compte n'est pas activé.</p>
+                    <div style="font-size:20px; margin-bottom:6px;">✅</div>
+                    <div style="font-family:'Syne',sans-serif; font-size:11px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:#25D366; margin-bottom:4px;">100% en ligne</div>
+                    <p style="font-size:13px; color:#9BA3B8; margin:0; line-height:1.65;">Valable depuis n'importe quel pays. Réponse sur WhatsApp sous 24h, sans déplacement.</p>
                 </div>
             </div>
 
@@ -1064,8 +1220,18 @@
                 <i class="bi bi-whatsapp"></i> En savoir plus &amp; nous contacter
             </a>
             <p style="font-size:11px; color:rgba(107,117,144,.5); margin-top:14px; font-family:'Syne',sans-serif; letter-spacing:.08em; text-transform:uppercase;">
-                Réponse sous 24h &nbsp;·&nbsp; 100% en ligne &nbsp;·&nbsp; Commission minime
+                Réponse sous 24h &nbsp;·&nbsp; 100% en ligne &nbsp;·&nbsp; Accompagnement personnalisé
             </p>
+
+            <div style="margin-top:24px; padding-top:20px; border-top:1px solid rgba(255,255,255,.06);">
+                <p style="font-size:13px; color:#6B7590; margin-bottom:8px;">
+                    Besoin d'un financement pour votre projet ?
+                </p>
+                <a href="{{ route('financement') }}" style="font-family:'Syne',sans-serif;font-size:12px;font-weight:700;letter-spacing:.06em;color:#25D366;text-decoration:none;">
+                    Découvrez notre service de facilitation →
+                </a>
+            </div>
+
         </div>
     </div>
 </section>

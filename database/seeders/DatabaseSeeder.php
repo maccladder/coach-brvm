@@ -18,6 +18,7 @@ class DatabaseSeeder extends Seeder
         // User::factory(10)->create();
 
  $this->call(\Database\Seeders\FinancialReports2025Seeder::class);
+ $this->call(\Database\Seeders\ForumCategorySeeder::class);
 
  $this->call(SocietesSeeder::class);
 

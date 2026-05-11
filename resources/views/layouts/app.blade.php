@@ -229,81 +229,65 @@
                     <a class="nav-link" href="{{ route('landing') }}">Accueil</a>
                 </li>
                 <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">Analyses</a>
-                    <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="{{ route('client-bocs.create') }}">📄 Analyser une BOC</a></li>
-                        <li><a class="dropdown-item" href="{{ route('client-financials.create') }}">📊 Analyser un état financier</a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><span class="dropdown-item disabled">🎧 Analyses audio (bientôt)</span></li>
-                        <li><span class="dropdown-item disabled">🎥 Analyses vidéo (bientôt)</span></li>
-                    </ul>
-                </li>
-                <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">Marché</a>
                     <ul class="dropdown-menu">
                         <li><a class="dropdown-item" href="{{ route('radar.index') }}">📡 Radar (7 jours)</a></li>
                         <li><a class="dropdown-item" href="{{ route('announcements.index') }}">📢 Annonces</a></li>
                         <li><a class="dropdown-item" href="{{ route('docs.public.index') }}">📄 Études & Business plans</a></li>
                         <li><a class="dropdown-item" href="{{ route('chocs.index') }}">⚡ Chocs de marché</a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li>
-                            <a class="dropdown-item d-flex justify-content-between align-items-center" href="{{ route('marketplace.index') }}">
-                                <span>🛍️ Marketplace</span><span class="cb-badge-new">Nouveau</span>
-                            </a>
-                        </li>
+                    </ul>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">Analyses</a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="{{ route('client-bocs.create') }}">📄 Analyser une BOC</a></li>
+                        <li><a class="dropdown-item" href="{{ route('client-financials.create') }}">📊 Analyser un état financier</a></li>
                     </ul>
                 </li>
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">Sociétés</a>
-                    <ul class="dropdown-menu dropdown-menu-scroll">
+                    <ul class="dropdown-menu">
                         <li><a class="dropdown-item" href="{{ route('societes.index') }}">🏢 Annuaire des sociétés</a></li>
                         <li><a class="dropdown-item" href="{{ route('sgis.index') }}">🏦 Courtiers (SGI)</a></li>
-                        <li><span class="dropdown-item disabled">🔍 Rechercher (bientôt)</span></li>
                         <li><hr class="dropdown-divider"></li>
                         <li><a class="dropdown-item" href="{{ route('dividendes.index', ['year' => 2025]) }}">🏆 Classement dividendes (2025)</a></li>
                     </ul>
                 </li>
                 <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">Formations</a>
+                    <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">Apprendre</a>
                     <ul class="dropdown-menu">
                         <li><a class="dropdown-item" href="{{ route('formations.brvm') }}">🎓 Formations BRVM</a></li>
                         <li><a class="dropdown-item" href="{{ route('books.index') }}">📚 Livres instructifs</a></li>
-                        <li><hr class="dropdown-divider"></li>
                         <li>
                             <a class="dropdown-item d-flex justify-content-between align-items-center" href="{{ route('marketplace.index') }}">
                                 <span>🛍️ Marketplace</span><span class="cb-badge-new">Nouveau</span>
                             </a>
                         </li>
                         <li><hr class="dropdown-divider"></li>
-                        <li><span class="dropdown-item disabled">🧠 Parcours guidé (bientôt)</span></li>
+                        <li><a class="dropdown-item" href="{{ route('formation.presentielle') }}">🏫 Formation en présentiel</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="{{ route('faq') }}">❓ FAQ</a></li>
+                        <li><a class="dropdown-item" href="{{ route('aide.glossaire') }}">📘 Glossaire BRVM</a></li>
+                        <li><a class="dropdown-item" href="{{ route('contact') }}">📩 Contact</a></li>
+                        <li><a class="dropdown-item" href="{{ route('aide.strategies') }}">🧠 Stratégies d'investissement</a></li>
                     </ul>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link nav-link-market" href="{{ route('marketplace.index') }}">🛍️ Marketplace</a>
+                    <a class="nav-link" href="{{ route('forum.index') }}">Forum</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link cb-nav-diaspora" href="{{ route('diaspora') }}">
                         <span class="cb-diaspora-blink"></span>Diaspora
                     </a>
                 </li>
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">Aide</a>
-                    <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="{{ route('faq') }}">❓ FAQ</a></li>
-                        <li><a class="dropdown-item" href="{{ route('aide.glossaire') }}">📘 Glossaire BRVM</a></li>
-                        <li><a class="dropdown-item" href="{{ route('contact') }}">📩 Contact</a></li>
-                        <li><a class="dropdown-item" href="{{ route('aide.strategies') }}">🧠 Stratégies d'investissement</a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item" href="{{ route('formations.brvm') }}">🎓 Se former à la BRVM</a></li>
-                        <li><a class="dropdown-item" href="{{ route('books.index') }}">📚 Mini-cours (gratuit)</a></li>
-                        <li><a class="dropdown-item" href="{{ route('marketplace.index') }}">🛍️ Marketplace</a></li>
-                    </ul>
+                <li class="nav-item">
+                    <a class="nav-link cb-nav-diaspora" href="{{ route('financement') }}">
+                        <span class="cb-diaspora-blink"></span>Financement
+                    </a>
                 </li>
             </ul>
 
             <div class="d-flex align-items-center gap-2 py-2 py-lg-0">
-                <span class="cb-badge-beta">Beta</span>
-
                 @auth
                     @php
                         $unreadCount  = auth()->user()->unreadNotifications()->count();
