@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AdminGrant;
+use App\Models\MarketplaceProduct;
 use App\Models\User;
 use Illuminate\Http\Request;
 
@@ -9,30 +11,61 @@ class AdminUserController extends Controller
 {
     public function index(Request $request)
     {
-        $q = trim((string) $request->query('q', ''));
+        $q    = trim((string) $request->query('q', ''));
         $sort = $request->query('sort', 'created_at');
         $dir  = $request->query('dir', 'desc');
 
-        // whitelist anti injection
-        $allowedSorts = ['name', 'email', 'created_at'];
+        $allowedSorts = ['name', 'email', 'created_at', 'marketplace_count', 'marketplace_total'];
         if (!in_array($sort, $allowedSorts, true)) $sort = 'created_at';
-
         $dir = strtolower($dir) === 'asc' ? 'asc' : 'desc';
 
         $users = User::query()
-            ->when($q !== '', function ($query) use ($q) {
-                $query->where(function ($qq) use ($q) {
+            ->withCount([
+                'marketplacePurchases as marketplace_count' => fn($q) => $q->where('status', 'paid'),
+                'coursePurchases as course_count',
+                'adminGrants as grants_count'               => fn($q) => $q->whereNull('revoked_at'),
+            ])
+            ->withSum(
+                ['marketplacePurchases as marketplace_total' => fn($q) => $q->where('status', 'paid')],
+                'amount'
+            )
+            ->when($q !== '', fn($query) =>
+                $query->where(fn($qq) =>
                     $qq->where('name', 'like', "%{$q}%")
-                       ->orWhere('email', 'like', "%{$q}%");
-                });
-            })
+                       ->orWhere('email', 'like', "%{$q}%")
+                       ->orWhere('phone', 'like', "%{$q}%")
+                )
+            )
             ->orderBy($sort, $dir)
-            ->paginate(20)
+            ->paginate(30)
             ->withQueryString();
 
-        $totalUsers = User::count();
-        $newLast7Days = User::where('created_at', '>=', now()->subDays(7))->count();
+        $stats = [
+            'total'       => User::count(),
+            'new7'        => User::where('created_at', '>=', now()->subDays(7))->count(),
+            'verified'    => User::whereNotNull('phone_verified_at')->count(),
+            'paying'      => User::whereHas('marketplacePurchases', fn($q) => $q->where('status', 'paid'))->count(),
+        ];
 
-        return view('admin.users.index', compact('users', 'q', 'sort', 'dir', 'totalUsers', 'newLast7Days'));
+        return view('admin.users.index', compact('users', 'q', 'sort', 'dir', 'stats'));
+    }
+
+    public function show(User $user)
+    {
+        $user->load([
+            'marketplacePurchases.product',
+            'coursePurchases.course',
+            'adminGrants',
+        ]);
+
+        $marketplaceTotal = $user->marketplacePurchases->where('status', 'paid')->sum('amount');
+        $courseTotal      = $user->coursePurchases->sum('amount_fcfa');
+
+        // Résoudre les noms des grants
+        $grantNames = AdminGrant::resolveItemNames($user->adminGrants);
+
+        return view('admin.users.show', compact(
+            'user', 'marketplaceTotal', 'courseTotal', 'grantNames'
+        ));
     }
 }

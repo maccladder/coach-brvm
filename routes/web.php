@@ -232,8 +232,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::post('/login', [AdminController::class, 'login'])->name('login');
 
     // ✅ Utilisateurs (ADMIN)
-Route::get('/users', [AdminUserController::class, 'index'])
-    ->name('users.index');
+    Route::get('/users', [AdminUserController::class, 'index'])->name('users.index');
+    Route::get('/users/{user}', [AdminUserController::class, 'show'])->name('users.show');
 
     // mass mail campagne
 
