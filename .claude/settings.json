@@ -5,7 +5,10 @@
       "Bash(git commit *)",
       "Bash(php -r \"require 'vendor/autoload.php'; echo 'PHP OK';\")",
       "Bash(grep -B 5 -A 30 'interpreted_markdown = $interpretation' /c/wamp64/www/coach-brvm/app/Http/Controllers/AdminController.php)",
-      "Bash(sqlite3 /c/wamp64/www/coach-brvm/database/database.sqlite \"SELECT id, title, status, interpreted_markdown, avatar_video_url, audio_path, stored_path FROM client_bocs WHERE id = 72;\")"
+      "Bash(sqlite3 /c/wamp64/www/coach-brvm/database/database.sqlite \"SELECT id, title, status, interpreted_markdown, avatar_video_url, audio_path, stored_path FROM client_bocs WHERE id = 72;\")",
+      "Bash(grep -E \"\\\\.php$\")",
+      "Bash(php -l app/Http/Controllers/ForumController.php)",
+      "Bash(php -l app/Mail/ForumReplyNotification.php)"
     ]
   }
 }
