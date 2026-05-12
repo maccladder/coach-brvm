@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AdminGrant;
 use App\Models\GamePremiumUnlock;
 use App\Models\MarketplaceProduct;
 use Illuminate\Http\Request;
@@ -21,7 +22,23 @@ class MarketplaceMyProductsController extends Controller
             $query->where('marketplace_products.type', request('type'));
         }
 
-        $products = $query->latest('marketplace_purchases.created_at')->get();
+        $purchased = $query->latest('marketplace_purchases.created_at')->get();
+
+        // Produits offerts via AdminGrant (actifs, non déjà dans les achats)
+        $grantedQuery = MarketplaceProduct::with('category')
+            ->whereIn('id',
+                AdminGrant::where('user_id', $user->id)
+                    ->where('grantable_type', MarketplaceProduct::class)
+                    ->active()
+                    ->pluck('grantable_id')
+            )
+            ->whereNotIn('id', $purchased->pluck('id'));
+
+        if (request()->filled('type')) {
+            $grantedQuery->where('type', request('type'));
+        }
+
+        $products = $purchased->concat($grantedQuery->get());
 
         return view('my-products', compact('products'));
     }
@@ -33,7 +50,8 @@ class MarketplaceMyProductsController extends Controller
         $hasAccess = $user->purchasedProducts()
             ->where('marketplace_products.id', $product->id)
             ->wherePivot('status', 'paid')
-            ->exists();
+            ->exists()
+            || $product->isGrantedTo($user);
 
         if (!$hasAccess) {
             abort(403, "Accès refusé : produit non acheté.");
@@ -76,7 +94,8 @@ class MarketplaceMyProductsController extends Controller
         $hasAccess = $user->purchasedProducts()
             ->where('marketplace_products.id', $product->id)
             ->wherePivot('status', 'paid')
-            ->exists();
+            ->exists()
+            || $product->isGrantedTo($user);
 
         if (!$hasAccess) {
             abort(403);
@@ -113,7 +132,8 @@ class MarketplaceMyProductsController extends Controller
         $hasAccess = $user->purchasedProducts()
             ->where('marketplace_products.id', $product->id)
             ->wherePivot('status', 'paid')
-            ->exists();
+            ->exists()
+            || $product->isGrantedTo($user);
 
         if (!$hasAccess) {
             abort(403, "Accès refusé : produit non acheté.");
@@ -143,7 +163,8 @@ class MarketplaceMyProductsController extends Controller
         $hasAccess = $user->purchasedProducts()
             ->where('marketplace_products.id', $product->id)
             ->wherePivot('status', 'paid')
-            ->exists();
+            ->exists()
+            || $product->isGrantedTo($user);
 
         if (!$hasAccess) {
             abort(403, "Accès refusé : produit non acheté.");

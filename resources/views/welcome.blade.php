@@ -517,6 +517,29 @@
 
 @section('content')
 
+@auth
+@php
+    $showOtpWelcomeBanner = !auth()->user()->phone_reward_claimed
+        && \Carbon\Carbon::parse(config('otp.reward_deadline'))->endOfDay()->isFuture();
+@endphp
+@if($showOtpWelcomeBanner)
+<div style="background:#080E1C;border-bottom:1px solid rgba(15,207,164,.12);padding:9px 0;text-align:center;">
+    <div class="container d-flex align-items-center justify-content-center flex-wrap gap-2" style="max-width:1100px;">
+        <span style="font-family:'Syne',sans-serif;font-size:11px;color:#6B7590;letter-spacing:.04em;">
+            🎁 <strong style="color:#E8EAF0;font-weight:600;">Cadeau membre</strong>
+            &nbsp;—&nbsp;Reçois Abidjan Run gratuitement
+            <span style="color:rgba(201,168,76,.4);margin:0 6px;">·</span>
+            <span style="color:#C9A84C;">Jusqu'au {{ \Carbon\Carbon::parse(config('otp.reward_deadline'))->locale('fr')->isoFormat('D MMMM') }}</span>
+        </span>
+        <a href="{{ route('phone.verify.form') }}"
+           style="display:inline-flex;align-items:center;gap:5px;background:#C9A84C;color:#060910 !important;font-family:'Syne',sans-serif;font-weight:800;font-size:10px;letter-spacing:.07em;text-transform:uppercase;padding:5px 13px;border-radius:2px;text-decoration:none;flex-shrink:0;">
+            Activer →
+        </a>
+    </div>
+</div>
+@endif
+@endauth
+
 {{-- ══════════════════════════════════════
      HERO
 ══════════════════════════════════════ --}}

@@ -28,6 +28,37 @@
     .cbr3 { transition-delay:.1s; }
     .cbr4 { transition-delay:.15s; }
     .cbr5 { transition-delay:.2s; }
+
+    /* ── OTP Banner ─── */
+    .otp-banner-wrap{background:#0C1120;border-bottom:1px solid rgba(201,168,76,.15);}
+    .otp-banner{display:flex;align-items:center;gap:24px;padding:18px 0;flex-wrap:wrap;}
+    .otp-banner-text{flex:1;min-width:220px;}
+    .otp-badge-cadeau{display:inline-block;font-family:'Syne',sans-serif;font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#060910;background:#0FCFA4;border-radius:2px;padding:2px 9px;margin-bottom:8px;}
+    .otp-badge-deadline{display:inline-block;font-family:'Syne',sans-serif;font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#C9A84C;border:1px solid rgba(201,168,76,.35);border-radius:2px;padding:2px 9px;margin-bottom:8px;margin-left:8px;}
+    .otp-banner-title{font-family:'Playfair Display',serif;font-size:clamp(15px,2.2vw,20px);font-weight:700;color:#E8EAF0;margin-bottom:4px;line-height:1.3;}
+    .otp-banner-sub{font-size:13px;color:#6B7590;line-height:1.5;}
+    .otp-submit{background:#C9A84C;color:#060910 !important;font-family:'Syne',sans-serif;font-weight:800;font-size:11px;letter-spacing:.07em;text-transform:uppercase;padding:10px 20px;border:none;border-radius:3px;cursor:pointer;transition:opacity .2s;display:inline-flex;align-items:center;gap:8px;text-decoration:none;}
+    .otp-submit:hover{opacity:.85;}
+    .otp-submit:disabled{opacity:.5;cursor:not-allowed;}
+
+    /* ── OTP Modal ─── */
+    #otpModal .modal-content{background:#0C1120;border:1px solid rgba(201,168,76,.18);border-radius:6px;}
+    #otpModal .modal-header{border-bottom:1px solid rgba(255,255,255,.06);padding:20px 24px 16px;}
+    #otpModal .modal-title{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:#E8EAF0;}
+    #otpModal .modal-body{padding:24px;}
+    #otpModal .btn-close{filter:invert(1);opacity:.4;}
+    .otp-step{display:none;}
+    .otp-step.active{display:block;}
+    .otp-field{margin-bottom:16px;}
+    .otp-field label{font-family:'Syne',sans-serif;font-size:11px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:#C9A84C;margin-bottom:6px;display:block;}
+    .otp-field select,.otp-field input[type=text],.otp-field input[type=tel]{background:#060910;border:1px solid rgba(255,255,255,.12);border-radius:3px;color:#E8EAF0;font-size:14px;padding:10px 14px;width:100%;transition:border-color .2s;}
+    .otp-field select:focus,.otp-field input:focus{border-color:#C9A84C;outline:none;box-shadow:none;}
+    .otp-field .is-invalid{border-color:#d97272 !important;}
+    .otp-field .invalid-feedback{display:block;font-size:12px;color:#d97272;margin-top:4px;}
+    .otp-hint{font-size:12.5px;color:#6B7590;line-height:1.6;margin-bottom:20px;}
+    .otp-step-lbl{font-family:'Syne',sans-serif;font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#6B7590;margin-bottom:14px;}
+    .otp-step-lbl b{color:#C9A84C;}
+    .otp-phone-preview{font-family:'Syne',sans-serif;font-size:12px;color:#C9A84C;margin-top:5px;min-height:18px;}
 </style>
 @endpush
 
@@ -44,6 +75,117 @@
             </div>
         </div>
     </div>
+
+    @php
+        $showOtpBanner = !auth()->user()->phone_reward_claimed
+            && \Carbon\Carbon::parse(config('otp.reward_deadline'))->endOfDay()->isFuture();
+        $otpDeadlineLabel = \Carbon\Carbon::parse(config('otp.reward_deadline'))
+            ->locale('fr')->isoFormat('D MMMM');
+    @endphp
+    @if($showOtpBanner)
+    <div class="otp-banner-wrap">
+        <div class="container" style="max-width:1100px;">
+            <div class="otp-banner">
+                <div class="otp-banner-text">
+                    <div>
+                        <span class="otp-badge-cadeau">Cadeau membre</span>
+                        <span class="otp-badge-deadline">Jusqu'au {{ $otpDeadlineLabel }}</span>
+                    </div>
+                    <div class="otp-banner-title">Cours dans les rues d'Abidjan avec AYA et GBÉ 🎮</div>
+                    <div class="otp-banner-sub">Reçois Abidjan Run gratuitement. Ajoute ton WhatsApp pour activer ton cadeau.</div>
+                </div>
+                <div class="flex-shrink-0">
+                    <button class="otp-submit" data-bs-toggle="modal" data-bs-target="#otpModal">Activer mon cadeau →</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- Modal vérification téléphone --}}
+    <div class="modal fade" id="otpModal" tabindex="-1" aria-labelledby="otpModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="otpModalLabel">Activer mon cadeau 🎁</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+                </div>
+                <div class="modal-body">
+                    {{-- Étape 1 : numéro de téléphone --}}
+                    <div class="otp-step" id="otp-step-1">
+                        <div class="otp-step-lbl">Étape <b>1 / 2</b> — Ton numéro</div>
+                        <p class="otp-hint">Saisis ton numéro WhatsApp. On t'envoie un code SMS pour confirmer que c'est bien toi.</p>
+                        <form method="POST" action="{{ route('phone.verify.send') }}">
+                            @csrf
+                            <div class="d-flex gap-2 align-items-start">
+                                <div class="otp-field" style="flex:0 0 168px;">
+                                    <label for="otp_country_code">Pays</label>
+                                    <select name="country_code" id="otp_country_code" class="{{ $errors->hasAny(['phone','country_code']) ? 'is-invalid' : '' }}">
+                                        @foreach(config('otp.countries') as $code => $country)
+                                            <option value="{{ $code }}"
+                                                data-digits="{{ $country['digits'] }}"
+                                                data-prefix="{{ $country['prefix'] }}"
+                                                {{ old('country_code', 'CI') === $code ? 'selected' : '' }}>
+                                                {{ $country['prefix'] }} {{ $country['name'] }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="otp-field flex-grow-1">
+                                    <label for="otp_phone_local">Numéro local</label>
+                                    <input type="tel" name="phone_local" id="otp_phone_local"
+                                        value="{{ old('phone_local') }}"
+                                        placeholder="0102345678"
+                                        class="{{ $errors->has('phone_local') || $errors->has('phone') ? 'is-invalid' : '' }}"
+                                        inputmode="numeric" maxlength="12">
+                                    @error('phone_local')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                    @error('phone')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                            </div>
+                            <div class="otp-phone-preview" id="otp-phone-preview"></div>
+                            <button type="submit" class="otp-submit w-100 justify-content-center mt-3">
+                                Envoyer le code SMS →
+                            </button>
+                        </form>
+                    </div>
+
+                    {{-- Étape 2 : code OTP --}}
+                    <div class="otp-step" id="otp-step-2">
+                        <div class="otp-step-lbl">Étape <b>2 / 2</b> — Code reçu par SMS</div>
+                        <p class="otp-hint">Saisis le code à 6 chiffres reçu par SMS. Il expire après 10&nbsp;minutes.</p>
+                        <form method="POST" action="{{ route('phone.verify.confirm') }}">
+                            @csrf
+                            <div class="otp-field">
+                                <label for="otp_code">Code SMS</label>
+                                <input type="text" name="otp_code" id="otp_code"
+                                    value="{{ old('otp_code') }}"
+                                    placeholder="123456"
+                                    maxlength="6"
+                                    inputmode="numeric"
+                                    autocomplete="one-time-code"
+                                    class="{{ $errors->has('otp_code') ? 'is-invalid' : '' }}">
+                                @error('otp_code')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            <button type="submit" class="otp-submit w-100 justify-content-center mt-2">
+                                Vérifier et activer →
+                            </button>
+                        </form>
+                        <button type="button" class="btn btn-link p-0 mt-3 d-block"
+                            style="font-size:12px;color:#6B7590;text-decoration:none;"
+                            onclick="otpGoStep(1)">
+                            ← Changer de numéro
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
 
     <div class="container py-5" style="max-width:1100px;">
         <div class="row g-3">
@@ -124,5 +266,43 @@
 @endsection
 
 @push('scripts')
-<script>document.querySelectorAll('.cbr').forEach(el=>{new IntersectionObserver(([e])=>{if(e.isIntersecting)el.classList.add('on');},{threshold:.06}).observe(el);});</script>
+<script>
+document.querySelectorAll('.cbr').forEach(el=>{new IntersectionObserver(([e])=>{if(e.isIntersecting)el.classList.add('on');},{threshold:.06}).observe(el);});
+
+@if($showOtpBanner ?? false)
+(function(){
+    const modal = document.getElementById('otpModal');
+    if(!modal) return;
+    const bsModal = bootstrap.Modal.getOrCreateInstance(modal);
+
+    window.otpGoStep = function(n){
+        document.querySelectorAll('.otp-step').forEach(s=>s.classList.remove('active'));
+        const t=document.getElementById('otp-step-'+n);
+        if(t) t.classList.add('active');
+    };
+
+    const countrySelect = document.getElementById('otp_country_code');
+    const phoneInput    = document.getElementById('otp_phone_local');
+    const preview       = document.getElementById('otp-phone-preview');
+
+    function syncPhone(){
+        if(!countrySelect||!phoneInput) return;
+        const opt=countrySelect.options[countrySelect.selectedIndex];
+        phoneInput.maxLength=parseInt(opt.dataset.digits,10);
+        phoneInput.placeholder='0'.repeat(opt.dataset.digits);
+        preview.textContent=phoneInput.value.trim()?(opt.dataset.prefix+phoneInput.value.trim()):'';
+    }
+    if(countrySelect){ countrySelect.addEventListener('change',syncPhone); syncPhone(); }
+    if(phoneInput){ phoneInput.addEventListener('input',function(){ this.value=this.value.replace(/\D/g,''); syncPhone(); }); }
+
+    const hasOtpSent   = {{ session('otp_sent')                                    ? 'true':'false' }};
+    const hasOtpError  = {{ $errors->has('otp_code')                               ? 'true':'false' }};
+    const hasPhoneErr  = {{ $errors->hasAny(['phone','phone_local','country_code']) ? 'true':'false' }};
+
+    otpGoStep((hasOtpSent||hasOtpError) ? 2 : 1);
+
+    if(hasOtpSent||hasOtpError||hasPhoneErr){ bsModal.show(); }
+})();
+@endif
+</script>
 @endpush

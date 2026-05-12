@@ -74,6 +74,12 @@ return [
         'property_id'      => env('GA_PROPERTY_ID'),
     ],
 
+    'twilio' => [
+        'account_sid'        => env('TWILIO_ACCOUNT_SID'),
+        'auth_token'         => env('TWILIO_AUTH_TOKEN'),
+        'verify_service_sid' => env('TWILIO_VERIFY_SERVICE_SID'),
+    ],
+
     'postmark' => [
         'token' => env('POSTMARK_TOKEN'),
     ],
