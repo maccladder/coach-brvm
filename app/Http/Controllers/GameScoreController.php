@@ -19,11 +19,12 @@ class GameScoreController extends Controller
     {
         $user = $request->user();
 
-        // Verifier que l'utilisateur a achete le jeu
+        // Verifier que l'utilisateur a achete ou recu le jeu
         $hasAccess = $user->purchasedProducts()
             ->where('marketplace_products.id', $product->id)
             ->wherePivot('status', 'paid')
-            ->exists();
+            ->exists()
+            || $product->isGrantedTo($user);
 
         if (!$hasAccess) {
             return response()->json(['error' => 'Acces refuse'], 403);
@@ -77,11 +78,12 @@ class GameScoreController extends Controller
     {
         $user = $request->user();
 
-        // L'utilisateur doit avoir acheté le jeu
+        // L'utilisateur doit avoir acheté ou reçu le jeu
         $hasAccess = $user->purchasedProducts()
             ->where('marketplace_products.id', $product->id)
             ->wherePivot('status', 'paid')
-            ->exists();
+            ->exists()
+            || $product->isGrantedTo($user);
 
         if (!$hasAccess) {
             return response()->json(['error' => 'Accès refusé'], 403);
@@ -162,10 +164,11 @@ class GameScoreController extends Controller
         $user = $request->user();
 
         $hasAccess = $user
-            ? $user->purchasedProducts()
+            ? ($user->purchasedProducts()
                 ->where('marketplace_products.id', $product->id)
                 ->wherePivot('status', 'paid')
                 ->exists()
+                || $product->isGrantedTo($user))
             : false;
 
         if (!$hasAccess) {
@@ -217,10 +220,11 @@ class GameScoreController extends Controller
         $user = $request->user();
 
         $hasAccess = $user
-            ? $user->purchasedProducts()
+            ? ($user->purchasedProducts()
                 ->where('marketplace_products.id', $product->id)
                 ->wherePivot('status', 'paid')
                 ->exists()
+                || $product->isGrantedTo($user))
             : false;
 
         if (!$hasAccess) {
@@ -279,10 +283,11 @@ class GameScoreController extends Controller
         // Verifier l'acces au jeu
         $user = $request->user();
         $hasAccess = $user
-            ? $user->purchasedProducts()
+            ? ($user->purchasedProducts()
                 ->where('marketplace_products.id', $product->id)
                 ->wherePivot('status', 'paid')
                 ->exists()
+                || $product->isGrantedTo($user))
             : false;
 
         abort_unless($hasAccess, 403);
