@@ -871,4 +871,14 @@ Route::middleware('auth')->prefix('lettreci')->name('lettreci.')->group(function
     });
 });
 
+// ──────────────────────────────────────────────────
+// Vérification téléphone OTP + récompense Abidjan Run
+// ──────────────────────────────────────────────────
+Route::middleware('auth')->prefix('mon-espace')->name('phone.')->group(function () {
+    Route::get('/verifier-telephone',              [\App\Http\Controllers\PhoneVerificationController::class, 'showForm'])  ->name('verify.form');
+    Route::post('/verifier-telephone/envoyer',     [\App\Http\Controllers\PhoneVerificationController::class, 'sendOtp'])   ->name('verify.send');
+    Route::post('/verifier-telephone/confirmer',   [\App\Http\Controllers\PhoneVerificationController::class, 'verifyOtp']) ->name('verify.confirm');
+    Route::get('/verifier-telephone/succes',       [\App\Http\Controllers\PhoneVerificationController::class, 'success'])   ->name('verify.success');
+});
+
 require __DIR__.'/auth.php';
