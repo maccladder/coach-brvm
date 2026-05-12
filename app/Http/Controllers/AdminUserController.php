@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\AdminGrant;
-use App\Models\MarketplaceProduct;
 use App\Models\User;
 use Illuminate\Http\Request;
 
@@ -22,7 +21,7 @@ class AdminUserController extends Controller
         $users = User::query()
             ->withCount([
                 'marketplacePurchases as marketplace_count' => fn($q) => $q->where('status', 'paid'),
-                'coursePurchases as course_count',
+                'coursePurchases as course_count'           => fn($q) => $q->whereNotNull('paid_at'),
                 'adminGrants as grants_count'               => fn($q) => $q->whereNull('revoked_at'),
             ])
             ->withSum(

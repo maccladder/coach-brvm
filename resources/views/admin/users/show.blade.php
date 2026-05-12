@@ -68,7 +68,7 @@
             <div class="card border-0 shadow-sm text-center h-100">
                 <div class="card-body">
                     <div class="text-muted small mb-1">Cours achetés</div>
-                    <div class="fs-3 fw-bold text-info">{{ $user->coursePurchases->count() }}</div>
+                    <div class="fs-3 fw-bold text-info">{{ $user->coursePurchases->whereNotNull('paid_at')->count() }}</div>
                 </div>
             </div>
         </div>
@@ -154,9 +154,17 @@
     </div>
 
     {{-- Cours --}}
+    @php
+        $paidCourses   = $user->coursePurchases->whereNotNull('paid_at');
+        $unpaidCourses = $user->coursePurchases->whereNull('paid_at');
+    @endphp
     <div class="card border-0 shadow-sm mb-4">
-        <div class="card-header bg-white fw-bold py-3">
-            🎓 Cours achetés ({{ $user->coursePurchases->count() }})
+        <div class="card-header bg-white fw-bold py-3 d-flex align-items-center gap-2">
+            🎓 Cours
+            <span class="badge bg-success">{{ $paidCourses->count() }} payés</span>
+            @if($unpaidCourses->count())
+                <span class="badge bg-secondary">{{ $unpaidCourses->count() }} non aboutis</span>
+            @endif
         </div>
         <div class="card-body p-0">
             @if($user->coursePurchases->isEmpty())
@@ -167,6 +175,7 @@
                     <thead class="table-light">
                         <tr>
                             <th>Formation</th>
+                            <th>Statut</th>
                             <th class="text-end">Montant</th>
                             <th>Réf. paiement</th>
                             <th>Date</th>
@@ -174,11 +183,24 @@
                     </thead>
                     <tbody>
                         @foreach($user->coursePurchases->sortByDesc('created_at') as $cp)
-                        <tr>
+                        <tr class="{{ is_null($cp->paid_at) ? 'text-muted' : '' }}">
                             <td class="fw-semibold">{{ $cp->course?->title ?? '(supprimé)' }}</td>
-                            <td class="text-end fw-semibold">{{ number_format($cp->amount_fcfa ?? 0, 0, ',', ' ') }} XOF</td>
-                            <td><span class="font-monospace text-muted" style="font-size:12px;">{{ $cp->payment_ref ?? '—' }}</span></td>
-                            <td style="font-size:13px;color:#6c757d;">{{ $cp->paid_at?->format('d/m/Y H:i') ?? $cp->created_at?->format('d/m/Y H:i') }}</td>
+                            <td>
+                                @if($cp->paid_at)
+                                    <span class="badge bg-success">✅ Payé</span>
+                                @else
+                                    <span class="badge bg-secondary">⏳ Non abouti</span>
+                                @endif
+                            </td>
+                            <td class="text-end">
+                                @if($cp->paid_at)
+                                    <span class="fw-semibold">{{ number_format($cp->amount_fcfa ?? 0, 0, ',', ' ') }} XOF</span>
+                                @else
+                                    <span class="text-muted">—</span>
+                                @endif
+                            </td>
+                            <td><span class="font-monospace" style="font-size:12px;color:#6c757d;">{{ $cp->payment_ref ?? '—' }}</span></td>
+                            <td style="font-size:13px;color:#6c757d;">{{ $cp->created_at?->format('d/m/Y H:i') }}</td>
                         </tr>
                         @endforeach
                     </tbody>
