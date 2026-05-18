@@ -93,6 +93,18 @@
     .cbr { opacity:0; transform:translateY(18px); transition:all .7s cubic-bezier(.16,1,.3,1); }
     .cbr.on { opacity:1; transform:translateY(0); }
     .cbr2 { transition-delay:.12s; }
+
+    .course-card { background:#0C1120;border:1px solid rgba(255,255,255,.06);border-radius:4px;overflow:hidden;height:100%;display:flex;flex-direction:column;transition:all .32s; }
+    .course-card:hover { border-color:rgba(201,168,76,.2);transform:translateY(-3px);box-shadow:0 12px 32px rgba(0,0,0,.35); }
+    .course-cover { position:relative;background:#121A2C;aspect-ratio:16/9;overflow:hidden; }
+    .course-cover img { width:100%;height:100%;object-fit:cover;transition:transform .4s; }
+    .course-card:hover .course-cover img { transform:scale(1.03); }
+    .course-play { position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:54px;height:54px;background:rgba(0,0,0,.6);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;color:#fff;backdrop-filter:blur(4px);transition:all .25s; }
+    .course-card:hover .course-play { background:rgba(201,168,76,.8);transform:translate(-50%,-50%) scale(1.1); }
+    .course-badge-pack { position:absolute;top:10px;left:10px;font-family:'Syne',sans-serif;font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;background:rgba(201,168,76,.92);color:#050810;padding:4px 10px;border-radius:100px; }
+    .course-body { padding:18px 20px;flex:1;display:flex;flex-direction:column; }
+    .course-title { font-family:'Syne',sans-serif;font-size:13.5px;font-weight:700;color:#E8EAF0;margin-bottom:6px;line-height:1.35; }
+    .course-desc { font-size:12px;color:#6B7590;line-height:1.6; }
 </style>
 @endpush
 
@@ -166,40 +178,35 @@
             3 formations + accompagnement <em style="color:#C9A84C;">personnalisé</em>
         </h2>
 
+        {{-- 3 cartes cours --}}
+        <div class="row g-4 mb-4">
+            @foreach($courses as $course)
+                @php
+                    $covers = [
+                        'brvm-debutant'                                      => asset('courses/brvm-debutant.jpg'),
+                        'brvm-intermediaire'                                 => asset('courses/brvm-intermediaire.jpg'),
+                        'brvm-pratique-outils-analyse-portefeuille-virtuel' => asset('courses/brvm-pratique.jpg'),
+                    ];
+                    $cover = $covers[$course->slug] ?? asset('courses/brvm-debutant.jpg');
+                @endphp
+                <div class="col-md-4">
+                    <div class="course-card">
+                        <div class="course-cover">
+                            <img src="{{ $cover }}" alt="{{ $course->title }}">
+                            <div class="course-play">▶</div>
+                            <span class="course-badge-pack">✓ Inclus dans le Pack</span>
+                        </div>
+                        <div class="course-body">
+                            <div class="course-title">{{ $course->title }}</div>
+                            <div class="course-desc">{{ \Illuminate\Support\Str::limit($course->description, 120) }}</div>
+                        </div>
+                    </div>
+                </div>
+            @endforeach
+        </div>
+
+        {{-- Bonus : WhatsApp + compte titre --}}
         <div class="row g-3 mb-5">
-
-            <div class="col-md-6">
-                <div class="pack-item">
-                    <div class="pack-item-icon">🎓</div>
-                    <div>
-                        <div class="pack-item-title">Cours Débutant BRVM</div>
-                        <div class="pack-item-desc">Comprendre les bases de la bourse régionale, ouvrir un compte-titres, placer tes premiers ordres.</div>
-                        <div class="pack-item-price">Valeur : 5 000 FCFA</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-md-6">
-                <div class="pack-item">
-                    <div class="pack-item-icon">📈</div>
-                    <div>
-                        <div class="pack-item-title">Cours Intermédiaire BRVM</div>
-                        <div class="pack-item-desc">Analyse fondamentale, lecture des états financiers, construction d'un portefeuille équilibré.</div>
-                        <div class="pack-item-price">Valeur : 5 000 FCFA</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-md-6">
-                <div class="pack-item">
-                    <div class="pack-item-icon">🛠️</div>
-                    <div>
-                        <div class="pack-item-title">Cours Pratique : outils & portefeuille virtuel</div>
-                        <div class="pack-item-desc">Maîtrise des outils d'analyse et simulation de portefeuille en conditions réelles.</div>
-                        <div class="pack-item-price">Valeur : 5 000 FCFA</div>
-                    </div>
-                </div>
-            </div>
 
             <div class="col-md-6">
                 <div class="pack-item" style="border-color:rgba(15,207,164,.2);">
