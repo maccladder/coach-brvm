@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Mail\AdminWalletTopupMail;
+use App\Mail\AdminWalletTransferMail;
 use App\Models\User;
 use App\Models\VirtualWallet;
 use App\Models\VirtualWalletTransaction;
@@ -149,6 +150,12 @@ class AdminWalletController extends Controller
         } catch (\Exception $e) {
             return back()->with('error', $e->getMessage());
         }
+
+        $sourceBalance = VirtualWallet::where('user_id', $user->id)->value('balance');
+        $destBalance   = VirtualWallet::where('user_id', $dest->id)->value('balance');
+
+        Mail::to($user->email)->send(new AdminWalletTransferMail($user, $dest, $amount, (float) $sourceBalance, 'sent', $motif));
+        Mail::to($dest->email)->send(new AdminWalletTransferMail($dest, $user, $amount, (float) $destBalance, 'received', $motif));
 
         return back()->with('success',
             'Transfert de ' . number_format($amount, 0, ',', ' ') . ' FCFA effectué de ' . $user->name . ' vers ' . $dest->name . '.'
