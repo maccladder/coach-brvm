@@ -19,7 +19,7 @@ use App\Services\BrvmMarketAiService; // adapte au bon service
 
 class VirtualWalletController extends Controller
 {
-    public function index(BrvmActionsAiService $svc)
+    public function index(Request $request, BrvmActionsAiService $svc)
 {
     $user = auth()->user();
 
@@ -59,12 +59,13 @@ class VirtualWalletController extends Controller
         ->get();
 
     return view('wallet.index', [
-        'wallet'     => $wallet,
-        'positions'  => $positions,
-        'market'     => $market,
-        'totalValue' => $totalValue,
-        'netWorth'   => $wallet->balance + $totalValue,
-        'history'    => $history,
+        'wallet'            => $wallet,
+        'positions'         => $positions,
+        'market'            => $market,
+        'totalValue'        => $totalValue,
+        'netWorth'          => $wallet->balance + $totalValue,
+        'history'           => $history,
+        'preSelectedTicker' => strtoupper($request->query('ticker', '')),
     ]);
 }
 

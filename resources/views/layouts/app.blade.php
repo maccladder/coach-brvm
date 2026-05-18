@@ -231,6 +231,8 @@
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">Marché</a>
                     <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="{{ route('market.live') }}">📈 Marché en direct</a></li>
+                        <li><hr class="dropdown-divider" style="border-color:rgba(255,255,255,.06);margin:4px 8px;"></li>
                         <li><a class="dropdown-item" href="{{ route('radar.index') }}">📡 Radar (7 jours)</a></li>
                         <li><a class="dropdown-item" href="{{ route('announcements.index') }}">📢 Annonces</a></li>
                         <li><a class="dropdown-item" href="{{ route('docs.public.index') }}">📄 Études & Business plans</a></li>

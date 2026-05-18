@@ -55,6 +55,7 @@ use App\Http\Controllers\VendorPayoutAdminController;
 use App\Http\Controllers\VendorProductController;
 use App\Http\Controllers\StagiaireController;
 use App\Http\Controllers\StagiaireLogController;
+use App\Http\Controllers\MarketLiveController;
 use App\Http\Controllers\VirtualWalletController;
 use App\Services\BrvmActionsAiService;
 use App\Services\BrvmMarketAiService;
@@ -515,6 +516,8 @@ Route::get('/ga-test', function (\App\Services\GoogleAnalyticsService $ga) {
 | Radar marché
 |--------------------------------------------------------------------------
 */
+
+Route::get('/marche-en-direct', [MarketLiveController::class, 'index'])->name('market.live');
 
 Route::get('/radar-marche', [PerformanceController::class, 'index'])->name('radar.index');
 Route::get('/radar-marche/data', [PerformanceController::class, 'data'])->name('radar.data');

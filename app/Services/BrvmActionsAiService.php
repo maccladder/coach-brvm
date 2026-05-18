@@ -68,7 +68,7 @@ class BrvmActionsAiService
          * Structure BRVM actuelle :
          * 0 => Ticker
          * 1 => Nom
-         * 2 => Volume (ignoré)
+         * 2 => Volume
          * 3 => Cours veille
          * 4 => Cours ouverture
          * 5 => Cours clôture
@@ -95,6 +95,7 @@ class BrvmActionsAiService
             return is_numeric($v) ? (float) $v : null;
         };
 
+        $volume = $toNumber($cells[2] ?? null);
         $prev   = $toNumber($cells[3] ?? null);
         $open   = $toNumber($cells[4] ?? null);
         $close  = $toNumber($cells[5] ?? null);
@@ -106,6 +107,7 @@ class BrvmActionsAiService
         $stocks[] = [
             'ticker'    => strtoupper($ticker),
             'name'      => $name,
+            'volume'    => $volume,
             'prev'      => $prev,
             'open'      => $open,
             'close'     => $close,

@@ -203,14 +203,14 @@
                             <div class="col-md-6">
                                 <label class="w-label">Action (ticker)</label>
                                 <select name="ticker" class="w-input form-select" required>
-                                    <option value="" disabled selected>Choisir…</option>
+                                    <option value="" disabled @selected(empty($preSelectedTicker ?? ''))>Choisir…</option>
                                     @foreach(($market ?? []) as $s)
                                         @php
                                             $t = $s['ticker'] ?? '';
                                             $n = $s['name'] ?? '';
                                             $p = $s['buy_price'] ?? ($s['close'] ?? null);
                                         @endphp
-                                        <option value="{{ $t }}">
+                                        <option value="{{ $t }}" @selected($t === ($preSelectedTicker ?? ''))>
                                             {{ $t }} — {{ $n }}
                                             @if(!is_null($p))
                                                 ({{ number_format((float)$p,0,',',' ') }} F)
