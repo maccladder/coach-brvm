@@ -321,10 +321,18 @@ Route::post('/{product}/publish', [MarketplaceProductAdminController::class, 'pu
 // ✅ Catégories (ADMIN)
 Route::resource('marketplace-categories', MarketplaceCategoryAdminController::class)->except(['show']);
 
-        // ✅ Wallet (ADMIN)
+        // ✅ Wallet (ADMIN) — démo session legacy
         Route::get('/wallet', [AdminVirtualWalletController::class, 'index'])->name('wallet.index');
         Route::post('/wallet/buy', [AdminVirtualWalletController::class, 'buy'])->name('wallet.buy');
         Route::post('/wallet/sell', [AdminVirtualWalletController::class, 'sell'])->name('wallet.sell');
+
+        // 💼 Portefeuilles utilisateurs (ADMIN)
+        Route::prefix('wallets')->name('wallets.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Admin\AdminWalletController::class, 'index'])->name('index');
+            Route::get('/{user}', [\App\Http\Controllers\Admin\AdminWalletController::class, 'show'])->name('show');
+            Route::post('/{user}/topup', [\App\Http\Controllers\Admin\AdminWalletController::class, 'topup'])->name('topup');
+            Route::post('/{user}/transfer', [\App\Http\Controllers\Admin\AdminWalletController::class, 'transfer'])->name('transfer');
+        });
 
         // ✅ Marché
         Route::get('/market', [AdminMarketController::class, 'index'])->name('market.index');
