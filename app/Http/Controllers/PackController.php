@@ -230,6 +230,6 @@ class PackController extends Controller
         $tokenRecord->used_at = now();
         $tokenRecord->save();
 
-        return redirect()->away('https://chat.whatsapp.com/LIEN_A_REMPLACER');
+        return redirect()->away('https://chat.whatsapp.com/BPnXjc0tNGdEHrvJtaHbvx?mode=gi_t');
     }
 }
