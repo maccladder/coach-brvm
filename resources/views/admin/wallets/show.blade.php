@@ -86,16 +86,44 @@
                     <p class="text-muted small mb-3">
                         Débite le portefeuille de <strong>{{ $user->name }}</strong> et crédite un autre compte.
                     </p>
-                    <form method="POST" action="{{ route('admin.wallets.transfer', $user) }}">
+                    <form method="POST" action="{{ route('admin.wallets.transfer', $user) }}" id="transferForm">
                         @csrf
+
+                        {{-- Autocomplete destination --}}
                         <div class="mb-3">
-                            <label class="form-label fw-semibold">Email du compte destination</label>
-                            <input type="email" name="dest_email" class="form-control @error('dest_email') is-invalid @enderror"
-                                   placeholder="email@exemple.com" value="{{ old('dest_email') }}" required>
+                            <label class="form-label fw-semibold">Compte destination</label>
+                            <div class="position-relative">
+                                <input type="text" id="destSearch"
+                                       class="form-control @error('dest_email') is-invalid @enderror"
+                                       placeholder="Tapez un nom ou email…"
+                                       autocomplete="off">
+                                <input type="hidden" name="dest_email" id="destEmail" value="{{ old('dest_email') }}">
+
+                                {{-- Dropdown résultats --}}
+                                <div id="destDropdown"
+                                     class="dropdown-menu w-100 shadow-sm p-0"
+                                     style="display:none; position:absolute; z-index:1000; top:100%; left:0; max-height:220px; overflow-y:auto">
+                                </div>
+                            </div>
+
+                            {{-- Utilisateur sélectionné --}}
+                            <div id="destSelected" class="mt-2" style="display:none">
+                                <div class="d-flex align-items-center justify-content-between bg-light border rounded px-3 py-2">
+                                    <div>
+                                        <span class="fw-semibold" id="destSelectedName"></span>
+                                        <span class="text-muted small ms-2" id="destSelectedEmail"></span>
+                                    </div>
+                                    <button type="button" class="btn btn-sm btn-outline-danger" id="destClear">
+                                        <i class="bi bi-x"></i>
+                                    </button>
+                                </div>
+                            </div>
+
                             @error('dest_email')
-                                <div class="invalid-feedback">{{ $message }}</div>
+                                <div class="text-danger small mt-1">{{ $message }}</div>
                             @enderror
                         </div>
+
                         <div class="mb-3">
                             <label class="form-label fw-semibold">Montant (FCFA)</label>
                             <input type="number" name="amount" class="form-control @error('amount') is-invalid @enderror"
@@ -109,8 +137,7 @@
                             <input type="text" name="motif" class="form-control" maxlength="255"
                                    placeholder="ex : Erreur d'email…" value="{{ old('motif') }}">
                         </div>
-                        <button type="submit" class="btn btn-primary w-100"
-                                onclick="return confirm('Confirmer le transfert depuis {{ addslashes($user->name) }} ?')">
+                        <button type="submit" id="transferSubmit" class="btn btn-primary w-100" disabled>
                             <i class="bi bi-arrow-left-right me-1"></i> Transférer
                         </button>
                     </form>
@@ -233,3 +260,108 @@
 
 </div>
 @endsection
+
+@push('scripts')
+<script>
+(function () {
+    const searchInput  = document.getElementById('destSearch');
+    const hiddenEmail  = document.getElementById('destEmail');
+    const dropdown     = document.getElementById('destDropdown');
+    const selectedBox  = document.getElementById('destSelected');
+    const selectedName = document.getElementById('destSelectedName');
+    const selectedMail = document.getElementById('destSelectedEmail');
+    const clearBtn     = document.getElementById('destClear');
+    const submitBtn    = document.getElementById('transferSubmit');
+    const searchUrl    = '{{ route('admin.wallets.user-search') }}';
+
+    let debounceTimer;
+
+    function selectUser(name, email) {
+        hiddenEmail.value   = email;
+        selectedName.textContent = name;
+        selectedMail.textContent = email;
+        selectedBox.style.display = 'block';
+        searchInput.style.display = 'none';
+        dropdown.style.display    = 'none';
+        submitBtn.disabled = false;
+    }
+
+    function resetSelection() {
+        hiddenEmail.value = '';
+        searchInput.value = '';
+        searchInput.style.display = 'block';
+        selectedBox.style.display = 'none';
+        dropdown.style.display    = 'none';
+        submitBtn.disabled = true;
+        searchInput.focus();
+    }
+
+    clearBtn.addEventListener('click', resetSelection);
+
+    searchInput.addEventListener('input', function () {
+        const q = this.value.trim();
+        clearTimeout(debounceTimer);
+
+        if (q.length < 2) {
+            dropdown.style.display = 'none';
+            return;
+        }
+
+        debounceTimer = setTimeout(function () {
+            fetch(searchUrl + '?q=' + encodeURIComponent(q))
+                .then(r => r.json())
+                .then(users => {
+                    dropdown.innerHTML = '';
+
+                    if (users.length === 0) {
+                        dropdown.innerHTML = '<div class="px-3 py-2 text-muted small">Aucun utilisateur trouvé.</div>';
+                        dropdown.style.display = 'block';
+                        return;
+                    }
+
+                    users.forEach(u => {
+                        const item = document.createElement('button');
+                        item.type = 'button';
+                        item.className = 'dropdown-item px-3 py-2';
+                        item.innerHTML =
+                            '<span class="fw-semibold">' + escHtml(u.name) + '</span>' +
+                            '<span class="text-muted small ms-2">' + escHtml(u.email) + '</span>';
+                        item.addEventListener('click', function () {
+                            selectUser(u.name, u.email);
+                        });
+                        dropdown.appendChild(item);
+                    });
+
+                    dropdown.style.display = 'block';
+                });
+        }, 250);
+    });
+
+    // Ferme le dropdown si on clique ailleurs
+    document.addEventListener('click', function (e) {
+        if (!searchInput.contains(e.target) && !dropdown.contains(e.target)) {
+            dropdown.style.display = 'none';
+        }
+    });
+
+    // Bloque la soumission si aucun user sélectionné
+    document.getElementById('transferForm').addEventListener('submit', function (e) {
+        if (!hiddenEmail.value) {
+            e.preventDefault();
+            searchInput.classList.add('is-invalid');
+            searchInput.focus();
+        }
+    });
+
+    function escHtml(str) {
+        return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    // Si old('dest_email') est renseigné (validation server échouée), réaffiche le champ texte
+    if (hiddenEmail.value) {
+        searchInput.value = hiddenEmail.value;
+        submitBtn.disabled = false;
+    }
+})();
+</script>
+@endpush

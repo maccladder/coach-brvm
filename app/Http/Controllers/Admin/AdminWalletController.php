@@ -14,6 +14,26 @@ use Illuminate\Support\Facades\Mail;
 
 class AdminWalletController extends Controller
 {
+    public function userSearch(Request $request)
+    {
+        $q = trim($request->input('q', ''));
+
+        if (strlen($q) < 2) {
+            return response()->json([]);
+        }
+
+        $users = User::where(fn($query) =>
+                $query->where('name', 'like', "%{$q}%")
+                      ->orWhere('email', 'like', "%{$q}%")
+            )
+            ->select('id', 'name', 'email')
+            ->orderBy('name')
+            ->limit(10)
+            ->get();
+
+        return response()->json($users);
+    }
+
     public function index(Request $request)
     {
         $search = $request->input('search');
