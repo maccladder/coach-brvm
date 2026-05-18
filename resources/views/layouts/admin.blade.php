@@ -99,6 +99,7 @@
                         <li><a class="dropdown-item" href="{{ route('admin.books.index') }}">📚 Livres</a></li>
                         <li><a class="dropdown-item" href="{{ route('admin.grants.index') }}">🎁 Attributions</a></li>
                         <li><a class="dropdown-item" href="{{ route('admin.wallets.index') }}">💼 Portefeuilles</a></li>
+                        <li><a class="dropdown-item" href="{{ route('admin.packs.index') }}">📦 Pack BRVM</a></li>
                         <li><a class="dropdown-item" href="{{ route('admin.emails.index') }}">📧 Envoyer un email</a></li>
                     </ul>
                 </li>

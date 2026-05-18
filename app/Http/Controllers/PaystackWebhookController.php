@@ -3,13 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Models\LettreCIAccess;
+use App\Services\Payments\PaystackPackService;
 use App\Services\Payments\PaystackWalletTopupService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
 class PaystackWebhookController extends Controller
 {
-    public function handle(Request $request, PaystackWalletTopupService $walletTopup)
+    public function handle(Request $request, PaystackWalletTopupService $walletTopup, PaystackPackService $packService)
     {
         $signature = $request->header('x-paystack-signature');
         $payload   = $request->getContent();
@@ -37,6 +38,12 @@ class PaystackWebhookController extends Controller
 
         if ($event === 'charge.success') {
             $reference = (string) ($data['reference'] ?? '');
+
+            // ✅ Pack BRVM
+            if (str_starts_with($reference, 'PACK-BRVM-')) {
+                $packService->handleChargeSuccess($data);
+                return response()->json(['status' => 'ok'], 200);
+            }
 
             // ✅ LettreCI
             if (str_starts_with($reference, 'LETTRECI_')) {

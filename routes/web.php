@@ -364,6 +364,13 @@ Route::prefix('topups')->name('topups.')->group(function () {
         Route::post('books/{book}/pages', [AdminBookController::class, 'storePage'])->name('books.pages.store');
         Route::delete('books/{book}/pages/{page}', [AdminBookController::class, 'destroyPage'])->name('books.pages.destroy');
 
+        // 📦 Pack BRVM (admin)
+        Route::prefix('packs')->name('packs.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Admin\AdminPackController::class, 'index'])->name('index');
+            Route::post('/{user}/resend', [\App\Http\Controllers\Admin\AdminPackController::class, 'resend'])->name('resend');
+            Route::post('/tokens/{packToken}/reset', [\App\Http\Controllers\Admin\AdminPackController::class, 'resetToken'])->name('tokens.reset');
+        });
+
         // 🎁 Attributions gratuites admin
         Route::prefix('grants')->name('grants.')->group(function () {
             Route::get('/user-search', [\App\Http\Controllers\Admin\AdminGrantController::class, 'userSearch'])->name('user-search');
@@ -758,6 +765,27 @@ Route::middleware('auth')->group(function () {
 // ✅ Callback Paystack (PUBLIC)
 Route::get('/paystack/courses/callback', [\App\Http\Controllers\CoursePaymentController::class, 'paystackCallback'])
     ->name('paystack.courses.callback');
+
+// ────────────────────────────────────────────────
+// Pack BRVM Complet
+// ────────────────────────────────────────────────
+
+// Public
+Route::get('/pack-brvm', [\App\Http\Controllers\PackController::class, 'show'])
+    ->name('pack.show');
+
+Route::get('/paystack/pack/callback', [\App\Http\Controllers\PackController::class, 'paystackCallback'])
+    ->name('paystack.pack.callback');
+
+// Auth
+Route::middleware('auth')->group(function () {
+    Route::post('/pack-brvm/buy/paystack', [\App\Http\Controllers\PackController::class, 'buyPaystack'])
+        ->name('pack.buy.paystack');
+    Route::get('/pack-brvm/merci', [\App\Http\Controllers\PackController::class, 'merci'])
+        ->name('pack.merci');
+    Route::get('/rejoindre-groupe/{token}', [\App\Http\Controllers\PackController::class, 'joinGroupe'])
+        ->name('pack.groupe');
+});
 
 
 Route::post('/admin/daily-bocs/{dailyBoc}/replace', [AdminController::class, 'dailyBocsReplace'])

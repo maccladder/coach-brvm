@@ -1043,6 +1043,52 @@
 </section>
 
 {{-- ══════════════════════════════════════
+     PACK BRVM COMPLET
+══════════════════════════════════════ --}}
+<section style="background:#060910; padding:72px 0; border-top:1px solid rgba(201,168,76,.08); border-bottom:1px solid rgba(201,168,76,.08);">
+    <style>@keyframes packBadgePulse{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(201,168,76,.5)}50%{opacity:.7;box-shadow:0 0 0 7px rgba(201,168,76,0)}}</style>
+    <div class="container cbr" style="max-width:900px; text-align:center;">
+
+        <div style="display:inline-flex; align-items:center; gap:8px; background:rgba(201,168,76,.08); border:1px solid rgba(201,168,76,.28); border-radius:100px; padding:7px 18px; margin-bottom:22px;">
+            <span style="width:8px;height:8px;border-radius:50%;background:#C9A84C;animation:packBadgePulse 1.5s ease-in-out infinite;flex-shrink:0;"></span>
+            <span style="font-family:'Syne',sans-serif;font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:#C9A84C;">Pack Exclusif</span>
+        </div>
+
+        <h2 style="font-family:'Playfair Display',serif; font-size:clamp(26px,5vw,42px); font-weight:900; color:#E8EAF0; margin-bottom:10px; line-height:1.1;">
+            🎓 Pack BRVM <em style="color:#C9A84C;">Complet</em>
+        </h2>
+
+        <p style="font-size:14px; color:#6B7590; line-height:1.75; max-width:600px; margin:0 auto 24px;">
+            3 Cours + Groupe WhatsApp Privé + Aide à l'ouverture de compte titre
+        </p>
+
+        <div style="margin-bottom:28px;">
+            <span style="font-size:17px; color:#6B7590; text-decoration:line-through; margin-right:12px;">50 000 FCFA</span>
+            <span style="font-family:'Playfair Display',serif; font-size:clamp(32px,5vw,46px); font-weight:900; color:#C9A84C;">30 000 FCFA</span>
+        </div>
+
+        <div style="display:flex; flex-wrap:wrap; gap:10px; justify-content:center; margin-bottom:36px;">
+            <span style="font-size:13px; color:#E8EAF0; background:rgba(201,168,76,.06); border:1px solid rgba(201,168,76,.15); border-radius:4px; padding:7px 14px;">✅ Cours Débutant</span>
+            <span style="font-size:13px; color:#E8EAF0; background:rgba(201,168,76,.06); border:1px solid rgba(201,168,76,.15); border-radius:4px; padding:7px 14px;">✅ Cours Intermédiaire</span>
+            <span style="font-size:13px; color:#E8EAF0; background:rgba(201,168,76,.06); border:1px solid rgba(201,168,76,.15); border-radius:4px; padding:7px 14px;">✅ Cours Pratique</span>
+            <span style="font-size:13px; color:#0FCFA4; background:rgba(15,207,164,.06); border:1px solid rgba(15,207,164,.2); border-radius:4px; padding:7px 14px;">💬 Groupe WhatsApp Privé</span>
+        </div>
+
+        <a href="{{ route('pack.show') }}"
+           style="display:inline-flex; align-items:center; gap:10px;
+                  background:linear-gradient(135deg,#C9A84C,#9B6B15);
+                  color:#050810 !important; font-family:'Syne',sans-serif;
+                  font-weight:800; font-size:13px; letter-spacing:.07em; text-transform:uppercase;
+                  padding:15px 36px; border-radius:4px; text-decoration:none; transition:all .3s;"
+           onmouseover="this.style.boxShadow='0 10px 32px rgba(201,168,76,.35)';this.style.transform='translateY(-2px)'"
+           onmouseout="this.style.boxShadow='';this.style.transform=''">
+            Découvrir le Pack →
+        </a>
+
+    </div>
+</section>
+
+{{-- ══════════════════════════════════════
      SERVICES — Financement + Formation présentielle
 ══════════════════════════════════════ --}}
 <section class="cb-sec" style="background:#060910;">
