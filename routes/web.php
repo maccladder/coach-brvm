@@ -187,6 +187,8 @@ Route::get('/formations-brvm', function () {
     return view('sections.formations-brvm');
 })->name('formations.brvm');
 
+Route::view('/pnd-brvm', 'sections.pnd-brvm')->name('pnd.brvm');
+
 Route::get('/formations', [CourseController::class, 'index'])->name('courses.index');
 
 Route::get('/mon-espace/cours', [CourseController::class, 'myCourses'])

@@ -6,6 +6,8 @@
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <title>{{ config('app.name', 'Coach BRVM') }}</title>
 
+    @stack('meta')
+
     <link rel="icon" type="image/png" href="{{ asset('favicon.png') }}">
     <link rel="shortcut icon" href="{{ asset('favicon.ico') }}">
 
@@ -244,6 +246,12 @@
                     <ul class="dropdown-menu">
                         <li><a class="dropdown-item" href="{{ route('client-bocs.create') }}">📄 Analyser une BOC</a></li>
                         <li><a class="dropdown-item" href="{{ route('client-financials.create') }}">📊 Analyser un état financier</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <a class="dropdown-item d-flex justify-content-between align-items-center" href="{{ route('pnd.brvm') }}">
+                                <span>🏛️ PND 2026-2030 × BRVM</span><span class="cb-badge-new">Nouveau</span>
+                            </a>
+                        </li>
                     </ul>
                 </li>
                 <li class="nav-item dropdown">
