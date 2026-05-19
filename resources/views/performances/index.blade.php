@@ -220,6 +220,83 @@
     .cbr { opacity:0; transform:translateY(18px); transition:all .7s cubic-bezier(.16,1,.3,1); }
     .cbr.on { opacity:1; transform:translateY(0); }
     .cbr2 { transition-delay:.1s; }
+
+    /* ═══════════════════════════════
+       STOCK HISTORY MODAL
+    ═══════════════════════════════ */
+    .stock-modal {
+        position: fixed; inset: 0; z-index: 9999;
+        align-items: center; justify-content: center; padding: 16px;
+    }
+    .stock-modal-overlay { position: absolute; inset: 0; background: rgba(0,0,0,.75); }
+    .stock-modal-content {
+        position: relative; z-index: 1;
+        width: 100%; max-width: 900px; max-height: 90vh;
+        background: #0C1120; border: 1px solid rgba(201,168,76,.2);
+        border-radius: 12px; overflow-y: auto;
+        display: flex; flex-direction: column;
+    }
+    .stock-modal-close {
+        position: absolute; top: 14px; right: 16px;
+        background: none; border: none; color: #6B7590;
+        font-size: 22px; cursor: pointer; line-height: 1;
+        padding: 4px 8px; border-radius: 4px; z-index: 2;
+        transition: color .2s, background .2s;
+    }
+    .stock-modal-close:hover { color: #E8EAF0; background: rgba(255,255,255,.06); }
+    .stock-modal-header {
+        background: #121A2C; border-radius: 12px 12px 0 0;
+        border-bottom: 1px solid rgba(255,255,255,.05);
+        padding: 20px 56px 20px 24px;
+        display: flex; align-items: flex-start;
+        justify-content: space-between; gap: 20px; flex-wrap: wrap;
+    }
+    #smTicker {
+        font-family: 'Syne', sans-serif; font-size: 24px;
+        font-weight: 800; color: #E8EAF0; margin: 0; letter-spacing: .04em;
+    }
+    .stock-modal-subtitle { font-family: 'DM Sans', sans-serif; font-size: 13px; color: #6B7590; margin: 4px 0 0; }
+    .stock-modal-stats    { display: flex; gap: 28px; flex-wrap: wrap; }
+    .stock-modal-stat     { display: flex; flex-direction: column; gap: 3px; align-items: flex-end; }
+    .stock-stat-label {
+        font-family: 'Syne', sans-serif; font-size: 10px;
+        font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: #6B7590;
+    }
+    .stock-stat-value { font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; color: #E8EAF0; }
+    .stock-modal-ranges { display: flex; gap: 8px; padding: 16px 24px 0; flex-wrap: wrap; }
+    .range-btn {
+        font-family: 'Syne', sans-serif; font-size: 11px; font-weight: 700;
+        letter-spacing: .08em; text-transform: uppercase;
+        padding: 7px 16px; border-radius: 3px;
+        border: 1px solid #C9A84C; background: transparent;
+        color: #C9A84C; cursor: pointer; transition: all .2s;
+    }
+    .range-btn:hover:not(:disabled) { background: rgba(201,168,76,.12); }
+    .range-btn.active               { background: #C9A84C; color: #060910; }
+    .range-btn:disabled             { opacity: .35; cursor: not-allowed; }
+    .stock-modal-chart {
+        padding: 16px 24px 24px; position: relative;
+        height: 380px; flex-shrink: 0;
+    }
+    .stock-empty-state, .stock-loading {
+        position: absolute; inset: 16px 24px 24px;
+        display: flex; align-items: center; justify-content: center;
+        font-family: 'Syne', sans-serif; font-size: 12px;
+        font-weight: 600; letter-spacing: .08em; text-transform: uppercase;
+        color: #6B7590; flex-direction: column; gap: 10px;
+    }
+    .stock-loading-ring {
+        width: 36px; height: 36px; border-radius: 50%;
+        border: 3px solid rgba(201,168,76,.1); border-top-color: #C9A84C;
+        animation: spin 1s linear infinite;
+    }
+    @media (max-width: 767px) {
+        .stock-modal-content { max-width: 95vw; }
+        .stock-modal-header  { flex-direction: column; gap: 12px; padding-right: 48px; }
+        .stock-modal-stats   { gap: 16px; }
+        .stock-modal-stat    { align-items: flex-start; }
+        .stock-modal-chart   { height: 280px; }
+    }
 </style>
 @endpush
 
@@ -353,10 +430,58 @@
 
     </div>
 </div>
+
+{{-- ── STOCK HISTORY MODAL ── --}}
+<div id="stockHistoryModal" class="stock-modal" style="display:none;">
+    <div class="stock-modal-overlay"></div>
+    <div class="stock-modal-content">
+        <button class="stock-modal-close" aria-label="Fermer">&times;</button>
+
+        <div class="stock-modal-header">
+            <div>
+                <h2 id="smTicker">—</h2>
+                <p id="smName" class="stock-modal-subtitle">—</p>
+            </div>
+            <div class="stock-modal-stats">
+                <div class="stock-modal-stat">
+                    <span class="stock-stat-label">Dernier cours</span>
+                    <span class="stock-stat-value" id="smLastPrice">—</span>
+                </div>
+                <div class="stock-modal-stat">
+                    <span class="stock-stat-label">Variation</span>
+                    <span class="stock-stat-value" id="smLastChange">—</span>
+                </div>
+                <div class="stock-modal-stat">
+                    <span class="stock-stat-label">Période</span>
+                    <span class="stock-stat-value" id="smDateRange">—</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="stock-modal-ranges">
+            <button class="range-btn" data-range="1w">1 Semaine</button>
+            <button class="range-btn" data-range="1m">1 Mois</button>
+            <button class="range-btn" data-range="1y">1 An</button>
+            <button class="range-btn active" data-range="all">Tout</button>
+        </div>
+
+        <div class="stock-modal-chart">
+            <canvas id="smChart" style="display:none;"></canvas>
+            <div id="smEmptyState" class="stock-empty-state" style="display:none;">
+                Aucune donnée disponible sur cette période
+            </div>
+            <div id="smLoading" class="stock-loading" style="display:none;">
+                <div class="stock-loading-ring"></div>
+                <span>Chargement…</span>
+            </div>
+        </div>
+    </div>
+</div>
 @endsection
 
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
 <script src="https://d3js.org/d3.v7.min.js"></script>
 
 <script>
@@ -585,13 +710,14 @@ function drawBubbles(data) {
         .data(nodes)
         .enter().append('g')
         .attr('class', 'node')
-        .style('cursor', 'grab')
+        .style('cursor', 'pointer')
         .call(
             d3.drag()
-                .on('start', (e,d) => { if(!e.active) sim.alphaTarget(.3).restart(); d.fx=d.x; d.fy=d.y; })
-                .on('drag',  (e,d) => { d.fx=e.x; d.fy=e.y; })
+                .on('start', (e,d) => { d._dragMoved=false; d._dragX0=e.x; d._dragY0=e.y; if(!e.active) sim.alphaTarget(.3).restart(); d.fx=d.x; d.fy=d.y; })
+                .on('drag',  (e,d) => { if(Math.hypot(e.x-d._dragX0, e.y-d._dragY0)>5) d._dragMoved=true; d.fx=e.x; d.fy=e.y; })
                 .on('end',   (e,d) => { if(!e.active) sim.alphaTarget(0); d.fx=null; d.fy=null; })
-        );
+        )
+        .on('click', (_e, d) => { if (!d._dragMoved) openStockModal(d.ticker); });
 
     /* Halo externe en mode crypto */
     if (currentStyle === 'crypto') {
@@ -730,10 +856,242 @@ window.addEventListener('orientationchange', () => { if(lastBubbleData) drawBubb
 loadLatestBubbles();
 
 /* Scroll reveal */
+
 const cbEls = document.querySelectorAll('.cbr');
 const cbObs = new IntersectionObserver(e => {
     e.forEach(x => { if(x.isIntersecting) x.target.classList.add('on'); });
 }, { threshold: 0.07 });
 cbEls.forEach(el => cbObs.observe(el));
+</script>
+
+<script>
+/* ═══════════════════════════════
+   STOCK HISTORY MODAL
+═══════════════════════════════ */
+let smChartInstance   = null;
+let currentModalTicker = null;
+
+const stockModal     = document.getElementById('stockHistoryModal');
+const smOverlay      = stockModal.querySelector('.stock-modal-overlay');
+const smCloseBtn     = stockModal.querySelector('.stock-modal-close');
+const smTickerEl     = document.getElementById('smTicker');
+const smNameEl       = document.getElementById('smName');
+const smLastPriceEl  = document.getElementById('smLastPrice');
+const smLastChangeEl = document.getElementById('smLastChange');
+const smDateRangeEl  = document.getElementById('smDateRange');
+const smLoadingEl    = document.getElementById('smLoading');
+const smEmptyEl      = document.getElementById('smEmptyState');
+const smCanvas       = document.getElementById('smChart');
+const smRangeBtns    = document.querySelectorAll('.range-btn');
+
+function smFormatPrice(v) {
+    /* séparateur d'espace insécable "7 975" */
+    return Math.round(v).toLocaleString('fr-FR');
+}
+
+function smFormatDate(iso) {
+    const [y, m, d] = iso.split('-');
+    const months = ['jan.','fév.','mars','avr.','mai','juin',
+                    'juil.','août','sept.','oct.','nov.','déc.'];
+    return `${parseInt(d)} ${months[parseInt(m)-1]} ${y}`;
+}
+
+function smTimeUnit(range) {
+    return (range === '1w' || range === '1m') ? 'day' : 'month';
+}
+
+function closeStockModal() {
+    stockModal.style.display = 'none';
+    if (smChartInstance) { smChartInstance.destroy(); smChartInstance = null; }
+    currentModalTicker = null;
+}
+
+function openStockModal(ticker) {
+    currentModalTicker = ticker;
+    stockModal.style.display = 'flex';
+
+    smTickerEl.textContent     = ticker;
+    smNameEl.textContent       = '—';
+    smLastPriceEl.textContent  = '—';
+    smLastChangeEl.textContent = '—';
+    smLastChangeEl.style.color = '#E8EAF0';
+    smDateRangeEl.textContent  = '—';
+    smLoadingEl.style.display  = 'none';
+    smEmptyEl.style.display    = 'none';
+    smCanvas.style.display     = 'none';
+
+    smRangeBtns.forEach(b => {
+        b.disabled = false;
+        b.removeAttribute('title');
+        b.classList.remove('active');
+    });
+    document.querySelector('.range-btn[data-range="all"]').classList.add('active');
+
+    probeAllRanges(ticker).then(() => {
+        if (currentModalTicker === ticker) smLoadRange(ticker, 'all');
+    });
+}
+
+async function probeAllRanges(ticker) {
+    const ranges  = ['1w', '1m', '1y', 'all'];
+    const results = await Promise.allSettled(
+        ranges.map(r =>
+            fetch(`/api/stock/${encodeURIComponent(ticker)}/history?range=${r}`)
+                .then(res => ({ range: r, ok: res.ok }))
+                .catch(()  => ({ range: r, ok: false }))
+        )
+    );
+    results.forEach(r => {
+        if (r.status !== 'fulfilled') return;
+        const { range, ok } = r.value;
+        const btn = document.querySelector(`.range-btn[data-range="${range}"]`);
+        if (!btn) return;
+        btn.disabled = !ok;
+        if (!ok) btn.setAttribute('title', 'Pas de données sur cette plage');
+        else     btn.removeAttribute('title');
+    });
+}
+
+async function smLoadRange(ticker, range) {
+    smLoadingEl.style.display = 'flex';
+    smEmptyEl.style.display   = 'none';
+    smCanvas.style.display    = 'none';
+
+    smRangeBtns.forEach(b => b.classList.remove('active'));
+    const activeBtn = document.querySelector(`.range-btn[data-range="${range}"]`);
+    if (activeBtn) activeBtn.classList.add('active');
+
+    try {
+        const res = await fetch(`/api/stock/${encodeURIComponent(ticker)}/history?range=${range}`);
+
+        if (!res.ok) {
+            smLoadingEl.style.display = 'none';
+            smEmptyEl.style.display   = 'flex';
+            if (activeBtn) activeBtn.disabled = true;
+            return;
+        }
+
+        const payload = await res.json();
+
+        /* ── header stats ── */
+        smNameEl.textContent = payload.name || ticker;
+
+        const last = payload.data[payload.data.length - 1];
+        smLastPriceEl.textContent = last?.price != null
+            ? smFormatPrice(last.price) + ' FCFA' : '—';
+
+        const c = last?.change ?? null;
+        if (c !== null) {
+            smLastChangeEl.textContent = (c >= 0 ? '+' : '')
+                + c.toFixed(2).replace('.', ',') + ' %';
+            smLastChangeEl.style.color = c >= 0 ? '#1fbf4a' : '#e53935';
+        }
+
+        smDateRangeEl.textContent =
+            `${smFormatDate(payload.first_date)} → ${smFormatDate(payload.last_date)}`;
+
+        /* ── chart ── */
+        smLoadingEl.style.display = 'none';
+        smCanvas.style.display    = 'block';
+
+        if (smChartInstance) { smChartInstance.destroy(); smChartInstance = null; }
+
+        const pts = payload.data.map(p => ({ x: p.date, y: p.price, ch: p.change }));
+
+        smChartInstance = new Chart(smCanvas.getContext('2d'), {
+            type: 'line',
+            data: {
+                datasets: [{
+                    data:                      pts,
+                    borderColor:               '#C9A84C',
+                    backgroundColor:           'rgba(201,168,76,.1)',
+                    fill:                      true,
+                    tension:                   0.2,
+                    pointRadius:               0,
+                    pointHoverRadius:          4,
+                    pointHoverBackgroundColor: '#C9A84C',
+                    borderWidth:               2,
+                }]
+            },
+            options: {
+                responsive:          true,
+                maintainAspectRatio: false,
+                interaction:         { mode: 'index', intersect: false },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: '#0C1120',
+                        borderColor:     'rgba(201,168,76,.3)',
+                        borderWidth:     1,
+                        titleColor:      '#E8EAF0',
+                        bodyColor:       '#6B7590',
+                        titleFont:       { family: 'Syne', weight: '700', size: 13 },
+                        bodyFont:        { family: 'DM Sans', size: 12 },
+                        padding:         10,
+                        callbacks: {
+                            title: items => {
+                                const d = new Date(items[0].parsed.x);
+                                return d.toLocaleDateString('fr-FR', {
+                                    day: 'numeric', month: 'long', year: 'numeric'
+                                });
+                            },
+                            label:      item => ` Cours : ${smFormatPrice(item.parsed.y)} FCFA`,
+                            afterLabel: item => {
+                                const ch = pts[item.dataIndex]?.ch;
+                                if (ch == null) return '';
+                                return ` Variation : ${ch >= 0 ? '+' : ''}${ch.toFixed(2).replace('.', ',')} %`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        type: 'time',
+                        time: {
+                            unit: smTimeUnit(range),
+                            displayFormats: { day: 'd MMM', month: 'MMM yy' }
+                        },
+                        grid:  { color: 'rgba(255,255,255,.04)' },
+                        ticks: {
+                            color:         '#6B7590',
+                            font:          { family: 'Syne', size: 10 },
+                            maxTicksLimit: 8,
+                        }
+                    },
+                    y: {
+                        title: {
+                            display: true, text: 'Cours (FCFA)',
+                            color: '#6B7590', font: { family: 'Syne', size: 11 }
+                        },
+                        grid:  { color: 'rgba(255,255,255,.04)' },
+                        ticks: {
+                            color:    '#6B7590',
+                            font:     { family: 'Syne', size: 10 },
+                            callback: v => smFormatPrice(v),
+                        }
+                    }
+                }
+            }
+        });
+
+    } catch (err) {
+        smLoadingEl.style.display = 'none';
+        smEmptyEl.style.display   = 'flex';
+        console.error('smLoadRange error:', err);
+    }
+}
+
+/* ── Range buttons ── */
+smRangeBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+        if (btn.disabled || !currentModalTicker) return;
+        smLoadRange(currentModalTicker, btn.dataset.range);
+    });
+});
+
+/* ── Close handlers ── */
+smCloseBtn.addEventListener('click', closeStockModal);
+smOverlay.addEventListener('click',  closeStockModal);
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeStockModal(); });
 </script>
 @endpush

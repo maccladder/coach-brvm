@@ -526,6 +526,10 @@ Route::get('/radar-marche/data', [PerformanceController::class, 'data'])->name('
 Route::get('/radar/bubbles-latest', [App\Http\Controllers\RadarController::class, 'bubblesLatest'])
     ->name('radar.bubblesLatest');
 
+// Historique de cours par ticker (utilisé par la modale Phase 3)
+Route::get('/api/stock/{ticker}/history', [App\Http\Controllers\Api\StockHistoryController::class, 'history'])
+    ->name('api.stock.history');
+
 /*
 |--------------------------------------------------------------------------
 | Sociétés / dividendes / SGI / FAQ / Glossaire
