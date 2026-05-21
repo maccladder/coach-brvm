@@ -8,7 +8,42 @@
       "Bash(sqlite3 /c/wamp64/www/coach-brvm/database/database.sqlite \"SELECT id, title, status, interpreted_markdown, avatar_video_url, audio_path, stored_path FROM client_bocs WHERE id = 72;\")",
       "Bash(grep -E \"\\\\.php$\")",
       "Bash(php -l app/Http/Controllers/ForumController.php)",
-      "Bash(php -l app/Mail/ForumReplyNotification.php)"
+      "Bash(php -l app/Mail/ForumReplyNotification.php)",
+      "Bash(php --version)",
+      "Bash(php -m)",
+      "Bash(composer require *)",
+      "PowerShell(Set-Location \"c:\\\\wamp64\\\\www\\\\coach-brvm\"; Copy-Item \"database\\\\database.sqlite\" \"database\\\\database.sqlite.backup_otp_phase2\" -Force; $orig = \\(Get-Item \"database\\\\database.sqlite\"\\).Length; $back = \\(Get-Item \"database\\\\database.sqlite.backup_otp_phase2\"\\).Length; Write-Output \"Original : $orig bytes\"; Write-Output \"Backup   : $back bytes\"; if \\($orig -eq $back\\) { Write-Output \"✅ Tailles identiques — backup valide\" } else { Write-Output \"❌ TAILLES DIFFÉRENTES — problème backup\" })",
+      "Bash(Get-Content \"c:\\\\wamp64\\\\www\\\\coach-brvm\\\\storage\\\\logs\\\\laravel.log\" -Tail 60)",
+      "Bash(git checkout *)",
+      "Bash(git pull *)",
+      "Bash(git cherry-pick *)",
+      "Bash(Get-ChildItem -Path \"c:\\\\wamp64\\\\www\\\\coach-brvm\" -Recurse -Include \"*.php\")",
+      "Bash(Select-String -Pattern \"\\(paystack|PaystackService|webhook|callback\\)\" -List)",
+      "Bash(Select-Object -ExpandProperty Path)",
+      "Bash(Sort-Object -Unique)",
+      "Bash(find . -name \"database\" -type d 2>nul | head -1)",
+      "Bash(grep -r \"wallet?ticker\" c:\\\\wamp64\\\\www\\\\coach-brvm\\\\resources 2>nul | head -5)",
+      "Bash(grep -r \"sgi\\\\|fee\" c:\\\\wamp64\\\\www\\\\coach-brvm\\\\config 2>nul)",
+      "Bash(Get-ChildItem -Path \"c:\\\\wamp64\\\\www\\\\coach-brvm\" -Directory)",
+      "Bash(Select-Object Name)",
+      "Bash(php -r ' *)",
+      "Bash(Get-ChildItem \"c:\\\\wamp64\\\\www\\\\coach-brvm\\\\storage\\\\app\\\\import\\\\bocs_2025\\\\*.pdf\")",
+      "Bash(Measure-Object)",
+      "Bash(Select-Object -ExpandProperty Count)",
+      "Bash(mkdir -p \"c:/wamp64/www/coach-brvm/app/Http/Controllers/Api\")",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" \"http://localhost/\")",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" \"http://localhost/coach-brvm/public/\")",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" \"http://coach-brvm.test/\")",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" \"http://coach-brvm.local/\")",
+      "Bash(git fetch *)",
+      "Bash(dir \"c:\\\\wamp64\\\\www\\\\coach-brvm\" -Force)",
+      "PowerShell($content = Get-Content \"C:\\\\Users\\\\SPECTRE PC\\\\.claude\\\\projects\\\\c--wamp64-www-coach-brvm\\\\b3ee17af-7264-4d4e-a2f7-37f66c8556da.jsonl\" | Where-Object { $_ -match '§173|secteur 04|IV\\\\.4|6 piliers' }; foreach\\($line in $content\\) { $obj = $line | ConvertFrom-Json; if\\($obj.message.content\\) { $obj.message.content | Where-Object { $_ -is [string] -or $_.type -eq 'text' } | ForEach-Object { if\\($_ -is [string]\\) { $_.Substring\\(0, [Math]::Min\\(2000,$_.Length\\)\\) } else { $_.text.Substring\\(0,[Math]::Min\\(2000,$_.text.Length\\)\\) } } } })",
+      "PowerShell($lines = Get-Content \"C:\\\\Users\\\\SPECTRE PC\\\\.claude\\\\projects\\\\c--wamp64-www-coach-brvm\\\\b3ee17af-7264-4d4e-a2f7-37f66c8556da.jsonl\"; $idx = 0; foreach\\($line in $lines\\) { $idx++; if\\($line -match 'secteur 01|SAPH|SOGB|pilier|3 chiffres|SECTION 2|SECTION 3|SECTION 4|SECTION 5|SECTION 6|SECTION 7|SECTION 8|SECTION 9'\\) { Write-Output \"=== LINE $idx ===\"; $obj = $line | ConvertFrom-Json; if\\($obj.message.content\\) { $obj.message.content | ForEach-Object { if\\($_ -is [string]\\) { $text = $_ } else { $text = $_.text } if\\($text\\) { Write-Output $text.Substring\\(0, [Math]::Min\\(4000,$text.Length\\)\\) } } } } })",
+      "PowerShell($lines = Get-Content \"C:\\\\Users\\\\SPECTRE PC\\\\.claude\\\\projects\\\\c--wamp64-www-coach-brvm\\\\b3ee17af-7264-4d4e-a2f7-37f66c8556da.jsonl\"; $line = $lines[18]; $obj = $line | ConvertFrom-Json; $content = $obj.message.content; foreach\\($item in $content\\) { if\\($item -is [string]\\) { $text = $item } else { $text = $item.text } if\\($text -and $text.Length -gt 100\\) { Write-Output $text } })"
+    ],
+    "additionalDirectories": [
+      "c:\\wamp64\\www\\coach-brvm",
+      "c:\\wamp64\\www\\coach-brvm\\app\\Http\\Controllers"
     ]
   }
 }

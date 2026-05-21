@@ -90,6 +90,20 @@
         display: flex; align-items: center; gap: 6px; margin-top: 14px;
     }
 
+    .btn-whatsapp {
+        display: inline-flex; align-items: center; gap: 9px;
+        background: rgba(37,211,102,.1); border: 1px solid rgba(37,211,102,.35);
+        color: #25D366 !important; text-decoration: none;
+        font-family: 'Syne', sans-serif; font-size: 12.5px; font-weight: 700;
+        letter-spacing: .04em; padding: 11px 26px; border-radius: 4px;
+        transition: all .28s;
+    }
+    .btn-whatsapp:hover {
+        background: rgba(37,211,102,.18); border-color: rgba(37,211,102,.6);
+        box-shadow: 0 6px 22px rgba(37,211,102,.18); transform: translateY(-1px);
+    }
+    .btn-whatsapp svg { flex-shrink:0; }
+
     .cbr { opacity:0; transform:translateY(18px); transition:all .7s cubic-bezier(.16,1,.3,1); }
     .cbr.on { opacity:1; transform:translateY(0); }
     .cbr2 { transition-delay:.12s; }
@@ -160,6 +174,18 @@
             <div class="pack-guarantee">
                 <span>🔒</span>
                 <span>Paiement sécurisé via Paystack · Accès instantané après confirmation</span>
+            </div>
+
+            {{-- WhatsApp contact --}}
+            <div style="margin-top:28px; padding-top:24px; border-top:1px solid rgba(255,255,255,.06);">
+                <p style="font-size:12.5px; color:#6B7590; margin-bottom:12px;">Une question avant d'acheter ? On vous répond sur WhatsApp.</p>
+                <a href="https://wa.me/2250767123451?text=Bonjour%2C%20j%27ai%20une%20question%20sur%20le%20Pack%20BRVM"
+                   target="_blank" rel="noopener" class="btn-whatsapp">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="#25D366" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/>
+                    </svg>
+                    Contacter sur WhatsApp
+                </a>
             </div>
 
             @if(session('error'))
@@ -253,6 +279,18 @@
                     🎓 Obtenir le Pack — 30 000 FCFA
                 </a>
             @endauth
+
+            {{-- WhatsApp contact --}}
+            <div style="margin-top:24px; padding-top:20px; border-top:1px solid rgba(255,255,255,.06);">
+                <p style="font-size:12.5px; color:#6B7590; margin-bottom:12px;">Une question avant d'acheter ? On vous répond sur WhatsApp.</p>
+                <a href="https://wa.me/2250767123451?text=Bonjour%2C%20j%27ai%20une%20question%20sur%20le%20Pack%20BRVM"
+                   target="_blank" rel="noopener" class="btn-whatsapp">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="#25D366" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/>
+                    </svg>
+                    Contacter sur WhatsApp
+                </a>
+            </div>
         </div>
 
     </div>
