@@ -65,6 +65,12 @@
     .bonus-badge-granted{display:inline-block;font-family:'Syne',sans-serif;font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#060910;background:#0FCFA4;border-radius:2px;padding:2px 9px;margin-bottom:8px;}
     .bonus-submit-teal{display:inline-flex;align-items:center;gap:8px;background:#0FCFA4;color:#060910 !important;font-family:'Syne',sans-serif;font-weight:800;font-size:11px;letter-spacing:.07em;text-transform:uppercase;padding:10px 20px;border:none;border-radius:3px;text-decoration:none;transition:opacity .2s;}
     .bonus-submit-teal:hover{opacity:.85;}
+
+    /* ── Bonus error message ─── */
+    .bonus-error-wrap{background:rgba(255,107,107,.06);border-bottom:1px solid rgba(255,107,107,.2);padding:12px 0;}
+    .bonus-error-inner{max-width:1100px;margin:0 auto;padding:0 24px;display:flex;align-items:center;gap:10px;}
+    .bonus-error-icon{font-size:16px;}
+    .bonus-error-text{font-family:'DM Sans',sans-serif;font-size:13px;color:#FF6B6B;}
 </style>
 @endpush
 
@@ -89,20 +95,31 @@
             ->locale('fr')->isoFormat('D MMMM');
     @endphp
 
+    @if(session('bonus_error'))
+    <div class="bonus-error-wrap">
+        <div class="bonus-error-inner">
+            <span class="bonus-error-icon">⚠️</span>
+            <span class="bonus-error-text">{{ session('bonus_error') }}</span>
+        </div>
+    </div>
+    @endif
+
     @php
         $_du = auth()->user();
 
-        // Bannière A — bonus déjà reçu (teal) : flash immédiat ou dans les 7 derniers jours
+        // Bannière A : flash immédiat OU claimed dans les 7 derniers jours
         $showBonusGranted = !is_null($_du->wallet_bonus_claimed_at)
             && (session('wallet_bonus_just_granted')
                 || $_du->wallet_bonus_claimed_at->gte(now()->subDays(7)));
 
-        // Bannière B — CTA Segment B : éligible mais pas encore vérifié, dans la fenêtre promo
-        $showBonusCta = is_null($_du->wallet_bonus_claimed_at)
-            && is_null($_du->phone_verified_at)
+        // Bannière B : éligible au bonus (pas encore crédité, dans la période, créé avant cutoff)
+        $showBonusEligible = is_null($_du->wallet_bonus_claimed_at)
             && $_du->created_at < \Carbon\Carbon::parse(config('otp.eligibility_cutoff'))
             && now()->gte(\Carbon\Carbon::parse(config('otp.wallet_bonus_start')))
             && now()->lte(\Carbon\Carbon::parse(config('otp.wallet_bonus_end')));
+
+        // Sous-cas : phone déjà vérifié ou pas
+        $phoneAlreadyVerified = !is_null($_du->phone_verified_at);
 
         $bonusAmount   = number_format(config('otp.wallet_bonus_amount'), 0, ',', ' ');
         $bonusEndLabel = \Carbon\Carbon::parse(config('otp.wallet_bonus_end'))
@@ -132,14 +149,14 @@
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="otpModalLabel">Activer mon cadeau 🎁</h5>
+                    <h5 class="modal-title" id="otpModalLabel">Active ton cadeau 50 000 FCFA</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
                 </div>
                 <div class="modal-body">
                     {{-- Étape 1 : numéro de téléphone --}}
                     <div class="otp-step" id="otp-step-1">
                         <div class="otp-step-lbl">Étape <b>1 / 2</b> — Ton numéro</div>
-                        <p class="otp-hint">Saisis ton numéro WhatsApp. On t'envoie un code SMS pour confirmer que c'est bien toi.</p>
+                        <p class="otp-hint">Vérifie ton numéro WhatsApp pour recevoir 50 000 FCFA virtuels dans ton portefeuille.</p>
                         <form method="POST" action="{{ route('phone.verify.send') }}">
                             @csrf
                             <div class="d-flex gap-2 align-items-start">
@@ -233,21 +250,45 @@
     </div>
     @endif
 
-    {{-- ── Bannière B : CTA Segment B (non vérifié, éligible au bonus) ─ --}}
-    @if($showBonusCta)
+    {{-- ── Bannière B1 : Cas A — Phone déjà vérifié, retire en un clic ── --}}
+    @if($showBonusEligible && $phoneAlreadyVerified)
     <div class="otp-banner-wrap">
         <div class="container" style="max-width:1100px;">
             <div class="otp-banner">
                 <div class="otp-banner-text">
                     <div>
-                        <span class="otp-badge-cadeau">Cadeau membre</span>
+                        <span class="otp-badge-cadeau">🎁 Cadeau à retirer</span>
                         <span class="otp-badge-deadline">Jusqu'au {{ $bonusEndLabel }}</span>
                     </div>
-                    <div class="otp-banner-title">{{ $bonusAmount }} FCFA virtuels offerts sur le simulateur BRVM</div>
-                    <div class="otp-banner-sub">Vérifie ton numéro de téléphone pour activer ton bonus. Découvre comment investir en bourse sans risquer ton argent.</div>
+                    <div class="otp-banner-title">Tu as un cadeau de {{ $bonusAmount }} FCFA à retirer</div>
+                    <div class="otp-banner-sub">Ton numéro est déjà vérifié. Retire ton bonus en un clic.</div>
                 </div>
                 <div class="flex-shrink-0">
-                    <a href="{{ route('phone.verify.form') }}" class="otp-submit">Activer mon bonus →</a>
+                    <form action="{{ route('bonus.claim') }}" method="POST">
+                        @csrf
+                        <button type="submit" class="otp-submit">Retirer mon cadeau →</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
+
+    {{-- ── Bannière B2 : Cas B — Phone non vérifié, ouvrir page OTP ── --}}
+    @if($showBonusEligible && !$phoneAlreadyVerified)
+    <div class="otp-banner-wrap">
+        <div class="container" style="max-width:1100px;">
+            <div class="otp-banner">
+                <div class="otp-banner-text">
+                    <div>
+                        <span class="otp-badge-cadeau">🎁 Cadeau membre</span>
+                        <span class="otp-badge-deadline">Jusqu'au {{ $bonusEndLabel }}</span>
+                    </div>
+                    <div class="otp-banner-title">Active ton cadeau de {{ $bonusAmount }} FCFA</div>
+                    <div class="otp-banner-sub">Vérifie ton numéro WhatsApp pour recevoir ton bonus.</div>
+                </div>
+                <div class="flex-shrink-0">
+                    <a href="{{ route('phone.verify.form') }}" class="otp-submit">Activer mon cadeau →</a>
                 </div>
             </div>
         </div>
