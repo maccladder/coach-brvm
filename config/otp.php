@@ -34,4 +34,25 @@ return [
         'GW' => ['name' => 'Guinée-Bissau',   'prefix' => '+245', 'digits' => 9],
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Promo 2 — Bonus portefeuille virtuel (Mai–Juin 2026)
+    |--------------------------------------------------------------------------
+    */
+
+    // Montant du bonus en FCFA virtuels
+    'wallet_bonus_amount'  => (int) env('WALLET_BONUS_AMOUNT', 50000),
+
+    // Début de la période promo (Segment B via OTP)
+    'wallet_bonus_start'   => env('WALLET_BONUS_START',  '2026-05-21 00:00:00'),
+
+    // Fin de la période promo
+    'wallet_bonus_end'     => env('WALLET_BONUS_END',    '2026-06-05 23:59:59'),
+
+    // Cutoff d'inscription : seuls les users inscrits AVANT cette date sont éligibles
+    'eligibility_cutoff'   => env('WALLET_ELIGIBILITY_CUTOFF', '2026-05-21 00:00:00'),
+
+    // Libellé de la transaction dans virtual_wallet_transactions.motif
+    'wallet_bonus_libelle' => env('WALLET_BONUS_LIBELLE', 'Bonus de bienvenue dans le simulateur — Mai 2026'),
+
 ];

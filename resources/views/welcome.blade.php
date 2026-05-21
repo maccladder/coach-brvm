@@ -521,6 +521,18 @@
 @php
     $showOtpWelcomeBanner = !auth()->user()->phone_reward_claimed
         && \Carbon\Carbon::parse(config('otp.reward_deadline'))->endOfDay()->isFuture();
+
+    $_wu = auth()->user();
+    $showWelcomeBonusGranted = !is_null($_wu->wallet_bonus_claimed_at)
+        && (session('wallet_bonus_just_granted')
+            || $_wu->wallet_bonus_claimed_at->gte(now()->subDays(7)));
+    $showWelcomeBonusCta = is_null($_wu->wallet_bonus_claimed_at)
+        && is_null($_wu->phone_verified_at)
+        && $_wu->created_at < \Carbon\Carbon::parse(config('otp.eligibility_cutoff'))
+        && now()->gte(\Carbon\Carbon::parse(config('otp.wallet_bonus_start')))
+        && now()->lte(\Carbon\Carbon::parse(config('otp.wallet_bonus_end')));
+    $wBonusAmount   = number_format(config('otp.wallet_bonus_amount'), 0, ',', ' ');
+    $wBonusEndLabel = \Carbon\Carbon::parse(config('otp.wallet_bonus_end'))->locale('fr')->isoFormat('D MMMM');
 @endphp
 @if($showOtpWelcomeBanner)
 <div style="background:#080E1C;border-bottom:1px solid rgba(15,207,164,.12);padding:9px 0;text-align:center;">
@@ -530,6 +542,39 @@
             &nbsp;—&nbsp;Reçois Abidjan Run gratuitement
             <span style="color:rgba(201,168,76,.4);margin:0 6px;">·</span>
             <span style="color:#C9A84C;">Jusqu'au {{ \Carbon\Carbon::parse(config('otp.reward_deadline'))->locale('fr')->isoFormat('D MMMM') }}</span>
+        </span>
+        <a href="{{ route('phone.verify.form') }}"
+           style="display:inline-flex;align-items:center;gap:5px;background:#C9A84C;color:#060910 !important;font-family:'Syne',sans-serif;font-weight:800;font-size:10px;letter-spacing:.07em;text-transform:uppercase;padding:5px 13px;border-radius:2px;text-decoration:none;flex-shrink:0;">
+            Activer →
+        </a>
+    </div>
+</div>
+@endif
+
+{{-- Bannière A — bonus wallet reçu (Promo 2) --}}
+@if($showWelcomeBonusGranted)
+<div style="background:rgba(15,207,164,.05);border-bottom:1px solid rgba(15,207,164,.18);padding:9px 0;text-align:center;">
+    <div class="container d-flex align-items-center justify-content-center flex-wrap gap-2" style="max-width:1100px;">
+        <span style="font-family:'Syne',sans-serif;font-size:11px;color:#6B7590;letter-spacing:.04em;">
+            🎉 <strong style="color:#0FCFA4;font-weight:600;">Bonus activé</strong>
+            &nbsp;—&nbsp;{{ $wBonusAmount }} FCFA virtuels crédités sur ton portefeuille
+        </span>
+        <a href="{{ route('wallet.index') }}"
+           style="display:inline-flex;align-items:center;gap:5px;background:#0FCFA4;color:#060910 !important;font-family:'Syne',sans-serif;font-weight:800;font-size:10px;letter-spacing:.07em;text-transform:uppercase;padding:5px 13px;border-radius:2px;text-decoration:none;flex-shrink:0;">
+            Simulateur →
+        </a>
+    </div>
+</div>
+@endif
+
+{{-- Bannière B — CTA Segment B (éligible, non vérifié) --}}
+@if($showWelcomeBonusCta)
+<div style="background:#080E1C;border-bottom:1px solid rgba(201,168,76,.15);padding:9px 0;text-align:center;">
+    <div class="container d-flex align-items-center justify-content-center flex-wrap gap-2" style="max-width:1100px;">
+        <span style="font-family:'Syne',sans-serif;font-size:11px;color:#6B7590;letter-spacing:.04em;">
+            🎁 <strong style="color:#E8EAF0;font-weight:600;">{{ $wBonusAmount }} FCFA virtuels offerts</strong>
+            &nbsp;—&nbsp;Vérifie ton numéro avant le
+            <span style="color:#C9A84C;">{{ $wBonusEndLabel }}</span>
         </span>
         <a href="{{ route('phone.verify.form') }}"
            style="display:inline-flex;align-items:center;gap:5px;background:#C9A84C;color:#060910 !important;font-family:'Syne',sans-serif;font-weight:800;font-size:10px;letter-spacing:.07em;text-transform:uppercase;padding:5px 13px;border-radius:2px;text-decoration:none;flex-shrink:0;">
