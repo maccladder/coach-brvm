@@ -34,12 +34,12 @@
 
         <div class="pv-card">
             <span class="pv-badge">Cadeau membre</span>
-            <h1 class="pv-title">Vérifie ton numéro, reçois Abidjan Run 🎮</h1>
+            <h1 class="pv-title">Vérifie ton numéro, reçois 50 000 FCFA virtuels 🎁</h1>
             <p class="pv-sub">
                 @if($alreadyClaimed)
                     Ton numéro a déjà été vérifié. Tu peux le mettre à jour ci-dessous.
                 @else
-                    Saisis ton numéro WhatsApp et confirme par SMS. On t'offre Abidjan Run gratuitement.
+                    Saisis ton numéro WhatsApp et confirme par SMS. Tu recevras 50 000 FCFA virtuels dans ton portefeuille.
                 @endif
             </p>
 

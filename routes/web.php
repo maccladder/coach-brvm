@@ -927,4 +927,8 @@ Route::middleware('auth')->prefix('mon-espace')->name('phone.')->group(function 
     Route::get('/verifier-telephone/succes',       [\App\Http\Controllers\PhoneVerificationController::class, 'success'])   ->name('verify.success');
 });
 
+Route::post('/bonus/claim', [\App\Http\Controllers\PhoneVerificationController::class, 'claimBonus'])
+    ->middleware('auth')
+    ->name('bonus.claim');
+
 require __DIR__.'/auth.php';

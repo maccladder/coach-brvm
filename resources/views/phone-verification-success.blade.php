@@ -26,18 +26,11 @@
             <span class="pvs-icon">🎉</span>
             <h1 class="pvs-title">Ton cadeau est prêt !</h1>
             <p class="pvs-sub">
-                Numéro vérifié avec succès. Abidjan Run a été ajouté à ta bibliothèque de jeux. Bonne course dans les rues d'Abidjan !
+                🎉 Tu as reçu 50 000 FCFA virtuels dans ton portefeuille ! Découvre le simulateur BRVM et commence à investir sans risque.
             </p>
 
-            @if($product)
-            <div class="pvs-product">
-                <div class="pvs-product-name">🎮 {{ $product->name }}</div>
-                <div class="pvs-product-desc">Jeu offert · Accès immédiat · Dans Mes jeux</div>
-            </div>
-            @endif
-
-            <a href="{{ route('my.products') }}?type=game" class="pvs-cta">
-                Jouer maintenant →
+            <a href="{{ route('wallet.index') }}" class="pvs-cta">
+                Découvrir le simulateur →
             </a>
 
             <a href="{{ route('dashboard') }}" class="pvs-link">← Retour au dashboard</a>
