@@ -79,7 +79,7 @@ class VirtualWalletBonusService
         // Wrappé en try/catch pour ne pas faire échouer le grant si la queue plante
         if ($result['success'] === true) {
             try {
-                Mail::to($user->email)->queue(new WalletBonusMail($user));
+                Mail::to($user->email)->send(new WalletBonusMail($user));
             } catch (\Throwable $e) {
                 Log::warning('wallet_bonus_mail_failed', [
                     'user_id' => $user->id,
