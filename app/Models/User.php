@@ -30,6 +30,7 @@ class User extends Authenticatable
         'phone',
         'phone_verified_at',
         'phone_reward_claimed',
+        'wallet_bonus_claimed_at',
     ];
 
     public function sendPasswordResetNotification($token): void
@@ -131,10 +132,11 @@ public function hasAccessTo(mixed $grantable): bool
     protected function casts(): array
     {
         return [
-            'email_verified_at'     => 'datetime',
-            'password'              => 'hashed',
-            'phone_verified_at'     => 'datetime',
-            'phone_reward_claimed'  => 'boolean',
+            'email_verified_at'       => 'datetime',
+            'password'                => 'hashed',
+            'phone_verified_at'       => 'datetime',
+            'phone_reward_claimed'    => 'boolean',
+            'wallet_bonus_claimed_at' => 'datetime',
         ];
     }
 }

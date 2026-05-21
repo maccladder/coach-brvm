@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\AdminGrant;
 use App\Models\MarketplaceProduct;
 use App\Services\TwilioVerifyService;
+use App\Services\VirtualWalletBonusService;
 use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -179,6 +180,28 @@ class PhoneVerificationController extends Controller
                     ]);
                 }
             }
+        }
+
+        // ──────────────────────────────────────────────────────────
+        // Promo 2 — Bonus 50 000 FCFA virtuels (Mai 2026)
+        // Indépendant de la promo Abidjan Run : ne bloque jamais le
+        // flow OTP, même si le service échoue.
+        // Le service gère ses propres gardes (cutoff, période,
+        // idempotence) — on l'appelle inconditionnellement.
+        // ──────────────────────────────────────────────────────────
+        try {
+            $bonusService = app(VirtualWalletBonusService::class);
+            $bonusResult  = $bonusService->grant($user);
+
+            if ($bonusResult['success'] === true) {
+                session()->flash('wallet_bonus_just_granted', true);
+                session()->flash('wallet_bonus_amount', $bonusResult['amount']);
+            }
+        } catch (\Throwable $e) {
+            \Log::warning('wallet_bonus_grant_failed_in_otp_flow', [
+                'user_id' => $user->id,
+                'error'   => $e->getMessage(),
+            ]);
         }
 
         if ($rewardGranted) {

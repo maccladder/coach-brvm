@@ -59,6 +59,12 @@
     .otp-step-lbl{font-family:'Syne',sans-serif;font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#6B7590;margin-bottom:14px;}
     .otp-step-lbl b{color:#C9A84C;}
     .otp-phone-preview{font-family:'Syne',sans-serif;font-size:12px;color:#C9A84C;margin-top:5px;min-height:18px;}
+
+    /* ── Bonus Banner Teal (Promo 2 — bonus wallet reçu) ─── */
+    .bonus-granted-wrap{background:rgba(15,207,164,.04);border-bottom:1px solid rgba(15,207,164,.18);}
+    .bonus-badge-granted{display:inline-block;font-family:'Syne',sans-serif;font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#060910;background:#0FCFA4;border-radius:2px;padding:2px 9px;margin-bottom:8px;}
+    .bonus-submit-teal{display:inline-flex;align-items:center;gap:8px;background:#0FCFA4;color:#060910 !important;font-family:'Syne',sans-serif;font-weight:800;font-size:11px;letter-spacing:.07em;text-transform:uppercase;padding:10px 20px;border:none;border-radius:3px;text-decoration:none;transition:opacity .2s;}
+    .bonus-submit-teal:hover{opacity:.85;}
 </style>
 @endpush
 
@@ -80,6 +86,26 @@
         $showOtpBanner = !auth()->user()->phone_reward_claimed
             && \Carbon\Carbon::parse(config('otp.reward_deadline'))->endOfDay()->isFuture();
         $otpDeadlineLabel = \Carbon\Carbon::parse(config('otp.reward_deadline'))
+            ->locale('fr')->isoFormat('D MMMM');
+    @endphp
+
+    @php
+        $_du = auth()->user();
+
+        // Bannière A — bonus déjà reçu (teal) : flash immédiat ou dans les 7 derniers jours
+        $showBonusGranted = !is_null($_du->wallet_bonus_claimed_at)
+            && (session('wallet_bonus_just_granted')
+                || $_du->wallet_bonus_claimed_at->gte(now()->subDays(7)));
+
+        // Bannière B — CTA Segment B : éligible mais pas encore vérifié, dans la fenêtre promo
+        $showBonusCta = is_null($_du->wallet_bonus_claimed_at)
+            && is_null($_du->phone_verified_at)
+            && $_du->created_at < \Carbon\Carbon::parse(config('otp.eligibility_cutoff'))
+            && now()->gte(\Carbon\Carbon::parse(config('otp.wallet_bonus_start')))
+            && now()->lte(\Carbon\Carbon::parse(config('otp.wallet_bonus_end')));
+
+        $bonusAmount   = number_format(config('otp.wallet_bonus_amount'), 0, ',', ' ');
+        $bonusEndLabel = \Carbon\Carbon::parse(config('otp.wallet_bonus_end'))
             ->locale('fr')->isoFormat('D MMMM');
     @endphp
     @if($showOtpBanner)
@@ -181,6 +207,47 @@
                             ← Changer de numéro
                         </button>
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
+
+    {{-- ── Bannière A : bonus wallet reçu (Promo 2) ─────────────────── --}}
+    @if($showBonusGranted)
+    <div class="bonus-granted-wrap">
+        <div class="container" style="max-width:1100px;">
+            <div class="otp-banner">
+                <div class="otp-banner-text">
+                    <div>
+                        <span class="bonus-badge-granted">🎉 Bonus activé</span>
+                    </div>
+                    <div class="otp-banner-title">{{ $bonusAmount }} FCFA virtuels ajoutés à ton portefeuille !</div>
+                    <div class="otp-banner-sub">Ton bonus de bienvenue est disponible. Commence à simuler des investissements sur la BRVM — sans risquer un seul franc réel.</div>
+                </div>
+                <div class="flex-shrink-0">
+                    <a href="{{ route('wallet.index') }}" class="bonus-submit-teal">Découvrir le simulateur →</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
+
+    {{-- ── Bannière B : CTA Segment B (non vérifié, éligible au bonus) ─ --}}
+    @if($showBonusCta)
+    <div class="otp-banner-wrap">
+        <div class="container" style="max-width:1100px;">
+            <div class="otp-banner">
+                <div class="otp-banner-text">
+                    <div>
+                        <span class="otp-badge-cadeau">Cadeau membre</span>
+                        <span class="otp-badge-deadline">Jusqu'au {{ $bonusEndLabel }}</span>
+                    </div>
+                    <div class="otp-banner-title">{{ $bonusAmount }} FCFA virtuels offerts sur le simulateur BRVM</div>
+                    <div class="otp-banner-sub">Vérifie ton numéro de téléphone pour activer ton bonus. Découvre comment investir en bourse sans risquer ton argent.</div>
+                </div>
+                <div class="flex-shrink-0">
+                    <a href="{{ route('phone.verify.form') }}" class="otp-submit">Activer mon bonus →</a>
                 </div>
             </div>
         </div>
