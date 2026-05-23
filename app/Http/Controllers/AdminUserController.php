@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\AdminGrant;
 use App\Models\User;
+use App\Models\VirtualWallet;
+use App\Models\VirtualWalletTransaction;
 use Illuminate\Http\Request;
 
 class AdminUserController extends Controller
@@ -98,8 +100,15 @@ class AdminUserController extends Controller
 
         $grantNames = AdminGrant::resolveItemNames($user->adminGrants);
 
+        $wallet          = VirtualWallet::where('user_id', $user->id)->first();
+        $walletBonusTxs  = VirtualWalletTransaction::where('user_id', $user->id)
+                               ->where('type', 'bonus')
+                               ->orderByDesc('created_at')
+                               ->get();
+
         return view('admin.users.show', compact(
-            'user', 'marketplaceTotal', 'courseTotal', 'grantNames'
+            'user', 'marketplaceTotal', 'courseTotal', 'grantNames',
+            'wallet', 'walletBonusTxs'
         ));
     }
 }

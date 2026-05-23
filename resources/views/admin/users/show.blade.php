@@ -210,7 +210,7 @@
         </div>
     </div>
 
-    {{-- Contenus offerts (AdminGrant) --}}
+    {{-- Contenus offerts (AdminGrant) — Promo 1 : Abidjan Run --}}
     <div class="card border-0 shadow-sm mb-4">
         <div class="card-header bg-white fw-bold py-3">
             🎁 Contenus offerts / AdminGrant ({{ $user->adminGrants->count() }})
@@ -245,6 +245,61 @@
                                 @else
                                     <span class="badge bg-success">Actif</span>
                                 @endif
+                            </td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+            @endif
+        </div>
+    </div>
+
+    {{-- Portefeuille virtuel — Promo 2 : Bonus 50k --}}
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-white fw-bold py-3 d-flex align-items-center gap-2">
+            💰 Portefeuille virtuel
+            @if($wallet)
+                <span class="badge bg-success">{{ number_format($wallet->balance, 0, ',', ' ') }} FCFA</span>
+            @else
+                <span class="badge bg-secondary">Aucun portefeuille</span>
+            @endif
+            @if($user->wallet_bonus_claimed_at)
+                <span class="badge" style="background:rgba(15,207,164,.15);color:#0aad8c;">
+                    ✅ Bonus reçu le {{ $user->wallet_bonus_claimed_at->format('d/m/Y à H:i') }}
+                </span>
+            @else
+                <span class="badge bg-warning text-dark">⏳ Bonus non réclamé</span>
+            @endif
+        </div>
+        <div class="card-body p-0">
+            @if($walletBonusTxs->isEmpty())
+                <p class="text-muted p-4 mb-0">Aucun bonus portefeuille accordé.</p>
+            @else
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Type</th>
+                            <th>Motif</th>
+                            <th class="text-end">Montant</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($walletBonusTxs as $tx)
+                        <tr>
+                            <td>
+                                <span class="badge" style="background:rgba(15,207,164,.15);color:#0aad8c;">
+                                    🎁 Bonus
+                                </span>
+                            </td>
+                            <td style="font-size:13px;">{{ $tx->motif ?? '—' }}</td>
+                            <td class="text-end fw-semibold">
+                                + {{ number_format($tx->amount, 0, ',', ' ') }} FCFA
+                            </td>
+                            <td style="font-size:13px;color:#6c757d;">
+                                {{ $tx->created_at?->format('d/m/Y à H:i') ?? '—' }}
                             </td>
                         </tr>
                         @endforeach
