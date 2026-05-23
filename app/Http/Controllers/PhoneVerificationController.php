@@ -237,6 +237,45 @@ class PhoneVerificationController extends Controller
     }
 
     // ──────────────────────────────────────────────
+    // Retrait du bonus 50 000 FCFA (Cas A — phone déjà vérifié)
+    // ──────────────────────────────────────────────
+
+    public function claimBonus(VirtualWalletBonusService $service)
+    {
+        $user = auth()->user();
+
+        if (is_null($user->phone_verified_at)) {
+            return redirect()->route('dashboard')
+                ->with('bonus_error', 'Tu dois d\'abord vérifier ton numéro de téléphone.');
+        }
+
+        try {
+            $result = $service->grant($user);
+
+            if ($result['success'] === true) {
+                session()->flash('wallet_bonus_just_granted', true);
+                session()->flash('wallet_bonus_amount', $result['amount']);
+            } else {
+                $messages = [
+                    'already_claimed'           => 'Tu as déjà reçu ton bonus.',
+                    'user_created_after_cutoff' => 'Cette offre est réservée aux membres inscrits avant le 21 mai.',
+                    'outside_promo_window'      => 'La période de l\'offre est terminée.',
+                    'phone_not_verified'        => 'Tu dois d\'abord vérifier ton numéro.',
+                ];
+                session()->flash('bonus_error', $messages[$result['reason']] ?? 'Une erreur est survenue.');
+            }
+        } catch (\Throwable $e) {
+            \Log::error('claim_bonus_failed', [
+                'user_id' => $user->id,
+                'error'   => $e->getMessage(),
+            ]);
+            session()->flash('bonus_error', 'Une erreur est survenue. Réessaye dans un instant.');
+        }
+
+        return redirect()->route('dashboard');
+    }
+
+    // ──────────────────────────────────────────────
     // Masquage téléphone pour logs
     // ──────────────────────────────────────────────
 
