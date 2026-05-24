@@ -172,9 +172,15 @@
                         <div class="wallet-card-title">➕ Recharger</div>
                     </div>
                     <div class="wallet-card-body">
-                        <p style="font-size:13px;color:#6B7590;margin-bottom:14px;">
+                        <p style="font-size:13px;color:#6B7590;margin-bottom:10px;">
                             Ajoute du cash virtuel pour tester des achats.
                         </p>
+                        <div style="background:rgba(201,168,76,.07);border:1px solid rgba(201,168,76,.2);border-radius:3px;padding:8px 12px;margin-bottom:14px;display:flex;align-items:center;gap:8px;">
+                            <span style="font-size:16px;">💡</span>
+                            <span style="font-family:'Syne',sans-serif;font-size:11px;font-weight:700;color:#C9A84C;letter-spacing:.04em;">
+                                1 000 F réels = 100 000 F virtuels
+                            </span>
+                        </div>
                         <form method="POST" action="{{ route('wallet.topup.confirm') }}" class="d-flex gap-2">
                             @csrf
                             <input type="number" name="amount_paid"
@@ -182,7 +188,7 @@
                                    min="1000" step="500" value="1000" required>
                             <button type="submit" class="cb-btn-green">Recharger</button>
                         </form>
-                        <div class="w-hint">Ex : 100 000 FCFA</div>
+                        <div class="w-hint">Ex : 1 000 F → vous recevez 100 000 F virtuels</div>
                     </div>
                 </div>
             </div>
