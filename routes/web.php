@@ -355,6 +355,9 @@ Route::prefix('topups')->name('topups.')->group(function () {
     Route::get('/', [AdminTopupController::class, 'index'])->name('index'); // /admin/topups
 });
 
+        // ✅ DONS (ADMIN)
+        Route::get('/donations', [\App\Http\Controllers\AdminDonationController::class, 'index'])->name('donations.index');
+
         // ✅ Annonces ADMIN (CRUD)
         Route::resource('announcements', AdminAnnouncementController::class)->except(['show']);
 
@@ -471,6 +474,14 @@ Route::get('/ssl-http-test', function () {
 | Pages statiques
 |--------------------------------------------------------------------------
 */
+
+// ──────────────────────────────────────────────────
+// Dons / Soutenir Coach BRVM
+// ──────────────────────────────────────────────────
+Route::get('/faire-un-don', [\App\Http\Controllers\DonationController::class, 'show'])->name('donation.show');
+Route::post('/faire-un-don/pay', [\App\Http\Controllers\DonationController::class, 'initiate'])->name('donation.initiate');
+Route::get('/faire-un-don/callback', [\App\Http\Controllers\DonationController::class, 'callback'])->name('donation.callback');
+Route::get('/faire-un-don/merci', [\App\Http\Controllers\DonationController::class, 'merci'])->name('donation.merci');
 
 Route::view('/contact', 'sections.contact')->name('contact');
 Route::view('/conditions', 'sections.conditions')->name('conditions');

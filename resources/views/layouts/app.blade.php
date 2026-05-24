@@ -295,6 +295,9 @@
                         <span class="cb-diaspora-blink"></span>Financement
                     </a>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ route('donation.show') }}" style="color:var(--cb-gold) !important;opacity:.85;">🤝 Soutenir</a>
+                </li>
             </ul>
 
             <div class="d-flex align-items-center gap-2 py-2 py-lg-0">
