@@ -295,9 +295,11 @@
                         <span class="cb-diaspora-blink"></span>Financement
                     </a>
                 </li>
+                @auth
                 <li class="nav-item">
                     <a class="nav-link" href="{{ route('donation.show') }}" style="color:var(--cb-gold) !important;opacity:.85;">🤝 Soutenir</a>
                 </li>
+                @endauth
             </ul>
 
             <div class="d-flex align-items-center gap-2 py-2 py-lg-0">
@@ -432,6 +434,15 @@
 <div class="cb-page">
     @yield('content')
 </div>
+
+@guest
+<div style="background:var(--cb-dark);border-top:1px solid var(--cb-border);padding:14px 0;text-align:center;">
+    <span style="font-size:.82rem;color:var(--cb-muted);">
+        Vous croyez en notre mission ?
+        <a href="{{ route('donation.show') }}" style="color:var(--cb-gold);text-decoration:none;font-weight:600;margin-left:6px;">🤝 Soutenir Coach BRVM →</a>
+    </span>
+</div>
+@endguest
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 @stack('scripts')
