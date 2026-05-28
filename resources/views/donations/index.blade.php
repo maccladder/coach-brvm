@@ -176,10 +176,135 @@
   .don-alert-error { background: rgba(255,107,107,.1); border: 1px solid rgba(255,107,107,.3); color: #FF9999; border-radius: 10px; padding: 14px 18px; margin-bottom: 20px; font-size: .95rem; }
   .don-error-msg { font-size: .82rem; color: #FF6B6B; margin-top: 5px; }
 
+  /* ── SÉPARATEUR OU ── */
+  .don-ou {
+    display: flex; align-items: center; gap: 16px;
+    margin: 28px 0;
+    color: var(--don-faible); font-size: .83rem; font-weight: 700;
+    letter-spacing: .15em; text-transform: uppercase;
+  }
+  .don-ou::before, .don-ou::after {
+    content: ""; flex: 1; height: 1px;
+    background: var(--don-bord);
+  }
+
+  /* ── WAVE QR CARD ── */
+  .don-wave-card {
+    background: var(--don-carte);
+    border: 1px solid rgba(41,182,246,.22);
+    border-radius: 18px;
+    padding: 32px 28px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .don-wave-card::before {
+    content: "";
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse 60% 40% at 50% 0%, rgba(41,182,246,.07), transparent 70%);
+    pointer-events: none;
+  }
+  .don-wave-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: rgba(41,182,246,.1);
+    border: 1px solid rgba(41,182,246,.25);
+    color: #29B6F6;
+    font-size: 11px; font-weight: 700; letter-spacing: .18em; text-transform: uppercase;
+    padding: 6px 16px; border-radius: 99px; margin-bottom: 18px;
+  }
+  .don-wave-badge svg { width: 14px; height: 14px; fill: currentColor; }
+  .don-wave-title {
+    font-family: 'Fraunces', serif; font-weight: 500;
+    font-size: 1.3rem; color: var(--don-texte);
+    margin-bottom: 8px;
+  }
+  .don-wave-sub {
+    font-size: .92rem; color: var(--don-doux); line-height: 1.6;
+    max-width: 38ch; margin: 0 auto 24px;
+  }
+  .don-wave-qr-wrap {
+    display: inline-block;
+    background: #fff;
+    border-radius: 16px;
+    padding: 14px;
+    box-shadow: 0 8px 32px rgba(0,0,0,.35), 0 0 0 1px rgba(41,182,246,.2);
+    margin-bottom: 22px;
+    transition: transform .2s;
+  }
+  .don-wave-qr-wrap:hover { transform: scale(1.03); }
+  .don-wave-qr-wrap img { width: 180px; height: 180px; display: block; border-radius: 6px; }
+  .don-wave-steps {
+    display: flex; justify-content: center; gap: 0;
+    flex-wrap: wrap;
+    margin-top: 4px;
+  }
+  .don-wave-step {
+    display: flex; align-items: center; gap: 6px;
+    font-size: .84rem; color: var(--don-doux);
+  }
+  .don-wave-step .num {
+    width: 22px; height: 22px; border-radius: 50%;
+    background: rgba(41,182,246,.15); border: 1px solid rgba(41,182,246,.3);
+    color: #29B6F6; font-size: .75rem; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .don-wave-step .arrow {
+    color: var(--don-faible); font-size: .8rem; margin: 0 8px;
+  }
+
+  /* ── SÉPARATEUR INTERNE ── */
+  .don-wave-ou {
+    display: flex; align-items: center; gap: 12px;
+    margin: 22px 0 18px;
+    color: var(--don-faible); font-size: .78rem; font-weight: 700;
+    letter-spacing: .15em; text-transform: uppercase;
+  }
+  .don-wave-ou::before, .don-wave-ou::after {
+    content: ""; flex: 1; height: 1px;
+    background: rgba(41,182,246,.15);
+  }
+
+  /* ── BOUTON WAVE LIEN ── */
+  .don-wave-btn {
+    display: flex; align-items: center; justify-content: center; gap: 11px;
+    width: 100%;
+    background: linear-gradient(135deg, #29B6F6, #0284c7);
+    color: #fff; text-decoration: none;
+    font-family: 'DM Sans', sans-serif; font-weight: 700; font-size: 1.05rem;
+    padding: 16px 24px; border-radius: 13px;
+    transition: filter .2s, transform .15s, box-shadow .2s;
+    box-shadow: 0 8px 24px rgba(41,182,246,.25);
+  }
+  .don-wave-btn:hover {
+    filter: brightness(1.1); transform: translateY(-2px);
+    box-shadow: 0 12px 32px rgba(41,182,246,.38);
+    color: #fff; text-decoration: none;
+  }
+  .don-wave-btn svg { width: 22px; height: 22px; flex-shrink: 0; }
+  .don-wave-btn-label { display: flex; flex-direction: column; align-items: flex-start; }
+  .don-wave-btn-label strong { line-height: 1.2; }
+  .don-wave-btn-label span { font-size: .78rem; font-weight: 400; opacity: .8; margin-top: 1px; }
+  .don-wave-hint {
+    font-size: .8rem; color: var(--don-faible); margin-top: 10px;
+    display: flex; align-items: center; justify-content: center; gap: 5px;
+  }
+  .don-wave-hint::before {
+    content: ""; width: 6px; height: 6px; border-radius: 50%;
+    background: #29B6F6; box-shadow: 0 0 6px #29B6F6;
+    flex-shrink: 0;
+  }
+
   @media (max-width: 576px) {
     .don-form-card { padding: 24px 18px; }
     .don-vision { padding: 30px 22px; }
     .don-h1 { font-size: 2rem; }
+    .don-wave-card { padding: 24px 18px; }
+    .don-wave-qr-wrap img { width: 150px; height: 150px; }
+    /* Sur mobile : masquer QR + étapes (inutile de scanner son propre écran) */
+    .don-wave-qr-only { display: none !important; }
+    .don-wave-ou { margin: 0 0 18px; }
+    .don-wave-ou::before, .don-wave-ou::after { display: none; }
   }
 </style>
 @endpush
@@ -339,6 +464,72 @@
           <p class="don-note">Paiement sécurisé via Paystack · Mobile Money, carte ou virement · aucune donnée bancaire conservée</p>
         </form>
       </div>
+
+      {{-- SÉPARATEUR --}}
+      <div class="don-ou">ou</div>
+
+      {{-- WAVE QR CODE + LIEN --}}
+      <div class="don-wave-card">
+        <div class="don-wave-badge">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M17 8C8 10 5.9 16.17 3.82 21" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            <path d="M21 12C16.55 13.77 13.1 16.94 12 21" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            <path d="M21 4C12.38 7.34 7.34 12.38 4 21" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+          Paiement Wave
+        </div>
+        <div class="don-wave-title">Payez avec Wave</div>
+        <p class="don-wave-sub">Scannez depuis un autre appareil, ou appuyez sur le bouton si vous êtes sur téléphone — Wave s'ouvre directement.</p>
+
+        {{-- QR code : masqué sur mobile (inutile de scanner son propre écran) --}}
+        <div class="don-wave-qr-only">
+          <div class="don-wave-qr-wrap">
+            <img src="{{ asset('img/wave-qr.png') }}" alt="QR code Wave – Soutenir Coach BRVM" loading="lazy">
+          </div>
+          <div class="don-wave-steps">
+            <div class="don-wave-step">
+              <span class="num">1</span>
+              <span>Ouvrez Wave</span>
+            </div>
+            <span class="don-wave-step arrow">→</span>
+            <div class="don-wave-step">
+              <span class="num">2</span>
+              <span>Scanner</span>
+            </div>
+            <span class="don-wave-step arrow">→</span>
+            <div class="don-wave-step">
+              <span class="num">3</span>
+              <span>Pointez</span>
+            </div>
+            <span class="don-wave-step arrow">→</span>
+            <div class="don-wave-step">
+              <span class="num">4</span>
+              <span>Confirmez</span>
+            </div>
+          </div>
+          <div class="don-wave-ou">sur mobile</div>
+        </div>
+
+        {{-- Bouton lien : toujours visible, mis en avant sur mobile --}}
+        <a href="https://pay.wave.com/m/M_ci_SWFbrhfGku6g/c/ci/"
+           target="_blank" rel="noopener noreferrer"
+           class="don-wave-btn">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M17 8C8 10 5.9 16.17 3.82 21" stroke="white" stroke-width="2.2" stroke-linecap="round"/>
+            <path d="M21 12C16.55 13.77 13.1 16.94 12 21" stroke="white" stroke-width="2.2" stroke-linecap="round"/>
+            <path d="M21 4C12.38 7.34 7.34 12.38 4 21" stroke="white" stroke-width="2.2" stroke-linecap="round"/>
+          </svg>
+          <div class="don-wave-btn-label">
+            <strong>Payer avec Wave</strong>
+            <span>Ouvre l'application Wave directement</span>
+          </div>
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:16px;opacity:.7;margin-left:auto;">
+            <path d="M7 17L17 7M17 7H7M17 7V17" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </a>
+        <p class="don-wave-hint">S'ouvre dans Wave · montant libre · aucune donnée conservée</p>
+      </div>
+
     </div>
   </div>
 
