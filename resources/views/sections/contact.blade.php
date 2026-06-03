@@ -45,11 +45,11 @@
                 <div class="contact-role">Support & Relations Clients — Coach BRVM</div>
                 <div class="contact-item">
                     <span class="contact-item-label">📞 Téléphone</span>
-                    <span class="contact-item-value"><a href="tel:+2250788035432">+225 07 88 03 54 32</a></span>
+                    <span class="contact-item-value"><a href="tel:+2250574023351">+225 05 74 02 33 51</a></span>
                 </div>
                 <div class="contact-item">
                     <span class="contact-item-label">💬 WhatsApp</span>
-                    <span class="contact-item-value"><a href="https://wa.me/2250788035432" target="_blank">+225 07 88 03 54 32</a></span>
+                    <span class="contact-item-value"><a href="https://wa.me/2250574023351" target="_blank">+225 05 74 02 33 51</a></span>
                 </div>
                 <div class="contact-item">
                     <span class="contact-item-label">✉️ Email</span>
