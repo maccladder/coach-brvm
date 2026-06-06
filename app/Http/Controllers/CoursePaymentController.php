@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Course;
 use App\Models\CoursePurchase;
 use App\Models\Payment;
+use App\Services\Affiliate\AffiliateCommissionService;
 use App\Services\CinetpayService;
 use App\Services\PaystackService;
 use Illuminate\Http\Request;
@@ -198,7 +199,7 @@ class CoursePaymentController extends Controller
     // Paystack
     // ============================================================
 
-    public function buyPaystack(Course $course, Request $request, PaystackService $paystack)
+    public function buyPaystack(Course $course, Request $request, PaystackService $paystack, AffiliateCommissionService $affiliateService)
     {
         $user = $request->user();
 
@@ -212,6 +213,17 @@ class CoursePaymentController extends Controller
                 ->with('success', 'Cours déjà acheté ✅');
         }
 
+        // ── Résolution code apporteur + remise éventuelle ─────────────────────
+        $checkout = $affiliateService->resolveForCheckout($request, 'course', $course->id, (int) $course->price_fcfa);
+
+        if ($checkout['warning']) {
+            return back()->withInput()->with('warning', $checkout['warning']);
+        }
+
+        $amountToPay   = $checkout['amount'];
+        $affiliateCode = $checkout['code'];
+        // ─────────────────────────────────────────────────────────────────────
+
         $purchase = CoursePurchase::firstOrCreate(
             ['user_id' => $user->id, 'course_id' => $course->id],
             ['amount_fcfa' => (int) $course->price_fcfa]
@@ -220,14 +232,16 @@ class CoursePaymentController extends Controller
         $transactionId = 'COURSE-' . $course->id . '-' . $user->id . '-' . Str::upper(Str::random(10));
 
         $payment = Payment::create([
-            'user_id'        => $user->id,
-            'transaction_id' => $transactionId,
-            'amount_paid'    => (int) $course->price_fcfa,
-            'amount_virtual' => 0,
-            'purpose'        => 'course',
-            'status'         => 'PENDING',
-            'credited_at'    => null,
-            'meta'           => [
+            'user_id'               => $user->id,
+            'transaction_id'        => $transactionId,
+            'amount_paid'           => $amountToPay,   // montant remisé (ou plein si pas de code)
+            'amount_virtual'        => 0,
+            'purpose'               => 'course',
+            'status'                => 'PENDING',
+            'credited_at'           => null,
+            'affiliate_code'        => $affiliateCode,
+            'affiliate_base_amount' => $affiliateCode ? (int) $course->price_fcfa : null,
+            'meta'                  => [
                 'type'        => 'course',
                 'course_id'   => $course->id,
                 'purchase_id' => $purchase->id,
@@ -239,7 +253,7 @@ class CoursePaymentController extends Controller
 
         $authUrl = $paystack->initialize([
             'email'        => $user->email,
-            'amount'       => (int) $payment->amount_paid,
+            'amount'       => $amountToPay,   // R7 : montant remisé transmis à Paystack
             'reference'    => $payment->transaction_id,
             'callback_url' => $callbackUrl,
             'metadata'     => [
@@ -259,7 +273,7 @@ class CoursePaymentController extends Controller
         return redirect()->away($authUrl);
     }
 
-    public function paystackCallback(Request $request, PaystackService $paystack)
+    public function paystackCallback(Request $request, PaystackService $paystack, AffiliateCommissionService $affiliateService)
     {
         $reference = (string) ($request->query('reference') ?: $request->query('trxref'));
 
@@ -343,6 +357,20 @@ class CoursePaymentController extends Controller
                 $purchase->save();
             }
         });
+
+        // Commission affiliation — hors transaction, idempotente (UNIQUE payment_id)
+        try {
+            $payment->refresh(); // relit l'état post-transaction
+            if ($payment->credited_at) {
+                $affiliateService->tryCreateCommission($payment);
+            }
+        } catch (\Throwable $e) {
+            Log::error('[COURSE][PAYSTACK_CALLBACK] affiliateCommission error', [
+                'reference'  => $reference,
+                'payment_id' => $payment->id,
+                'error'      => $e->getMessage(),
+            ]);
+        }
 
         // ✅ fb_purchase unifié (même clé que marketplace → même lecture dans les blades)
         return redirect()->route('courses.my')

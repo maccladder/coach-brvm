@@ -8,6 +8,7 @@ use App\Models\CoursePurchase;
 use App\Models\PackWhatsappToken;
 use App\Models\Payment;
 use App\Models\User;
+use App\Services\Affiliate\AffiliateCommissionService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
@@ -15,6 +16,10 @@ use Illuminate\Support\Str;
 
 class PaystackPackService
 {
+    public function __construct(
+        private AffiliateCommissionService $affiliateService
+    ) {}
+
     /**
      * Traitement métier du webhook Paystack pour les packs (charge.success).
      * Idempotent : vérifie credited_at avant tout traitement.
@@ -121,6 +126,23 @@ class PaystackPackService
                 'user_id'   => $user->id,
             ]);
         });
+
+        // Commission affiliation — hors transaction pour éviter tout rollback croisé
+        // Idempotence garantie par UNIQUE(payment_id) dans affiliate_commissions
+        $confirmedPayment = Payment::where('transaction_id', $reference)
+            ->whereNotNull('credited_at')
+            ->first();
+        if ($confirmedPayment) {
+            try {
+                $this->affiliateService->tryCreateCommission($confirmedPayment);
+            } catch (\Throwable $e) {
+                Log::error('PaystackPackService: affiliateCommission error', [
+                    'reference'  => $reference,
+                    'payment_id' => $confirmedPayment->id,
+                    'error'      => $e->getMessage(),
+                ]);
+            }
+        }
 
         // Email envoyé hors transaction
         if ($token && $user) {

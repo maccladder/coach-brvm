@@ -18,7 +18,7 @@
                             {{ Str::limit($course->description, 100) }}
                         </p>
 
-                        <div class="d-flex justify-content-between align-items-center">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
                             <span class="fw-bold text-success">
                                 {{ number_format($course->price_fcfa) }} FCFA
                             </span>
@@ -26,6 +26,16 @@
                                 {{ $course->buyers_count }} acheteurs
                             </span>
                         </div>
+
+                        {{-- Toggle éligibilité affiliation --}}
+                        <form action="{{ route('admin.affiliates.toggle-course', $course) }}" method="POST" class="d-flex align-items-center gap-2">
+                            @csrf
+                            @method('PATCH')
+                            <button type="submit"
+                                    class="btn btn-sm w-100 {{ $course->affiliate_eligible ? 'btn-success' : 'btn-outline-secondary' }}">
+                                🤝 {{ $course->affiliate_eligible ? 'Affiliation activée' : 'Affiliation désactivée' }}
+                            </button>
+                        </form>
                     </div>
                 </div>
             </div>

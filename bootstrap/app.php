@@ -47,8 +47,9 @@ return Application::configure(basePath: dirname(__DIR__))
             'admin.code'      => \App\Http\Middleware\AdminCodeMiddleware::class,
             'stagiaire.code'  => \App\Http\Middleware\StagiaireCodeMiddleware::class,
             'stagiaire.log'   => \App\Http\Middleware\StagiaireActivityLogger::class,
-            'vendor.mode'     => \App\Http\Middleware\EnsureVendorMode::class,
-            'lettreci.access' => \App\Http\Middleware\EnsureLettreCIAccess::class,
+            'vendor.mode'      => \App\Http\Middleware\EnsureVendorMode::class,
+            'lettreci.access'  => \App\Http\Middleware\EnsureLettreCIAccess::class,
+            'affiliate.active' => \App\Http\Middleware\EnsureAffiliateActive::class,
         ]);
 
         // $middleware->append(\App\Http\Middleware\TestMiddleware::class);

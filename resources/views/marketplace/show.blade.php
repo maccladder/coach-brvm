@@ -359,6 +359,18 @@
                     @else
                         <form method="POST" action="{{ route('paystack.marketplace.buy', $product) }}">
                             @csrf
+                            @php $cookieCode = strtoupper(trim(request()->cookie('affiliate_code', ''))); @endphp
+                            <input type="text"
+                                   name="affiliate_code"
+                                   id="mp-affiliate-code"
+                                   value="{{ old('affiliate_code', $cookieCode) }}"
+                                   placeholder="Code apporteur (optionnel)"
+                                   maxlength="20"
+                                   style="background:rgba(6,9,16,.9);border:1px solid rgba(255,255,255,.1);color:#E8EAF0;border-radius:3px;font-family:'DM Sans',sans-serif;font-size:12px;padding:8px 12px;width:100%;outline:none;margin-bottom:6px;">
+                            <div id="mp-affiliate-preview" style="min-height:16px;font-size:12px;margin-bottom:6px;"></div>
+                            @if(session('warning'))
+                                <div style="font-size:12px;color:#FFC850;margin-bottom:8px;">{!! session('warning') !!}</div>
+                            @endif
                             <button type="submit"
                                     class="cb-btn-pay js-pay-btn"
                                     data-mp-id="{{ $product->id }}"
@@ -492,6 +504,8 @@
                                     @auth
                                         <form method="POST" action="{{ route('paystack.marketplace.buy', $product) }}">
                                             @csrf
+                                            @php $cookieCode = strtoupper(trim(request()->cookie('affiliate_code', ''))); @endphp
+                                            <input type="hidden" name="affiliate_code" value="{{ old('affiliate_code', $cookieCode) }}">
                                             <button type="submit"
                                                     class="cb-btn-outline js-pay-btn"
                                                     style="font-size:11px;padding:7px 14px;"
@@ -632,4 +646,66 @@ document.addEventListener('DOMContentLoaded', function () {
     @endif
 });
 </script>
+
+@auth
+@if(!empty($product) && (int)$product->price > 0 && empty($isOwned))
+<script>
+(function () {
+    const VALIDATE   = '{{ route("affiliate.validate-code") }}';
+    const CSRF       = document.querySelector('meta[name="csrf-token"]')?.content ?? '';
+    const PRODUCT_ID = {{ (int) $product->id }};
+    const ORIGINAL   = {{ (int) $product->price }};
+
+    const input   = document.getElementById('mp-affiliate-code');
+    const preview = document.getElementById('mp-affiliate-preview');
+    const priceEl = document.querySelector('.mp-price-big');
+
+    if (!input) return;
+
+    function fmt(n) { return new Intl.NumberFormat('fr-FR').format(n); }
+
+    function applyResult(data) {
+        if (!data) { reset(); return; }
+        if (data.applicable) {
+            if (priceEl) priceEl.innerHTML =
+                '<span style="text-decoration:line-through;color:#6B7590;font-size:.65em;">'
+                + fmt(ORIGINAL) + ' F</span> '
+                + '<span style="color:#C9A84C;">' + fmt(data.new_price) + ' FCFA</span>';
+            if (preview) preview.innerHTML =
+                '<span style="color:#0FCFA4;">✅ −' + Math.round(data.discount_rate * 100)
+                + '% grâce au code de ' + (data.affiliate_label ?? input.value.toUpperCase())
+                + ' — nouveau prix : ' + fmt(data.new_price) + ' FCFA</span>';
+        } else {
+            reset();
+            if (preview && data.message)
+                preview.innerHTML = '<span style="color:#FFC850;">⚠️ ' + data.message + '</span>';
+        }
+    }
+
+    function reset() {
+        if (priceEl) priceEl.innerHTML = fmt(ORIGINAL) + ' FCFA';
+        if (preview) preview.innerHTML = '';
+    }
+
+    let timer;
+    function trigger() {
+        const code = input.value.trim().toUpperCase();
+        if (code.length < 2) { reset(); return; }
+        clearTimeout(timer);
+        timer = setTimeout(() => {
+            fetch(VALIDATE, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': CSRF, 'Accept': 'application/json' },
+                body: JSON.stringify({ code, product_type: 'marketplace', product_id: PRODUCT_ID }),
+            }).then(r => r.json()).then(applyResult).catch(() => reset());
+        }, 400);
+    }
+
+    input.addEventListener('input', trigger);
+    input.addEventListener('blur',  trigger);
+    if (input.value.trim().length >= 2) trigger();
+})();
+</script>
+@endif
+@endauth
 @endpush

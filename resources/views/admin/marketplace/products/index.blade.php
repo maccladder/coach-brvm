@@ -149,6 +149,11 @@
                                 @if($p->is_featured)
                                     <span class="badge bg-warning text-dark ms-1">featured</span>
                                 @endif
+                                @if($p->affiliate_eligible && is_null($p->user_id))
+                                    <span class="badge bg-success ms-1" title="Éligible affiliation">🤝</span>
+                                @elseif($p->affiliate_eligible && !is_null($p->user_id))
+                                    <span class="badge bg-secondary ms-1" title="Flag actif mais vendeur tiers — commission bloquée par garde-fou ownership">🤝⚠️</span>
+                                @endif
                             </td>
                             <td class="text-end">
                                 {{-- ✅ Inspecter --}}
@@ -171,6 +176,16 @@
                                 <a href="{{ route('admin.marketplace.edit', $p) }}" class="btn btn-sm btn-outline-primary">
                                     Modifier
                                 </a>
+
+                                {{-- Toggle éligibilité affiliation --}}
+                                <form action="{{ route('admin.affiliates.toggle-product', $p) }}" method="POST" class="d-inline">
+                                    @csrf
+                                    @method('PATCH')
+                                    <button class="btn btn-sm {{ $p->affiliate_eligible ? 'btn-success' : 'btn-outline-secondary' }}"
+                                            title="{{ $p->affiliate_eligible ? 'Éligible affiliation — cliquer pour désactiver' : 'Non éligible — cliquer pour activer' }}">
+                                        🤝
+                                    </button>
+                                </form>
 
                                 @if(session('is_admin'))
                                 <form action="{{ route('admin.marketplace.destroy', $p) }}" method="POST" class="d-inline"

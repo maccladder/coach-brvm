@@ -9,3 +9,6 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote');
 
 Schedule::command('payments:notify-abandoned')->everyFiveMinutes();
+
+// Affiliation : passe les commissions pending → validated après security_delay_days jours
+Schedule::command('affiliate:validate-commissions')->daily();

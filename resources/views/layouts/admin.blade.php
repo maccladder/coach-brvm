@@ -102,6 +102,10 @@
                         <li><a class="dropdown-item" href="{{ route('admin.packs.index') }}">📦 Pack BRVM</a></li>
                         <li><a class="dropdown-item" href="{{ route('admin.donations.index') }}">🤝 Dons</a></li>
                         <li><a class="dropdown-item" href="{{ route('admin.emails.index') }}">📧 Envoyer un email</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><h6 class="dropdown-header" style="font-size:.7rem;letter-spacing:.05em;">AFFILIATION</h6></li>
+                        <li><a class="dropdown-item" href="{{ route('admin.affiliates.index') }}">🤝 Apporteurs d'affaires</a></li>
+                        <li><a class="dropdown-item" href="{{ route('admin.affiliate-payouts.index') }}">💳 Reversements affiliation</a></li>
                     </ul>
                 </li>
 

@@ -143,7 +143,7 @@
             {{-- Prix --}}
             <div style="margin-bottom:16px;">
                 <span class="pack-price-old">50 000 FCFA</span>
-                <span class="pack-price-new">30 000 FCFA</span>
+                <span class="pack-price-new" id="pack-price-display" data-original="30000">30 000 FCFA</span>
                 <span class="pack-price-economy">−40%</span>
             </div>
             <p style="font-size:12px; color:#6B7590; margin-bottom:40px;">Accès à vie · Paiement unique · Livraison immédiate</p>
@@ -159,10 +159,24 @@
 
             {{-- CTA --}}
             @auth
-                <form method="POST" action="{{ route('pack.buy.paystack') }}" style="display:inline;">
+                <form method="POST" action="{{ route('pack.buy.paystack') }}" id="pack-buy-form-top">
                     @csrf
-                    <button type="submit" class="cb-btn-gold-lg">
-                        🎓 Obtenir le Pack — 30 000 FCFA
+                    @php $cookieCode = strtoupper(trim(request()->cookie('affiliate_code', ''))); @endphp
+                    <div style="margin-bottom:14px;">
+                        <input type="text"
+                               name="affiliate_code"
+                               id="affiliate_code_top"
+                               value="{{ old('affiliate_code', $cookieCode) }}"
+                               placeholder="Code apporteur (optionnel)"
+                               maxlength="20"
+                               style="background:rgba(6,9,16,.9);border:1px solid rgba(255,255,255,.1);color:#E8EAF0;border-radius:3px;font-family:'DM Sans',sans-serif;font-size:12px;padding:9px 14px;width:100%;max-width:240px;outline:none;">
+                        @if(session('warning'))
+                            <div style="font-size:12px;color:#FFC850;margin-top:6px;">{!! session('warning') !!}</div>
+                        @endif
+                        <div id="pack-affiliate-preview" style="min-height:18px;margin-top:5px;font-size:12px;"></div>
+                    </div>
+                    <button type="submit" class="cb-btn-gold-lg" id="pack-buy-btn">
+                        🎓 Obtenir le Pack — <span id="pack-btn-price">30 000</span> FCFA
                     </button>
                 </form>
             @else
@@ -268,8 +282,17 @@
             <p style="font-size:12px; color:#6B7590; margin-bottom:28px;">Accès à vie · Paiement unique</p>
 
             @auth
-                <form method="POST" action="{{ route('pack.buy.paystack') }}" style="display:inline;">
+                <form method="POST" action="{{ route('pack.buy.paystack') }}" id="pack-buy-form-bottom">
                     @csrf
+                    @php $cookieCode = strtoupper(trim(request()->cookie('affiliate_code', ''))); @endphp
+                    <div style="margin-bottom:14px;">
+                        <input type="text"
+                               name="affiliate_code"
+                               value="{{ old('affiliate_code', $cookieCode) }}"
+                               placeholder="Code apporteur (optionnel)"
+                               maxlength="20"
+                               style="background:rgba(6,9,16,.9);border:1px solid rgba(255,255,255,.1);color:#E8EAF0;border-radius:3px;font-family:'DM Sans',sans-serif;font-size:12px;padding:9px 14px;width:100%;max-width:240px;outline:none;">
+                    </div>
                     <button type="submit" class="cb-btn-gold-lg">
                         🎓 Obtenir le Pack — 30 000 FCFA
                     </button>
@@ -304,4 +327,72 @@
     const io  = new IntersectionObserver(entries => entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('on'); }), { threshold: .1 });
     els.forEach(el => io.observe(el));
 </script>
+
+@auth
+<script>
+(function () {
+    const VALIDATE = '{{ route("affiliate.validate-code") }}';
+    const CSRF     = document.querySelector('meta[name="csrf-token"]')?.content ?? '';
+    const ORIGINAL = 30000;
+
+    const input    = document.getElementById('affiliate_code_top');
+    const preview  = document.getElementById('pack-affiliate-preview');
+    const priceEl  = document.getElementById('pack-price-display');
+    const btnPrice = document.getElementById('pack-btn-price');
+    // Input du formulaire du bas (on le synchronise en écriture)
+    const inputBot = document.querySelector('#pack-buy-form-bottom input[name="affiliate_code"]');
+
+    if (!input) return;
+
+    function fmt(n) { return new Intl.NumberFormat('fr-FR').format(n); }
+
+    function applyResult(data) {
+        if (!data) { reset(); return; }
+        if (data.applicable) {
+            if (priceEl) priceEl.innerHTML =
+                '<span style="text-decoration:line-through;color:#6B7590;font-size:.75em;">'
+                + fmt(ORIGINAL) + ' F</span> '
+                + '<span style="color:#C9A84C;">' + fmt(data.new_price) + ' FCFA</span>';
+            if (btnPrice) btnPrice.textContent = fmt(data.new_price);
+            if (preview) preview.innerHTML =
+                '<span style="color:#0FCFA4;">✅ −' + Math.round(data.discount_rate * 100)
+                + '% grâce au code de ' + (data.affiliate_label ?? input.value.toUpperCase())
+                + ' — nouveau prix : ' + fmt(data.new_price) + ' FCFA</span>';
+        } else {
+            reset();
+            if (preview && data.message)
+                preview.innerHTML = '<span style="color:#FFC850;">⚠️ ' + data.message + '</span>';
+        }
+    }
+
+    function reset() {
+        if (priceEl) priceEl.innerHTML = fmt(ORIGINAL) + ' FCFA';
+        if (btnPrice) btnPrice.textContent = fmt(ORIGINAL);
+        if (preview) preview.innerHTML = '';
+    }
+
+    let timer;
+    function triggerValidation() {
+        const code = input.value.trim().toUpperCase();
+        // Sync bottom form
+        if (inputBot) inputBot.value = code;
+        if (code.length < 2) { reset(); return; }
+        clearTimeout(timer);
+        timer = setTimeout(() => {
+            fetch(VALIDATE, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': CSRF, 'Accept': 'application/json' },
+                body: JSON.stringify({ code, product_type: 'pack_brvm', product_id: null }),
+            }).then(r => r.json()).then(applyResult).catch(() => reset());
+        }, 400);
+    }
+
+    input.addEventListener('input', triggerValidation);
+    input.addEventListener('blur',  triggerValidation);
+
+    // Déclencher au chargement si un code est déjà pré-rempli (cookie)
+    if (input.value.trim().length >= 2) triggerValidation();
+})();
+</script>
+@endauth
 @endpush

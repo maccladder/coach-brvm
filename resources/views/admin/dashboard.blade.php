@@ -135,6 +135,12 @@
         <a href="{{ route('admin.books.index') }}">
             <i class="bi bi-book"></i> Livres
         </a>
+        <a href="{{ route('admin.affiliates.index') }}">
+            <i class="bi bi-person-check"></i> Apporteurs
+        </a>
+        <a href="{{ route('admin.affiliate-payouts.index') }}">
+            <i class="bi bi-cash-coin"></i> Reversements affiliation
+        </a>
     </div>
 
     {{-- ── CARDS RAPIDES ───────────────────────────────────── --}}
@@ -176,6 +182,44 @@
                         <span class="badge bg-light text-dark" style="font-size:.7rem;">Demandes</span>
                         <span class="badge bg-light text-dark" style="font-size:.7rem;">Validation</span>
                         <span class="badge bg-light text-dark" style="font-size:.7rem;">Paiement</span>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        {{-- Apporteurs d'affaires (caisse SÉPARÉE des vendeurs) --}}
+        <div class="col-6 col-md-4 col-lg-3">
+            <a href="{{ route('admin.affiliates.index') }}" class="dash-card bg-success text-white">
+                <div class="card-body">
+                    <div class="d-flex align-items-start gap-3 mb-3">
+                        <div class="card-icon bg-white bg-opacity-10 border border-light border-opacity-25">🤝</div>
+                        <span class="badge bg-light text-dark ms-auto">Affiliation</span>
+                    </div>
+                    <div class="fw-bold mb-1">Apporteurs d'affaires</div>
+                    <p class="small mb-3 opacity-75">Activer les apporteurs, gérer les codes et l'éligibilité des produits.</p>
+                    <div class="d-flex flex-wrap gap-1">
+                        <span class="badge bg-light text-dark" style="font-size:.7rem;">Activation</span>
+                        <span class="badge bg-light text-dark" style="font-size:.7rem;">Codes</span>
+                        <span class="badge bg-light text-dark" style="font-size:.7rem;">Commissions</span>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        {{-- Reversements affiliation (caisse SÉPARÉE des reversements vendeurs) --}}
+        <div class="col-6 col-md-4 col-lg-3">
+            <a href="{{ route('admin.affiliate-payouts.index') }}" class="dash-card bg-secondary text-white">
+                <div class="card-body">
+                    <div class="d-flex align-items-start gap-3 mb-3">
+                        <div class="card-icon bg-white bg-opacity-10 border border-light border-opacity-25">💳</div>
+                        <span class="badge bg-warning text-dark ms-auto">Payouts</span>
+                    </div>
+                    <div class="fw-bold mb-1">Reversements affiliation</div>
+                    <p class="small mb-3 opacity-75">Caisse apporteurs — distincte de la caisse vendeurs. Mobile money.</p>
+                    <div class="d-flex flex-wrap gap-1">
+                        <span class="badge bg-light text-dark" style="font-size:.7rem;">Demandes</span>
+                        <span class="badge bg-light text-dark" style="font-size:.7rem;">Validation</span>
+                        <span class="badge bg-light text-dark" style="font-size:.7rem;">Reçus</span>
                     </div>
                 </div>
             </a>

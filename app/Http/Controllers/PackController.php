@@ -8,6 +8,7 @@ use App\Models\CoursePurchase;
 use App\Models\PackWhatsappToken;
 use App\Models\Payment;
 use App\Models\User;
+use App\Services\Affiliate\AffiliateCommissionService;
 use App\Services\PaystackService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -54,22 +55,36 @@ class PackController extends Controller
     // Initiation paiement Paystack
     // ────────────────────────────────────────────────
 
-    public function buyPaystack(Request $request, PaystackService $paystack)
+    public function buyPaystack(Request $request, PaystackService $paystack, AffiliateCommissionService $affiliateService)
     {
         $user    = $request->user();
         $courses = $this->loadCourses();
 
+        // ── Résolution code apporteur + remise éventuelle ─────────────────────
+        $checkout = $affiliateService->resolveForCheckout($request, 'pack_brvm', null, self::PRICE);
+
+        if ($checkout['warning']) {
+            // Code saisi manuellement mais produit non éligible → informer et stopper
+            return back()->withInput()->with('warning', $checkout['warning']);
+        }
+
+        $amountToPay   = $checkout['amount'];
+        $affiliateCode = $checkout['code'];
+        // ─────────────────────────────────────────────────────────────────────
+
         $transactionId = 'PACK-BRVM-' . $user->id . '-' . Str::upper(Str::random(10));
 
         $payment = Payment::create([
-            'user_id'        => $user->id,
-            'transaction_id' => $transactionId,
-            'amount_paid'    => self::PRICE,
-            'amount_virtual' => 0,
-            'purpose'        => 'pack_brvm',
-            'status'         => 'PENDING',
-            'credited_at'    => null,
-            'meta'           => [
+            'user_id'                => $user->id,
+            'transaction_id'         => $transactionId,
+            'amount_paid'            => $amountToPay,   // montant remisé (ou plein si pas de code)
+            'amount_virtual'         => 0,
+            'purpose'                => 'pack_brvm',
+            'status'                 => 'PENDING',
+            'credited_at'            => null,
+            'affiliate_code'         => $affiliateCode,
+            'affiliate_base_amount'  => $affiliateCode ? self::PRICE : null,
+            'meta'                   => [
                 'type'       => 'pack_brvm',
                 'course_ids' => $courses->pluck('id')->all(),
                 'provider'   => 'paystack',
@@ -78,7 +93,7 @@ class PackController extends Controller
 
         $authUrl = $paystack->initialize([
             'email'        => $user->email,
-            'amount'       => self::PRICE,
+            'amount'       => $amountToPay,   // R7 : Paystack reçoit le montant remisé
             'reference'    => $transactionId,
             'callback_url' => route('paystack.pack.callback', [], true),
             'metadata'     => [

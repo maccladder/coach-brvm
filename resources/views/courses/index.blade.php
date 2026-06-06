@@ -48,6 +48,24 @@
     <div class="container py-5" style="max-width:1100px;">
         @if(session('success'))<div style="background:rgba(15,207,164,.08);border:1px solid rgba(15,207,164,.2);border-radius:3px;padding:14px 18px;margin-bottom:20px;font-size:13px;color:#0FCFA4;font-family:'Syne',sans-serif;">{{ session('success') }}</div>@endif
         @if(session('error'))<div style="background:rgba(255,107,107,.08);border:1px solid rgba(255,107,107,.2);border-radius:3px;padding:14px 18px;margin-bottom:20px;font-size:13px;color:#FF6B6B;font-family:'Syne',sans-serif;">{{ session('error') }}</div>@endif
+        @if(session('warning'))<div style="background:rgba(255,200,30,.06);border:1px solid rgba(255,200,30,.15);border-radius:3px;padding:14px 18px;margin-bottom:20px;font-size:13px;color:#FFC850;font-family:'Syne',sans-serif;">{!! session('warning') !!}</div>@endif
+
+        {{-- Champ code apporteur global : propagé à tous les formulaires d'achat via JS --}}
+        @php $cookieCode = strtoupper(trim(request()->cookie('affiliate_code', ''))); @endphp
+        @if(!auth()->user()?->coursePurchases()->count())
+        <div style="margin-bottom:20px;flex-wrap:wrap;">
+            <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:4px;">
+                <input type="text"
+                       id="global-affiliate-code"
+                       value="{{ old('affiliate_code', $cookieCode) }}"
+                       placeholder="Code apporteur (optionnel, −10% si éligible)"
+                       maxlength="20"
+                       style="background:rgba(6,9,16,.9);border:1px solid rgba(255,255,255,.1);color:#E8EAF0;border-radius:3px;font-family:'DM Sans',sans-serif;font-size:12px;padding:9px 14px;width:240px;outline:none;">
+                <span style="font-size:11px;color:#6B7590;">Appliqué à l'achat si éligible</span>
+            </div>
+            <div id="courses-affiliate-preview" style="min-height:16px;font-size:12px;"></div>
+        </div>
+        @endif
 
         <div class="row g-4 cbr">
             @forelse($courses as $course)
@@ -74,6 +92,7 @@
                                     @else
                                         <form method="POST" action="{{ route('courses.buy.paystack',$course) }}" class="js-paystack-form">
                                             @csrf
+                                            <input type="hidden" name="affiliate_code" class="js-affiliate-code-hidden" value="{{ $cookieCode }}">
                                             <button type="submit"
                                                     class="cb-btn-gold js-init-checkout"
                                                     data-course-id="{{ $course->id }}"
@@ -109,6 +128,23 @@ document.addEventListener('DOMContentLoaded', function () {
         }, { threshold: .06 }).observe(el);
     });
 
+    // ── Propagation code apporteur global → tous les formulaires ──
+    var globalInput = document.getElementById('global-affiliate-code');
+    if (globalInput) {
+        // Synchronise en temps réel
+        globalInput.addEventListener('input', function() {
+            var val = this.value.toUpperCase().trim();
+            document.querySelectorAll('.js-affiliate-code-hidden').forEach(function(h) { h.value = val; });
+        });
+        // Synchronise au submit (sécurité si l'input global a été modifié sans événement)
+        document.querySelectorAll('.js-paystack-form').forEach(function(f) {
+            f.addEventListener('submit', function() {
+                var h = f.querySelector('.js-affiliate-code-hidden');
+                if (h && globalInput) h.value = globalInput.value.toUpperCase().trim();
+            });
+        });
+    }
+
     // ── InitiateCheckout au clic sur "Payer" ──
     // e.preventDefault() bloque la redirection immédiate vers Paystack
     // setTimeout 400ms laisse le temps au pixel d'envoyer l'événement à Meta
@@ -135,4 +171,124 @@ document.addEventListener('DOMContentLoaded', function () {
 
 });
 </script>
+
+@auth
+<script>
+(function () {
+    const VALIDATE = '{{ route("affiliate.validate-code") }}';
+    const CSRF     = document.querySelector('meta[name="csrf-token"]')?.content ?? '';
+    const globalIn = document.getElementById('global-affiliate-code');
+    const preview  = document.getElementById('courses-affiliate-preview');
+
+    if (!globalIn) return;
+
+    function fmt(n) { return new Intl.NumberFormat('fr-FR').format(n); }
+
+    // Valide le code pour un cours donné et met à jour son affichage prix
+    function validateForCourse(code, btn, priceSpan) {
+        const courseId    = parseInt(btn.dataset.courseId, 10);
+        const coursePrice = parseInt(btn.dataset.coursePrice, 10);
+        if (!courseId || !coursePrice) return;
+
+        fetch(VALIDATE, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': CSRF, 'Accept': 'application/json' },
+            body: JSON.stringify({ code, product_type: 'course', product_id: courseId }),
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.applicable) {
+                priceSpan.innerHTML =
+                    '<span style="text-decoration:line-through;color:#6B7590;font-size:.8em;">'
+                    + fmt(coursePrice) + ' F</span> '
+                    + '<span style="color:#C9A84C;">' + fmt(data.new_price) + '</span>';
+                priceSpan.dataset.discounted = '1';
+            } else {
+                priceSpan.innerHTML = fmt(coursePrice) + ' F';
+                priceSpan.dataset.discounted = '';
+            }
+        })
+        .catch(() => {
+            priceSpan.innerHTML = fmt(coursePrice) + ' F';
+        });
+    }
+
+    // Pour chaque formulaire d'achat cours, lance la validation
+    function validateAll(code) {
+        let anyPreviewSet = false;
+        document.querySelectorAll('.js-paystack-form').forEach(function (form) {
+            const btn       = form.querySelector('.js-init-checkout');
+            const priceSpan = form.closest('.course-body')?.querySelector('.course-price');
+            if (!btn || !priceSpan) return;
+
+            if (code.length < 2) {
+                // Réinitialiser au prix original
+                const orig = parseInt(btn.dataset.coursePrice, 10);
+                if (orig) priceSpan.innerHTML = fmt(orig) + ' F';
+                return;
+            }
+            validateForCourse(code, btn, priceSpan);
+            anyPreviewSet = true;
+        });
+
+        if (preview) {
+            if (code.length < 2) {
+                preview.innerHTML = '';
+            } else if (!anyPreviewSet) {
+                preview.innerHTML = '';
+            }
+            // Le message global sera mis à jour lors du premier résultat de cours éligible
+        }
+    }
+
+    // Message global basé sur le résultat du premier cours
+    function setGlobalMessage(data, code) {
+        if (!preview) return;
+        if (!data) { preview.innerHTML = ''; return; }
+        if (data.applicable) {
+            preview.innerHTML = '<span style="color:#0FCFA4;">✅ Code valide — −'
+                + Math.round(data.discount_rate * 100) + '% sur les formations éligibles</span>';
+        } else if (data.reason === 'self_referral') {
+            preview.innerHTML = '<span style="color:#FFC850;">⚠️ ' + data.message + '</span>';
+        } else {
+            preview.innerHTML = '<span style="color:#FFC850;">⚠️ ' + (data.message || 'Code invalide ou non éligible.') + '</span>';
+        }
+    }
+
+    let timer;
+    function onCodeChange() {
+        const code = globalIn.value.trim().toUpperCase();
+        // Sync tous les champs hidden
+        document.querySelectorAll('.js-affiliate-code-hidden').forEach(h => { h.value = code; });
+
+        clearTimeout(timer);
+        timer = setTimeout(() => {
+            if (code.length < 2) { validateAll(''); setGlobalMessage(null, ''); return; }
+
+            // Validation globale basée sur le premier cours non acheté trouvé
+            const firstBtn = document.querySelector('.js-paystack-form .js-init-checkout');
+            if (firstBtn) {
+                fetch(VALIDATE, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': CSRF, 'Accept': 'application/json' },
+                    body: JSON.stringify({ code, product_type: 'course', product_id: parseInt(firstBtn.dataset.courseId, 10) }),
+                })
+                .then(r => r.json())
+                .then(data => {
+                    setGlobalMessage(data, code);
+                    validateAll(code); // mise à jour prix individuels
+                })
+                .catch(() => { setGlobalMessage(null, code); validateAll(code); });
+            } else {
+                validateAll(code);
+            }
+        }, 400);
+    }
+
+    globalIn.addEventListener('input', onCodeChange);
+    globalIn.addEventListener('blur',  onCodeChange);
+    if (globalIn.value.trim().length >= 2) onCodeChange();
+})();
+</script>
+@endauth
 @endpush

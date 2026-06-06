@@ -912,6 +912,52 @@
 </section>
 
 {{-- ══════════════════════════════════════
+     CTA AFFILIATION
+══════════════════════════════════════ --}}
+<section style="background:linear-gradient(135deg,#0C1120 0%,#060910 100%);border-top:1px solid rgba(201,168,76,.1);border-bottom:1px solid rgba(201,168,76,.1);padding:52px 0;">
+    <div class="container" style="max-width:1000px;">
+        <div class="row g-4 align-items-center cbr">
+            <div class="col-lg-7">
+                <p style="font-family:'Syne',sans-serif;font-size:11px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:#C9A84C;margin-bottom:10px;">Programme apporteur d'affaires</p>
+                <h2 style="font-family:'Playfair Display',serif;font-size:clamp(24px,4vw,36px);font-weight:900;color:#E8EAF0;line-height:1.2;margin-bottom:14px;">
+                    Gagnez <em style="color:#C9A84C;font-style:italic;">10%</em> en parrainant<br>vos contacts sur Coach BRVM
+                </h2>
+                <p style="font-size:14px;color:#6B7590;line-height:1.7;margin-bottom:24px;max-width:520px;">
+                    Partagez votre lien unique — vos contacts bénéficient de <strong style="color:#0FCFA4;">−10%</strong> à l'achat de formations et packs éligibles, et vous touchez <strong style="color:#C9A84C;">+10%</strong> de commission. Reversement dès 10 000 FCFA via mobile money.
+                </p>
+                <div class="d-flex flex-wrap gap-3">
+                    <a href="{{ route('affiliate.landing') }}"
+                       style="display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,#C9A84C,#9B6B15);color:#050810;text-decoration:none;font-family:'Syne',sans-serif;font-weight:800;font-size:12px;letter-spacing:.07em;text-transform:uppercase;padding:13px 24px;border-radius:3px;transition:all .3s;">
+                        🤝 Devenir apporteur d'affaires
+                    </a>
+                </div>
+            </div>
+            <div class="col-lg-5 cbr cbr2">
+                <div class="row g-3">
+                    <div class="col-6">
+                        <div style="background:#0C1120;border:1px solid rgba(201,168,76,.12);border-radius:4px;padding:18px;text-align:center;">
+                            <div style="font-family:'Playfair Display',serif;font-size:28px;font-weight:900;color:#C9A84C;">+10%</div>
+                            <div style="font-family:'Syne',sans-serif;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#6B7590;margin-top:4px;">Pour vous</div>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div style="background:#0C1120;border:1px solid rgba(15,207,164,.12);border-radius:4px;padding:18px;text-align:center;">
+                            <div style="font-family:'Playfair Display',serif;font-size:28px;font-weight:900;color:#0FCFA4;">−10%</div>
+                            <div style="font-family:'Syne',sans-serif;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#6B7590;margin-top:4px;">Pour l'acheteur</div>
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <div style="background:#0C1120;border:1px solid rgba(255,255,255,.06);border-radius:4px;padding:14px 16px;font-size:12px;color:#9AA3B8;line-height:1.7;">
+                            ✅ Lien + QR code uniques &nbsp;·&nbsp; ✅ Retrait mobile money &nbsp;·&nbsp; ✅ Tableau de bord dédié
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+{{-- ══════════════════════════════════════
      ANNONCES BRVM
 ══════════════════════════════════════ --}}
 <section class="cb-sec" style="background:#060910;">

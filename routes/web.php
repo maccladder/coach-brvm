@@ -942,4 +942,56 @@ Route::post('/bonus/claim', [\App\Http\Controllers\PhoneVerificationController::
     ->middleware('auth')
     ->name('bonus.claim');
 
+// ═══════════════════════════════════════════════════════
+// Affiliation / Apporteur d'affaires
+// ═══════════════════════════════════════════════════════
+
+// Route publique : pose le cookie d'attribution (sans auth)
+Route::get('/r/{code}', [\App\Http\Controllers\AffiliateController::class, 'redirect'])
+    ->name('affiliate.redirect');
+
+// Onboarding apporteur (auth requis)
+Route::middleware('auth')->group(function () {
+    Route::get('/devenir-apporteur',  [\App\Http\Controllers\AffiliateController::class, 'landing'])->name('affiliate.landing');
+    Route::post('/devenir-apporteur', [\App\Http\Controllers\AffiliateController::class, 'store'])->name('affiliate.store');
+
+    // Validation code en temps réel (endpoint JSON pour aperçu checkout)
+    Route::post('/apporteur/valider-code', [\App\Http\Controllers\AffiliateController::class, 'validateCode'])->name('affiliate.validate-code');
+});
+
+// Dashboard apporteur (auth + affiliate.active)
+Route::middleware(['auth', 'affiliate.active'])->prefix('apporteur')->name('affiliate.')->group(function () {
+    Route::get('/dashboard', [\App\Http\Controllers\AffiliateController::class, 'dashboard'])->name('dashboard');
+    Route::post('/reversements', [\App\Http\Controllers\AffiliatePayoutController::class, 'request'])->name('payout.request');
+});
+
+// ═══════════════════════════════════════════════════════
+// Admin — Affiliation (middleware auth, aligné sur l'existant)
+// ═══════════════════════════════════════════════════════
+
+// Routes admin affiliation — double protection : auth + admin.code
+// Ces routes contrôlent de l'argent (approbations, reversements, commissions).
+Route::middleware(['auth', 'admin.code'])->prefix('admin')->name('admin.')->group(function () {
+
+    // Apporteurs
+    Route::get('/affiliates',                         [\App\Http\Controllers\Admin\AffiliateAdminController::class, 'index'])       ->name('affiliates.index');
+    Route::post('/affiliates/{affiliate}/approve',    [\App\Http\Controllers\Admin\AffiliateAdminController::class, 'approve'])     ->name('affiliates.approve');
+    Route::post('/affiliates/{affiliate}/suspend',    [\App\Http\Controllers\Admin\AffiliateAdminController::class, 'suspend'])     ->name('affiliates.suspend');
+    Route::get('/affiliates/{affiliate}/commissions', [\App\Http\Controllers\Admin\AffiliateAdminController::class, 'commissions']) ->name('affiliates.commissions');
+
+    // Toggle éligibilité produits / cours
+    Route::patch('/marketplace/{product}/affiliate-toggle', [\App\Http\Controllers\Admin\AffiliateAdminController::class, 'toggleProduct'])->name('affiliates.toggle-product');
+    Route::patch('/courses/{course}/affiliate-toggle',      [\App\Http\Controllers\Admin\AffiliateAdminController::class, 'toggleCourse'])  ->name('affiliates.toggle-course');
+
+    // Reversements apporteurs
+    Route::get('/affiliate-payouts',                                              [\App\Http\Controllers\Admin\AffiliatePayoutAdminController::class, 'index'])           ->name('affiliate-payouts.index');
+    Route::post('/affiliate-payouts/{payout}/approve',                            [\App\Http\Controllers\Admin\AffiliatePayoutAdminController::class, 'approve'])         ->name('affiliate-payouts.approve');
+    Route::post('/affiliate-payouts/{payout}/reject',                             [\App\Http\Controllers\Admin\AffiliatePayoutAdminController::class, 'reject'])          ->name('affiliate-payouts.reject');
+    Route::post('/affiliate-payouts/{payout}/paid',                               [\App\Http\Controllers\Admin\AffiliatePayoutAdminController::class, 'markPaid'])        ->name('affiliate-payouts.paid');
+    Route::get('/affiliate-payouts/{payout}/receipt',                             [\App\Http\Controllers\Admin\AffiliatePayoutAdminController::class, 'downloadReceipt']) ->name('affiliate-payouts.receipt');
+
+    // Annulation manuelle commission
+    Route::post('/affiliate-payouts/commissions/{commission}/cancel', [\App\Http\Controllers\Admin\AffiliatePayoutAdminController::class, 'cancelCommission'])->name('affiliate-payouts.cancel-commission');
+});
+
 require __DIR__.'/auth.php';

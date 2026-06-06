@@ -4,6 +4,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ config('app.name', 'Coach BRVM') }}</title>
 
     @stack('meta')
@@ -386,6 +387,16 @@
                                 $viewMode = session('view_mode', 'user');
                             @endphp
                             <li><hr class="dropdown-divider"></li>
+                            @php $isAffiliate = (bool)(auth()->user()->is_affiliate ?? false); @endphp
+                            @if(!$isAffiliate)
+                                <li>
+                                    <a class="dropdown-item" href="{{ route('affiliate.landing') }}">🤝 Devenir apporteur d'affaires</a>
+                                </li>
+                            @else
+                                <li>
+                                    <a class="dropdown-item" href="{{ route('affiliate.dashboard') }}">🤝 Mon espace apporteur</a>
+                                </li>
+                            @endif
                             @if(!$isVendor)
                                 <li>
                                     <form method="POST" action="{{ route('vendor.become') }}">

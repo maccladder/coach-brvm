@@ -31,6 +31,8 @@ class User extends Authenticatable
         'phone_verified_at',
         'phone_reward_claimed',
         'wallet_bonus_claimed_at',
+        'is_affiliate',
+        'affiliate_status',
     ];
 
     public function sendPasswordResetNotification($token): void
@@ -94,6 +96,11 @@ public function adminGrants(): HasMany
     return $this->hasMany(AdminGrant::class);
 }
 
+public function affiliate()
+{
+    return $this->hasOne(\App\Models\Affiliate::class);
+}
+
 /**
  * Vérifie si cet utilisateur a accès à un item via un AdminGrant actif.
  * Accepte un modèle Eloquent (Course, MarketplaceProduct, Document…)
@@ -137,6 +144,7 @@ public function hasAccessTo(mixed $grantable): bool
             'phone_verified_at'       => 'datetime',
             'phone_reward_claimed'    => 'boolean',
             'wallet_bonus_claimed_at' => 'datetime',
+            'is_affiliate'            => 'boolean',
         ];
     }
 }

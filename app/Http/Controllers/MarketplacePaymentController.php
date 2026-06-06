@@ -7,6 +7,7 @@ use App\Models\MarketplaceProduct;
 use App\Models\Payment;
 use App\Models\User;
 use App\Notifications\VendorPaymentReceivedNotification;
+use App\Services\Affiliate\AffiliateCommissionService;
 use App\Services\CinetpayService;
 use App\Services\PaystackService;
 use Illuminate\Http\Request;
@@ -335,7 +336,7 @@ class MarketplacePaymentController extends Controller
     // PAYSTACK (ton code)
     // =======================
 
-    public function buyPaystack(Request $request, MarketplaceProduct $product, PaystackService $paystack)
+    public function buyPaystack(Request $request, MarketplaceProduct $product, PaystackService $paystack, AffiliateCommissionService $affiliateService)
     {
         $user = $request->user();
 
@@ -350,13 +351,24 @@ class MarketplacePaymentController extends Controller
                 ->with('success', '✅ Produit déjà acheté. Tu peux le télécharger / regarder.');
         }
 
+        // ── Résolution code apporteur + remise éventuelle ─────────────────────
+        $checkout = $affiliateService->resolveForCheckout($request, 'marketplace', $product->id, (int) $product->price);
+
+        if ($checkout['warning']) {
+            return back()->withInput()->with('warning', $checkout['warning']);
+        }
+
+        $amountToPay   = $checkout['amount'];
+        $affiliateCode = $checkout['code'];
+        // ─────────────────────────────────────────────────────────────────────
+
         $transactionId = 'MP-' . now()->format('YmdHis') . '-' . Str::upper(Str::random(6));
 
         DB::table('marketplace_purchases')->updateOrInsert(
             ['user_id' => $user->id, 'product_id' => $product->id],
             [
                 'status'        => 'pending',
-                'amount'        => (int) $product->price,
+                'amount'        => $amountToPay,  // montant remisé stocké dans la purchase
                 'provider'      => 'paystack',
                 'provider_ref'  => $transactionId,
                 'paid_at'       => null,
@@ -368,13 +380,15 @@ class MarketplacePaymentController extends Controller
         Payment::updateOrCreate(
             ['transaction_id' => $transactionId],
             [
-                'user_id'         => $user->id,
-                'amount_paid'     => (int) $product->price,
-                'amount_virtual'  => 0,
-                'purpose'         => 'marketplace',
-                'status'          => 'pending',
-                'credited_at'     => null,
-                'meta'            => [
+                'user_id'               => $user->id,
+                'amount_paid'           => $amountToPay,  // R7 : montant remisé = référence de vérification
+                'amount_virtual'        => 0,
+                'purpose'               => 'marketplace',
+                'status'                => 'pending',
+                'credited_at'           => null,
+                'affiliate_code'        => $affiliateCode,
+                'affiliate_base_amount' => $affiliateCode ? (int) $product->price : null,
+                'meta'                  => [
                     'product_id'    => $product->id,
                     'product_slug'  => $product->slug,
                     'product_title' => $product->title,
@@ -387,7 +401,7 @@ class MarketplacePaymentController extends Controller
 
         $authUrl = $paystack->initialize([
             'email'        => $user->email,
-            'amount'       => (int) $product->price,
+            'amount'       => $amountToPay,  // R7 : Paystack reçoit le montant remisé
             'currency'     => 'XOF',
             'reference'    => $transactionId,
             'callback_url' => $callbackUrl,
@@ -411,7 +425,7 @@ class MarketplacePaymentController extends Controller
         return redirect()->away($authUrl);
     }
 
-    public function paystackCallback(Request $request, PaystackService $paystack)
+    public function paystackCallback(Request $request, PaystackService $paystack, AffiliateCommissionService $affiliateService)
     {
         $reference = (string) ($request->query('reference') ?: $request->query('trxref'));
 
@@ -510,6 +524,20 @@ class MarketplacePaymentController extends Controller
         // ✅ notif vendeur + notif admin
         $this->notifyVendorPayment($reference);
         $this->notifyAdminPayment($reference);
+
+        // Commission affiliation — hors transaction, idempotente (UNIQUE payment_id)
+        try {
+            $payment->refresh(); // relit l'état post-transaction
+            if ($payment->credited_at) {
+                $affiliateService->tryCreateCommission($payment);
+            }
+        } catch (\Throwable $e) {
+            Log::error('Marketplace paystackCallback: affiliateCommission error', [
+                'reference'  => $reference,
+                'payment_id' => $payment->id,
+                'error'      => $e->getMessage(),
+            ]);
+        }
 
         // ✅ SPECIAL FLOW (PAYSTACK ONLY): software du vendeur particulier (ID=59)
         $specialVendorId = 59;
