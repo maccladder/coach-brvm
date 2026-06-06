@@ -8,9 +8,9 @@ return [
     | (même liste que le reste de la codebase — peut être surchargée via .env)
     |--------------------------------------------------------------------------
     */
-    'admin_emails' => array_filter(
-        explode(',', env('ADMIN_EMAILS', 'maccladder@gmail.com,ghislainkouadiodjaha@gmail.com'))
-    ),
+    'admin_emails' => array_values(array_filter(
+        array_map('trim', explode(',', env('ADMIN_EMAILS', 'maccladder@gmail.com,coachbrvm@gmail.com')))
+    )),
 
     /*
     |--------------------------------------------------------------------------
