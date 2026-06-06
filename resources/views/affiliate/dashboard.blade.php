@@ -79,6 +79,21 @@
     .af-shortcut-label { font-family:'Syne',sans-serif; font-size:12px; font-weight:600; color:#E8EAF0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:240px; }
     .af-shortcut-url { font-size:10px; color:#6B7590; word-break:break-all; flex:1; min-width:0; }
     .af-shortcut-actions { display:flex; gap:6px; align-items:center; flex-wrap:wrap; }
+
+    /* Accordéon FAQ */
+    .af-faq-item { border-bottom:1px solid rgba(255,255,255,.05); }
+    .af-faq-item:last-child { border-bottom:none; }
+    .af-faq-trigger { width:100%; background:transparent; border:none; text-align:left; padding:16px 20px; display:flex; align-items:center; gap:14px; cursor:pointer; transition:background .2s; }
+    .af-faq-trigger:hover { background:rgba(201,168,76,.03); }
+    .af-faq-trigger:focus-visible { outline:2px solid rgba(201,168,76,.4); outline-offset:-2px; }
+    .af-faq-num { font-family:'Playfair Display',serif; font-size:17px; font-weight:900; color:#C9A84C; min-width:22px; flex-shrink:0; }
+    .af-faq-q { font-family:'Syne',sans-serif; font-size:13px; font-weight:700; color:#E8EAF0; flex:1; }
+    .af-faq-icon { font-size:22px; font-weight:300; color:#C9A84C; line-height:1; transition:transform .3s cubic-bezier(.16,1,.3,1); flex-shrink:0; }
+    .af-faq-trigger[aria-expanded="true"] .af-faq-icon { transform:rotate(45deg); }
+    .af-faq-trigger[aria-expanded="true"] .af-faq-q { color:#C9A84C; }
+    .af-faq-body { overflow:hidden; max-height:0; transition:max-height .38s cubic-bezier(.16,1,.3,1); }
+    .af-faq-body.open { max-height:240px; }
+    .af-faq-body p { font-family:'DM Sans',sans-serif; font-size:13.5px; color:#9AA3B8; line-height:1.75; margin:0; padding:0 20px 18px calc(20px + 22px + 14px); }
 </style>
 @endpush
 
@@ -438,6 +453,93 @@
             @endif
         </div>
 
+        {{-- Accordéon : Comment ça marche ? --}}
+        <div class="af-section cbr cbr4">
+            <div class="af-section-header">
+                <div class="af-section-title">❓ Comment ça marche ?</div>
+            </div>
+            <div style="padding:8px 0;">
+
+                <div class="af-faq-item">
+                    <button class="af-faq-trigger" aria-expanded="false" onclick="afFaqToggle(this)">
+                        <span class="af-faq-num">1</span>
+                        <span class="af-faq-q">Le principe</span>
+                        <span class="af-faq-icon">+</span>
+                    </button>
+                    <div class="af-faq-body">
+                        <p>Tu gagnes 10% de commission sur chaque vente réalisée via ton lien, et l'acheteur bénéficie de 10% de remise. Gagnant-gagnant.</p>
+                    </div>
+                </div>
+
+                <div class="af-faq-item">
+                    <button class="af-faq-trigger" aria-expanded="false" onclick="afFaqToggle(this)">
+                        <span class="af-faq-num">2</span>
+                        <span class="af-faq-q">Ton lien et ton code</span>
+                        <span class="af-faq-icon">+</span>
+                    </button>
+                    <div class="af-faq-body">
+                        <p>Partage ton lien /r/TONCODE ou donne ton code au moment de l'achat. Tu as aussi des raccourcis pour parrainer un produit précis (Pack, formation…) qui amènent directement sur la bonne page.</p>
+                    </div>
+                </div>
+
+                <div class="af-faq-item">
+                    <button class="af-faq-trigger" aria-expanded="false" onclick="afFaqToggle(this)">
+                        <span class="af-faq-num">3</span>
+                        <span class="af-faq-q">Produits éligibles</span>
+                        <span class="af-faq-icon">+</span>
+                    </button>
+                    <div class="af-faq-body">
+                        <p>Le Pack BRVM, les formations et les produits Coach BRVM. Les produits de vendeurs tiers ne donnent pas de commission.</p>
+                    </div>
+                </div>
+
+                <div class="af-faq-item">
+                    <button class="af-faq-trigger" aria-expanded="false" onclick="afFaqToggle(this)">
+                        <span class="af-faq-num">4</span>
+                        <span class="af-faq-q">Comment une commission est créée</span>
+                        <span class="af-faq-icon">+</span>
+                    </button>
+                    <div class="af-faq-body">
+                        <p>Dès qu'une personne achète un produit éligible via ton lien ou ton code (et que ce n'est pas toi-même), une commission de 10% est créée automatiquement.</p>
+                    </div>
+                </div>
+
+                <div class="af-faq-item">
+                    <button class="af-faq-trigger" aria-expanded="false" onclick="afFaqToggle(this)">
+                        <span class="af-faq-num">5</span>
+                        <span class="af-faq-q">Le délai de 10 jours</span>
+                        <span class="af-faq-icon">+</span>
+                    </button>
+                    <div class="af-faq-body">
+                        <p>Une nouvelle commission est d'abord « en attente » pendant 10 jours, puis devient « disponible » (retirable). Ce délai correspond au temps de règlement des paiements.</p>
+                    </div>
+                </div>
+
+                <div class="af-faq-item">
+                    <button class="af-faq-trigger" aria-expanded="false" onclick="afFaqToggle(this)">
+                        <span class="af-faq-num">6</span>
+                        <span class="af-faq-q">Retirer tes gains</span>
+                        <span class="af-faq-icon">+</span>
+                    </button>
+                    <div class="af-faq-body">
+                        <p>Dès que ton solde disponible atteint 10 000 FCFA, demande un reversement par mobile money (Wave, Orange Money, MTN, Moov). L'équipe valide, effectue le paiement, et ton solde est débité.</p>
+                    </div>
+                </div>
+
+                <div class="af-faq-item">
+                    <button class="af-faq-trigger" aria-expanded="false" onclick="afFaqToggle(this)">
+                        <span class="af-faq-num">7</span>
+                        <span class="af-faq-q">Bon à savoir</span>
+                        <span class="af-faq-icon">+</span>
+                    </button>
+                    <div class="af-faq-body">
+                        <p>Tu ne peux pas utiliser ton propre code pour tes propres achats (pas d'autoparrainage).</p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
     </div>
 </div>
 @endsection
@@ -453,6 +555,14 @@
         }).catch(() => {
             prompt('Copie manuelle :', text);
         });
+    }
+
+    // Accordéon FAQ
+    function afFaqToggle(btn) {
+        const body = btn.nextElementSibling;
+        const open = btn.getAttribute('aria-expanded') === 'true';
+        btn.setAttribute('aria-expanded', String(!open));
+        body.classList.toggle('open', !open);
     }
 
     // Animations entrée
