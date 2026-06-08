@@ -1,0 +1,105 @@
+@verbatim
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Maintenance en cours</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600&family=Syne:wght@600;800&family=DM+Sans:opsz,wght@9..40,400;9..40,500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0a0e14;
+    --bg2:#121826;
+    --gold:#C9A84C;
+    --emerald:#0FCFA4;
+    --text:#E8E6DF;
+    --muted:#9aa3b2;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    font-family:"DM Sans",sans-serif;
+    background:radial-gradient(120% 120% at 50% 0%, var(--bg2) 0%, var(--bg) 55%);
+    color:var(--text);
+    min-height:100vh;
+    display:flex;align-items:center;justify-content:center;
+    padding:24px;
+    position:relative;overflow:hidden;
+  }
+  /* subtle grain + glow */
+  body::before{
+    content:"";position:absolute;inset:0;
+    background:
+      radial-gradient(40% 35% at 50% 12%, rgba(201,168,76,.10), transparent 70%),
+      radial-gradient(50% 40% at 50% 100%, rgba(15,207,164,.08), transparent 70%);
+    pointer-events:none;
+  }
+  .card{
+    position:relative;z-index:1;
+    max-width:540px;width:100%;text-align:center;
+    background:rgba(18,24,38,.55);
+    border:1px solid rgba(201,168,76,.18);
+    border-radius:22px;
+    padding:48px 36px;
+    backdrop-filter:blur(8px);
+    box-shadow:0 24px 70px rgba(0,0,0,.45);
+    animation:rise .9s cubic-bezier(.2,.8,.2,1) both;
+  }
+  @keyframes rise{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+  .mark{
+    font-family:"Syne",sans-serif;font-weight:800;
+    letter-spacing:.18em;font-size:14px;text-transform:uppercase;
+    color:var(--gold);margin-bottom:6px;
+    animation:rise .9s .05s both;
+  }
+  .dot{display:inline-block;width:7px;height:7px;border-radius:50%;
+    background:var(--emerald);margin-left:8px;vertical-align:middle;
+    box-shadow:0 0 0 0 rgba(15,207,164,.6);animation:pulse 2s infinite}
+  @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(15,207,164,.5)}70%{box-shadow:0 0 0 10px rgba(15,207,164,0)}100%{box-shadow:0 0 0 0 rgba(15,207,164,0)}}
+  h1{
+    font-family:"Playfair Display",serif;font-weight:600;
+    font-size:clamp(28px,6vw,40px);line-height:1.15;
+    margin:18px 0 8px;animation:rise .9s .12s both;
+  }
+  h1 em{font-style:italic;color:var(--gold)}
+  p{color:var(--muted);font-size:16px;line-height:1.7;margin:14px auto;max-width:420px;animation:rise .9s .2s both}
+  .keep{color:var(--text)}
+  .divider{width:54px;height:2px;margin:26px auto;border-radius:2px;
+    background:linear-gradient(90deg,var(--gold),var(--emerald));animation:rise .9s .26s both}
+  .btn{
+    display:inline-flex;align-items:center;gap:10px;
+    margin-top:8px;padding:14px 26px;border-radius:999px;
+    background:var(--emerald);color:#05221c;font-weight:500;
+    font-family:"DM Sans",sans-serif;font-size:15px;text-decoration:none;
+    transition:transform .2s ease, box-shadow .2s ease;
+    box-shadow:0 10px 30px rgba(15,207,164,.25);
+    animation:rise .9s .32s both;
+  }
+  .btn:hover{transform:translateY(-2px);box-shadow:0 14px 38px rgba(15,207,164,.35)}
+  .btn svg{width:18px;height:18px;fill:#05221c}
+  .foot{margin-top:30px;font-size:12.5px;color:rgba(154,163,178,.7);animation:rise .9s .38s both}
+</style>
+</head>
+<body>
+  <main class="card">
+    <div class="mark">Coach BRVM<span class="dot"></span></div>
+    <h1>Maintenance &amp; <em>mise à jour</em> en cours</h1>
+    <p>Notre plateforme est momentanément indisponible le temps d'une opération de maintenance technique et de vérifications internes.</p>
+    <p class="keep">Vos comptes et vos accès restent entièrement préservés.</p>
+    <div class="divider"></div>
+    <p>Nous revenons très prochainement avec une expérience améliorée. Merci de votre confiance et de votre patience.</p>
+    <p class="keep">Une question ou besoin d'informations ? Notre équipe reste à votre écoute.</p>
+    <!-- Numéro WhatsApp support : +225 0574023351 -->
+    <a class="btn" href="https://wa.me/2250574023351?text=Bonjour%2C%20je%20souhaite%20avoir%20plus%20d%27informations." target="_blank" rel="noopener">
+      <svg viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163a11.867 11.867 0 0 1-1.587-5.946C.16 5.335 5.495 0 12.05 0a11.817 11.817 0 0 1 8.413 3.488 11.824 11.824 0 0 1 3.48 8.414c-.003 6.557-5.338 11.892-11.893 11.892a11.9 11.9 0 0 1-5.688-1.448L.057 24zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884a9.86 9.86 0 0 0 1.51 5.26l-.999 3.648 3.978-.607zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.074-.149-.668-1.612-.916-2.207-.241-.579-.486-.5-.668-.51l-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.095 3.2 5.076 4.487.71.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413z"/></svg>
+      Nous écrire sur WhatsApp
+    </a>
+    <div class="foot">© <span id="y"></span> Coach BRVM — Tous droits réservés</div>
+  </main>
+  <script>document.getElementById('y').textContent=new Date().getFullYear();</script>
+</body>
+</html>
+@endverbatim
