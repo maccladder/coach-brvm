@@ -894,7 +894,7 @@
                 <div class="cb-callout h-100 d-flex justify-content-between align-items-center gap-3 flex-wrap" style="border-color:rgba(201,168,76,.18);">
                     <div>
                         <div class="cb-callout-title">💬 Forum communautaire</div>
-                        <div class="cb-callout-desc">Échangez avec les autres investisseurs BRVM — analyses, questions, actualités et expériences partagées.</div>
+                        <div class="cb-callout-desc">Échangez avec les autres investisseurs — analyses, questions, actualités et expériences partagées.</div>
                     </div>
                     <a href="{{ route('forum.index') }}" class="cb-cta-primary" style="white-space:nowrap;">Rejoindre →</a>
                 </div>
@@ -903,7 +903,7 @@
                 <div class="cb-callout h-100 d-flex justify-content-between align-items-center gap-3 flex-wrap">
                     <div>
                         <div class="cb-callout-title">📚 Mini-cours en livre</div>
-                        <div class="cb-callout-desc">Apprends des notions BRVM rapidement, page par page, comme un vrai livre.</div>
+                        <div class="cb-callout-desc">Apprends des notions de bourse rapidement, page par page, comme un vrai livre.</div>
                     </div>
                     <a href="{{ route('books.index') }}" class="cb-cta-green" style="white-space:nowrap;">Ouvrir →</a>
                 </div>
@@ -966,7 +966,7 @@
         <div class="cbr d-flex justify-content-between align-items-end flex-wrap gap-3 mb-4">
             <div>
                 <p class="cb-sec-tag">Annonces récentes</p>
-                <h2 class="cb-sec-title" style="margin-bottom:0;">Toute l'info BRVM, <em>en temps réel</em></h2>
+                <h2 class="cb-sec-title" style="margin-bottom:0;">Toute l'info du marché, <em>en temps réel</em></h2>
             </div>
             <a href="{{ route('announcements.index') }}" class="cb-cta-outline">Voir tout →</a>
         </div>
@@ -990,7 +990,7 @@
             @empty
                 <div class="col-12">
                     <div style="background:rgba(201,168,76,.04);border:1px solid rgba(201,168,76,.1);border-radius:4px;padding:24px;font-size:14px;color:#6B7590;">
-                        Aucune annonce pour le moment. Les communiqués BRVM apparaîtront ici dès publication.
+                        Aucune annonce pour le moment. Les communiqués du marché apparaîtront ici dès publication.
                     </div>
                 </div>
             @endforelse
@@ -1017,7 +1017,7 @@
             <div class="cb-how-step">
                 <div class="cb-how-n">02</div>
                 <h3 class="cb-how-title">Explorer le marché</h3>
-                <p class="cb-how-desc">Radar 7 jours, annonces, chocs de marché — tous les outils gratuits pour suivre la BRVM en continu.</p>
+                <p class="cb-how-desc">Radar 7 jours, annonces, chocs de marché — tous les outils gratuits pour suivre la bourse en continu.</p>
             </div>
             <div class="cb-how-step">
                 <div class="cb-how-n">03</div>
@@ -1084,7 +1084,7 @@
                     <div class="cb-price-num" style="font-size:24px;color:#0FCFA4;">Mobile <span>Money</span></div>
                     <p class="cb-price-desc">PDF, vidéos, logiciels — achat instantané.</p>
                     <ul class="cb-price-features">
-                        <li>Livres PDF thématiques BRVM</li>
+                        <li>Livres PDF thématiques bourse</li>
                         <li>Vidéos de formation</li>
                         <li>Logiciels & outils pratiques</li>
                         <li>Accès immédiat après paiement</li>
@@ -1118,7 +1118,7 @@
                 <div style="background:#121A2C;border:1px solid rgba(201,168,76,.12);border-radius:4px;padding:28px;">
                     <p style="font-family:'Syne',sans-serif;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#6B7590;margin-bottom:10px;">Exemple de formation</p>
                     <h4 style="font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:#E8EAF0;margin-bottom:10px;">
-                        « Investir à la BRVM – Guide du débutant »
+                        « Investir en bourse – Guide du débutant »
                     </h4>
                     <p style="font-size:13px;color:#6B7590;line-height:1.65;margin-bottom:18px;">
                         Comprendre les bases de la bourse régionale, ouvrir un compte-titres, placer tes premiers ordres en limitant les erreurs classiques.
@@ -1232,7 +1232,7 @@
                     <div style="font-size:36px; margin-bottom:16px;">🎓</div>
                     <p style="font-family:'Syne',sans-serif;font-size:10px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:#C9A84C;margin-bottom:10px;">Formation en présentiel</p>
                     <h3 style="font-family:'Playfair Display',serif;font-size:clamp(18px,2.5vw,24px);font-weight:700;color:#E8EAF0;line-height:1.25;margin-bottom:12px;">
-                        Maîtrisez la BRVM avec une formation en présentiel
+                        Maîtrisez la bourse avec une formation en présentiel
                     </h3>
                     <p style="font-size:14px;color:#6B7590;line-height:1.75;margin-bottom:24px;flex-grow:1;">
                         Sessions animées par des experts, adaptées à tous les niveaux — du débutant à l'investisseur confirmé.
@@ -1266,7 +1266,7 @@
 
             <div class="col-lg-5 cbr">
                 <p class="cb-sec-tag">Forum</p>
-                <h2 class="cb-sec-title">La communauté des <em>investisseurs BRVM</em></h2>
+                <h2 class="cb-sec-title">La communauté des <em>investisseurs</em></h2>
                 <div class="cb-divider"></div>
                 <p style="font-size:15px;color:#6B7590;line-height:1.75;font-weight:300;margin-bottom:28px;">
                     Échangez, posez vos questions, partagez vos analyses avec une communauté d'investisseurs passionnés.
@@ -1312,7 +1312,7 @@
                         onmouseover="this.style.borderColor='rgba(201,168,76,.3)';this.style.transform='translateY(-3px)'"
                         onmouseout="this.style.borderColor='rgba(201,168,76,.1)';this.style.transform=''">
                             <div style="font-size:24px;margin-bottom:10px;">📰</div>
-                            <div style="font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:#E8EAF0;margin-bottom:4px;">Actualités BRVM</div>
+                            <div style="font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:#E8EAF0;margin-bottom:4px;">Actualités marché</div>
                             <div style="font-size:12px;color:#6B7590;line-height:1.5;">Infos, événements, nouvelles du marché</div>
                         </a>
                     </div>
@@ -1350,7 +1350,7 @@
             </div>
 
             <h2 style="font-family:'Playfair Display',serif; font-size:clamp(26px,4vw,38px); font-weight:700; color:#E8EAF0; margin:0 0 14px;" class="cbr cbr2">
-                Tu es à l'étranger et tu veux<br>investir à la <span style="color:#25D366;">BRVM</span> ?
+                Tu es à l'étranger et tu veux<br>investir dans la <span style="color:#25D366;">bourse ouest-africaine</span> ?
             </h2>
 
             <p style="font-size:clamp(14px,2vw,16px); color:#6B7590; line-height:1.85; max-width:600px; margin:0 auto 28px;" class="cbr">
@@ -1363,7 +1363,7 @@
                 <div style="background:rgba(255,255,255,.04); border:1px solid rgba(37,211,102,.12); border-radius:6px; padding:14px 20px; text-align:left; min-width:220px; flex:1; max-width:280px;">
                     <div style="font-size:20px; margin-bottom:6px;">🌍</div>
                     <div style="font-family:'Syne',sans-serif; font-size:11px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:#25D366; margin-bottom:4px;">Qui peut en bénéficier</div>
-                    <p style="font-size:13px; color:#9BA3B8; margin:0; line-height:1.65;">Diaspora africaine, Européens, Américains... Toute personne hors UEMOA souhaitant investir à la BRVM.</p>
+                    <p style="font-size:13px; color:#9BA3B8; margin:0; line-height:1.65;">Diaspora africaine, Européens, Américains... Toute personne hors UEMOA souhaitant investir dans la bourse ouest-africaine.</p>
                 </div>
                 <div style="background:rgba(255,255,255,.04); border:1px solid rgba(37,211,102,.12); border-radius:6px; padding:14px 20px; text-align:left; min-width:220px; flex:1; max-width:280px;">
                     <div style="font-size:20px; margin-bottom:6px;">📋</div>
