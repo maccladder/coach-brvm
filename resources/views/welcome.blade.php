@@ -757,7 +757,7 @@
                     </h2>
                     <p style="font-size:15px;color:#6B7590;line-height:1.75;max-width:520px;font-weight:300;margin-bottom:0;">
                         PDF, études de marché, logiciels, vidéos, jeux éducatifs —
-                        des ressources sélectionnées pour <strong style="color:#E8EAF0;font-weight:500;">investir mieux à la BRVM</strong>.
+                        des ressources sélectionnées pour votre <strong style="color:#E8EAF0;font-weight:500;">éducation financière et développement personnel</strong>.
                     </p>
                 </div>
                 <div class="col-lg-4 d-flex flex-column flex-sm-row flex-lg-column gap-2 align-items-start align-items-lg-end">
