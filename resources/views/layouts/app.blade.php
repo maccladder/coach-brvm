@@ -267,7 +267,7 @@
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">Apprendre</a>
                     <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="{{ route('formations.brvm') }}">🎓 Formations BRVM</a></li>
+                        <li><a class="dropdown-item" href="{{ route('formations.brvm') }}">🎓 Formations en ligne</a></li>
                         <li><a class="dropdown-item" href="{{ route('books.index') }}">📚 Livres instructifs</a></li>
                         <li>
                             <a class="dropdown-item d-flex justify-content-between align-items-center" href="{{ route('marketplace.index') }}">

@@ -55,7 +55,7 @@
     <div class="form-hero">
         <div class="form-hero-grid"></div>
         <div class="container" style="max-width:1100px;position:relative;z-index:1;">
-            <p class="form-hero-tag">Formations BRVM</p>
+            <p class="form-hero-tag">Formations en ligne</p>
             <h1 class="form-hero-title">🎓 Monte en niveau, <em>à ton rythme</em></h1>
             <p style="font-size:14px;color:#6B7590;font-weight:300;max-width:520px;">Cours débutant, intermédiaire, pratique — disponibles 24h/24, à vie une fois achetés.</p>
         </div>
