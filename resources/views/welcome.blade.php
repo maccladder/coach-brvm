@@ -600,17 +600,16 @@
             <div class="col-lg-7">
                 <div class="cb-hero-badge">
                     <span class="cb-hero-badge-dot"></span>
-                    BOURSE RÉGIONALE · ACCÈS OUVERT
+                    ÉDUCATION FINANCIÈRE · POUR TOUS
                 </div>
 
                 <p style="font-family:'Syne',sans-serif;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:#C9A84C;margin-bottom:16px;">
-                    Investisseurs d'Afrique de l'Ouest
+                    Plateforme d'éducation financière
                 </p>
 
                 <h1 class="cb-hero-title">
-                    Investir dans la bourse de<br>
-                    <span class="gold">l'Afrique de l'Ouest</span><br>
-                    devient plus intelligent
+                    S'éduquer aujourd'hui,<br>
+                    <span class="gold">prospérer</span> demain.
                 </h1>
 
                 <p class="cb-hero-tag">
@@ -620,9 +619,11 @@
                 </p>
 
                 <p class="cb-hero-desc">
-                    Boursiv réunit tout le <strong>marché régional</strong> au même endroit :
-                    annonces, radar marché, annuaires, formations, portefeuille virtuel
-                    et marketplace.
+                    Boursiv est une plateforme d'éducation financière multiservice : formations à la bourse,
+                    analyses du marché régional, portefeuille virtuel pour s'entraîner sans risque, et une
+                    <strong>marketplace de produits variés</strong> (cours, e-books, outils, logiciels —
+                    et même des jeux pour se détendre).<br>
+                    Parce que <strong>l'avenir appartient à ceux qui se forment.</strong>
                 </p>
 
                 <div class="d-flex flex-wrap gap-2 mb-4">
@@ -731,6 +732,44 @@
         </div>
     </div>
 </div>
+
+{{-- ══════════════════════════════════════
+     PILIERS
+══════════════════════════════════════ --}}
+<section class="cb-sec" style="background:#060910;">
+    <div class="container" style="max-width:1100px;">
+        <p class="cb-sec-tag" style="justify-content:center;">Ce que Boursiv te propose</p>
+        <h2 class="cb-sec-title" style="text-align:center;">
+            Tout ce dont tu as besoin<br><em>pour te former et progresser</em>
+        </h2>
+        <div class="cb-feature-grid cbr">
+            <a href="{{ route('formations.brvm') }}" class="cb-feature-card" style="text-decoration:none;">
+                <span class="cb-feature-num">01</span>
+                <span class="cb-feature-emoji">🎓</span>
+                <div class="cb-feature-title">Apprendre</div>
+                <div class="cb-feature-desc">Formations vidéo débutant → intermédiaire, mini-cours en livre, ressources pédagogiques à ton rythme.</div>
+            </a>
+            <a href="{{ route('wallet.index') }}" class="cb-feature-card" style="text-decoration:none;">
+                <span class="cb-feature-num">02</span>
+                <span class="cb-feature-emoji">💼</span>
+                <div class="cb-feature-title">S'entraîner</div>
+                <div class="cb-feature-desc">Portefeuille virtuel sans risque, radar marché 7 jours, chocs de marché — pratique avant d'investir réel.</div>
+            </a>
+            <a href="{{ route('marketplace.index') }}" class="cb-feature-card" style="text-decoration:none;">
+                <span class="cb-feature-num">03</span>
+                <span class="cb-feature-emoji">🛍️</span>
+                <div class="cb-feature-title">Échanger</div>
+                <div class="cb-feature-desc">Marketplace ouverte : cours, e-books, logiciels, outils, jeux éducatifs — achetez et vendez entre membres.</div>
+            </a>
+            <a href="{{ route('announcements.index') }}" class="cb-feature-card" style="text-decoration:none;">
+                <span class="cb-feature-num">04</span>
+                <span class="cb-feature-emoji">📊</span>
+                <div class="cb-feature-title">Comprendre le marché</div>
+                <div class="cb-feature-desc">Annonces du marché, analyses IA des BOC, états financiers décryptés — toute l'info accessible.</div>
+            </a>
+        </div>
+    </div>
+</section>
 
 {{-- ══════════════════════════════════════
      MARKETPLACE BANNER
@@ -1423,6 +1462,17 @@
         </p>
     </div>
 </section>
+
+{{-- ══════════════════════════════════════
+     BANDE INDÉPENDANCE & TRANSPARENCE
+══════════════════════════════════════ --}}
+<div style="background:#060910;border-top:1px solid rgba(255,255,255,.05);padding:28px 0;">
+    <div class="container" style="max-width:860px;text-align:center;">
+        <p style="font-size:12px;color:#4A5068;line-height:1.85;font-weight:300;">
+            Boursiv est une plateforme indépendante d'éducation financière. Elle n'est pas affiliée à la BRVM ni à aucune autorité, bourse ou société de gestion. Les formations et contenus sont proposés à but pédagogique par un investisseur autonome partageant son expérience et ses méthodes personnelles ; ils ne constituent pas un conseil en investissement.
+        </p>
+    </div>
+</div>
 
 {{-- ══════════════════════════════════════
      FOOTER

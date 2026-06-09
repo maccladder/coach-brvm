@@ -155,6 +155,17 @@
             .cb-navbar .dropdown-menu { background:var(--cb-dark3); border:none; border-left:2px solid var(--cb-border); border-radius:0; margin-left:8px; padding:4px 0; }
             .cb-navbar .nav-link::after { display:none; }
             .cb-navbar .nav-link { padding:12px 16px !important; }
+            .cb-navbar .cb-account-menu {
+                position: static !important;
+                transform: none !important;
+                inset: auto !important;
+                width: auto;
+                max-width: 100%;
+                max-height: none;
+                box-shadow: none;
+                border-left: none;
+                margin-left: 0;
+            }
         }
         @media (max-width:576px) {
             .cb-notif-menu { width:calc(100vw - 24px) !important; max-width:calc(100vw - 24px) !important; }
@@ -370,7 +381,7 @@
                         <button class="cb-user-btn dropdown-toggle" type="button" data-bs-toggle="dropdown">
                             👤 {{ Auth::user()->name }}
                         </button>
-                        <ul class="dropdown-menu dropdown-menu-end">
+                        <ul class="dropdown-menu dropdown-menu-end cb-account-menu">
                             <li><a class="dropdown-item" href="{{ route('dashboard') }}">🧭 Dashboard</a></li>
                             <li><a class="dropdown-item" href="{{ route('courses.my') }}">🎓 Mes cours</a></li>
                             <li><a class="dropdown-item" href="{{ route('marketplace.index') }}">🛍️ Marketplace</a></li>
