@@ -36,7 +36,7 @@
     <hr style="margin-top:30px">
 
     <p style="font-size:12px; color:#666">
-        Notification automatique – Coach-BRVM<br>
+        Notification automatique – Boursiv<br>
         Cet email a été envoyé à {{ $user->email }} suite à votre inscription.
     </p>
 

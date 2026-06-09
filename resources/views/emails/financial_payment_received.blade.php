@@ -25,7 +25,7 @@
 
     <hr>
 
-    <p style="font-size:12px; color:#666">Notification automatique – Coach-BRVM</p>
+    <p style="font-size:12px; color:#666">Notification automatique – Boursiv</p>
 
 </div>
 

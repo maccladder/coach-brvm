@@ -276,7 +276,7 @@
                     Contactez-nous sur WhatsApp pour vous renseigner sur les prochaines sessions
                     disponibles, les tarifs et le programme adapté à votre niveau.
                 </p>
-                <a href="https://wa.me/2250574023351?text=Bonjour%20Coach%20BRVM%2C%20je%20suis%20int%C3%A9ress%C3%A9(e)%20par%20une%20formation%20en%20pr%C3%A9sentiel%20et%20souhaite%20avoir%20plus%20d%27informations."
+                <a href="https://wa.me/2250574023351?text=Bonjour%20Boursiv%2C%20je%20suis%20int%C3%A9ress%C3%A9(e)%20par%20une%20formation%20en%20pr%C3%A9sentiel%20et%20souhaite%20avoir%20plus%20d%27informations."
                    target="_blank" rel="noopener"
                    class="fp-wa-btn">
                     <i class="bi bi-whatsapp"></i> Nous contacter sur WhatsApp

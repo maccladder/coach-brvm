@@ -303,7 +303,7 @@
                     Envoyez-nous un message WhatsApp. On évalue votre besoin et on vous met
                     en relation avec la structure financière la mieux adaptée à votre situation.
                 </p>
-                <a href="https://wa.me/2250574023351?text=Bonjour%20Coach%20BRVM%2C%20je%20souhaite%20%C3%AAtre%20mis%20en%20relation%20avec%20une%20structure%20de%20financement%20agr%C3%A9%C3%A9e."
+                <a href="https://wa.me/2250574023351?text=Bonjour%20Boursiv%2C%20je%20souhaite%20%C3%AAtre%20mis%20en%20relation%20avec%20une%20structure%20de%20financement%20agr%C3%A9%C3%A9e."
                    target="_blank" rel="noopener"
                    class="fin-wa-btn">
                     <i class="bi bi-whatsapp"></i> Nous contacter sur WhatsApp

@@ -10,7 +10,7 @@
     <!-- Header -->
     <div style="background:#060910; padding:28px 32px; text-align:center;">
         <p style="font-family:Georgia,serif; font-size:22px; font-weight:900; color:#C9A84C; margin:0; letter-spacing:-.01em;">
-            Coach<span style="color:#E8EAF0;">BRVM</span>
+            Boursiv
         </p>
     </div>
 

@@ -600,7 +600,7 @@
             <div class="col-lg-7">
                 <div class="cb-hero-badge">
                     <span class="cb-hero-badge-dot"></span>
-                    Plateforme BRVM · Accès ouvert
+                    BOURSE RÉGIONALE · ACCÈS OUVERT
                 </div>
 
                 <p style="font-family:'Syne',sans-serif;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:#C9A84C;margin-bottom:16px;">
@@ -608,7 +608,8 @@
                 </p>
 
                 <h1 class="cb-hero-title">
-                    <span class="gold">Investir à la BRVM</span>
+                    Investir dans la bourse de<br>
+                    <span class="gold">l'Afrique de l'Ouest</span><br>
                     devient plus intelligent
                 </h1>
 
@@ -619,9 +620,9 @@
                 </p>
 
                 <p class="cb-hero-desc">
-                    Boursiv regroupe <strong>toutes les infos utiles BRVM</strong> :
+                    Boursiv réunit tout le <strong>marché régional</strong> au même endroit :
                     annonces, radar marché, annuaires, formations, portefeuille virtuel
-                    et marketplace — au même endroit.
+                    et marketplace.
                 </p>
 
                 <div class="d-flex flex-wrap gap-2 mb-4">
@@ -653,7 +654,7 @@
 
                     <a href="{{ route('announcements.index') }}" class="cb-tool-item" style="text-decoration:none;">
                         <div>
-                            <div class="cb-tool-name">📢 Annonces BRVM</div>
+                            <div class="cb-tool-name">📢 Annonces du marché</div>
                             <div class="cb-tool-desc">Communiqués, AG, infos importantes</div>
                         </div>
                         <span class="cb-chip cb-chip-free">Gratuit</span>
@@ -668,7 +669,7 @@
                     <a href="{{ route('books.index') }}" class="cb-tool-item" style="text-decoration:none;">
                         <div>
                             <div class="cb-tool-name">📚 Mini-cours en livre</div>
-                            <div class="cb-tool-desc">Notions BRVM, page par page</div>
+                            <div class="cb-tool-desc">Notions de bourse, page par page</div>
                         </div>
                         <span class="cb-chip cb-chip-free">Gratuit</span>
                     </a>
@@ -681,7 +682,7 @@
                     </a>
                     <a href="{{ route('formations.brvm') }}" class="cb-tool-item" style="text-decoration:none;">
                         <div>
-                            <div class="cb-tool-name">🎓 Formations BRVM</div>
+                            <div class="cb-tool-name">🎓 Formations bourse</div>
                             <div class="cb-tool-desc">Débutant → Intermédiaire</div>
                         </div>
                         <span class="cb-chip cb-chip-pay">Payant</span>
@@ -1430,7 +1431,7 @@
     <div class="container" style="max-width:1100px;">
         <div class="row g-4 align-items-center mb-4">
             <div class="col-lg-4">
-                <a href="{{ route('landing') }}" class="cb-footer-logo">Coach<em>BRVM</em></a>
+                <a href="{{ route('landing') }}" class="cb-footer-logo">Boursiv</a>
                 <p style="font-size:12px;color:#6B7590;margin-top:10px;line-height:1.6;">
                     Service indépendant, non affilié officiellement à la BRVM.<br>
                     Une solution de CHENGGONG SARL.

@@ -222,7 +222,7 @@
 {{-- ══ NAVBAR ══ --}}
 <nav class="navbar navbar-expand-lg cb-navbar">
     <div class="container" style="max-width:1100px;">
-        <a class="cb-brand" href="{{ route('landing') }}">Coach<em>BRVM</em></a>
+        <a class="cb-brand" href="{{ route('landing') }}">Boursiv</a>
         <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar">
             <span class="navbar-toggler-icon"></span>
         </button>

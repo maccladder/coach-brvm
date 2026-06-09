@@ -60,7 +60,7 @@
 </head>
 <body>
     <div class="header">
-        <div class="brand">CoachBRVM · LettreCI</div>
+        <div class="brand">Boursiv · LettreCI</div>
         <div class="doc-type">
             Généré le {{ now()->isoFormat('D MMMM YYYY') }}<br>
             {{ $templateName ?? '' }}

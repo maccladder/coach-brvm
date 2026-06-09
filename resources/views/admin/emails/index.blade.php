@@ -98,7 +98,7 @@
                         <div class="mb-3">
                             <label class="form-label">Sujet</label>
                             <input name="subject" class="form-control" required maxlength="200"
-                                   placeholder="Ex: Nouveautés Coach-BRVM">
+                                   placeholder="Ex: Nouveautés Boursiv">
                         </div>
 
                         <div class="mb-3">
