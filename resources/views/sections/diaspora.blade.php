@@ -128,7 +128,7 @@
                     <div class="dia-tag"><span class="dia-dot-blink"></span> Diaspora africaine</div>
                     <h1 class="dia-hero-title">
                         Tu es à l'étranger et tu veux<br>
-                        investir à la <em>BRVM</em> ?
+                        investir en <em>Afrique de l'Ouest</em> ?
                     </h1>
                     <p class="dia-hero-desc">
                         C'est possible, et Boursiv est là pour t'<strong>accompagner pas à pas</strong>
@@ -188,7 +188,7 @@
                     <div class="dia-card">
                         <div class="dia-card-icon">🌍</div>
                         <div class="dia-card-title">Tu vis en diaspora</div>
-                        <p class="dia-card-desc">Europe, Amérique, Asie, Océanie... Peu importe où tu es, on t'accompagne à distance pour ouvrir ton compte-titres à la BRVM.</p>
+                        <p class="dia-card-desc">Europe, Amérique, Asie, Océanie... Peu importe où tu es, on t'accompagne à distance pour ouvrir ton compte-titres en bourse.</p>
                     </div>
                 </div>
                 <div class="col-md-4">
@@ -256,7 +256,7 @@
                         <div class="dia-step-num">05</div>
                         <div>
                             <div class="dia-step-title">Tu investis en autonomie</div>
-                            <p class="dia-step-desc">Compte activé, tu passes tes ordres directement avec ta SGI. Boursiv continue de t'accompagner dans l'analyse du marché BRVM.</p>
+                            <p class="dia-step-desc">Compte activé, tu passes tes ordres directement avec ta SGI. Boursiv continue de t'accompagner dans l'analyse du marché.</p>
                         </div>
                     </div>
                 </div>
@@ -274,15 +274,15 @@
             <div>
                 <div class="dia-faq-item">
                     <div class="dia-faq-q">C'est quoi une SGI et pourquoi en ai-je besoin ? <span>+</span></div>
-                    <p class="dia-faq-a">Une SGI (Société de Gestion et d'Intermédiation) est un courtier agréé par la BRVM. C'est l'intermédiaire obligatoire pour acheter ou vendre des actions en bourse. Sans compte-titres chez une SGI, tu ne peux pas investir à la BRVM.</p>
+                    <p class="dia-faq-a">Une SGI (Société de Gestion et d'Intermédiation) est un courtier agréé par la BRVM. C'est l'intermédiaire obligatoire pour acheter ou vendre des actions en bourse. Sans compte-titres chez une SGI, tu ne peux pas investir en bourse.</p>
                 </div>
                 <div class="dia-faq-item">
                     <div class="dia-faq-q">Quels documents sont généralement requis ? <span>+</span></div>
                     <p class="dia-faq-a">En général : une pièce d'identité valide, un justificatif de domicile récent, un RIB/coordonnées bancaires et parfois une déclaration de revenus. Les exigences varient selon la SGI choisie — on t'accompagne pour préparer exactement ce qu'il faut.</p>
                 </div>
                 <div class="dia-faq-item">
-                    <div class="dia-faq-q">Est-ce légal d'investir à la BRVM depuis l'étranger ? <span>+</span></div>
-                    <p class="dia-faq-a">Oui, tout à fait. La BRVM est ouverte aux investisseurs internationaux. Des SGI agréées ont même des procédures spécifiques pour les non-résidents. Notre rôle est de t'orienter vers les SGI qui facilitent ces démarches.</p>
+                    <div class="dia-faq-q">Est-ce légal d'investir dans la bourse ouest-africaine depuis l'étranger ? <span>+</span></div>
+                    <p class="dia-faq-a">Oui, tout à fait. La bourse est ouverte aux investisseurs internationaux. Des SGI agréées ont même des procédures spécifiques pour les non-résidents. Notre rôle est de t'orienter vers les SGI qui facilitent ces démarches.</p>
                 </div>
                 <div class="dia-faq-item">
                     <div class="dia-faq-q">Combien de temps prend l'ouverture d'un compte-titres ? <span>+</span></div>
@@ -298,13 +298,13 @@
             <div class="dia-cta-box">
                 <div style="font-size:40px; margin-bottom:16px;">🌍</div>
                 <h2 class="dia-cta-title">
-                    Prêt à investir à la BRVM<br>depuis <em>là où tu es</em> ?
+                    Prêt à investir dans la bourse<br>depuis <em>là où tu es</em> ?
                 </h2>
                 <p style="font-size:15px;color:#6B7590;line-height:1.8;max-width:500px;margin:0 auto 32px;">
                     Envoie-nous un message WhatsApp. On t'explique tout, on évalue ta situation
                     et on t'accompagne de A à Z jusqu'à l'activation de ton compte-titres.
                 </p>
-                <a href="https://wa.me/2250574023351?text=Bonjour%2C%20je%20suis%20en%20diaspora%20et%20je%20voudrais%20investir%20%C3%A0%20la%20BRVM.%20Pouvez-vous%20m%27accompagner%20%3F"
+                <a href="https://wa.me/2250574023351?text=Bonjour%2C%20je%20suis%20en%20diaspora%20et%20je%20voudrais%20investir%20dans%20la%20bourse%20ouest-africaine.%20Pouvez-vous%20m%27accompagner%20%3F"
                    target="_blank" rel="noopener"
                    class="dia-wa-btn">
                     <i class="bi bi-whatsapp"></i> Nous contacter sur WhatsApp
