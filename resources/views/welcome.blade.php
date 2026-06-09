@@ -844,7 +844,7 @@
                 <h2 class="cb-sec-title">Visualise les <em>opportunités</em> en 7 jours</h2>
                 <div class="cb-divider"></div>
                 <p style="font-size:16px;color:#6B7590;line-height:1.75;font-weight:300;margin-bottom:28px;">
-                    Repère en un coup d'œil quelles sociétés performent, lesquelles reculent, et les tendances du marché BRVM sur la semaine.
+                    Repère en un coup d'œil quelles sociétés performent, lesquelles reculent, et les tendances de la bourse ouest-africaine sur la semaine.
                 </p>
                 <a href="{{ route('radar.index') }}" class="cb-cta-primary">📡 Ouvrir le Radar Marché</a>
             </div>
