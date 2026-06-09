@@ -16,7 +16,7 @@ class AdminFinancialPaymentMail extends Mailable
     public function build()
     {
         return $this
-            ->subject('💰 Nouveau paiement – États financiers Coach BRVM')
+            ->subject('💰 Nouveau paiement – États financiers Boursiv')
             ->view('emails.financial_payment_received');
     }
 }

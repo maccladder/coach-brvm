@@ -56,13 +56,13 @@ class SendAdminGrantNotificationJob implements ShouldQueue
         }
 
         if (!class_exists($type)) {
-            return ['un accès premium Coach BRVM', url('/dashboard')];
+            return ['un accès premium Boursiv', url('/dashboard')];
         }
 
         $model = $type::find($id);
 
         if (!$model) {
-            return ['un accès premium Coach BRVM', url('/dashboard')];
+            return ['un accès premium Boursiv', url('/dashboard')];
         }
 
         $url = match($type) {

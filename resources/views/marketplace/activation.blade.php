@@ -31,7 +31,7 @@
             @endif
 
             <a class="btn btn-outline-dark ms-2"
-               href="mailto:coachbrvm@gmail.com?subject=Activation%20logiciel%20{{ urlencode($product->title) }}">
+               href="mailto:boursivoire@gmail.com?subject=Activation%20logiciel%20{{ urlencode($product->title) }}">
                 Envoyer un mail
             </a>
         </div>

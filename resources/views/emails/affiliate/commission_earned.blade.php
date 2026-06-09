@@ -11,7 +11,7 @@
         $base      = number_format($commission->base_amount, 0, ',', ' ');
         $delay     = (int) config('affiliate.security_delay_days', 10);
         $typeLabel = match($commission->product_type) {
-            'pack_brvm'   => 'Pack BRVM',
+            'pack_brvm'   => 'Pack Boursiv',
             'course'      => 'Formation',
             'marketplace' => 'Produit Marketplace',
             default       => $commission->product_type,
@@ -56,7 +56,7 @@
         </a>
     </p>
 
-    <p style="font-size:12px;color:#999;margin-top:24px">Coach BRVM – Notification automatique</p>
+    <p style="font-size:12px;color:#999;margin-top:24px">Boursiv – Notification automatique</p>
 </div>
 </body>
 </html>

@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Conditions d’utilisation – Coach BRVM')
+@section('title', 'Conditions d’utilisation – Boursiv')
 
 @section('content')
 <div class="bg-light py-5">
@@ -9,12 +9,12 @@
         <h1 class="fw-bold mb-4">Conditions d’utilisation</h1>
 
         <p class="text-muted">
-            Bienvenue sur Coach BRVM. En utilisant ce site, vous acceptez les conditions ci-dessous.
+            Bienvenue sur Boursiv. En utilisant ce site, vous acceptez les conditions ci-dessous.
         </p>
 
         <h4 class="mt-4">1. Nature du service</h4>
         <p>
-            Coach BRVM fournit des analyses automatisées et des interprétations assistées par IA
+            Boursiv fournit des analyses automatisées et des interprétations assistées par IA
             concernant les Bulletins Officiels de Cote (BOC) et d'autres documents financiers.
             Les résultats fournis sont des <strong>informations à but éducatif</strong> et ne constituent
             en aucun cas une recommandation d’investissement.
@@ -28,7 +28,7 @@
         </p>
 
         <div class="alert alert-warning mt-3">
-            <strong>Disclaimer :</strong> Coach BRVM, ses créateurs et ses partenaires <strong>n’endossent aucune responsabilité</strong>
+            <strong>Disclaimer :</strong> Boursiv, ses créateurs et ses partenaires <strong>n’endossent aucune responsabilité</strong>
             en cas de perte financière ou d’interprétation erronée des informations générées.
         </div>
 
@@ -45,7 +45,7 @@
 
         <h4 class="mt-4">5. Utilisation interdite</h4>
         <p>
-            Vous vous engagez à ne pas utiliser Coach BRVM pour des activités illégales,
+            Vous vous engagez à ne pas utiliser Boursiv pour des activités illégales,
             frauduleuses ou contraires aux règles de marché.
         </p>
 

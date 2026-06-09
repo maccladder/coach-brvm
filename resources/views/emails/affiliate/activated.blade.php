@@ -12,7 +12,7 @@
     <p>Bonjour <strong>{{ $affiliate->user->name ?? '' }}</strong>,</p>
 
     <p>
-        Félicitations ! Votre compte apporteur d'affaires sur <strong>Coach BRVM</strong> est maintenant activé.
+        Félicitations ! Votre compte apporteur d'affaires sur <strong>Boursiv</strong> est maintenant activé.
         Vous pouvez dès maintenant partager votre lien et commencer à gagner des commissions.
     </p>
 
@@ -50,7 +50,7 @@
         </a>
     </p>
 
-    <p style="font-size:12px;color:#999;margin-top:24px">Coach BRVM – Notification automatique</p>
+    <p style="font-size:12px;color:#999;margin-top:24px">Boursiv – Notification automatique</p>
 </div>
 </body>
 </html>

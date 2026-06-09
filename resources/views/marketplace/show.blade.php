@@ -1,4 +1,4 @@
-{{-- resources/views/marketplace/show.blade.php --}}
+﻿{{-- resources/views/marketplace/show.blade.php --}}
 @extends('layouts.app')
 
 @push('styles')
@@ -267,7 +267,7 @@
             default    => 'mp-chip-cat',
         };
         $wa = preg_replace('/[^0-9]/', '', (string)($product->support_whatsapp ?? ''));
-        $waText = rawurlencode("Bonjour, je suis intéressé par \"{$product->title}\" sur Coach BRVM Marketplace.");
+        $waText = rawurlencode("Bonjour, je suis intéressé par \"{$product->title}\" sur Boursiv Marketplace.");
         $assetsToShow = $product->type === 'video'
             ? $product->assets->filter(fn($a) => $a->kind === 'stream')->values()
             : ($product->type === 'game' ? collect() : $product->assets);
@@ -280,7 +280,7 @@
             <div class="col-lg-8">
                 <div class="mp-vendor-title">💼 Tu veux vendre tes produits ici ?</div>
                 <div class="mp-vendor-desc">
-                    ✉️ <a href="mailto:coachbrvm@gmail.com">coachbrvm@gmail.com</a>
+                    ✉️ <a href="mailto:boursivoire@gmail.com">boursivoire@gmail.com</a>
                     &nbsp;·&nbsp; 📞 <a href="tel:+2250788035432">+225 07 88 03 54 32</a>
                 </div>
             </div>

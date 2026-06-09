@@ -1,4 +1,4 @@
-{{-- ════════════════════════════════════════════════
+﻿{{-- ════════════════════════════════════════════════
      resources/views/my-products-play.blade.php
 ════════════════════════════════════════════════ --}}
 <!DOCTYPE html>
@@ -7,7 +7,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>🎮 {{ $product->title }} — Coach BRVM</title>
+    <title>🎮 {{ $product->title }} — Boursiv</title>
     <style>
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
         html { height: 100%; height: -webkit-fill-available; }

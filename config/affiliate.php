@@ -9,7 +9,7 @@ return [
     |--------------------------------------------------------------------------
     */
     'admin_emails' => array_values(array_filter(
-        array_map('trim', explode(',', env('ADMIN_EMAILS', 'maccladder@gmail.com,coachbrvm@gmail.com')))
+        array_map('trim', explode(',', env('ADMIN_EMAILS', 'maccladder@gmail.com,boursivoire@gmail.com')))
     )),
 
     /*
@@ -74,7 +74,7 @@ return [
         'LOGIN', 'REGISTER', 'LOGOUT', 'PASSWORD', 'RESET',
         'HOME', 'INDEX', 'DASHBOARD', 'ACCOUNT', 'PROFILE',
         // Marque
-        'COACH', 'BRVM', 'COACHBRVM',
+        'COACH', 'BRVM', 'COACHBRVM', 'BOURSIV',
         // Support / contact
         'SUPPORT', 'CONTACT', 'HELP', 'FAQ', 'INFO', 'MAIL', 'EMAIL',
         // Commerce

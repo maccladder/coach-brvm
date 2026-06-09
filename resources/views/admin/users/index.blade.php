@@ -1,6 +1,6 @@
 @extends('layouts.admin')
 
-@section('title', 'Utilisateurs – Admin Coach BRVM')
+@section('title', 'Utilisateurs – Admin Boursiv')
 
 @section('content')
 <div class="container-fluid py-4 px-4" style="max-width:1400px;">

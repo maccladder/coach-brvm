@@ -211,7 +211,7 @@ class AffiliateController extends Controller
     // Paramètres de destination optionnels (whitelist serveur — pas d'open redirect) :
     //   ?p=pack                → page Pack BRVM
     //   ?course={slug}         → page formation (affiliate_eligible = true requis)
-    //   ?product={slug}        → page produit marketplace Coach BRVM éligible
+    //   ?product={slug}        → page produit marketplace Boursiv éligible
     // Toute valeur inconnue ou invalide → fallback accueil.
 
     public function redirect(Request $request, string $code)
@@ -264,7 +264,7 @@ class AffiliateController extends Controller
             }
         }
 
-        // ?product={slug} → produit marketplace Coach BRVM éligible (user_id IS NULL)
+        // ?product={slug} → produit marketplace Boursiv éligible (user_id IS NULL)
         if ($request->has('product')) {
             $slug    = (string) $request->query('product');
             $product = MarketplaceProduct::where('slug', $slug)
@@ -311,7 +311,7 @@ class AffiliateController extends Controller
             : collect();
 
         $eligibleProducts = MarketplaceProduct::where('affiliate_eligible', true)
-            ->whereNull('user_id')           // garde-fou ownership : Coach BRVM uniquement
+            ->whereNull('user_id')           // garde-fou ownership : Boursiv uniquement
             ->where('status', 'published')
             ->orderBy('title')
             ->get();

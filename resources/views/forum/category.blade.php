@@ -1,6 +1,6 @@
-{{-- ════════ forum/category.blade.php ════════ --}}
+﻿{{-- ════════ forum/category.blade.php ════════ --}}
 @extends('layouts.app')
-@section('title', $category->name . ' – Forum Coach BRVM')
+@section('title', $category->name . ' – Forum Boursiv')
 
 @push('styles')
 <style>

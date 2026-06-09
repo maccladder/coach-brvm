@@ -17,7 +17,7 @@ class BrvmActionsAiService
     try {
         $resp = Http::timeout(30)
             ->withHeaders([
-                'User-Agent' => 'CoachBRVM/1.0 (+https://coach-brvm.com)',
+                'User-Agent' => 'Boursiv/1.0 (+https://boursiv.com)',
             ])
             ->withOptions([
                 'verify' => false, // ❌ désactive SSL PARTOUT (local + prod)

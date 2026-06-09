@@ -65,7 +65,7 @@
 
 @section('content')
 @php
-    $site = 'https://coach-brvm.com';
+    $site = 'https://boursiv.com';
     $cta_debutant = 'https://www.udemy.com/course/investir-a-la-brvm-le-guide-du-debutant/';
     $cta_intermediaire = 'https://www.udemy.com/course/brvm-strategies-investissement/';
     $sections = [
@@ -75,15 +75,15 @@
             ['q'=>"Avec quel budget peut-on commencer ?",'a'=>"On peut démarrer avec un petit budget (souvent dès 10 000 FCFA), selon le prix de l'action, la quantité achetée et les frais du SGI.",'links'=>[['label'=>"Comprendre les SGI",'url'=>route('sgis.index')]]],
             ['q'=>"Investir à la BRVM, est-ce risqué ?",'a'=>"Oui, comme toute bourse. Mais le risque diminue fortement quand on comprend les fondamentaux, les BOC, et les états financiers. La meilleure protection, c'est la formation + la discipline.",'links'=>[['label'=>"Formation débutant",'url'=>$cta_debutant]]],
         ]],
-        ['title'=>'Coach-BRVM','icon'=>'🚀','items'=>[
-            ['q'=>"C'est quoi Coach-BRVM ?",'a'=>"Coach-BRVM est une plateforme qui aide à comprendre la BRVM, analyser les BOC, suivre l'actualité du marché, et apprendre à investir intelligemment.",'links'=>[['label'=>"Voir les annonces BRVM",'url'=>route('announcements.index')]]],
-            ['q'=>"Coach-BRVM remplace-t-il un SGI ?",'a'=>"Non. Un SGI exécute tes ordres de bourse. Coach-BRVM t'aide à comprendre et analyser pour prendre de meilleures décisions.",'links'=>[['label'=>"Liste des SGI",'url'=>route('sgis.index')]]],
-            ['q'=>"Coach-BRVM donne-t-il des signaux d'achat/vente ?",'a'=>"Non. Nous fournissons des analyses et de l'éducation financière. La décision finale appartient toujours à l'investisseur.",'links'=>[['label'=>"Apprendre une stratégie",'url'=>$cta_intermediaire]]],
+        ['title'=>'Boursiv','icon'=>'🚀','items'=>[
+            ['q'=>"C'est quoi Boursiv ?",'a'=>"Boursiv est une plateforme qui aide à comprendre la BRVM, analyser les BOC, suivre l'actualité du marché, et apprendre à investir intelligemment.",'links'=>[['label'=>"Voir les annonces BRVM",'url'=>route('announcements.index')]]],
+            ['q'=>"Boursiv remplace-t-il un SGI ?",'a'=>"Non. Un SGI exécute tes ordres de bourse. Boursiv t'aide à comprendre et analyser pour prendre de meilleures décisions.",'links'=>[['label'=>"Liste des SGI",'url'=>route('sgis.index')]]],
+            ['q'=>"Boursiv donne-t-il des signaux d'achat/vente ?",'a'=>"Non. Nous fournissons des analyses et de l'éducation financière. La décision finale appartient toujours à l'investisseur.",'links'=>[['label'=>"Apprendre une stratégie",'url'=>$cta_intermediaire]]],
         ]],
         ['title'=>'BOC – Bulletins Officiels de Cote','icon'=>'🧾','items'=>[
             ['q'=>"C'est quoi un BOC ?",'a'=>"Le Bulletin Officiel de Cote (BOC) est le document officiel publié chaque jour de cotation, avec les cours, variations, volumes, indices et informations du marché.",'links'=>[['label'=>"Voir les analyses BOC",'url'=>route('announcements.index')]]],
-            ['q'=>"Pourquoi le BOC est difficile à comprendre ?",'a'=>"Parce qu'il est technique et conçu pour les professionnels. Coach-BRVM le transforme en résumé clair et compréhensible.",'links'=>[['label'=>"Voir un exemple",'url'=>route('announcements.index')]]],
-            ['q'=>"Comment Coach-BRVM analyse les BOC ?",'a'=>"On extrait les informations clés (indices, hausses/baisses, volumes, tendances), puis on produit un résumé lisible + des explications utiles pour les investisseurs.",'links'=>[['label'=>"Page annonces",'url'=>route('announcements.index')]]],
+            ['q'=>"Pourquoi le BOC est difficile à comprendre ?",'a'=>"Parce qu'il est technique et conçu pour les professionnels. Boursiv le transforme en résumé clair et compréhensible.",'links'=>[['label'=>"Voir un exemple",'url'=>route('announcements.index')]]],
+            ['q'=>"Comment Boursiv analyse les BOC ?",'a'=>"On extrait les informations clés (indices, hausses/baisses, volumes, tendances), puis on produit un résumé lisible + des explications utiles pour les investisseurs.",'links'=>[['label'=>"Page annonces",'url'=>route('announcements.index')]]],
         ]],
         ['title'=>'États financiers & analyse fondamentale','icon'=>'📊','items'=>[
             ['q'=>"C'est quoi un état financier ?",'a'=>"C'est un document qui montre la santé d'une entreprise (chiffre d'affaires, bénéfice, dettes, trésorerie, etc.). C'est essentiel pour investir sur le long terme.",'links'=>[]],
@@ -103,7 +103,7 @@
                 <div>
                     <p class="faq-hero-tag">Aide & Support</p>
                     <h1 class="faq-hero-title">FAQ — <em>Questions fréquentes</em></h1>
-                    <p style="font-size:14px;color:#6B7590;font-weight:300;">Réponses simples sur la BRVM, les BOC, les états financiers et Coach-BRVM.</p>
+                    <p style="font-size:14px;color:#6B7590;font-weight:300;">Réponses simples sur la BRVM, les BOC, les états financiers et Boursiv.</p>
                 </div>
                 <div class="d-flex gap-2 flex-wrap">
                     <a href="{{ route('announcements.index') }}" class="cb-btn-outline" style="font-size:11px;padding:9px 16px;">🧾 Analyses BOC</a>

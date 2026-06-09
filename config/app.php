@@ -13,7 +13,7 @@ return [
     |
     */
 
-    'name' => env('APP_NAME', 'Laravel'),
+    'name' => env('APP_NAME', 'Boursiv'),
 
     /*
     |--------------------------------------------------------------------------
@@ -54,7 +54,7 @@ return [
 
     'url' => env('APP_URL', 'http://localhost'),
 
-    'coach_brvm_admin_code' => env('COACH_BRVM_ADMIN_CODE', 'Coach-brvm2025'),
+    'coach_brvm_admin_code' => env('COACH_BRVM_ADMIN_CODE', 'Boursiv2025'),
 
 
     /*

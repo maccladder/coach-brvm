@@ -64,7 +64,8 @@
       "Read(//mnt/c/wamp64/www/**)",
       "Bash(Get-ChildItem -Path \"c:\\\\wamp64\\\\www\\\\coach-brvm\\\\app\" -Directory)",
       "Bash(not exist *)",
-      "Bash(grep -rn \"{{[^}]*\\\\\\\\\\\\\\\\'\" \"c:/wamp64/www/coach-brvm/resources/views/affiliate/\" \"c:/wamp64/www/coach-brvm/resources/views/admin/affiliate-payouts/\" \"c:/wamp64/www/coach-brvm/resources/views/admin/affiliates/\")"
+      "Bash(grep -rn \"{{[^}]*\\\\\\\\\\\\\\\\'\" \"c:/wamp64/www/coach-brvm/resources/views/affiliate/\" \"c:/wamp64/www/coach-brvm/resources/views/admin/affiliate-payouts/\" \"c:/wamp64/www/coach-brvm/resources/views/admin/affiliates/\")",
+      "Read(//c/Users/SPECTRE PC/.claude/projects/c--wamp64-www-coach-brvm/0a94807d-694d-4ff4-851c-da24b46f704a/tool-results/**)"
     ],
     "additionalDirectories": [
       "c:\\wamp64\\www\\coach-brvm",

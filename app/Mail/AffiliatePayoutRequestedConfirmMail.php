@@ -16,7 +16,7 @@ class AffiliatePayoutRequestedConfirmMail extends Mailable
     public function build()
     {
         return $this
-            ->subject('📤 Demande de reversement reçue – Coach BRVM')
+            ->subject('📤 Demande de reversement reçue – Boursiv')
             ->view('emails.affiliate.payout_confirm');
     }
 }

@@ -1,4 +1,4 @@
-@extends('layouts.app')
+﻿@extends('layouts.app')
 
 @push('styles')
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,700&display=swap" rel="stylesheet">
@@ -74,7 +74,7 @@
         <a href="{{ route('donation.show') }}" class="don-btn-ghost">Faire un autre don</a>
       </div>
 
-      <p class="don-merci-note">Un email de confirmation vous a été envoyé. Merci d'avoir cru en Coach BRVM.</p>
+      <p class="don-merci-note">Un email de confirmation vous a été envoyé. Merci d'avoir cru en Boursiv.</p>
     </div>
   </div>
 </div>

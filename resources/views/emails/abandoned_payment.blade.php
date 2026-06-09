@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Votre achat sur Coach BRVM</title>
+    <title>Votre achat sur Boursiv</title>
 </head>
 <body style="margin:0; padding:0; background-color:#f4f4f4; font-family:Arial,Helvetica,sans-serif;">
 
@@ -19,7 +19,7 @@
                     <tr>
                         <td style="padding:32px 40px 0; border-radius:8px 8px 0 0;">
                             <p style="margin:0; font-size:20px; font-weight:bold; color:#1a1a1a; letter-spacing:-0.3px;">
-                                Coach BRVM
+                                Boursiv
                             </p>
                         </td>
                     </tr>
@@ -39,7 +39,7 @@
                     <tr>
                         <td style="padding:28px 40px 0; color:#333333; font-size:15px; line-height:1.7;">
                             <p style="margin:0 0 16px;">
-                                Nous avons constaté que votre tentative d'achat sur Coach BRVM n'a pas abouti.
+                                Nous avons constaté que votre tentative d'achat sur Boursiv n'a pas abouti.
                             </p>
                             <p style="margin:0 0 32px;">
                                 Besoin d'aide pour finaliser votre commande&nbsp;? Notre équipe est disponible sur WhatsApp pour vous accompagner.
@@ -79,7 +79,7 @@
                     {{-- Signature --}}
                     <tr>
                         <td style="padding:0 40px 36px; color:#555555; font-size:14px; line-height:1.6;">
-                            <p style="margin:0;">L'équipe Coach Brvm.</p>
+                            <p style="margin:0;">L'équipe Boursiv.</p>
                         </td>
                     </tr>
 

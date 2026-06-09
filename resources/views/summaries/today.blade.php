@@ -1,4 +1,4 @@
-@extends('layouts.app')
+﻿@extends('layouts.app')
 
 @section('content')
 <div class="container py-4" style="max-width: 1100px;">
@@ -10,13 +10,13 @@
       {{-- Coach --}}
       <div class="d-flex align-items-center gap-3 flex-grow-1">
         <img src="{{ asset('avatars/coach.png') }}"
-             alt="Coach BRVM"
+             alt="Boursiv"
              class="rounded-circle border shadow-sm"
              style="width:70px;height:70px;object-fit:cover;">
         <div>
           <h4 class="mb-1">Résumé du {{ $today->format('d/m/Y') }}</h4>
           <div class="text-muted small">
-            Coach BRVM · interprétation personnalisée
+            Boursiv · interprétation personnalisée
           </div>
         </div>
       </div>

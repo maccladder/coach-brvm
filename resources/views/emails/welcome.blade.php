@@ -7,14 +7,14 @@
 
 <div style="max-width:600px; background:white; padding:30px; border-radius:8px; margin:0 auto">
 
-    <h2 style="color:#0d6efd">Bienvenue sur Coach BRVM, {{ $user->name }} ! 🎉</h2>
+    <h2 style="color:#0d6efd">Bienvenue sur Boursiv, {{ $user->name }} ! 🎉</h2>
 
     <p>Nous sommes ravis de vous compter parmi nos membres.</p>
 
     <p>Votre compte a été créé avec succès avec l'adresse email <strong>{{ $user->email }}</strong>.</p>
 
     <div style="background:#f0f9ff; border-left:4px solid #0d6efd; padding:15px; margin:20px 0; border-radius:4px">
-        <p style="margin:0"><strong>Que pouvez-vous faire sur Coach BRVM ?</strong></p>
+        <p style="margin:0"><strong>Que pouvez-vous faire sur Boursiv ?</strong></p>
         <ul style="margin:10px 0 0 0; padding-left:20px">
             <li>Accéder à nos formations sur les marchés financiers africains</li>
             <li>Simuler des investissements sur la BRVM</li>
@@ -31,7 +31,7 @@
 
     <p>Si vous avez des questions, n'hésitez pas à nous contacter.</p>
 
-    <p>À bientôt,<br><strong>L'équipe Coach BRVM</strong></p>
+    <p>À bientôt,<br><strong>L'équipe Boursiv</strong></p>
 
     <hr style="margin-top:30px">
 

@@ -10,13 +10,13 @@
 
     <div style="text-align:center; margin-bottom:24px">
         <div style="font-size:48px">🎁</div>
-        <h2 style="color:#0d6efd; margin:8px 0 0">Coach BRVM vous offre un accès gratuit</h2>
+        <h2 style="color:#0d6efd; margin:8px 0 0">Boursiv vous offre un accès gratuit</h2>
     </div>
 
     <p>Bonjour <strong>{{ $grant->user->name }}</strong>,</p>
 
     <p>
-        Bonne nouvelle ! L'équipe Coach BRVM vous offre un accès <strong>gratuit</strong> à&nbsp;:
+        Bonne nouvelle ! L'équipe Boursiv vous offre un accès <strong>gratuit</strong> à&nbsp;:
     </p>
 
     <div style="background:#f0f9ff; border-left:4px solid #0d6efd; padding:16px 20px; margin:20px 0; border-radius:4px">
@@ -51,12 +51,12 @@
 
     <p>Si vous avez des questions, notre équipe est disponible pour vous aider.</p>
 
-    <p>À bientôt sur Coach BRVM,<br><strong>L'équipe Coach BRVM</strong></p>
+    <p>À bientôt sur Boursiv,<br><strong>L'équipe Boursiv</strong></p>
 
     <hr style="margin-top:30px; border:none; border-top:1px solid #eee">
 
     <p style="font-size:12px; color:#888; margin-top:15px">
-        Notification officielle – Coach BRVM<br>
+        Notification officielle – Boursiv<br>
         Cet email a été envoyé à {{ $grant->user->email }}.
     </p>
 

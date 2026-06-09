@@ -1,6 +1,6 @@
 @extends('layouts.admin')
 
-@section('title', 'Dashboard Administrateur – Coach BRVM')
+@section('title', 'Dashboard Administrateur – Boursiv')
 
 @section('content')
 <div class="bg-light py-5">

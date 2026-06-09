@@ -18,7 +18,7 @@ class ProductApprovedMail extends Mailable
     public function build()
     {
         return $this
-            ->subject('🎉 Votre produit a été approuvé – Coach BRVM')
+            ->subject('🎉 Votre produit a été approuvé – Boursiv')
             ->view('emails.product_approved');
     }
 }

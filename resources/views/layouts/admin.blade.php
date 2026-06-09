@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
 
-    <title>@yield('title', 'Admin – Coach BRVM')</title>
+    <title>@yield('title', 'Admin – Boursiv')</title>
 
     {{-- Favicon --}}
     <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
@@ -65,7 +65,7 @@
         {{-- Brand --}}
         <a class="navbar-brand d-flex align-items-center" href="{{ route('admin.dashboard') }}">
             <span class="logo-dot"></span>
-            <span class="fw-semibold">Coach BRVM – Admin</span>
+            <span class="fw-semibold">Boursiv – Admin</span>
         </a>
 
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
@@ -99,7 +99,7 @@
                         <li><a class="dropdown-item" href="{{ route('admin.books.index') }}">📚 Livres</a></li>
                         <li><a class="dropdown-item" href="{{ route('admin.grants.index') }}">🎁 Attributions</a></li>
                         <li><a class="dropdown-item" href="{{ route('admin.wallets.index') }}">💼 Portefeuilles</a></li>
-                        <li><a class="dropdown-item" href="{{ route('admin.packs.index') }}">📦 Pack BRVM</a></li>
+                        <li><a class="dropdown-item" href="{{ route('admin.packs.index') }}">📦 Pack Boursiv</a></li>
                         <li><a class="dropdown-item" href="{{ route('admin.donations.index') }}">🤝 Dons</a></li>
                         <li><a class="dropdown-item" href="{{ route('admin.emails.index') }}">📧 Envoyer un email</a></li>
                         <li><hr class="dropdown-divider"></li>

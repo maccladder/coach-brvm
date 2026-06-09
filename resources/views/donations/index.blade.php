@@ -1,7 +1,7 @@
-@extends('layouts.app')
+﻿@extends('layouts.app')
 
 @push('meta')
-<meta name="description" content="Soutenir Coach BRVM — éduquer la jeunesse d'Afrique de l'Ouest à la finance et à la bourse.">
+<meta name="description" content="Soutenir Boursiv — éduquer la jeunesse d'Afrique de l'Ouest à la finance et à la bourse.">
 @endpush
 
 @push('styles')
@@ -317,9 +317,9 @@
     <div class="container" style="max-width:1080px;">
       <div class="don-hero-inner">
         <div class="don-pastille"><span class="dot"></span>Soutenir le projet</div>
-        <div class="don-surtitre">Coach BRVM · développé sur fonds propres</div>
+        <div class="don-surtitre">Boursiv · développé sur fonds propres</div>
         <h1 class="don-h1">Si notre <span class="or">vision</span> vous parle,<br><em>donnez-lui</em> de l'élan.</h1>
-        <p class="don-lede">Coach BRVM est né d'une conviction simple : <strong>la jeunesse d'Afrique de l'Ouest mérite de comprendre la finance et la bourse.</strong> Le projet se construit aujourd'hui sur fonds propres. Un don, ce n'est pas payer un service — c'est soutenir une mission à laquelle vous croyez.</p>
+        <p class="don-lede">Boursiv est né d'une conviction simple : <strong>la jeunesse d'Afrique de l'Ouest mérite de comprendre la finance et la bourse.</strong> Le projet se construit aujourd'hui sur fonds propres. Un don, ce n'est pas payer un service — c'est soutenir une mission à laquelle vous croyez.</p>
       </div>
     </div>
   </div>
@@ -329,7 +329,7 @@
     <div class="container" style="max-width:1080px;">
       <div class="don-trait"></div>
       <h2 class="don-h2">Ce que votre soutien <em>fait grandir</em></h2>
-      <p class="don-body">Coach BRVM regroupe annonces, radar marché, annuaires, portefeuille virtuel, mini-cours et bien plus. Construire et maintenir tout cela demande du temps, des outils et des données. Votre don alimente directement la mission — pas un compte, une mission.</p>
+      <p class="don-body">Boursiv regroupe annonces, radar marché, annuaires, portefeuille virtuel, mini-cours et bien plus. Construire et maintenir tout cela demande du temps, des outils et des données. Votre don alimente directement la mission — pas un compte, une mission.</p>
       <div class="don-grid">
         <div class="don-card">
           <div class="ico">📚</div>
@@ -356,12 +356,12 @@
       <div class="don-vision">
         <span class="pin">Notre engagement</span>
         <h2 class="don-h2">Un don, un <em>soutien</em> — pas un achat.</h2>
-        <p>Soyons transparents : Coach BRVM propose des contenus gratuits <em>et</em> des contenus payants. Donner ne débloque rien, ne remplace aucun abonnement et ne vous donne aucun avantage caché. Ce n'est pas une transaction.</p>
+        <p>Soyons transparents : Boursiv propose des contenus gratuits <em>et</em> des contenus payants. Donner ne débloque rien, ne remplace aucun abonnement et ne vous donne aucun avantage caché. Ce n'est pas une transaction.</p>
         <p>Le projet est porté sur fonds propres, par conviction. Si vous choisissez de contribuer, c'est parce que la vision vous parle : éduquer financièrement une génération entière. Vous ne payez pas un produit — vous portez une idée avec nous.</p>
         <div class="don-signature">
           <div class="av">CB</div>
           <div class="qui">
-            <b>L'équipe Coach BRVM</b>
+            <b>L'équipe Boursiv</b>
             <span>Au service des investisseurs d'Afrique de l'Ouest</span>
           </div>
         </div>
@@ -459,7 +459,7 @@
           @endauth
 
           <button type="submit" class="don-cta" id="donBtn">
-            Soutenir Coach BRVM &nbsp;→
+            Soutenir Boursiv &nbsp;→
           </button>
           <p class="don-note">Paiement sécurisé via Paystack · Mobile Money, carte ou virement · aucune donnée bancaire conservée</p>
         </form>
@@ -484,7 +484,7 @@
         {{-- QR code : masqué sur mobile (inutile de scanner son propre écran) --}}
         <div class="don-wave-qr-only">
           <div class="don-wave-qr-wrap">
-            <img src="{{ asset('img/wave-qr.png') }}" alt="QR code Wave – Soutenir Coach BRVM" loading="lazy">
+            <img src="{{ asset('img/wave-qr.png') }}" alt="QR code Wave – Soutenir Boursiv" loading="lazy">
           </div>
           <div class="don-wave-steps">
             <div class="don-wave-step">
@@ -546,7 +546,7 @@
       </div>
       <div class="don-autres">
         <p><strong>Pas envie ou pas les moyens de donner ?</strong><br>
-        C'est parfaitement normal. Partager Coach BRVM autour de vous, signaler une erreur, proposer un sujet ou animer le forum aide tout autant la mission. Le soutien ne se mesure pas qu'en francs.</p>
+        C'est parfaitement normal. Partager Boursiv autour de vous, signaler une erreur, proposer un sujet ou animer le forum aide tout autant la mission. Le soutien ne se mesure pas qu'en francs.</p>
       </div>
     </div>
   </div>
@@ -581,7 +581,7 @@
   <div class="don-footer-local">
     <div class="container">
       <p class="merci">Merci de croire en l'éducation financière.</p>
-      <p>Coach BRVM · comprendre, analyser, progresser. Ensemble.</p>
+      <p>Boursiv · comprendre, analyser, progresser. Ensemble.</p>
     </div>
   </div>
 

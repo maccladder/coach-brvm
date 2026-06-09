@@ -25,8 +25,8 @@ class VendorProductReviewedNotification extends Notification
         $isApproved = $this->status === 'approved';
 
         $subject = $isApproved
-            ? '✅ Produit approuvé — Coach BRVM'
-            : '⛔ Produit refusé — Coach BRVM';
+            ? '✅ Produit approuvé — Boursiv'
+            : '⛔ Produit refusé — Boursiv';
 
         $headline = $isApproved
             ? 'Bonne nouvelle ! Votre produit a été approuvé.'

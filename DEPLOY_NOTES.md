@@ -1,4 +1,4 @@
-# Notes de déploiement — Coach BRVM
+# Notes de déploiement — Boursiv
 ## Feature : email automatique "achat non abouti"
 
 ---
@@ -42,7 +42,7 @@ MAIL_USERNAME=noreply@coach-brvm.com
 MAIL_PASSWORD=<mot_de_passe_prod>
 MAIL_SCHEME=smtp
 MAIL_FROM_ADDRESS=noreply@coach-brvm.com
-MAIL_FROM_NAME="Coach BRVM"
+MAIL_FROM_NAME="Boursiv"
 
 # Queue — les mails passent par le worker
 QUEUE_CONNECTION=database

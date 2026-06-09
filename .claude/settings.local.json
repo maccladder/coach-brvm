@@ -6,7 +6,15 @@
       "Bash(php -l app/Http/Controllers/AdminAnalyticsController.php)",
       "Bash(php -l resources/views/admin/analytics/index.blade.php)",
       "Bash(php -l resources/views/layouts/admin.blade.php)",
-      "Bash(php -l resources/views/admin/dashboard.blade.php)"
+      "Bash(php -l resources/views/admin/dashboard.blade.php)",
+      "Bash(findstr /i \"laravel/framework\")",
+      "Bash(Get-Content composer.json)",
+      "Bash(Select-String \"laravel/framework\")",
+      "Bash(mkdir -p c:/wamp64/www/coach-brvm/resources/views/errors)",
+      "Read(//c/Users/SPECTRE PC/.claude/projects/c--wamp64-www-coach-brvm/0a94807d-694d-4ff4-851c-da24b46f704a/tool-results/**)"
+    ],
+    "additionalDirectories": [
+      "c:\\wamp64\\www\\coach-brvm\\resources\\views"
     ]
   }
 }

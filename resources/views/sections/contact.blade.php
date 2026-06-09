@@ -1,7 +1,7 @@
 {{-- ════════ contact.blade.php ════════ --}}
 {{-- resources/views/sections/contact.blade.php --}}
 @extends('layouts.app')
-@section('title','Contact – Coach BRVM')
+@section('title','Contact – Boursiv')
 
 @push('styles')
 <style>
@@ -34,7 +34,7 @@
         <div class="contact-hero-grid"></div>
         <div class="container" style="max-width:800px;position:relative;z-index:1;">
             <p class="contact-hero-tag">Support</p>
-            <h1 class="contact-hero-title">Contact <em>Coach BRVM</em></h1>
+            <h1 class="contact-hero-title">Contact <em>Boursiv</em></h1>
             <p style="font-size:14px;color:#6B7590;font-weight:300;">Une question sur les analyses, les BOC, les formations ou la plateforme ? Contactez notre équipe.</p>
         </div>
     </div>
@@ -42,7 +42,7 @@
         <div class="contact-card cbr">
             <div class="contact-card-body">
                 <div class="contact-name">Djaha Ghislian</div>
-                <div class="contact-role">Support & Relations Clients — Coach BRVM</div>
+                <div class="contact-role">Support & Relations Clients — Boursiv</div>
                 <div class="contact-item">
                     <span class="contact-item-label">📞 Téléphone</span>
                     <span class="contact-item-value"><a href="tel:+2250574023351">+225 05 74 02 33 51</a></span>
@@ -53,7 +53,7 @@
                 </div>
                 <div class="contact-item">
                     <span class="contact-item-label">✉️ Email</span>
-                    <span class="contact-item-value"><a href="mailto:coachbrvm@gmail.com">coachbrvm@gmail.com</a></span>
+                    <span class="contact-item-value"><a href="mailto:boursivoire@gmail.com">boursivoire@gmail.com</a></span>
                 </div>
                 <div class="contact-item">
                     <span class="contact-item-label">⏰ Horaires</span>

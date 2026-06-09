@@ -1,6 +1,6 @@
 {{-- ════════ notre-histoire.blade.php ════════ --}}
 @extends('layouts.app')
-@section('title','Notre histoire – Coach BRVM')
+@section('title','Notre histoire – Boursiv')
 
 @push('styles')
 <style>
@@ -35,7 +35,7 @@
         <div class="container" style="max-width:900px;position:relative;z-index:1;">
             <p class="histoire-hero-tag">À propos</p>
             <h1 class="histoire-hero-title">Notre <em>histoire</em></h1>
-            <p style="font-size:14px;color:#6B7590;font-weight:300;">Coach BRVM est né d'une expérience réelle, d'un parcours d'investisseurs passionnés mais souvent livrés à eux-mêmes.</p>
+            <p style="font-size:14px;color:#6B7590;font-weight:300;">Boursiv est né d'une expérience réelle, d'un parcours d'investisseurs passionnés mais souvent livrés à eux-mêmes.</p>
         </div>
     </div>
     <div class="container py-5" style="max-width:900px;">
@@ -50,7 +50,7 @@
 
             <h2 class="histoire-h">Alors est née une idée simple : aider ceux qui commencent.</h2>
             <p class="histoire-p"><em class="histoire-em">"Et si les nouveaux investisseurs avaient accès aux outils que nous n'avons jamais eus ? Et si l'analyse financière devenait enfin accessible à tous ?"</em></p>
-            <p class="histoire-p">C'est ainsi qu'est né <strong style="color:#E8EAF0;">Coach BRVM</strong> : une plateforme pensée pour les débutants, mais utile aussi aux investisseurs confirmés.</p>
+            <p class="histoire-p">C'est ainsi qu'est né <strong style="color:#E8EAF0;">Boursiv</strong> : une plateforme pensée pour les débutants, mais utile aussi aux investisseurs confirmés.</p>
 
             <h2 class="histoire-h">Notre mission</h2>
             <ul class="histoire-ul">
@@ -62,7 +62,7 @@
 
             <div class="histoire-mission-box">
                 <div class="histoire-mission-text">
-                    <strong>Coach BRVM</strong> n'est pas seulement un outil. C'est une mission : contribuer à créer une nouvelle génération d'investisseurs africains mieux préparés, mieux accompagnés, et mieux informés.<br><br>
+                    <strong>Boursiv</strong> n'est pas seulement un outil. C'est une mission : contribuer à créer une nouvelle génération d'investisseurs africains mieux préparés, mieux accompagnés, et mieux informés.<br><br>
                     Merci de faire partie de cette aventure. Ensemble, faisons grandir la culture financière dans toute la région.
                 </div>
             </div>

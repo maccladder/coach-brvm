@@ -1,6 +1,6 @@
-{{-- ════════ forum/create-topic.blade.php ════════ --}}
+﻿{{-- ════════ forum/create-topic.blade.php ════════ --}}
 @extends('layouts.app')
-@section('title', 'Nouveau sujet – ' . $category->name . ' – Forum Coach BRVM')
+@section('title', 'Nouveau sujet – ' . $category->name . ' – Forum Boursiv')
 
 @push('styles')
 <style>

@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Pack BRVM activé — Merci !')
+@section('title', 'Pack Boursiv activé — Merci !')
 
 @section('content')
 <div style="background:#060910; min-height:100vh; display:flex; align-items:center; justify-content:center; padding:40px 15px;">
@@ -9,7 +9,7 @@
         <div style="font-size:64px; margin-bottom:24px;">🎉</div>
 
         <h1 style="font-family:'Playfair Display',serif; font-size:clamp(28px,5vw,42px); font-weight:900; color:#E8EAF0; margin-bottom:16px; line-height:1.15;">
-            Votre Pack BRVM est <em style="color:#C9A84C;">activé</em> !
+            Votre Pack Boursiv est <em style="color:#C9A84C;">activé</em> !
         </h1>
 
         <p style="font-size:15px; color:#6B7590; line-height:1.75; margin-bottom:32px;">

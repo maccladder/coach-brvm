@@ -1,6 +1,6 @@
-{{-- ════════ sections/financement.blade.php ════════ --}}
+﻿{{-- ════════ sections/financement.blade.php ════════ --}}
 @extends('layouts.app')
-@section('title','Facilitation de financement – Coach BRVM')
+@section('title','Facilitation de financement – Boursiv')
 
 @push('styles')
 <style>
@@ -131,7 +131,7 @@
                         d'un <em>financement</em> ?
                     </h1>
                     <p class="fin-hero-desc">
-                        Coach BRVM joue le rôle de <strong>facilitateur</strong> entre les particuliers
+                        Boursiv joue le rôle de <strong>facilitateur</strong> entre les particuliers
                         et des structures financières agréées, pour vous aider à obtenir le prêt
                         adapté à votre situation.
                     </p>
@@ -139,7 +139,7 @@
                     <div class="fin-disclaimer">
                         <span style="font-size:20px; flex-shrink:0;">⚠️</span>
                         <div>
-                            <strong>Transparence importante :</strong> Coach BRVM n'est pas une banque
+                            <strong>Transparence importante :</strong> Boursiv n'est pas une banque
                             ni un organisme de crédit. Nous ne prêtons pas d'argent et ne collectons
                             aucun fonds. Nous vous <strong>mettons en relation</strong> avec des structures
                             financières agréées et vous accompagnons dans les démarches.
@@ -272,8 +272,8 @@
             </div>
             <div>
                 <div class="fin-faq-item">
-                    <div class="fin-faq-q">Coach BRVM est-il une banque ou un organisme de crédit ? <span>+</span></div>
-                    <p class="fin-faq-a">Non. Coach BRVM est un facilitateur. Nous ne prêtons pas d'argent et ne collectons aucun fonds. Notre rôle est de vous mettre en relation avec des structures financières agréées et de vous accompagner dans la préparation de votre dossier.</p>
+                    <div class="fin-faq-q">Boursiv est-il une banque ou un organisme de crédit ? <span>+</span></div>
+                    <p class="fin-faq-a">Non. Boursiv est un facilitateur. Nous ne prêtons pas d'argent et ne collectons aucun fonds. Notre rôle est de vous mettre en relation avec des structures financières agréées et de vous accompagner dans la préparation de votre dossier.</p>
                 </div>
                 <div class="fin-faq-item">
                     <div class="fin-faq-q">Quels types de projets peuvent bénéficier d'un financement ? <span>+</span></div>

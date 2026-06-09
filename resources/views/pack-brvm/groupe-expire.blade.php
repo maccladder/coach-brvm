@@ -1,6 +1,6 @@
-@extends('layouts.app')
+﻿@extends('layouts.app')
 
-@section('title', 'Lien WhatsApp — Coach BRVM')
+@section('title', 'Lien WhatsApp — Boursiv')
 
 @section('content')
 <div style="background:#060910; min-height:100vh; display:flex; align-items:center; justify-content:center; padding:40px 15px;">
@@ -16,7 +16,7 @@
                 Ce lien d'accès au groupe WhatsApp a déjà été utilisé. Par sécurité, chaque lien n'est valable qu'une seule fois.
             </p>
             <div style="background:rgba(201,168,76,.06); border:1px solid rgba(201,168,76,.18); border-radius:6px; padding:16px 20px; font-size:13px; color:#9AA3B8; line-height:1.65; margin-bottom:28px;">
-                Si vous avez perdu l'accès ou avez besoin d'un nouveau lien, contactez l'équipe Coach BRVM.
+                Si vous avez perdu l'accès ou avez besoin d'un nouveau lien, contactez l'équipe Boursiv.
                 Un administrateur peut vous renvoyer un nouvel email depuis votre profil.
             </div>
 
@@ -27,7 +27,7 @@
                 Ce lien ne vous appartient pas
             </h1>
             <p style="font-size:14px; color:#6B7590; line-height:1.75; margin-bottom:28px;">
-                Ce lien d'invitation est associé à un autre compte. Veuillez vous connecter avec le compte qui a acheté le Pack BRVM.
+                Ce lien d'invitation est associé à un autre compte. Veuillez vous connecter avec le compte qui a acheté le Pack Boursiv.
             </p>
 
         @else {{-- invalid --}}

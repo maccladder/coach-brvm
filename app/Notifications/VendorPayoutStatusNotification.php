@@ -25,10 +25,10 @@ class VendorPayoutStatusNotification extends Notification
         $amount = number_format((int) $this->amount, 0, ',', ' ');
 
         $subject = match ($this->status) {
-            'approved' => '✅ Reversement approuvé — Coach BRVM',
-            'paid'     => '💸 Reversement payé — Coach BRVM',
-            'rejected' => '⛔ Reversement rejeté — Coach BRVM',
-            default    => 'Notification reversement — Coach BRVM',
+            'approved' => '✅ Reversement approuvé — Boursiv',
+            'paid'     => '💸 Reversement payé — Boursiv',
+            'rejected' => '⛔ Reversement rejeté — Boursiv',
+            default    => 'Notification reversement — Boursiv',
         };
 
         $title = match ($this->status) {

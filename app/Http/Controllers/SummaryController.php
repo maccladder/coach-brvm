@@ -140,7 +140,7 @@ class SummaryController extends Controller
 
         // Texte final pour l'avatar
         $textForAvatar = <<<TXT
-Bonjour, ici ton coach BRVM.
+Bonjour, ici ton coach Boursiv.
 
 Voici l'essentiel de la séance du {$target} :
 {$mainSummary}

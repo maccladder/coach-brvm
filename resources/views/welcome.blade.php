@@ -1,4 +1,4 @@
-{{-- resources/views/welcome.blade.php --}}
+﻿{{-- resources/views/welcome.blade.php --}}
 @extends('layouts.app')
 
 @push('styles')
@@ -619,7 +619,7 @@
                 </p>
 
                 <p class="cb-hero-desc">
-                    Coach BRVM regroupe <strong>toutes les infos utiles BRVM</strong> :
+                    Boursiv regroupe <strong>toutes les infos utiles BRVM</strong> :
                     annonces, radar marché, annuaires, formations, portefeuille virtuel
                     et marketplace — au même endroit.
                 </p>
@@ -648,7 +648,7 @@
                         <span class="cb-hero-card-dot" style="background:#FF5F57;"></span>
                         <span class="cb-hero-card-dot" style="background:#FEBC2E;"></span>
                         <span class="cb-hero-card-dot" style="background:#28C840;"></span>
-                        <span class="cb-hero-card-title">coach-brvm.com — Outils</span>
+                        <span class="cb-hero-card-title">boursiv.com — Outils</span>
                     </div>
 
                     <a href="{{ route('announcements.index') }}" class="cb-tool-item" style="text-decoration:none;">
@@ -752,7 +752,7 @@
                         ✦ Nouveau
                     </span>
                     <h2 style="font-family:'Playfair Display',serif;font-size:clamp(24px,3.5vw,38px);font-weight:900;color:#E8EAF0;line-height:1.1;margin-bottom:14px;">
-                        La <em style="color:#C9A84C;font-style:italic;">Marketplace</em> Coach BRVM
+                        La <em style="color:#C9A84C;font-style:italic;">Marketplace</em> Boursiv
                     </h2>
                     <p style="font-size:15px;color:#6B7590;line-height:1.75;max-width:520px;font-weight:300;margin-bottom:0;">
                         PDF, études de marché, logiciels, vidéos, jeux éducatifs —
@@ -800,7 +800,7 @@
             <h2 class="cb-sec-title">La BOC du jour, <em>résumée par l'IA</em></h2>
             <div class="cb-divider"></div>
             <p style="font-size:16px;color:#6B7590;max-width:520px;font-weight:300;line-height:1.75;">
-                Marre de décortiquer seul les BOC ? Coach BRVM publie une interprétation gratuite de la dernière BOC disponible (J-1) chaque jour.
+                Marre de décortiquer seul les BOC ? Boursiv publie une interprétation gratuite de la dernière BOC disponible (J-1) chaque jour.
             </p>
         </div>
 
@@ -809,7 +809,7 @@
                 📄 Bulletin Officiel de la Côte — J-1 disponible
             </p>
             <h3 style="font-family:'Playfair Display',serif;font-size:clamp(20px,3vw,30px);font-weight:700;color:#E8EAF0;margin-bottom:12px;">
-                Coach BRVM — l'IA qui résume la BOC pour toi
+                Boursiv — l'IA qui résume la BOC pour toi
             </h3>
             <span style="display:inline-flex;align-items:center;gap:7px;font-family:'Syne',sans-serif;font-size:11px;color:#0FCFA4;background:rgba(15,207,164,.08);border:1px solid rgba(15,207,164,.18);padding:5px 12px;border-radius:100px;margin-bottom:18px;">
                 ✅ Accès 100% gratuit — aucun compte requis
@@ -874,7 +874,7 @@
             <div class="col-md-6 cbr">
                 <div class="cb-callout h-100 d-flex justify-content-between align-items-center gap-3 flex-wrap">
                     <div>
-                        <div class="cb-callout-title">🛍️ Marketplace Coach BRVM</div>
+                        <div class="cb-callout-title">🛍️ Marketplace Boursiv</div>
                         <div class="cb-callout-desc">PDF, vidéos, logiciels – achat instantané.<br>Paiement sécurisé par <strong style="color:#E8EAF0;">Mobile Money</strong>.</div>
                     </div>
                     <a href="{{ route('marketplace.index') }}" class="cb-cta-primary" style="white-space:nowrap;">Découvrir →</a>
@@ -920,7 +920,7 @@
             <div class="col-lg-7">
                 <p style="font-family:'Syne',sans-serif;font-size:11px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:#C9A84C;margin-bottom:10px;">Programme apporteur d'affaires</p>
                 <h2 style="font-family:'Playfair Display',serif;font-size:clamp(24px,4vw,36px);font-weight:900;color:#E8EAF0;line-height:1.2;margin-bottom:14px;">
-                    Gagnez <em style="color:#C9A84C;font-style:italic;">10%</em> en parrainant<br>vos contacts sur Coach BRVM
+                    Gagnez <em style="color:#C9A84C;font-style:italic;">10%</em> en parrainant<br>vos contacts sur Boursiv
                 </h2>
                 <p style="font-size:14px;color:#6B7590;line-height:1.7;margin-bottom:24px;max-width:520px;">
                     Partagez votre lien unique — vos contacts bénéficient de <strong style="color:#0FCFA4;">−10%</strong> à l'achat de formations et packs éligibles, et vous touchez <strong style="color:#C9A84C;">+10%</strong> de commission. Reversement dès 10 000 FCFA via mobile money.
@@ -1146,7 +1146,7 @@
         </div>
 
         <h2 style="font-family:'Playfair Display',serif; font-size:clamp(26px,5vw,42px); font-weight:900; color:#E8EAF0; margin-bottom:10px; line-height:1.1;">
-            🎓 Pack BRVM <em style="color:#C9A84C;">Complet</em>
+            🎓 Pack Boursiv <em style="color:#C9A84C;">Complet</em>
         </h2>
 
         <p style="font-size:14px; color:#6B7590; line-height:1.75; max-width:600px; margin:0 auto 24px;">
@@ -1185,7 +1185,7 @@
 <section class="cb-sec" style="background:#060910;">
     <div class="container" style="max-width:1100px;">
         <div class="cbr">
-            <p class="cb-sec-tag">Services Coach BRVM</p>
+            <p class="cb-sec-tag">Services Boursiv</p>
             <h2 class="cb-sec-title">Bien plus qu'une plateforme — <em>un accompagnement</em></h2>
             <div class="cb-divider"></div>
         </div>
@@ -1204,7 +1204,7 @@
                         Besoin d'un prêt pour concrétiser votre projet ?
                     </h3>
                     <p style="font-size:14px;color:#6B7590;line-height:1.75;margin-bottom:24px;flex-grow:1;">
-                        Coach BRVM joue le rôle de <strong style="color:#E8EAF0;">facilitateur</strong> entre les particuliers
+                        Boursiv joue le rôle de <strong style="color:#E8EAF0;">facilitateur</strong> entre les particuliers
                         et des structures financières agréées. Mise en relation gratuite, réponse sous 24h.
                     </p>
                     <a href="{{ route('financement') }}" style="
@@ -1353,7 +1353,7 @@
             </h2>
 
             <p style="font-size:clamp(14px,2vw,16px); color:#6B7590; line-height:1.85; max-width:600px; margin:0 auto 28px;" class="cbr">
-                Coach BRVM <strong style="color:#E8EAF0;">n'est pas une SGI</strong>. Nous t'accompagnons pas à pas dans les démarches
+                Boursiv <strong style="color:#E8EAF0;">n'est pas une SGI</strong>. Nous t'accompagnons pas à pas dans les démarches
                 d'ouverture de ton compte-titres auprès d'une <strong style="color:#E8EAF0;">SGI agréée BRVM</strong> — que tu sois en Europe, en Amérique, ou ailleurs.
                 Tout se fait en ligne, de A à Z.
             </p>
@@ -1409,7 +1409,7 @@
             <span class="g">d'investisseur</span>
         </h2>
         <p style="font-size:clamp(15px,2vw,17px);color:#6B7590;max-width:420px;margin:20px auto 40px;line-height:1.75;font-weight:300;">
-            Coach BRVM t'accompagne à chaque étape. Commence avec la BOC gratuite, puis va aussi loin que tu veux.
+            Boursiv t'accompagne à chaque étape. Commence avec la BOC gratuite, puis va aussi loin que tu veux.
         </p>
         <div class="d-flex gap-3 justify-content-center flex-wrap">
             <a href="{{ route('register') }}" class="cb-cta-primary" style="font-size:15px;padding:16px 36px;">✦ S'inscrire — c'est gratuit</a>
@@ -1418,7 +1418,7 @@
             @endif
         </div>
         <p style="font-family:'Syne',sans-serif;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:#6B7590;margin-top:32px;border-top:1px solid rgba(255,255,255,.06);padding-top:24px;">
-            coach-brvm.com &nbsp;·&nbsp; <strong style="color:#C9A84C;">Comprends. Analyse. Progresse.</strong>
+            boursiv.com &nbsp;·&nbsp; <strong style="color:#C9A84C;">Comprends. Analyse. Progresse.</strong>
         </p>
     </div>
 </section>
@@ -1437,7 +1437,7 @@
                 </p>
             </div>
             <div class="col-lg-4">
-                <p style="font-family:'Syne',sans-serif;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#6B7590;margin-bottom:12px;">Suivre Coach BRVM</p>
+                <p style="font-family:'Syne',sans-serif;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#6B7590;margin-bottom:12px;">Suivre Boursiv</p>
                 <div class="d-flex flex-wrap gap-2">
                     <a href="https://t.me/coachbrvm" target="_blank" class="cb-social-btn"><i class="bi bi-telegram"></i> Telegram</a>
                     <a href="https://x.com/coachbrvm" target="_blank" class="cb-social-btn"><i class="bi bi-twitter-x"></i> X</a>
@@ -1460,7 +1460,7 @@
             </div>
         </div>
         <div class="border-top pt-3" style="border-color:rgba(255,255,255,.05)!important;">
-            <div class="cb-footer-copy">© {{ date('Y') }} Coach BRVM · CHENGGONG SARL</div>
+            <div class="cb-footer-copy">© {{ date('Y') }} Boursiv · CHENGGONG SARL</div>
         </div>
     </div>
 </footer>

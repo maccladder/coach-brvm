@@ -40,7 +40,7 @@
         </a>
     </p>
 
-    <p style="font-size:12px;color:#999;margin-top:24px">Coach BRVM – Notification automatique</p>
+    <p style="font-size:12px;color:#999;margin-top:24px">Boursiv – Notification automatique</p>
 </div>
 </body>
 </html>

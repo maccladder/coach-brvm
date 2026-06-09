@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
@@ -54,7 +54,7 @@
     <p>
         <strong>Titre :</strong> {{ $boc->title }}<br>
         <strong>Date du BOC :</strong> {{ optional($boc->boc_date)->format('d/m/Y') }}<br>
-        <span class="badge">Coach BRVM</span>
+        <span class="badge">Boursiv</span>
     </p>
 </div>
 

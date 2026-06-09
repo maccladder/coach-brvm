@@ -1,7 +1,7 @@
-{{-- resources/views/sgis/show.blade.php --}}
+﻿{{-- resources/views/sgis/show.blade.php --}}
 @extends('layouts.app')
 
-@section('title', $sgi->name . ' – SGI – Coach BRVM')
+@section('title', $sgi->name . ' – SGI – Boursiv')
 
 @push('styles')
 <style>
@@ -183,7 +183,7 @@
                     </div>
                 @endif
                 <div class="sgi-disclaimer-text">
-                    ℹ️ Coach BRVM affiche ces données à titre indicatif. Pour les frais, procédures et documents nécessaires, contactez directement la SGI.
+                    ℹ️ Boursiv affiche ces données à titre indicatif. Pour les frais, procédures et documents nécessaires, contactez directement la SGI.
                 </div>
             </div>
         </div>

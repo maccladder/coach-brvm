@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="utf-8">
@@ -48,7 +48,7 @@
 
         <p style="font-size:13px; color:#6b7280; margin:0;">
             Regards,<br>
-            <strong style="color:#374151;">Coach BRVM</strong>
+            <strong style="color:#374151;">Boursiv</strong>
         </p>
     </div>
 

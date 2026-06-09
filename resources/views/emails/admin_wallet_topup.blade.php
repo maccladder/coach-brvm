@@ -15,7 +15,7 @@
 
     <p>Bonjour <strong>{{ $user->name }}</strong>,</p>
 
-    <p>Bonne nouvelle ! Votre portefeuille virtuel Coach BRVM vient d'être rechargé.</p>
+    <p>Bonne nouvelle ! Votre portefeuille virtuel Boursiv vient d'être rechargé.</p>
 
     <div style="background:#f0fdf4; border-left:4px solid #198754; padding:16px 20px; margin:20px 0; border-radius:4px">
         <p style="margin:0 0 8px; font-size:15px; color:#555">Montant crédité</p>
@@ -46,12 +46,12 @@
 
     <p>Si vous avez des questions, notre équipe est disponible pour vous aider.</p>
 
-    <p>À bientôt sur Coach BRVM,<br><strong>L'équipe Coach BRVM</strong></p>
+    <p>À bientôt sur Boursiv,<br><strong>L'équipe Boursiv</strong></p>
 
     <hr style="margin-top:30px; border:none; border-top:1px solid #eee">
 
     <p style="font-size:12px; color:#888; margin-top:15px">
-        Notification officielle – Coach BRVM<br>
+        Notification officielle – Boursiv<br>
         Cet email a été envoyé à {{ $user->email }}.
     </p>
 

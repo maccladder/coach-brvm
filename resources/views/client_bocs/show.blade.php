@@ -1,4 +1,4 @@
-{{-- resources/views/client_bocs/show.blade.php --}}
+﻿{{-- resources/views/client_bocs/show.blade.php --}}
 @extends('layouts.app')
 
 @push('styles')
@@ -114,10 +114,10 @@
 
                 {{-- Titre + meta --}}
                 <div class="d-flex align-items-center gap-3">
-                    <img src="{{ asset('avatars/coach.png') }}" alt="Coach BRVM" class="boc-avatar-img">
+                    <img src="{{ asset('avatars/coach.png') }}" alt="Boursiv" class="boc-avatar-img">
                     <div>
                         <h1 class="boc-title">{{ $boc->title }}</h1>
-                        <div class="boc-meta">BOC du {{ optional($boc->boc_date)->format('d/m/Y') }} · Coach BRVM</div>
+                        <div class="boc-meta">BOC du {{ optional($boc->boc_date)->format('d/m/Y') }} · Boursiv</div>
                         <div style="margin-top:8px;">
                             @if(!empty($boc->interpreted_markdown))
                                 <span class="boc-badge-ok">✅ Analyse prête</span>

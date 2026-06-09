@@ -11,7 +11,7 @@
     {{-- Header --}}
     <div style="background: #060910; border-radius: 8px 8px 0 0; padding: 28px 32px; text-align: center;">
         <a href="{{ url('/') }}" style="font-family: Georgia, serif; font-size: 22px; font-weight: 900; color: #C9A84C; text-decoration: none; letter-spacing: .02em;">
-            Coach<em style="font-style: normal; color: #E8EAF0;">BRVM</em>
+            Boursiv
         </a>
     </div>
 
@@ -24,7 +24,7 @@
             Nouvelle réponse sur votre sujet
         </h2>
         <p style="font-size: 13px; color: #888; text-align: center; margin: 0 0 28px; letter-spacing: .04em; text-transform: uppercase;">
-            Forum Coach BRVM
+            Forum Boursiv
         </p>
 
         <p style="font-size: 15px; color: #333; margin: 0 0 20px;">
@@ -33,7 +33,7 @@
 
         <p style="font-size: 15px; color: #555; line-height: 1.7; margin: 0 0 24px;">
             <strong style="color: #0d0f1a;">{{ $post->user->name ?? 'Un membre' }}</strong>
-            a répondu à votre sujet sur le forum Coach BRVM.
+            a répondu à votre sujet sur le forum Boursiv.
         </p>
 
         {{-- Topic title --}}
@@ -73,7 +73,7 @@
     {{-- Footer --}}
     <div style="background: #060910; border-radius: 0 0 8px 8px; padding: 18px 32px; text-align: center;">
         <p style="font-size: 11px; color: #6B7590; margin: 0; letter-spacing: .06em; text-transform: uppercase;">
-            Coach BRVM · Comprends. Analyse. Progresse.
+            Boursiv · Comprends. Analyse. Progresse.
         </p>
         <p style="font-size: 11px; color: #444; margin: 6px 0 0;">
             Cet email a été envoyé à {{ $topic->user->email ?? '' }}

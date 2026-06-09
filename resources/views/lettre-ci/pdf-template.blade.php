@@ -70,7 +70,7 @@
     <div class="content">{{ $content }}</div>
 
     <div class="footer">
-        <span>Généré par LettreCI — coachbrvm.com</span>
+        <span>Généré par LettreCI — boursiv.com</span>
         <span>Document non contractuel · Usage personnel</span>
     </div>
 </body>

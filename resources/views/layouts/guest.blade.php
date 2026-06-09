@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>{{ config('app.name', 'Coach BRVM') }}</title>
+    <title>{{ config('app.name', 'Boursiv') }}</title>
 
     {{-- Fonts --}}
     <link rel="preconnect" href="https://fonts.bunny.net">
@@ -269,10 +269,7 @@
     {{-- Logo --}}
     <div class="cb-guest-logo">
         <a href="{{ route('landing') }}">
-            <img src="{{ asset('img/coach-brvm-logo.png') }}"
-                 alt="Coach BRVM"
-                 onerror="this.style.display='none'">
-            <span class="cb-guest-logo-text">Coach<em>BRVM</em></span>
+            <span class="cb-guest-logo-text">Boursiv</span>
         </a>
         <p class="cb-guest-logo-sub">Comprends · Analyse · Progresse</p>
     </div>
@@ -284,7 +281,7 @@
 
     {{-- Footer --}}
     <p class="cb-guest-footer">
-        © {{ date('Y') }} Coach BRVM · CHENGGONG SARL
+        © {{ date('Y') }} Boursiv · CHENGGONG SARL
     </p>
 
 </div>

@@ -1,4 +1,4 @@
-@extends('layouts.app')
+﻿@extends('layouts.app')
 
 @push('styles')
 <style>
@@ -105,7 +105,7 @@
     $minPayout  = (int)($totals['min_payout'] ?? 10000);
     $canRequest = $available >= $minPayout;
 
-    $whatsappText = urlencode("Rejoins Coach BRVM et investis à la bourse BRVM ! Utilise mon code parrain pour −10% sur ton premier achat : {$affiliateUrl}");
+    $whatsappText = urlencode("Rejoins Boursiv et investis à la bourse BRVM ! Utilise mon code parrain pour −10% sur ton premier achat : {$affiliateUrl}");
     $fbUrl = urlencode($affiliateUrl);
 @endphp
 <div class="af-page">
@@ -213,13 +213,13 @@
                     @if(config('affiliate.pack_brvm_eligible', true))
                     @php
                         $packUrl   = url('/r/' . $affiliate->code . '?p=pack');
-                        $packWa    = urlencode('Rejoins Coach BRVM et investis à la BRVM ! Obtiens le Pack BRVM complet avec -10% via mon lien : ' . $packUrl);
+                        $packWa    = urlencode('Rejoins Boursiv et investis à la BRVM ! Obtiens le Pack Boursiv complet avec -10% via mon lien : ' . $packUrl);
                         $packFb    = urlencode($packUrl);
                     @endphp
                     <div class="af-shortcut-row">
                         <div class="af-shortcut-info">
                             <span class="af-shortcut-badge" style="background:rgba(201,168,76,.12);color:#C9A84C;border-color:rgba(201,168,76,.25);">🎓 Pack</span>
-                            <span class="af-shortcut-label">Pack BRVM Complet</span>
+                            <span class="af-shortcut-label">Pack Boursiv Complet</span>
                             <span class="af-shortcut-url">{{ $packUrl }}</span>
                         </div>
                         <div class="af-shortcut-actions">
@@ -263,7 +263,7 @@
                     </div>
                     @endforeach
 
-                    {{-- Produits marketplace Coach BRVM éligibles --}}
+                    {{-- Produits marketplace Boursiv éligibles --}}
                     @foreach($eligibleProducts as $mp)
                     @php
                         $mpUrl = url('/r/' . $affiliate->code . '?product=' . $mp->slug);
@@ -329,7 +329,7 @@
                                     default     => '—',
                                 };
                                 $typeLabel = match($c->product_type) {
-                                    'pack_brvm'   => 'Pack BRVM',
+                                    'pack_brvm'   => 'Pack Boursiv',
                                     'course'      => 'Formation',
                                     'marketplace' => 'Marketplace',
                                     default       => $c->product_type,
@@ -489,7 +489,7 @@
                         <span class="af-faq-icon">+</span>
                     </button>
                     <div class="af-faq-body">
-                        <p>Le Pack BRVM, les formations et les produits Coach BRVM. Les produits de vendeurs tiers ne donnent pas de commission.</p>
+                        <p>Le Pack Boursiv, les formations et les produits Boursiv. Les produits de vendeurs tiers ne donnent pas de commission.</p>
                     </div>
                 </div>
 

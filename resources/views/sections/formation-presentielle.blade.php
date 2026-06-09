@@ -1,6 +1,6 @@
-{{-- ════════ sections/formation-presentielle.blade.php ════════ --}}
+﻿{{-- ════════ sections/formation-presentielle.blade.php ════════ --}}
 @extends('layouts.app')
-@section('title','Formation en présentiel – Coach BRVM')
+@section('title','Formation en présentiel – Boursiv')
 
 @push('styles')
 <style>
@@ -121,7 +121,7 @@
                         avec une <em>formation</em> en présentiel
                     </h1>
                     <p class="fp-hero-desc">
-                        Coach BRVM propose des sessions de formation en présentiel pour vous aider à
+                        Boursiv propose des sessions de formation en présentiel pour vous aider à
                         <strong>maîtriser les fondamentaux de l'investissement en bourse</strong>
                         et développer une stratégie adaptée à votre profil.
                     </p>

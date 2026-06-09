@@ -20,7 +20,7 @@ class AdminGrantNotificationMail extends Mailable
     public function build()
     {
         return $this
-            ->subject('🎁 Un cadeau de l\'équipe Coach BRVM pour vous')
+            ->subject('🎁 Un cadeau de l\'équipe Boursiv pour vous')
             ->view('emails.admin_grant_notification')
             ->text('emails.admin_grant_notification_text');
     }

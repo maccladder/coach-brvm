@@ -16,7 +16,7 @@ class AffiliateCommissionEarnedMail extends Mailable
     public function build()
     {
         return $this
-            ->subject('💰 Vous avez gagné une commission – Coach BRVM')
+            ->subject('💰 Vous avez gagné une commission – Boursiv')
             ->view('emails.affiliate.commission_earned');
     }
 }

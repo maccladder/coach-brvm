@@ -16,7 +16,7 @@ class AffiliateCommissionAdminMail extends Mailable
     public function build()
     {
         return $this
-            ->subject('🤝 Vente affiliée – Coach BRVM')
+            ->subject('🤝 Vente affiliée – Boursiv')
             ->view('emails.affiliate.commission_admin');
     }
 }

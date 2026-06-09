@@ -59,7 +59,7 @@ class RegenerateClientBocAnalysis extends Command
         $mainLines   = array_slice($lines, 0, 4);
         $mainSummary = implode(' ', $mainLines);
 
-        $textForAvatar = "Bonjour, je suis ton coach BRVM.\n\n"
+        $textForAvatar = "Bonjour, je suis ton coach Boursiv.\n\n"
             ."Voici les principaux enseignements de ton BOC du {$bocDate} :\n"
             ."{$mainSummary}\n\n"
             ."N'oublie pas : ceci n'est pas un conseil d'investissement personnalisé.\n"

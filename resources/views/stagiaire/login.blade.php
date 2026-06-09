@@ -1,4 +1,4 @@
-@extends('layouts.app')
+﻿@extends('layouts.app')
 
 @section('content')
 <div class="container py-5" style="max-width: 500px;">
@@ -6,7 +6,7 @@
         <div class="card-body p-4">
 
             <h3 class="fw-bold text-center mb-1">Espace Stagiaire</h3>
-            <p class="text-center text-muted small mb-4">Coach BRVM</p>
+            <p class="text-center text-muted small mb-4">Boursiv</p>
 
             @if(session('error'))
                 <div class="alert alert-danger">{{ session('error') }}</div>

@@ -1,6 +1,6 @@
-{{-- ════════ sections/diaspora.blade.php ════════ --}}
+﻿{{-- ════════ sections/diaspora.blade.php ════════ --}}
 @extends('layouts.app')
-@section('title','Investir depuis la diaspora – Coach BRVM')
+@section('title','Investir depuis la diaspora – Boursiv')
 
 @push('styles')
 <style>
@@ -131,7 +131,7 @@
                         investir à la <em>BRVM</em> ?
                     </h1>
                     <p class="dia-hero-desc">
-                        C'est possible, et Coach BRVM est là pour t'<strong>accompagner pas à pas</strong>
+                        C'est possible, et Boursiv est là pour t'<strong>accompagner pas à pas</strong>
                         dans toutes les démarches — de zéro jusqu'à l'activation de ton compte-titres
                         auprès d'une SGI agréée.
                     </p>
@@ -139,7 +139,7 @@
                     <div class="dia-disclaimer">
                         <span style="font-size:20px; flex-shrink:0;">⚠️</span>
                         <div>
-                            <strong>Transparence importante :</strong> Coach BRVM n'est pas une SGI
+                            <strong>Transparence importante :</strong> Boursiv n'est pas une SGI
                             (Société de Gestion et d'Intermédiation). Nous ne gérons pas ton argent
                             et nous ne passons pas d'ordres en bourse à ta place.
                             Nous t'<strong>accompagnons uniquement dans les démarches administratives</strong>
@@ -256,7 +256,7 @@
                         <div class="dia-step-num">05</div>
                         <div>
                             <div class="dia-step-title">Tu investis en autonomie</div>
-                            <p class="dia-step-desc">Compte activé, tu passes tes ordres directement avec ta SGI. Coach BRVM continue de t'accompagner dans l'analyse du marché BRVM.</p>
+                            <p class="dia-step-desc">Compte activé, tu passes tes ordres directement avec ta SGI. Boursiv continue de t'accompagner dans l'analyse du marché BRVM.</p>
                         </div>
                     </div>
                 </div>

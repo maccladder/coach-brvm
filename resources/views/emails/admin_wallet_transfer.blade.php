@@ -18,9 +18,9 @@
     <p>Bonjour <strong>{{ $user->name }}</strong>,</p>
 
     @if($direction === 'received')
-        <p>Votre portefeuille Coach BRVM vient de recevoir un transfert.</p>
+        <p>Votre portefeuille Boursiv vient de recevoir un transfert.</p>
     @else
-        <p>Un transfert a été effectué depuis votre portefeuille Coach BRVM.</p>
+        <p>Un transfert a été effectué depuis votre portefeuille Boursiv.</p>
     @endif
 
     <div style="background:{{ $direction === 'received' ? '#f0fdf4' : '#fff8f0' }}; border-left:4px solid {{ $direction === 'received' ? '#198754' : '#fd7e14' }}; padding:16px 20px; margin:20px 0; border-radius:4px">
@@ -55,12 +55,12 @@
 
     <p>Si vous avez des questions, notre équipe est disponible pour vous aider.</p>
 
-    <p>À bientôt sur Coach BRVM,<br><strong>L'équipe Coach BRVM</strong></p>
+    <p>À bientôt sur Boursiv,<br><strong>L'équipe Boursiv</strong></p>
 
     <hr style="margin-top:30px; border:none; border-top:1px solid #eee">
 
     <p style="font-size:12px; color:#888; margin-top:15px">
-        Notification officielle – Coach BRVM<br>
+        Notification officielle – Boursiv<br>
         Cet email a été envoyé à {{ $user->email }}.
     </p>
 

@@ -20,7 +20,7 @@ class PaymentReceivedMail extends Mailable
     public function build()
     {
         return $this
-            ->subject('💰 Nouveau paiement reçu – Coach BRVM')
+            ->subject('💰 Nouveau paiement reçu – Boursiv')
             ->view('emails.payment_received');
     }
 }

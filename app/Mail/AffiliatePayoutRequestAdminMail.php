@@ -16,7 +16,7 @@ class AffiliatePayoutRequestAdminMail extends Mailable
     public function build()
     {
         return $this
-            ->subject('💸 Nouvelle demande de reversement apporteur – Coach BRVM')
+            ->subject('💸 Nouvelle demande de reversement apporteur – Boursiv')
             ->view('emails.affiliate.payout_admin');
     }
 }

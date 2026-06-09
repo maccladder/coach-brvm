@@ -16,7 +16,7 @@ class AffiliateActivatedMail extends Mailable
     public function build()
     {
         return $this
-            ->subject('🎉 Votre compte apporteur est actif – Coach BRVM')
+            ->subject('🎉 Votre compte apporteur est actif – Boursiv')
             ->view('emails.affiliate.activated');
     }
 }

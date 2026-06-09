@@ -21,7 +21,7 @@ class GrantWalletBonusCommand extends Command
         $limit  = $this->option('limit')   ? (int) $this->option('limit')   : null;
         $userId = $this->option('user-id') ? (int) $this->option('user-id') : null;
 
-        $this->info('🎁 Promo Wallet Bonus — Coach BRVM');
+        $this->info('🎁 Promo Wallet Bonus — Boursiv');
         $this->info('Cutoff inscription : ' . config('otp.eligibility_cutoff'));
         $this->info('Période active    : ' . config('otp.wallet_bonus_start') . ' → ' . config('otp.wallet_bonus_end'));
         $this->info('Montant bonus     : ' . number_format(config('otp.wallet_bonus_amount'), 0, ',', ' ') . ' FCFA virtuels');

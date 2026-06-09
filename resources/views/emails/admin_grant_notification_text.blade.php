@@ -1,6 +1,6 @@
 Bonjour {{ $grant->user->name }},
 
-Bonne nouvelle ! L'équipe Coach BRVM vous offre un accès gratuit à :
+Bonne nouvelle ! L'équipe Boursiv vous offre un accès gratuit à :
 
 {{ $itemName }}
 
@@ -15,4 +15,4 @@ Cet accès est valable jusqu'au {{ $grant->expires_at->format('d/m/Y') }}.
 Accédez à votre contenu ici : {{ $itemUrl }}
 
 À bientôt,
-L'équipe Coach BRVM
+L'équipe Boursiv

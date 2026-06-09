@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Politique de confidentialité – Coach BRVM')
+@section('title', 'Politique de confidentialité – Boursiv')
 
 @section('content')
 <div class="bg-light py-5">
@@ -10,7 +10,7 @@
 
         <p class="text-muted">
             Cette politique décrit comment nous collectons, utilisons et protégeons les données que
-            vous nous confiez lors de l’utilisation de Coach BRVM.
+            vous nous confiez lors de l’utilisation de Boursiv.
         </p>
 
         <h4 class="mt-4">1. Données collectées</h4>
@@ -47,7 +47,7 @@
 
         <div class="alert alert-warning mt-3">
             <strong>Important :</strong> Vous restez responsable des documents que vous nous transmettez.
-            Coach BRVM ne pourra être tenu responsable d’une mauvaise utilisation des analyses générées.
+            Boursiv ne pourra être tenu responsable d’une mauvaise utilisation des analyses générées.
         </div>
 
         <h4 class="mt-4">5. Cookies</h4>
@@ -58,7 +58,7 @@
         <h4 class="mt-4">6. Vos droits</h4>
         <p>
             Vous pouvez demander la suppression de vos données en nous contactant à :
-            <strong>coachbrvm@gmail.com</strong>.
+            <strong>boursivoire@gmail.com</strong>.
         </p>
 
         <p class="text-muted mt-4">Dernière mise à jour : {{ date('Y') }}</p>

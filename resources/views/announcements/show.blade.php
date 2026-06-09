@@ -1,4 +1,4 @@
-{{-- resources/views/announcements/show.blade.php --}}
+﻿{{-- resources/views/announcements/show.blade.php --}}
 @extends('layouts.app')
 
 @push('styles')
@@ -284,17 +284,14 @@
         {{-- Signature --}}
         <div class="ann-signature">
             <img src="{{ asset('avatars/coach.png') }}"
-                 alt="Coach BRVM"
+                 alt="Boursiv"
                  class="ann-signature-avatar"
                  onerror="this.style.display='none'">
             <div>
-                <div class="ann-signature-name">Coach BRVM</div>
+                <div class="ann-signature-name">Boursiv</div>
                 <div class="ann-signature-sub">Service indépendant — analyses & explications pédagogiques.</div>
             </div>
-            <img src="{{ asset('img/coach-brvm-logo.png') }}"
-                 alt="Coach BRVM"
-                 class="ann-signature-logo"
-                 onerror="this.style.display='none'">
+            <span class="ann-signature-logo" style="font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:700;color:#C9A84C;letter-spacing:-.01em;">Boursiv</span>
         </div>
 
     </div>

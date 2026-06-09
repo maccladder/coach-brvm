@@ -4,13 +4,11 @@
             {{-- Header logo --}}
             <div class="text-center mb-6">
                 <a href="{{ route('landing') }}" class="inline-flex items-center justify-center">
-                    <img src="{{ asset('img/coach-brvm-logo.png') }}"
-                         alt="Coach BRVM"
-                         class="h-16 w-auto drop-shadow-sm">
+                    <span style="font-family:'Playfair Display',serif;font-size:2rem;font-weight:700;color:#1a1a1a;letter-spacing:-.01em;">Boursiv</span>
                 </a>
                 <h1 class="mt-3 text-2xl font-bold text-gray-900">Créer un compte</h1>
                 <p class="mt-1 text-sm text-gray-600">
-                    Inscris-toi pour accéder au portefeuille virtuel et aux services Coach BRVM.
+                    Inscris-toi pour accéder au portefeuille virtuel et aux services Boursiv.
                 </p>
             </div>
 
@@ -106,7 +104,7 @@
             </div>
 
             <p class="mt-6 text-center text-xs text-gray-500">
-                © {{ date('Y') }} Coach BRVM – CHENGGONG SARL
+                © {{ date('Y') }} Boursiv – CHENGGONG SARL
             </p>
         </div>
     </div>

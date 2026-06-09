@@ -183,7 +183,7 @@ class ClientFinancialController extends Controller
         $mainSummary = implode(' ', $mainLines);
 
         $textForAvatar = <<<TXT
-Bonjour, je suis ton coach BRVM.
+Bonjour, je suis ton coach Boursiv.
 
 Voici les points essentiels des états financiers de {$financial->company} ({$financial->period}) :
 

@@ -25,7 +25,7 @@
 
                 <p style="margin:10px 0 0; font-size:14px; color:#0c4a6e;">
                     <strong>
-                    Bonjour, j’ai acheté “{{ $product->title }}” sur Coach BRVM.
+                    Bonjour, j’ai acheté “{{ $product->title }}” sur Boursiv.
                     Je souhaite recevoir ma licence d’activation.
                     </strong>
                 </p>
@@ -57,7 +57,7 @@
             </p>
 
             <p style="margin:18px 0 0; color:#6b7280; font-size:12px; line-height:1.6;">
-                Coach BRVM — Marketplace<br>
+                Boursiv — Marketplace<br>
                 Si vous n’êtes pas à l’origine de cet achat, vous pouvez ignorer ce mail.
             </p>
 

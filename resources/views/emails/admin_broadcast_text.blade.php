@@ -3,4 +3,4 @@ Bonjour {{ $recipientName }},
 {!! strip_tags($htmlContent) !!}
 
 --
-L'équipe Coach BRVM
+L'équipe Boursiv

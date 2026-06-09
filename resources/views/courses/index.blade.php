@@ -1,4 +1,4 @@
-{{-- ════════ courses/index.blade.php ════════ --}}
+﻿{{-- ════════ courses/index.blade.php ════════ --}}
 @extends('layouts.app')
 
 @push('styles')
@@ -41,7 +41,7 @@
         <div class="courses-hero-grid"></div>
         <div class="container" style="max-width:1100px;position:relative;z-index:1;">
             <p class="courses-hero-tag">Formations</p>
-            <h1 class="courses-hero-title">🎓 Formations <em>Coach BRVM</em></h1>
+            <h1 class="courses-hero-title">🎓 Formations <em>Boursiv</em></h1>
             <p style="font-size:14px;color:#6B7590;font-weight:300;">Formations pratiques pour investir intelligemment à la BRVM.</p>
         </div>
     </div>

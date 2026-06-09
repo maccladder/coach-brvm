@@ -19,7 +19,7 @@ class AffiliateRequestAdminMail extends Mailable
     public function build()
     {
         return $this
-            ->subject('🤝 Nouvelle demande d\'apporteur – Coach BRVM')
+            ->subject('🤝 Nouvelle demande d\'apporteur – Boursiv')
             ->view('emails.affiliate.request_admin');
     }
 }

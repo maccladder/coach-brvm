@@ -21,7 +21,7 @@ class AdminWalletTopupMail extends Mailable
     public function build(): static
     {
         return $this
-            ->subject('💰 Votre portefeuille Coach BRVM a été rechargé')
+            ->subject('💰 Votre portefeuille Boursiv a été rechargé')
             ->view('emails.admin_wallet_topup');
     }
 }

@@ -1,4 +1,4 @@
-{{-- ════════════════════════════════════════════════
+﻿{{-- ════════════════════════════════════════════════
      resources/views/aide/strategies.blade.php
 ════════════════════════════════════════════════ --}}
 @extends('layouts.app')
@@ -85,7 +85,7 @@
     .strat-reflex strong { color: #0FCFA4; }
     .strat-reflex-title { font-family:'Syne',sans-serif;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#0FCFA4;margin-bottom:6px; }
 
-    /* Outils Coach BRVM */
+    /* Outils Boursiv */
     .strat-tools { background: #121A2C; border: 1px solid rgba(201,168,76,.1); border-radius: 4px; padding: 20px; }
     .strat-tools-title { font-family:'Syne',sans-serif;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#C9A84C;margin-bottom:14px; }
     .strat-tool-btn {
@@ -134,7 +134,7 @@
                     <h1 class="strat-hero-title">Stratégies <em>d'investissement</em></h1>
                     <p class="strat-hero-desc">
                         Comprendre, appliquer, éviter les pièges. Pour chaque stratégie : principe, avantages,
-                        dangers et comment Coach BRVM peut t'aider avec des liens directs vers les outils.
+                        dangers et comment Boursiv peut t'aider avec des liens directs vers les outils.
                     </p>
                 </div>
                 <div class="d-flex flex-wrap gap-2">
@@ -192,7 +192,7 @@
                     </div>
                     <div class="col-lg-5">
                         <div class="strat-tools">
-                            <div class="strat-tools-title">🔎 Coach BRVM peut t'aider</div>
+                            <div class="strat-tools-title">🔎 Boursiv peut t'aider</div>
                             <a class="strat-tool-btn dark" href="{{ route('radar.index') }}">📡 Radar : repérer les bulles rouges</a>
                             <a class="strat-tool-btn dark" href="{{ route('chocs.index') }}">⚡ Chocs : comprendre si c'est un "vrai choc"</a>
                             @auth
@@ -245,7 +245,7 @@
                     </div>
                     <div class="col-lg-5">
                         <div class="strat-tools">
-                            <div class="strat-tools-title">🔎 Coach BRVM peut t'aider</div>
+                            <div class="strat-tools-title">🔎 Boursiv peut t'aider</div>
                             <a class="strat-tool-btn green" href="{{ route('dividendes.index', ['year' => 2025]) }}">🏆 Classement dividendes (2025)</a>
                             <a class="strat-tool-btn dark" href="{{ route('societes.index') }}">🏢 Annuaire : choisir des entreprises solides</a>
                             @auth
@@ -299,7 +299,7 @@
                     </div>
                     <div class="col-lg-5">
                         <div class="strat-tools">
-                            <div class="strat-tools-title">🔎 Coach BRVM peut t'aider</div>
+                            <div class="strat-tools-title">🔎 Boursiv peut t'aider</div>
                             <a class="strat-tool-btn dark" href="{{ route('radar.index') }}">📡 Radar : repérer les bulles vertes dominantes</a>
                             <a class="strat-tool-btn dark" href="{{ route('chocs.index') }}">⚡ Chocs : éviter les "fausses" hausses</a>
                             @auth
@@ -348,7 +348,7 @@
                     </div>
                     <div class="col-lg-5">
                         <div class="strat-tools">
-                            <div class="strat-tools-title">🔎 Coach BRVM peut t'aider</div>
+                            <div class="strat-tools-title">🔎 Boursiv peut t'aider</div>
                             <a class="strat-tool-btn dark" href="{{ route('societes.index') }}">🏢 Annuaire : choisir des entreprises de qualité</a>
                             <a class="strat-tool-btn dark" href="{{ route('announcements.index') }}">📢 Annonces : suivre les événements importants</a>
                             @auth
@@ -396,7 +396,7 @@
                     </div>
                     <div class="col-lg-5">
                         <div class="strat-tools">
-                            <div class="strat-tools-title">🔎 Coach BRVM peut t'aider</div>
+                            <div class="strat-tools-title">🔎 Boursiv peut t'aider</div>
                             <a class="strat-tool-btn dark" href="{{ route('radar.index') }}">📡 Radar : voir quels secteurs dominent</a>
                             <a class="strat-tool-btn dark" href="{{ route('chocs.index') }}">⚡ Chocs : comprendre les montées/chutes par secteur</a>
                             <a class="strat-tool-btn dark" href="{{ route('announcements.index') }}">📢 Annonces : suivre les infos sectorielles</a>

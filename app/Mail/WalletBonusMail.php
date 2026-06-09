@@ -20,7 +20,7 @@ class WalletBonusMail extends Mailable
         $amount = number_format(config('otp.wallet_bonus_amount'), 0, ',', ' ');
 
         return $this
-            ->subject("🎁 Tu as reçu {$amount} FCFA virtuels — Coach BRVM")
+            ->subject("🎁 Tu as reçu {$amount} FCFA virtuels — Boursiv")
             ->view('emails.wallet-bonus');
     }
 }

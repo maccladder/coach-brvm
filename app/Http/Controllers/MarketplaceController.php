@@ -119,7 +119,7 @@ public function activation(MarketplaceProduct $product)
 
     // optionnel : whatsapp du support
     $wa = preg_replace('/[^0-9]/', '', (string) ($product->support_whatsapp ?? ''));
-    $waText = rawurlencode("Bonjour, j'ai acheté \"{$product->title}\" sur Coach BRVM. Je veux activer ma licence.");
+    $waText = rawurlencode("Bonjour, j'ai acheté \"{$product->title}\" sur Boursiv. Je veux activer ma licence.");
 
     return view('marketplace.activation', compact('product', 'wa', 'waText'));
 }

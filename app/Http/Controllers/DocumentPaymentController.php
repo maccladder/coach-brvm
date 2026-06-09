@@ -51,7 +51,7 @@ class DocumentPaymentController extends Controller
             // metadata string (ton service gère array->json aussi)
             'metadata'       => 'document_id=' . $document->id . ';purchase_id=' . $purchase->id,
             'customer_name'  => $user->name ?? 'Client',
-            'customer_email' => $user->email ?? 'client@coach-brvm.com',
+            'customer_email' => $user->email ?? 'boursivoire@gmail.com',
         ]);
 
         if (!$paymentUrl) {

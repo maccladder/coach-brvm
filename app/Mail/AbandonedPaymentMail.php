@@ -17,7 +17,7 @@ class AbandonedPaymentMail extends Mailable implements ShouldQueue
     public function __construct(public Payment $payment)
     {
         $phone   = config('services.whatsapp.support_number');
-        $message = urlencode("Bonjour, j'ai eu un souci pour finaliser mon achat sur Coach BRVM.");
+        $message = urlencode("Bonjour, j'ai eu un souci pour finaliser mon achat sur Boursiv.");
 
         $this->whatsappUrl = "https://wa.me/{$phone}?text={$message}";
     }
@@ -25,7 +25,7 @@ class AbandonedPaymentMail extends Mailable implements ShouldQueue
     public function build(): static
     {
         return $this
-            ->subject('Votre achat sur Coach BRVM — on est là pour vous aider')
+            ->subject('Votre achat sur Boursiv — on est là pour vous aider')
             ->view('emails.abandoned_payment');
     }
 }

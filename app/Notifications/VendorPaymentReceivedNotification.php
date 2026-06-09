@@ -30,7 +30,7 @@ class VendorPaymentReceivedNotification extends Notification
         $amount = number_format((int) $this->amount, 0, ',', ' ');
 
         return (new MailMessage)
-            ->subject('✅ Nouveau paiement reçu — Coach BRVM')
+            ->subject('✅ Nouveau paiement reçu — Boursiv')
             ->greeting('Bonjour ' . ($notifiable->name ?? ''))
             ->line("Bonne nouvelle ! {$this->buyerName} a acheté votre produit :")
             ->line("« {$this->productTitle} »")

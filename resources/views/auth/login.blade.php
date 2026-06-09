@@ -6,7 +6,7 @@
             Connexion
         </h1>
         <p style="font-family:'DM Sans',sans-serif;font-size:14px;color:#6B7590;font-weight:300;">
-            Accède à ton espace Coach BRVM
+            Accède à ton espace Boursiv
         </p>
     </div>
 

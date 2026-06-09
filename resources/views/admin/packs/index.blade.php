@@ -1,13 +1,13 @@
 @extends('layouts.admin')
 
-@section('title', 'Pack BRVM — Admin')
+@section('title', 'Pack Boursiv — Admin')
 
 @section('content')
 <div class="container py-4" style="max-width:1200px">
 
     <div class="d-flex align-items-center justify-content-between mb-4">
         <div>
-            <h4 class="fw-bold mb-0">📦 Pack BRVM Complet</h4>
+            <h4 class="fw-bold mb-0">📦 Pack Boursiv Complet</h4>
             <div class="text-muted small">{{ $payments->total() }} acheteur(s)</div>
         </div>
     </div>
@@ -87,7 +87,7 @@
                     @empty
                         <tr>
                             <td colspan="5" class="text-center text-muted py-4">
-                                Aucun achat du Pack BRVM pour l'instant.
+                                Aucun achat du Pack Boursiv pour l'instant.
                             </td>
                         </tr>
                     @endforelse

@@ -1,4 +1,4 @@
-@extends('layouts.app')
+﻿@extends('layouts.app')
 
 @push('styles')
 <style>
@@ -135,7 +135,7 @@
                 <span style="font-family:'Syne',sans-serif; font-size:10px; font-weight:700; letter-spacing:.18em; text-transform:uppercase; color:#C9A84C;">Pack Exclusif</span>
             </div>
 
-            <h1 class="pack-title">Pack BRVM <em>Complet</em></h1>
+            <h1 class="pack-title">Pack Boursiv <em>Complet</em></h1>
             <p style="font-size:15px; color:#6B7590; line-height:1.75; max-width:580px; margin:0 auto 32px;">
                 Tout ce qu'il faut pour investir à la BRVM — 3 formations complètes, un groupe privé d'accompagnement et une aide pour ouvrir votre compte titre.
             </p>
@@ -253,7 +253,7 @@
                     <div class="pack-item-icon">💬</div>
                     <div>
                         <div class="pack-item-title" style="color:#0FCFA4;">Groupe WhatsApp privé</div>
-                        <div class="pack-item-desc">Accès au groupe d'accompagnement privé — échanges directs avec l'équipe Coach BRVM.</div>
+                        <div class="pack-item-desc">Accès au groupe d'accompagnement privé — échanges directs avec l'équipe Boursiv.</div>
                         <div class="pack-item-price" style="color:#0FCFA4;">Lien unique envoyé par email</div>
                     </div>
                 </div>

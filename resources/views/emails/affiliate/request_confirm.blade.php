@@ -12,7 +12,7 @@
     <p>Bonjour <strong>{{ $user->name }}</strong>,</p>
 
     <p>
-        Votre demande pour devenir apporteur d'affaires sur <strong>Coach BRVM</strong> a bien été enregistrée.
+        Votre demande pour devenir apporteur d'affaires sur <strong>Boursiv</strong> a bien été enregistrée.
         Notre équipe va la traiter dans les plus brefs délais.
     </p>
 
@@ -23,7 +23,7 @@
     </div>
 
     <p style="font-size:12px;color:#999;margin-top:24px">
-        Cet email a été envoyé automatiquement – Coach BRVM
+        Cet email a été envoyé automatiquement – Boursiv
     </p>
 </div>
 </body>

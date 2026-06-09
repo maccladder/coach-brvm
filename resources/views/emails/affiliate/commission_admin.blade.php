@@ -8,7 +8,7 @@
 
     @php
         $typeLabel = match($commission->product_type) {
-            'pack_brvm'   => 'Pack BRVM',
+            'pack_brvm'   => 'Pack Boursiv',
             'course'      => 'Formation',
             'marketplace' => 'Produit Marketplace',
             default       => $commission->product_type,
@@ -32,7 +32,7 @@
         </a>
     </p>
 
-    <p style="font-size:12px;color:#999;margin-top:24px">Notification automatique – Coach BRVM</p>
+    <p style="font-size:12px;color:#999;margin-top:24px">Notification automatique – Boursiv</p>
 </div>
 </body>
 </html>

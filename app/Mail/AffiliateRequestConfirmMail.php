@@ -16,7 +16,7 @@ class AffiliateRequestConfirmMail extends Mailable
     public function build()
     {
         return $this
-            ->subject('✅ Votre demande d\'apporteur a bien été reçue – Coach BRVM')
+            ->subject('✅ Votre demande d\'apporteur a bien été reçue – Boursiv')
             ->view('emails.affiliate.request_confirm');
     }
 }

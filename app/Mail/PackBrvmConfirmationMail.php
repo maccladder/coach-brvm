@@ -21,7 +21,7 @@ class PackBrvmConfirmationMail extends Mailable
     public function build(): static
     {
         return $this
-            ->subject('🎓 Votre Pack BRVM Complet est activé !')
+            ->subject('🎓 Votre Pack Boursiv Complet est activé !')
             ->view('emails.pack_brvm_confirmation');
     }
 }

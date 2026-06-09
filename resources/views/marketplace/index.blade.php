@@ -1,4 +1,4 @@
-{{-- resources/views/marketplace/index.blade.php --}}
+﻿{{-- resources/views/marketplace/index.blade.php --}}
 @extends('layouts.app')
 
 @push('styles')
@@ -284,7 +284,7 @@
                 <div class="col-lg-7">
                     <p class="mp-hero-tag">Contenus premium</p>
                     <h1 class="mp-hero-title">
-                        La <em>Marketplace</em><br>Coach BRVM
+                        La <em>Marketplace</em><br>Boursiv
                     </h1>
                     <p class="mp-hero-desc">
                         Livres PDF, vidéos et logiciels pour progresser sur la BRVM.
@@ -320,8 +320,8 @@
                 <div class="col-lg-8">
                     <div class="mp-vendor-title">💼 Tu veux vendre tes produits ici ?</div>
                     <div class="mp-vendor-desc">
-                        Publie tes livres PDF, vidéos ou logiciels sur la marketplace Coach BRVM.<br>
-                        ✉️ <a href="mailto:coachbrvm@gmail.com">coachbrvm@gmail.com</a>
+                        Publie tes livres PDF, vidéos ou logiciels sur la marketplace Boursiv.<br>
+                        ✉️ <a href="mailto:boursivoire@gmail.com">boursivoire@gmail.com</a>
                         &nbsp;·&nbsp; 📞 <a href="tel:+2250788035432">+225 07 88 03 54 32</a>
                     </div>
                 </div>
@@ -343,7 +343,7 @@
                                 </button>
                             </form>
                         @endif
-                        <a href="mailto:coachbrvm@gmail.com?subject=Devenir%20vendeur" class="cb-btn-outline">Mail →</a>
+                        <a href="mailto:boursivoire@gmail.com?subject=Devenir%20vendeur" class="cb-btn-outline">Mail →</a>
                         <a href="https://wa.me/2250788035432" target="_blank" class="cb-btn-outline">WhatsApp</a>
                     @endguest
                 </div>

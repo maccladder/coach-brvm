@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ton bonus Coach BRVM</title>
+    <title>Ton bonus Boursiv</title>
 </head>
 <body style="margin:0;padding:0;background-color:#060910;font-family:Helvetica,Arial,sans-serif;">
 
@@ -19,7 +19,7 @@
         <div style="text-align:center;margin-bottom:28px;">
             <div style="font-size:44px;margin-bottom:12px;">🎁</div>
             <div style="display:inline-block;background:#0FCFA4;color:#060910;font-family:Helvetica,Arial,sans-serif;font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;padding:3px 12px;border-radius:2px;margin-bottom:14px;">
-                Cadeau Coach BRVM
+                Cadeau Boursiv
             </div>
             <h1 style="margin:0;font-size:26px;font-weight:900;color:#E8EAF0;line-height:1.25;">
                 Tu as reçu<br>
@@ -86,7 +86,7 @@
         {{-- Salutation --}}
         <p style="margin:0 0 4px;font-size:14px;color:#9AA3B8;line-height:1.6;">
             Bonne exploration,<br>
-            <strong style="color:#E8EAF0;">L'équipe Coach BRVM</strong>
+            <strong style="color:#E8EAF0;">L'équipe Boursiv</strong>
         </p>
 
     </div>
@@ -95,7 +95,7 @@
     <div style="padding:20px 0 0;text-align:center;">
         <p style="margin:0;font-size:11px;color:rgba(107,117,144,.5);line-height:1.6;">
             Cet email a été envoyé à {{ $user->email }}.<br>
-            © {{ date('Y') }} Coach BRVM — Simulateur pédagogique, non destiné à des fins d'investissement réel.
+            © {{ date('Y') }} Boursiv — Simulateur pédagogique, non destiné à des fins d'investissement réel.
         </p>
     </div>
 

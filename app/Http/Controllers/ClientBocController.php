@@ -134,7 +134,7 @@ private function generateAnalysisForBoc(
     $mainSummary = implode(' ', $mainLines);
 
     $textForAvatar = <<<TXT
-Bonjour, je suis ton coach BRVM.
+Bonjour, je suis ton coach Boursiv.
 
 Voici les principaux enseignements de ton BOC du {$bocDate} :
 {$mainSummary}

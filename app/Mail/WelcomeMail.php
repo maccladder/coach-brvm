@@ -18,7 +18,7 @@ class WelcomeMail extends Mailable
     public function build()
     {
         return $this
-            ->subject('Bienvenue sur Coach BRVM ! 🎉')
+            ->subject('Bienvenue sur Boursiv ! 🎉')
             ->view('emails.welcome');
     }
 }

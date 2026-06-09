@@ -1,4 +1,4 @@
-{{-- ════════════════════════════════════════════════
+﻿{{-- ════════════════════════════════════════════════
      resources/views/vendor/earnings.blade.php
 ════════════════════════════════════════════════ --}}
 @extends('layouts.app')
@@ -106,7 +106,7 @@
                 <div>
                     <p class="vd-hero-tag">Vendeur</p>
                     <h1 class="vd-hero-title">💰 Mes revenus</h1>
-                    <p class="vd-hero-sub">Commission Coach BRVM : <strong style="color:#FF6B6B;">15%</strong> · Délai sécurité : <strong style="color:#FFC850;">{{ $delayH }}h</strong></p>
+                    <p class="vd-hero-sub">Commission Boursiv : <strong style="color:#FF6B6B;">15%</strong> · Délai sécurité : <strong style="color:#FFC850;">{{ $delayH }}h</strong></p>
                 </div>
                 <a href="{{ route('vendor.dashboard') }}" class="cb-btn-outline">← Dashboard</a>
             </div>

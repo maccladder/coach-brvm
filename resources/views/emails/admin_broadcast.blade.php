@@ -13,7 +13,7 @@
     <hr style="margin-top:30px; border:none; border-top:1px solid #eee">
 
     <p style="font-size:12px; color:#888; margin-top:15px">
-        Notification de l'équipe Coach BRVM
+        Notification de l'équipe Boursiv
     </p>
 
 </div>

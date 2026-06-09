@@ -1,4 +1,4 @@
-{{-- ════════ books/show.blade.php ════════ --}}
+﻿{{-- ════════ books/show.blade.php ════════ --}}
 @extends('layouts.app')
 
 @push('styles')
@@ -67,7 +67,7 @@
             <div class="book">
                 <div class="book-left">
                     <div class="book-left-inner">
-                        <div class="book-left-brand">Coach BRVM · Livre</div>
+                        <div class="book-left-brand">Boursiv · Livre</div>
                         <div class="book-left-chapter">{{ $currentTitle }}</div>
                         <div class="book-left-hint">Flèches ← → pour feuilleter</div>
                     </div>

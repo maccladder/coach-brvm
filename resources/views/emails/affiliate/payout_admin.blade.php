@@ -22,7 +22,7 @@
         </a>
     </p>
 
-    <p style="font-size:12px;color:#999;margin-top:24px">Notification automatique – Coach BRVM</p>
+    <p style="font-size:12px;color:#999;margin-top:24px">Notification automatique – Boursiv</p>
 </div>
 </body>
 </html>

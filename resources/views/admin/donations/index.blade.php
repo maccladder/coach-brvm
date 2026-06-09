@@ -1,6 +1,6 @@
 @extends('layouts.admin')
 
-@section('title', 'Dons – Admin Coach BRVM')
+@section('title', 'Dons – Admin Boursiv')
 
 @push('styles')
 <style>
@@ -16,7 +16,7 @@
 
     <div class="mb-4 d-flex justify-content-between align-items-start flex-wrap gap-2">
         <div>
-            <h2 class="fw-bold mb-1">🤝 Dons — Soutenir Coach BRVM</h2>
+            <h2 class="fw-bold mb-1">🤝 Dons — Soutenir Boursiv</h2>
             <p class="text-muted mb-0">Suivi de tous les dons reçus via Paystack.</p>
         </div>
         <a href="{{ route('donation.show') }}" target="_blank" class="btn btn-outline-secondary btn-sm">

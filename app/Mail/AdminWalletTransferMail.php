@@ -26,8 +26,8 @@ class AdminWalletTransferMail extends Mailable
     public function build(): static
     {
         $subject = $this->direction === 'received'
-            ? '💸 Vous avez reçu un transfert sur Coach BRVM'
-            : '💸 Transfert de solde effectué – Coach BRVM';
+            ? '💸 Vous avez reçu un transfert sur Boursiv'
+            : '💸 Transfert de solde effectué – Boursiv';
 
         return $this
             ->subject($subject)

@@ -59,16 +59,16 @@
     </div>
 
     <p style="color:#555; font-size:13px; line-height:1.7;">
-        Pour accéder à vos cours, connectez-vous sur <a href="{{ config('app.url') }}" style="color:#C9A84C;">Coach BRVM</a>
+        Pour accéder à vos cours, connectez-vous sur <a href="{{ config('app.url') }}" style="color:#C9A84C;">Boursiv</a>
         et rendez-vous dans <strong>Mes formations</strong>.
     </p>
 
-    <p>À bientôt sur Coach BRVM,<br><strong>L'équipe Coach BRVM</strong></p>
+    <p>À bientôt sur Boursiv,<br><strong>L'équipe Boursiv</strong></p>
 
     <hr style="margin-top:30px; border:none; border-top:1px solid #eee">
 
     <p style="font-size:11px; color:#aaa; margin-top:14px; line-height:1.6">
-        Notification officielle – Coach BRVM<br>
+        Notification officielle – Boursiv<br>
         Cet email a été envoyé à {{ $user->email }}.<br>
         Le lien WhatsApp est à usage unique. En cas de problème, contactez notre équipe.
     </p>

@@ -449,7 +449,7 @@ Route::get('/ssl-http-test', function () {
             $res = Http::withOptions(['verify' => $ca])
                 ->timeout(20)
                 ->withHeaders([
-                    'User-Agent' => 'CoachBRVM/1.0 (+https://coach-brvm.com)',
+                    'User-Agent' => 'Boursiv/1.0 (+https://boursiv.com)',
                 ])
                 ->get($url);
 
@@ -476,7 +476,7 @@ Route::get('/ssl-http-test', function () {
 */
 
 // ──────────────────────────────────────────────────
-// Dons / Soutenir Coach BRVM
+// Dons / Soutenir Boursiv
 // ──────────────────────────────────────────────────
 Route::get('/faire-un-don', [\App\Http\Controllers\DonationController::class, 'show'])->name('donation.show');
 Route::post('/faire-un-don/pay', [\App\Http\Controllers\DonationController::class, 'initiate'])->name('donation.initiate');

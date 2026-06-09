@@ -1,8 +1,8 @@
-@extends('layouts.app')
+﻿@extends('layouts.app')
 
 @push('meta')
-<meta name="description" content="Analyse du PND 2026-2030 × BRVM — Le Plan National de Développement ivoirien identifie 7 secteurs porteurs. Coach BRVM croise ces secteurs avec les sociétés cotées à la BRVM.">
-<meta property="og:title" content="PND 2026-2030 × BRVM — Coach BRVM">
+<meta name="description" content="Analyse du PND 2026-2030 × BRVM — Le Plan National de Développement ivoirien identifie 7 secteurs porteurs. Boursiv croise ces secteurs avec les sociétés cotées à la BRVM.">
+<meta property="og:title" content="PND 2026-2030 × BRVM — Boursiv">
 <meta property="og:description" content="216 pages publiées par l'État ivoirien. 6 piliers. 7 secteurs. Quelles sociétés BRVM sont concernées ?">
 <meta property="og:type" content="article">
 @endpush
@@ -524,7 +524,7 @@
             </div>
             <h1>
                 Le Plan National de Développement vous dit où investir.<br>
-                <span class="gold">Coach BRVM vous dit par où.</span>
+                <span class="gold">Boursiv vous dit par où.</span>
             </h1>
             <p class="pnd-hero-sub">
                 <strong>216 pages</strong> publiées par l'État ivoirien. <strong>6 piliers stratégiques.</strong><br>
@@ -886,7 +886,7 @@
                 Aucune projection, aucune extrapolation : chaque mention sectorielle renvoie à un paragraphe précis du document officiel, vérifiable ligne par ligne.
             </p>
             <p>
-                Coach BRVM ne fournit pas de conseil en investissement. Cette page est une lecture comparée d'un document public.
+                Boursiv ne fournit pas de conseil en investissement. Cette page est une lecture comparée d'un document public.
             </p>
         </div>
     </div>
@@ -931,7 +931,7 @@
             <h2 class="pnd-cta-title">
                 Le PND fixe le cap jusqu'en 2030.<br>
                 La BRVM offre les véhicules.<br>
-                <span class="gold">Coach BRVM vous donne la carte.</span>
+                <span class="gold">Boursiv vous donne la carte.</span>
             </h2>
             <p class="pnd-cta-sub">
                 Formation, analyse, accompagnement. Investissez en connaissance de cause.
@@ -941,7 +941,7 @@
                     Découvrir nos formations
                 </a>
                 <a href="{{ route('pack.show') }}" class="pnd-btn-outline">
-                    Voir le Pack BRVM
+                    Voir le Pack Boursiv
                 </a>
             </div>
         </div>

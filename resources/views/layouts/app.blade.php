@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>{{ config('app.name', 'Coach BRVM') }}</title>
+    <title>{{ config('app.name', 'Boursiv') }}</title>
 
     @stack('meta')
 
@@ -450,7 +450,7 @@
 <div style="background:var(--cb-dark);border-top:1px solid var(--cb-border);padding:14px 0;text-align:center;">
     <span style="font-size:.82rem;color:var(--cb-muted);">
         Vous croyez en notre mission ?
-        <a href="{{ route('donation.show') }}" style="color:var(--cb-gold);text-decoration:none;font-weight:600;margin-left:6px;">🤝 Soutenir Coach BRVM →</a>
+        <a href="{{ route('donation.show') }}" style="color:var(--cb-gold);text-decoration:none;font-weight:600;margin-left:6px;">🤝 Soutenir Boursiv →</a>
     </span>
 </div>
 @endguest

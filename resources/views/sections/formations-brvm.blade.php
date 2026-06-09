@@ -1,4 +1,4 @@
-{{-- ═══════════════════════════════════════════════════════════
+﻿{{-- ═══════════════════════════════════════════════════════════
      formations-brvm.blade.php
 ═══════════════════════════════════════════════════════════ --}}
 {{-- resources/views/sections/formations-brvm.blade.php --}}
@@ -66,7 +66,7 @@
         <div class="form-info-box cbr">
             <div class="form-info-box-title">✅ Deux façons d'acheter (accès à vie dans les deux cas)</div>
             <div class="form-info-box-text">
-                • <strong>Sur Coach BRVM</strong> : paiement par <strong>Mobile Money</strong> (Wave, Orange Money, MTN, Moov).<br>
+                • <strong>Sur Boursiv</strong> : paiement par <strong>Mobile Money</strong> (Wave, Orange Money, MTN, Moov).<br>
                 • <strong>Sur Udemy</strong> : paiement par <strong>carte bancaire</strong> (plateforme internationale).<br>
                 <span style="color:#6B7590;">Dans les deux cas, l'accès est à vie après achat.</span>
             </div>

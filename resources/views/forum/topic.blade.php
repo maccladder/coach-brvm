@@ -1,6 +1,6 @@
-{{-- ════════ forum/topic.blade.php ════════ --}}
+﻿{{-- ════════ forum/topic.blade.php ════════ --}}
 @extends('layouts.app')
-@section('title', $topic->title . ' – Forum Coach BRVM')
+@section('title', $topic->title . ' – Forum Boursiv')
 
 @push('styles')
 <style>

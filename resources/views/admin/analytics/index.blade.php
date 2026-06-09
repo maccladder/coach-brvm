@@ -1,6 +1,6 @@
 @extends('layouts.admin')
 
-@section('title', 'Analytics – Coach BRVM')
+@section('title', 'Analytics – Boursiv')
 
 @push('styles')
 <style>

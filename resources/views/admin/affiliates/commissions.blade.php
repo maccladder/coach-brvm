@@ -47,7 +47,7 @@
                             default     => 'secondary',
                         };
                         $typeLabel = match($c->product_type) {
-                            'pack_brvm'   => 'Pack BRVM',
+                            'pack_brvm'   => 'Pack Boursiv',
                             'course'      => 'Formation',
                             'marketplace' => 'Marketplace',
                             default       => $c->product_type,

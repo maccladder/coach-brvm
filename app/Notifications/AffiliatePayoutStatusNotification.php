@@ -25,10 +25,10 @@ class AffiliatePayoutStatusNotification extends Notification
         $amountFmt = number_format($this->amount, 0, ',', ' ');
 
         $subject = match ($this->status) {
-            'approved' => '✅ Reversement approuvé — Coach BRVM',
-            'paid'     => '💸 Reversement payé — Coach BRVM',
-            'rejected' => '⛔ Reversement rejeté — Coach BRVM',
-            default    => 'Mise à jour reversement — Coach BRVM',
+            'approved' => '✅ Reversement approuvé — Boursiv',
+            'paid'     => '💸 Reversement payé — Boursiv',
+            'rejected' => '⛔ Reversement rejeté — Boursiv',
+            default    => 'Mise à jour reversement — Boursiv',
         };
 
         $headline = match ($this->status) {
