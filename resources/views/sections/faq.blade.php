@@ -3,60 +3,60 @@
 
 @push('styles')
 <style>
-    .faq-page { background: #060910; min-height: 100vh; }
+    .faq-page { background: var(--cb-paper); min-height: 100vh; }
 
-    .faq-hero { background:radial-gradient(ellipse 80% 50% at 50% 0%,rgba(201,168,76,.1) 0%,transparent 55%),#060910;border-bottom:1px solid rgba(201,168,76,.08);padding:48px 0 36px;position:relative;overflow:hidden; }
-    .faq-hero-grid { position:absolute;inset:0;background-image:linear-gradient(rgba(201,168,76,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(201,168,76,.04) 1px,transparent 1px);background-size:56px 56px;mask-image:radial-gradient(ellipse 80% 70% at 50% 50%,black 0%,transparent 70%);pointer-events:none; }
-    .faq-hero-tag { font-family:'Syne',sans-serif;font-size:11px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:#0FCFA4;display:flex;align-items:center;gap:10px;margin-bottom:14px; }
-    .faq-hero-tag::before { content:'';width:28px;height:1px;background:#0FCFA4; }
-    .faq-hero-title { font-family:'Playfair Display',serif;font-size:clamp(28px,5vw,48px);font-weight:900;color:#E8EAF0;line-height:1.08;margin-bottom:10px; }
-    .faq-hero-title em { font-style:italic;color:#C9A84C; }
+    .faq-hero { background:radial-gradient(ellipse 80% 50% at 50% 0%,rgba(15,92,67,.08) 0%,transparent 55%),var(--cb-paper);border-bottom:1px solid var(--cb-border);padding:48px 0 36px;position:relative;overflow:hidden; }
+    .faq-hero-grid { position:absolute;inset:0;background-image:linear-gradient(rgba(15,92,67,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(15,92,67,.04) 1px,transparent 1px);background-size:56px 56px;mask-image:radial-gradient(ellipse 80% 70% at 50% 50%,black 0%,transparent 70%);pointer-events:none; }
+    .faq-hero-tag { font-family:'Syne',sans-serif;font-size:11px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--cb-forest);display:flex;align-items:center;gap:10px;margin-bottom:14px; }
+    .faq-hero-tag::before { content:'';width:28px;height:1px;background:var(--cb-forest); }
+    .faq-hero-title { font-family:'Playfair Display',serif;font-size:clamp(28px,5vw,48px);font-weight:900;color:var(--cb-ink);line-height:1.08;margin-bottom:10px; }
+    .faq-hero-title em { font-style:italic;color:var(--cb-gold); }
 
     /* Search */
-    .faq-search { background:#0C1120;border:1px solid rgba(201,168,76,.08);border-radius:4px;padding:20px 24px;margin-bottom:32px; }
-    .faq-search input { background:rgba(6,9,16,.9) !important;border:1px solid rgba(255,255,255,.1) !important;color:#E8EAF0 !important;border-radius:3px !important;font-family:'DM Sans',sans-serif !important;font-size:14px !important;padding:12px 16px !important;width:100%;outline:none;transition:border-color .25s; }
-    .faq-search input:focus { border-color:rgba(201,168,76,.4) !important;box-shadow:0 0 0 3px rgba(201,168,76,.07) !important; }
-    .faq-search input::placeholder { color:#6B7590 !important; }
-    .faq-search-hint { font-size:12px;color:#6B7590;margin-top:8px; }
+    .faq-search { background:var(--cb-card);border:1px solid var(--cb-border);border-radius:4px;padding:20px 24px;margin-bottom:32px; }
+    .faq-search input { background:var(--cb-paper) !important;border:1px solid var(--cb-border) !important;color:var(--cb-ink) !important;border-radius:3px !important;font-family:'DM Sans',sans-serif !important;font-size:14px !important;padding:12px 16px !important;width:100%;outline:none;transition:border-color .25s; }
+    .faq-search input:focus { border-color:rgba(15,92,67,.4) !important;box-shadow:0 0 0 3px rgba(15,92,67,.07) !important; }
+    .faq-search input::placeholder { color:var(--cb-muted) !important; }
+    .faq-search-hint { font-size:12px;color:var(--cb-muted);margin-top:8px; }
 
     /* Sections */
     .faq-section-header { display:flex;align-items:center;gap:10px;margin-bottom:16px;margin-top:8px; }
     .faq-section-icon { font-size:20px; }
-    .faq-section-title { font-family:'Syne',sans-serif;font-size:14px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#C9A84C; }
+    .faq-section-title { font-family:'Syne',sans-serif;font-size:14px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--cb-gold); }
 
     /* Accordion */
-    .faq-accordion { background:#0C1120;border:1px solid rgba(255,255,255,.05);border-radius:4px;overflow:hidden;margin-bottom:28px; }
-    .faq-item { border-bottom:1px solid rgba(255,255,255,.04); }
+    .faq-accordion { background:var(--cb-card);border:1px solid var(--cb-border);border-radius:4px;overflow:hidden;margin-bottom:28px; }
+    .faq-item { border-bottom:1px solid var(--cb-border); }
     .faq-item:last-child { border-bottom:none; }
 
     .faq-btn {
         width:100%;text-align:left;background:transparent;border:none;cursor:pointer;
         padding:18px 22px;display:flex;justify-content:space-between;align-items:center;gap:12px;
-        font-family:'Syne',sans-serif;font-size:13px;font-weight:600;color:#E8EAF0;
+        font-family:'Syne',sans-serif;font-size:13px;font-weight:600;color:var(--cb-ink);
         transition:all .25s;
     }
-    .faq-btn:hover { background:rgba(201,168,76,.04);color:#C9A84C; }
-    .faq-btn.active { color:#C9A84C;background:rgba(201,168,76,.05); }
-    .faq-btn-arrow { font-size:14px;color:#6B7590;transition:transform .3s;flex-shrink:0; }
-    .faq-btn.active .faq-btn-arrow { transform:rotate(180deg);color:#C9A84C; }
+    .faq-btn:hover { background:rgba(176,134,46,.05);color:var(--cb-gold); }
+    .faq-btn.active { color:var(--cb-gold);background:rgba(176,134,46,.06); }
+    .faq-btn-arrow { font-size:14px;color:var(--cb-muted);transition:transform .3s;flex-shrink:0; }
+    .faq-btn.active .faq-btn-arrow { transform:rotate(180deg);color:var(--cb-gold); }
 
     .faq-body { display:none;padding:0 22px 18px; }
     .faq-body.open { display:block; }
-    .faq-body p { font-size:13.5px;color:#9AA3B8;line-height:1.75;margin-bottom:12px; }
+    .faq-body p { font-size:13.5px;color:var(--cb-muted);line-height:1.75;margin-bottom:12px; }
 
     .faq-links { display:flex;flex-wrap:wrap;gap:8px;margin-top:4px; }
-    .faq-link { display:inline-flex;align-items:center;gap:6px;font-family:'Syne',sans-serif;font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;padding:6px 12px;border-radius:3px;background:rgba(201,168,76,.08);color:#C9A84C;border:1px solid rgba(201,168,76,.18);text-decoration:none;transition:all .25s; }
-    .faq-link:hover { background:rgba(201,168,76,.16);color:#C9A84C; }
+    .faq-link { display:inline-flex;align-items:center;gap:6px;font-family:'Syne',sans-serif;font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;padding:6px 12px;border-radius:3px;background:rgba(176,134,46,.08);color:var(--cb-gold);border:1px solid rgba(176,134,46,.2);text-decoration:none;transition:all .25s; }
+    .faq-link:hover { background:rgba(176,134,46,.16);color:var(--cb-gold); }
 
     /* CTA bottom */
-    .faq-cta { background:rgba(201,168,76,.05);border:1px solid rgba(201,168,76,.12);border-radius:4px;padding:28px 32px;margin-top:8px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:20px; }
-    .faq-cta-title { font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:#E8EAF0;margin-bottom:4px; }
-    .faq-cta-sub { font-size:13px;color:#6B7590; }
+    .faq-cta { background:rgba(176,134,46,.05);border:1px solid rgba(176,134,46,.12);border-radius:4px;padding:28px 32px;margin-top:8px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:20px; }
+    .faq-cta-title { font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:var(--cb-ink);margin-bottom:4px; }
+    .faq-cta-sub { font-size:13px;color:var(--cb-muted); }
 
-    .cb-btn-gold { display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,#C9A84C,#9B6B15);color:#050810 !important;font-family:'Syne',sans-serif;font-weight:800;font-size:12px;letter-spacing:.07em;text-transform:uppercase;padding:11px 22px;border:none;border-radius:3px;cursor:pointer;text-decoration:none;transition:all .3s; }
-    .cb-btn-gold:hover { box-shadow:0 6px 20px rgba(201,168,76,.3);transform:translateY(-1px); }
-    .cb-btn-outline { display:inline-flex;align-items:center;gap:8px;background:transparent;color:#E8EAF0 !important;font-family:'Syne',sans-serif;font-weight:600;font-size:12px;letter-spacing:.06em;text-transform:uppercase;padding:10px 18px;border:1px solid rgba(255,255,255,.12);border-radius:3px;text-decoration:none;transition:all .3s; }
-    .cb-btn-outline:hover { border-color:#C9A84C;color:#C9A84C !important;background:rgba(201,168,76,.05); }
+    .cb-btn-gold { display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,var(--cb-gold),#7A5412);color:var(--cb-paper) !important;font-family:'Syne',sans-serif;font-weight:800;font-size:12px;letter-spacing:.07em;text-transform:uppercase;padding:11px 22px;border:none;border-radius:3px;cursor:pointer;text-decoration:none;transition:all .3s; }
+    .cb-btn-gold:hover { box-shadow:0 6px 20px rgba(176,134,46,.3);transform:translateY(-1px); }
+    .cb-btn-outline { display:inline-flex;align-items:center;gap:8px;background:transparent;color:var(--cb-ink) !important;font-family:'Syne',sans-serif;font-weight:600;font-size:12px;letter-spacing:.06em;text-transform:uppercase;padding:10px 18px;border:1px solid var(--cb-border);border-radius:3px;text-decoration:none;transition:all .3s; }
+    .cb-btn-outline:hover { border-color:var(--cb-gold);color:var(--cb-gold) !important;background:rgba(176,134,46,.05); }
 
     .cbr { opacity:0;transform:translateY(18px);transition:all .7s cubic-bezier(.16,1,.3,1); }
     .cbr.on { opacity:1;transform:translateY(0); }
@@ -103,7 +103,7 @@
                 <div>
                     <p class="faq-hero-tag">Aide & Support</p>
                     <h1 class="faq-hero-title">FAQ — <em>Questions fréquentes</em></h1>
-                    <p style="font-size:14px;color:#6B7590;font-weight:300;">Réponses simples sur la BRVM, les BOC, les états financiers et Boursiv.</p>
+                    <p style="font-size:14px;color:var(--cb-muted);font-weight:300;">Réponses simples sur la BRVM, les BOC, les états financiers et Boursiv.</p>
                 </div>
                 <div class="d-flex gap-2 flex-wrap">
                     <a href="{{ route('announcements.index') }}" class="cb-btn-outline" style="font-size:11px;padding:9px 16px;">🧾 Analyses BOC</a>
@@ -182,9 +182,9 @@ function toggleFaq(btn) {
 const faqInput = document.getElementById('faqSearch');
 if (faqInput) {
     faqInput.addEventListener('input', function() {
-        const q = this.value.trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"");
+        const q = this.value.trim().toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"");
         document.querySelectorAll('.faq-item').forEach(el => {
-            const hay = (el.dataset.search||'').normalize("NFD").replace(/[\u0300-\u036f]/g,"");
+            const hay = (el.dataset.search||'').normalize("NFD").replace(/[̀-ͯ]/g,"");
             el.style.display = (!q || hay.includes(q)) ? '' : 'none';
         });
     });

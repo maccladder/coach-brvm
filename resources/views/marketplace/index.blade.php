@@ -1,25 +1,25 @@
-﻿{{-- resources/views/marketplace/index.blade.php --}}
+{{-- resources/views/marketplace/index.blade.php --}}
 @extends('layouts.app')
 
 @push('styles')
 <style>
     /* ── Page base ── */
-    .mp-page { background: #060910; min-height: 100vh; }
+    .mp-page { background: var(--cb-paper); min-height: 100vh; }
 
     /* ── Hero marketplace ── */
     .mp-hero {
         background:
-            radial-gradient(ellipse 80% 50% at 50% 0%, rgba(201,168,76,.1) 0%, transparent 55%),
-            #060910;
-        border-bottom: 1px solid rgba(201,168,76,.08);
+            radial-gradient(ellipse 80% 50% at 50% 0%, rgba(176,134,46,.08) 0%, transparent 55%),
+            var(--cb-paper);
+        border-bottom: 1px solid var(--cb-border);
         padding: 56px 0 40px;
         position: relative; overflow: hidden;
     }
     .mp-hero-grid {
         position: absolute; inset: 0;
         background-image:
-            linear-gradient(rgba(201,168,76,.04) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(201,168,76,.04) 1px, transparent 1px);
+            linear-gradient(rgba(176,134,46,.04) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(176,134,46,.04) 1px, transparent 1px);
         background-size: 56px 56px;
         mask-image: radial-gradient(ellipse 80% 70% at 50% 50%, black 0%, transparent 70%);
         pointer-events: none;
@@ -27,53 +27,53 @@
     .mp-hero-tag {
         font-family: 'Syne', sans-serif; font-size: 11px;
         font-weight: 600; letter-spacing: .2em; text-transform: uppercase;
-        color: #0FCFA4; display: flex; align-items: center; gap: 10px;
+        color: var(--cb-forest); display: flex; align-items: center; gap: 10px;
         margin-bottom: 14px;
     }
-    .mp-hero-tag::before { content:''; width:28px; height:1px; background:#0FCFA4; }
+    .mp-hero-tag::before { content:''; width:28px; height:1px; background:var(--cb-forest); }
     .mp-hero-title {
         font-family: 'Playfair Display', serif;
         font-size: clamp(32px, 5vw, 52px); font-weight: 900;
-        color: #E8EAF0; line-height: 1.08; margin-bottom: 12px;
+        color: var(--cb-ink); line-height: 1.08; margin-bottom: 12px;
     }
-    .mp-hero-title em { font-style: italic; color: #C9A84C; }
-    .mp-hero-desc { font-size: 15px; color: #6B7590; font-weight: 300; line-height: 1.7; max-width: 520px; }
+    .mp-hero-title em { font-style: italic; color: var(--cb-gold); }
+    .mp-hero-desc { font-size: 15px; color: var(--cb-muted); font-weight: 300; line-height: 1.7; max-width: 520px; }
 
     /* ── Vendeur callout ── */
     .mp-vendor-box {
-        background: rgba(201,168,76,.05);
-        border: 1px solid rgba(201,168,76,.14);
+        background: rgba(176,134,46,.05);
+        border: 1px solid rgba(176,134,46,.14);
         border-radius: 4px; padding: 20px 24px;
         position: relative; overflow: hidden;
     }
     .mp-vendor-box::before {
         content:''; position:absolute; top:0;left:0;right:0;height:2px;
-        background: linear-gradient(90deg, #C9A84C, transparent);
+        background: linear-gradient(90deg, var(--cb-gold), transparent);
     }
     .mp-vendor-title {
         font-family: 'Syne', sans-serif; font-size: 13px;
-        font-weight: 700; color: #E8EAF0; margin-bottom: 4px;
+        font-weight: 700; color: var(--cb-ink); margin-bottom: 4px;
     }
-    .mp-vendor-desc { font-size: 13px; color: #6B7590; line-height: 1.6; }
-    .mp-vendor-desc a { color: #C9A84C; text-decoration: none; }
+    .mp-vendor-desc { font-size: 13px; color: var(--cb-muted); line-height: 1.6; }
+    .mp-vendor-desc a { color: var(--cb-gold); text-decoration: none; }
     .mp-vendor-desc a:hover { text-decoration: underline; }
 
     /* ── Filtres ── */
     .mp-filters {
-        background: rgba(12,17,32,.95);
-        border: 1px solid rgba(201,168,76,.08);
+        background: var(--cb-card);
+        border: 1px solid var(--cb-border);
         border-radius: 4px; padding: 20px 24px;
     }
     .mp-filters label {
         font-family: 'Syne', sans-serif; font-size: 10px;
         font-weight: 700; letter-spacing: .12em; text-transform: uppercase;
-        color: #6B7590; display: block; margin-bottom: 6px;
+        color: var(--cb-muted); display: block; margin-bottom: 6px;
     }
     .mp-filters input,
     .mp-filters select {
-        background: rgba(6,9,16,.9) !important;
-        border: 1px solid rgba(255,255,255,.1) !important;
-        color: #E8EAF0 !important;
+        background: var(--cb-paper) !important;
+        border: 1px solid var(--cb-border) !important;
+        color: var(--cb-ink) !important;
         border-radius: 3px !important;
         font-family: 'DM Sans', sans-serif !important;
         font-size: 13px !important;
@@ -84,74 +84,74 @@
     }
     .mp-filters input:focus,
     .mp-filters select:focus {
-        border-color: rgba(201,168,76,.4) !important;
-        box-shadow: 0 0 0 3px rgba(201,168,76,.07) !important;
+        border-color: rgba(176,134,46,.4) !important;
+        box-shadow: 0 0 0 3px rgba(176,134,46,.07) !important;
     }
-    .mp-filters input::placeholder { color: #6B7590 !important; }
-    .mp-filters select option { background: #0C1120; }
+    .mp-filters input::placeholder { color: var(--cb-muted) !important; }
+    .mp-filters select option { background: var(--cb-card); color: var(--cb-ink); }
 
     /* ── Boutons ── */
     .cb-btn-gold {
         display: inline-flex; align-items: center; gap: 8px;
-        background: linear-gradient(135deg, #C9A84C, #9B6B15);
+        background: linear-gradient(135deg, var(--cb-gold), #7A5412);
         color: #050810 !important; font-family: 'Syne', sans-serif;
         font-weight: 800; font-size: 12px; letter-spacing: .07em;
         text-transform: uppercase; padding: 10px 20px;
         border: none; border-radius: 3px; cursor: pointer;
         text-decoration: none; transition: all .3s;
     }
-    .cb-btn-gold:hover { box-shadow: 0 6px 20px rgba(201,168,76,.3); transform: translateY(-1px); color: #050810 !important; }
+    .cb-btn-gold:hover { box-shadow: 0 6px 20px rgba(176,134,46,.3); transform: translateY(-1px); color: #050810 !important; }
 
     .cb-btn-outline {
         display: inline-flex; align-items: center; gap: 8px;
-        background: transparent; color: #E8EAF0 !important;
+        background: transparent; color: var(--cb-ink) !important;
         font-family: 'Syne', sans-serif; font-weight: 600;
         font-size: 12px; letter-spacing: .06em; text-transform: uppercase;
-        padding: 9px 18px; border: 1px solid rgba(255,255,255,.12);
+        padding: 9px 18px; border: 1px solid var(--cb-border);
         border-radius: 3px; text-decoration: none; transition: all .3s;
         cursor: pointer;
     }
-    .cb-btn-outline:hover { border-color: #C9A84C; color: #C9A84C !important; background: rgba(201,168,76,.05); }
+    .cb-btn-outline:hover { border-color: var(--cb-gold); color: var(--cb-gold) !important; background: rgba(176,134,46,.05); }
 
     .cb-btn-green {
         display: inline-flex; align-items: center; gap: 8px;
-        background: rgba(15,207,164,.1); color: #0FCFA4 !important;
+        background: rgba(15,92,67,.08); color: var(--cb-forest) !important;
         font-family: 'Syne', sans-serif; font-weight: 700;
         font-size: 12px; letter-spacing: .06em; text-transform: uppercase;
-        padding: 9px 18px; border: 1px solid rgba(15,207,164,.2);
+        padding: 9px 18px; border: 1px solid rgba(15,92,67,.2);
         border-radius: 3px; text-decoration: none; transition: all .3s;
         cursor: pointer;
     }
-    .cb-btn-green:hover { background: rgba(15,207,164,.16); border-color: rgba(15,207,164,.4); }
+    .cb-btn-green:hover { background: rgba(15,92,67,.14); border-color: rgba(15,92,67,.4); }
 
     .cb-btn-filter {
-        background: rgba(201,168,76,.1);
-        border: 1px solid rgba(201,168,76,.2);
-        color: #C9A84C; border-radius: 3px;
+        background: rgba(176,134,46,.1);
+        border: 1px solid rgba(176,134,46,.2);
+        color: var(--cb-gold); border-radius: 3px;
         padding: 9px 14px; cursor: pointer;
         transition: all .25s; font-size: 14px;
         display: flex; align-items: center; justify-content: center;
     }
-    .cb-btn-filter:hover { background: rgba(201,168,76,.18); }
+    .cb-btn-filter:hover { background: rgba(176,134,46,.18); }
 
     /* ── Produit card ── */
     .mp-card {
-        background: #0C1120;
-        border: 1px solid rgba(255,255,255,.06);
+        background: var(--cb-card);
+        border: 1px solid var(--cb-border);
         border-radius: 4px; overflow: hidden;
         transition: all .35s; height: 100%;
         display: flex; flex-direction: column;
         text-decoration: none; color: inherit;
     }
     .mp-card:hover {
-        border-color: rgba(201,168,76,.2);
+        border-color: rgba(176,134,46,.2);
         transform: translateY(-4px);
-        box-shadow: 0 16px 40px rgba(0,0,0,.4);
+        box-shadow: 0 8px 24px rgba(0,0,0,.08);
         color: inherit;
     }
     .mp-card-img {
         position: relative;
-        background: #121A2C;
+        background: var(--cb-paper);
         aspect-ratio: 16/9;
         overflow: hidden;
     }
@@ -166,14 +166,14 @@
         width: 100%; height: 100%;
         display: flex; flex-direction: column;
         align-items: center; justify-content: center;
-        color: #6B7590; font-size: 28px;
+        color: var(--cb-muted); font-size: 28px;
     }
 
     .mp-badge-owned {
         position: absolute; top: 10px; left: 10px; z-index: 5;
         display: inline-flex; align-items: center; gap: 5px;
-        background: rgba(15,207,164,.9);
-        color: #050810; font-family: 'Syne', sans-serif;
+        background: rgba(15,92,67,.9);
+        color: #fff; font-family: 'Syne', sans-serif;
         font-size: 10px; font-weight: 700; letter-spacing: .06em;
         text-transform: uppercase; padding: 4px 10px;
         border-radius: 100px;
@@ -181,7 +181,7 @@
     }
     .mp-badge-featured {
         position: absolute; top: 10px; right: 10px; z-index: 5;
-        background: rgba(201,168,76,.9); color: #050810;
+        background: rgba(176,134,46,.9); color: #050810;
         font-family: 'Syne', sans-serif; font-size: 9px;
         font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
         padding: 3px 8px; border-radius: 100px;
@@ -195,31 +195,31 @@
         letter-spacing: .08em; text-transform: uppercase;
         padding: 3px 8px; border-radius: 100px;
     }
-    .mp-chip-book     { background:rgba(99,179,237,.08);  color:#63B3ED; border:1px solid rgba(99,179,237,.2); }
-    .mp-chip-video    { background:rgba(252,129,74,.08);  color:#FC814A; border:1px solid rgba(252,129,74,.2); }
-    .mp-chip-software { background:rgba(160,120,255,.08); color:#B090FF; border:1px solid rgba(160,120,255,.2); }
-    .mp-chip-game     { background:rgba(120,80,255,.08);  color:#A070FF; border:1px solid rgba(120,80,255,.2); }
-    .mp-chip-cat      { background:rgba(255,255,255,.05); color:#6B7590; border:1px solid rgba(255,255,255,.08); }
+    .mp-chip-book     { background:rgba(43,127,196,.08);  color:#2B7FC4; border:1px solid rgba(43,127,196,.2); }
+    .mp-chip-video    { background:rgba(200,90,40,.08);   color:#C85A28; border:1px solid rgba(200,90,40,.2); }
+    .mp-chip-software { background:rgba(120,80,200,.08);  color:#7850C8; border:1px solid rgba(120,80,200,.2); }
+    .mp-chip-game     { background:rgba(80,50,180,.08);   color:#5032B4; border:1px solid rgba(80,50,180,.2); }
+    .mp-chip-cat      { background:rgba(15,92,67,.04);    color:var(--cb-muted); border:1px solid var(--cb-border); }
 
     .mp-card-title {
         font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700;
-        color: #E8EAF0; line-height: 1.4; margin-bottom: 8px;
+        color: var(--cb-ink); line-height: 1.4; margin-bottom: 8px;
         flex: 1;
     }
-    .mp-card-desc { font-size: 12px; color: #6B7590; line-height: 1.6; margin-bottom: 14px; }
+    .mp-card-desc { font-size: 12px; color: var(--cb-muted); line-height: 1.6; margin-bottom: 14px; }
 
     .mp-card-footer {
         display: flex; justify-content: space-between;
         align-items: center; gap: 8px; flex-wrap: wrap;
         margin-top: auto; padding-top: 14px;
-        border-top: 1px solid rgba(255,255,255,.05);
+        border-top: 1px solid var(--cb-border);
     }
     .mp-card-price {
         font-family: 'Playfair Display', serif;
-        font-size: 18px; font-weight: 700; color: #C9A84C;
+        font-size: 18px; font-weight: 700; color: var(--cb-gold);
     }
-    .mp-card-price.free { color: #0FCFA4; }
-    .mp-card-price.owned { color: #0FCFA4; font-family: 'Syne', sans-serif; font-size: 12px; font-weight: 700; }
+    .mp-card-price.free  { color: var(--cb-forest); }
+    .mp-card-price.owned { color: var(--cb-forest); font-family: 'Syne', sans-serif; font-size: 12px; font-weight: 700; }
 
     .mp-card-actions { display: flex; gap: 6px; }
     .mp-btn-sm {
@@ -229,40 +229,40 @@
         padding: 7px 12px; border-radius: 3px; text-decoration: none;
         transition: all .25s; border: 1px solid; cursor: pointer;
     }
-    .mp-btn-see  { background: rgba(201,168,76,.08); color: #C9A84C; border-color: rgba(201,168,76,.2); }
-    .mp-btn-see:hover { background: rgba(201,168,76,.16); color: #C9A84C; }
-    .mp-btn-dl   { background: rgba(15,207,164,.08); color: #0FCFA4; border-color: rgba(15,207,164,.2); }
-    .mp-btn-dl:hover { background: rgba(15,207,164,.16); color: #0FCFA4; }
+    .mp-btn-see  { background: rgba(176,134,46,.08); color: var(--cb-gold); border-color: rgba(176,134,46,.2); }
+    .mp-btn-see:hover { background: rgba(176,134,46,.16); color: var(--cb-gold); }
+    .mp-btn-dl   { background: rgba(15,92,67,.08); color: var(--cb-forest); border-color: rgba(15,92,67,.2); }
+    .mp-btn-dl:hover { background: rgba(15,92,67,.16); color: var(--cb-forest); }
 
     /* ── Empty state ── */
     .mp-empty {
         text-align: center; padding: 80px 20px;
-        background: rgba(12,17,32,.6);
-        border: 1px solid rgba(201,168,76,.08);
+        background: var(--cb-card);
+        border: 1px solid var(--cb-border);
         border-radius: 4px;
     }
     .mp-empty-icon { font-size: 48px; margin-bottom: 16px; opacity: .5; }
     .mp-empty-title {
         font-family: 'Syne', sans-serif; font-size: 16px;
-        font-weight: 700; color: #E8EAF0; margin-bottom: 8px;
+        font-weight: 700; color: var(--cb-ink); margin-bottom: 8px;
     }
-    .mp-empty-desc { font-size: 14px; color: #6B7590; }
+    .mp-empty-desc { font-size: 14px; color: var(--cb-muted); }
 
     /* ── Pagination override ── */
     .pagination .page-link {
-        background: #0C1120 !important;
-        border-color: rgba(255,255,255,.08) !important;
-        color: #6B7590 !important;
+        background: var(--cb-card) !important;
+        border-color: var(--cb-border) !important;
+        color: var(--cb-muted) !important;
         font-family: 'Syne', sans-serif;
         font-size: 12px;
     }
     .pagination .page-link:hover {
-        background: rgba(201,168,76,.1) !important;
-        color: #C9A84C !important;
-        border-color: rgba(201,168,76,.2) !important;
+        background: rgba(176,134,46,.08) !important;
+        color: var(--cb-gold) !important;
+        border-color: rgba(176,134,46,.2) !important;
     }
     .pagination .active .page-link {
-        background: linear-gradient(135deg, #C9A84C, #9B6B15) !important;
+        background: linear-gradient(135deg, var(--cb-gold), #7A5412) !important;
         border-color: transparent !important;
         color: #050810 !important;
     }
@@ -288,7 +288,7 @@
                     </h1>
                     <p class="mp-hero-desc">
                         Livres PDF, vidéos et logiciels pour progresser sur la BRVM.
-                        Achat instantané, paiement sécurisé par <strong style="color:#E8EAF0;">Mobile Money</strong>.
+                        Achat instantané, paiement sécurisé par <strong style="color:var(--cb-ink);">Mobile Money</strong>.
                     </p>
                 </div>
                 <div class="col-lg-5 d-flex justify-content-lg-end gap-2 flex-wrap">
@@ -387,7 +387,7 @@
                     <div class="col-12 d-flex justify-content-end">
                         <a href="{{ route('marketplace.index') }}"
                            style="font-family:'Syne',sans-serif;font-size:11px;letter-spacing:.08em;
-                                  text-transform:uppercase;color:#6B7590;text-decoration:none;">
+                                  text-transform:uppercase;color:var(--cb-muted);text-decoration:none;">
                             ✕ Réinitialiser les filtres
                         </a>
                     </div>
@@ -402,21 +402,21 @@
                     $hasLettreCI = auth()->check() && \App\Models\LettreCIAccess::hasActiveAccess(auth()->user());
                     $lciPrice = number_format(config('services.lettreci.price', 5000), 0, ',', ' ');
                 @endphp
-                <a href="{{ route('lettreci.showcase') }}" class="mp-card" style="border-color:rgba(201,168,76,.18);">
+                <a href="{{ route('lettreci.showcase') }}" class="mp-card" style="border-color:rgba(176,134,46,.18);">
                     {{-- Cover LettreCI --}}
                     <div class="mp-card-img" style="position:relative;overflow:hidden;">
                         @if($hasLettreCI)
                             <span class="mp-badge-owned">✓ Accès actif</span>
                         @else
-                            <span class="mp-badge-featured" style="background:rgba(201,168,76,.92);color:#060910;">✨ NOUVEAU</span>
+                            <span class="mp-badge-featured" style="background:rgba(176,134,46,.92);color:#060910;">✨ NOUVEAU</span>
                         @endif
                         <img src="{{ asset('img/lettreci-cover.png') }}" alt="LettreCI" style="width:100%;height:100%;object-fit:cover;object-position:center;display:block;">
                     </div>
                     {{-- Body --}}
                     <div class="mp-card-body">
                         <div class="mp-card-chips">
-                            <span class="mp-chip" style="background:rgba(201,168,76,.08);color:#C9A84C;border:1px solid rgba(201,168,76,.2);">🤖 Outil IA</span>
-                            <span class="mp-chip" style="background:rgba(15,207,164,.07);color:#0FCFA4;border:1px solid rgba(15,207,164,.18);">15 types</span>
+                            <span class="mp-chip" style="background:rgba(176,134,46,.08);color:var(--cb-gold);border:1px solid rgba(176,134,46,.2);">🤖 Outil IA</span>
+                            <span class="mp-chip" style="background:rgba(15,92,67,.07);color:var(--cb-forest);border:1px solid rgba(15,92,67,.18);">15 types</span>
                         </div>
                         <div class="mp-card-title" style="font-family:'Playfair Display',serif;font-size:16px;font-weight:900;">LettreCI</div>
                         <div class="mp-card-desc">Lettres administratives générées par IA en 30 secondes — démission, bail, mise en demeure, motivation et bien plus.</div>
