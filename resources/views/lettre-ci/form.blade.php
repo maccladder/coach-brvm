@@ -3,74 +3,71 @@
 
 @push('styles')
 <style>
-    .lci-page { background: #060910; min-height: 100vh; padding-bottom: 80px; }
+    .lci-page { background: var(--cb-paper); min-height: 100vh; padding-bottom: 80px; }
 
     .lci-header {
-        background: radial-gradient(ellipse 80% 50% at 50% 0%, rgba(201,168,76,.1) 0%, transparent 55%), #060910;
-        border-bottom: 1px solid rgba(201,168,76,.08);
+        background: radial-gradient(ellipse 80% 50% at 50% 0%, rgba(176,134,46,.1) 0%, transparent 55%), var(--cb-paper);
+        border-bottom: 1px solid rgba(176,134,46,.08);
         padding: 36px 0 28px; position: relative; overflow: hidden;
     }
-    .lci-header-grid { position:absolute;inset:0;background-image:linear-gradient(rgba(201,168,76,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(201,168,76,.04) 1px,transparent 1px);background-size:56px 56px;mask-image:radial-gradient(ellipse 80% 70% at 50% 50%,black 0%,transparent 70%);pointer-events:none; }
-    .lci-header-tag { font-family:'Syne',sans-serif;font-size:11px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:#C9A84C;display:flex;align-items:center;gap:10px;margin-bottom:12px; }
-    .lci-header-tag::before { content:'';width:28px;height:1px;background:#C9A84C; }
-    .lci-header-title { font-family:'Playfair Display',serif;font-size:clamp(22px,3.5vw,34px);font-weight:900;color:#E8EAF0;margin-bottom:4px; }
-    .lci-header-sub { font-size:13px;color:#6B7590; }
+    .lci-header-grid { position:absolute;inset:0;background-image:linear-gradient(rgba(176,134,46,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(176,134,46,.04) 1px,transparent 1px);background-size:56px 56px;mask-image:radial-gradient(ellipse 80% 70% at 50% 50%,black 0%,transparent 70%);pointer-events:none; }
+    .lci-header-tag { font-family:'Syne',sans-serif;font-size:11px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--cb-gold);display:flex;align-items:center;gap:10px;margin-bottom:12px; }
+    .lci-header-tag::before { content:'';width:28px;height:1px;background:var(--cb-gold); }
+    .lci-header-title { font-family:'Playfair Display',serif;font-size:clamp(22px,3.5vw,34px);font-weight:900;color:var(--cb-ink);margin-bottom:4px; }
+    .lci-header-sub { font-size:13px;color:var(--cb-muted); }
 
     .cb-btn-outline {
-        display:inline-flex;align-items:center;gap:7px;background:transparent;color:#6B7590 !important;
+        display:inline-flex;align-items:center;gap:7px;background:transparent;color:var(--cb-muted) !important;
         font-family:'Syne',sans-serif;font-weight:600;font-size:11px;letter-spacing:.08em;text-transform:uppercase;
-        padding:8px 14px;border:1px solid rgba(255,255,255,.08);border-radius:3px;text-decoration:none;transition:all .25s;
+        padding:8px 14px;border:1px solid var(--cb-border);border-radius:3px;text-decoration:none;transition:all .25s;
     }
-    .cb-btn-outline:hover { border-color:#C9A84C;color:#C9A84C !important; }
+    .cb-btn-outline:hover { border-color:var(--cb-gold);color:var(--cb-gold) !important; }
 
-    /* Form wrapper */
     .lci-form-wrap {
         max-width: 660px; margin: 36px auto 0;
-        background: #0C1120; border: 1px solid rgba(201,168,76,.1);
+        background: var(--cb-card); border: 1px solid rgba(176,134,46,.1);
         border-radius: 6px; overflow: hidden;
     }
     .lci-form-wrap::before {
         content:'';display:block;height:2px;
-        background:linear-gradient(90deg,#C9A84C,#0FCFA4,transparent);
+        background:linear-gradient(90deg,var(--cb-gold),var(--cb-forest),transparent);
     }
     .lci-form-inner { padding: 36px 36px 32px; }
 
     .lci-notice {
-        background: rgba(201,168,76,.05); border: 1px solid rgba(201,168,76,.12);
+        background: rgba(176,134,46,.05); border: 1px solid rgba(176,134,46,.12);
         border-radius: 4px; padding: 12px 16px;
-        font-size: 13px; color: #A0A8C0; line-height: 1.6; margin-bottom: 28px;
+        font-size: 13px; color: var(--cb-muted); line-height: 1.6; margin-bottom: 28px;
     }
 
-    /* Field styles */
     .lci-field-lbl {
         font-family:'Syne',sans-serif;font-size:11px;font-weight:700;
-        letter-spacing:.1em;text-transform:uppercase;color:#A0A8C0;
+        letter-spacing:.1em;text-transform:uppercase;color:var(--cb-muted);
         margin-bottom:8px;display:block;
     }
-    .lci-field-lbl .req { color:#FF6B6B;margin-left:3px; }
+    .lci-field-lbl .req { color:var(--cb-down);margin-left:3px; }
     .lci-input {
-        width:100%;background:rgba(255,255,255,.04);
-        border:1px solid rgba(255,255,255,.09);
-        border-radius:3px;padding:11px 14px;color:#E8EAF0;font-size:14px;
+        width:100%;background:var(--cb-paper);
+        border:1px solid var(--cb-border);
+        border-radius:3px;padding:11px 14px;color:var(--cb-ink);font-size:14px;
         font-family:'DM Sans',sans-serif;line-height:1.5;
         transition:border-color .2s,background .2s;
         display:block;
     }
-    .lci-input:focus { outline:none;border-color:rgba(201,168,76,.4);background:rgba(255,255,255,.06); }
-    .lci-input::placeholder { color:#3E4560; }
+    .lci-input:focus { outline:none;border-color:rgba(176,134,46,.4);background:var(--cb-card); }
+    .lci-input::placeholder { color:var(--cb-muted); }
     .lci-textarea { resize:vertical;min-height:96px; }
     .lci-select { appearance:none;cursor:pointer; }
 
-    /* Submit button */
     .cb-btn-gold {
         display:inline-flex;align-items:center;gap:8px;justify-content:center;width:100%;
-        background:linear-gradient(135deg,#C9A84C,#9B6B15);
+        background:linear-gradient(135deg,var(--cb-gold),#9B6B15);
         color:#050810 !important;font-family:'Syne',sans-serif;
         font-weight:800;font-size:13px;letter-spacing:.07em;text-transform:uppercase;
         padding:14px 28px;border:none;border-radius:3px;cursor:pointer;
         text-decoration:none;transition:all .3s;margin-top:8px;
     }
-    .cb-btn-gold:hover { box-shadow:0 8px 28px rgba(201,168,76,.3);transform:translateY(-1px); }
+    .cb-btn-gold:hover { box-shadow:0 8px 28px rgba(176,134,46,.3);transform:translateY(-1px); }
 
     .cbr { opacity:0;transform:translateY(16px);transition:all .6s cubic-bezier(.16,1,.3,1); }
     .cbr.on { opacity:1;transform:translateY(0); }

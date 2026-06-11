@@ -2,38 +2,38 @@
 
 @push('styles')
 <style>
-.lci-page { background: #060910; min-height: 100vh; padding-bottom: 60px; }
-.lci-header { background: linear-gradient(135deg, #0C1120 0%, #060910 100%); border-bottom: 1px solid rgba(201,168,76,.1); padding: 40px 0 32px; }
-.lci-header-tag { font-family:'Syne',sans-serif; font-size:11px; font-weight:600; letter-spacing:.2em; text-transform:uppercase; color:#C9A84C; margin-bottom:8px; }
-.lci-header-title { font-family:'Playfair Display',serif; font-size:32px; font-weight:900; color:#E8EAF0; margin-bottom:4px; }
-.lci-header-sub { font-size:14px; color:#6B7590; }
+.lci-page { background: var(--cb-paper); min-height: 100vh; padding-bottom: 60px; }
+.lci-header { background: var(--cb-card); border-bottom: 1px solid rgba(176,134,46,.1); padding: 40px 0 32px; }
+.lci-header-tag { font-family:'Syne',sans-serif; font-size:11px; font-weight:600; letter-spacing:.2em; text-transform:uppercase; color:var(--cb-gold); margin-bottom:8px; }
+.lci-header-title { font-family:'Playfair Display',serif; font-size:32px; font-weight:900; color:var(--cb-ink); margin-bottom:4px; }
+.lci-header-sub { font-size:14px; color:var(--cb-muted); }
 .btn-lci-primary {
     font-family:'Syne',sans-serif; font-size:12px; font-weight:700;
     letter-spacing:.1em; text-transform:uppercase;
-    background:#C9A84C; color:#060910;
+    background:var(--cb-gold); color:#060910;
     border:none; border-radius:4px; padding:10px 22px;
     text-decoration:none; display:inline-block; transition:background .2s;
 }
-.btn-lci-primary:hover { background:#d4b568; color:#060910; }
+.btn-lci-primary:hover { background:#9A7020; color:#060910; }
 .lci-letter-row {
-    background: rgba(255,255,255,.02);
-    border: 1px solid rgba(255,255,255,.05);
+    background: rgba(15,92,67,.03);
+    border: 1px solid var(--cb-border);
     border-radius: 5px; padding: 16px 20px;
     display: flex; align-items: center; gap: 14px;
     margin-bottom: 8px; transition: border-color .2s;
     text-decoration: none;
 }
-.lci-letter-row:hover { border-color: rgba(201,168,76,.2); text-decoration: none; }
+.lci-letter-row:hover { border-color: rgba(176,134,46,.2); text-decoration: none; }
 .lci-letter-row .letter-icon { font-size: 24px; flex-shrink: 0; }
-.lci-letter-row .letter-name { font-family:'Syne',sans-serif; font-size:13px; font-weight:600; color:#E8EAF0; margin-bottom:3px; }
-.lci-letter-row .letter-meta { font-size:12px; color:#6B7590; }
+.lci-letter-row .letter-name { font-family:'Syne',sans-serif; font-size:13px; font-weight:600; color:var(--cb-ink); margin-bottom:3px; }
+.lci-letter-row .letter-meta { font-size:12px; color:var(--cb-muted); }
 .lci-letter-row .letter-actions { margin-left:auto; flex-shrink:0; display:flex; align-items:center; gap:8px; }
 .status-badge { font-family:'Syne',sans-serif; font-size:10px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; padding:3px 9px; border-radius:3px; }
-.status-completed { background:rgba(15,207,164,.12); color:#0FCFA4; }
-.status-pending, .status-processing { background:rgba(201,168,76,.12); color:#C9A84C; }
-.status-failed { background:rgba(255,107,107,.12); color:#FF6B6B; }
-.lci-pdf-link { font-size:11px; color:#C9A84C; text-decoration:none; font-family:'Syne',sans-serif; font-weight:600; }
-.lci-pdf-link:hover { color:#d4b568; }
+.status-completed { background:rgba(15,92,67,.08); color:var(--cb-forest); }
+.status-pending, .status-processing { background:rgba(176,134,46,.12); color:var(--cb-gold); }
+.status-failed { background:rgba(192,57,43,.1); color:var(--cb-down); }
+.lci-pdf-link { font-size:11px; color:var(--cb-gold); text-decoration:none; font-family:'Syne',sans-serif; font-weight:600; }
+.lci-pdf-link:hover { color:var(--cb-forest); }
 </style>
 @endpush
 
@@ -72,9 +72,9 @@
             </div>
         </div>
         @empty
-        <div style="text-align:center; padding:60px; color:#6B7590; font-size:14px;">
+        <div style="text-align:center; padding:60px; color:var(--cb-muted); font-size:14px;">
             Aucune lettre générée pour l'instant.<br>
-            <a href="{{ route('lettreci.new') }}" style="color:#C9A84C; margin-top:12px; display:inline-block;">
+            <a href="{{ route('lettreci.new') }}" style="color:var(--cb-gold); margin-top:12px; display:inline-block;">
                 Créer ma première lettre →
             </a>
         </div>
