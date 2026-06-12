@@ -1,4 +1,4 @@
-﻿{{-- ═══════════════════════════════════════════════════════════
+{{-- ═══════════════════════════════════════════════════════════
      formations-brvm.blade.php
 ═══════════════════════════════════════════════════════════ --}}
 {{-- resources/views/sections/formations-brvm.blade.php --}}
@@ -6,42 +6,42 @@
 
 @push('styles')
 <style>
-    .form-page { background: #060910; min-height: 100vh; }
-    .form-hero { background:radial-gradient(ellipse 80% 50% at 50% 0%,rgba(201,168,76,.1) 0%,transparent 55%),#060910;border-bottom:1px solid rgba(201,168,76,.08);padding:48px 0 36px;position:relative;overflow:hidden; }
-    .form-hero-grid { position:absolute;inset:0;background-image:linear-gradient(rgba(201,168,76,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(201,168,76,.04) 1px,transparent 1px);background-size:56px 56px;mask-image:radial-gradient(ellipse 80% 70% at 50% 50%,black 0%,transparent 70%);pointer-events:none; }
-    .form-hero-tag { font-family:'Syne',sans-serif;font-size:11px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:#0FCFA4;display:flex;align-items:center;gap:10px;margin-bottom:14px; }
-    .form-hero-tag::before { content:'';width:28px;height:1px;background:#0FCFA4; }
-    .form-hero-title { font-family:'Playfair Display',serif;font-size:clamp(28px,5vw,48px);font-weight:900;color:#E8EAF0;line-height:1.08;margin-bottom:10px; }
-    .form-hero-title em { font-style:italic;color:#C9A84C; }
+    .form-page { background: var(--cb-paper); min-height: 100vh; }
+    .form-hero { background:radial-gradient(ellipse 80% 50% at 50% 0%,rgba(15,92,67,.08) 0%,transparent 55%),var(--cb-paper);border-bottom:1px solid var(--cb-border);padding:48px 0 36px;position:relative;overflow:hidden; }
+    .form-hero-grid { position:absolute;inset:0;background-image:linear-gradient(rgba(15,92,67,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(15,92,67,.04) 1px,transparent 1px);background-size:56px 56px;mask-image:radial-gradient(ellipse 80% 70% at 50% 50%,black 0%,transparent 70%);pointer-events:none; }
+    .form-hero-tag { font-family:'Syne',sans-serif;font-size:11px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--cb-forest);display:flex;align-items:center;gap:10px;margin-bottom:14px; }
+    .form-hero-tag::before { content:'';width:28px;height:1px;background:var(--cb-forest); }
+    .form-hero-title { font-family:'Playfair Display',serif;font-size:clamp(28px,5vw,48px);font-weight:900;color:var(--cb-ink);line-height:1.08;margin-bottom:10px; }
+    .form-hero-title em { font-style:italic;color:var(--cb-gold); }
 
-    .form-info-box { background:rgba(15,207,164,.04);border:1px solid rgba(15,207,164,.12);border-radius:4px;padding:20px 24px;margin-bottom:32px; }
-    .form-info-box-title { font-family:'Syne',sans-serif;font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#0FCFA4;margin-bottom:10px; }
-    .form-info-box-text { font-size:13.5px;color:#9AA3B8;line-height:1.75; }
-    .form-info-box-text strong { color:#E8EAF0; }
+    .form-info-box { background:rgba(15,92,67,.05);border:1px solid rgba(15,92,67,.15);border-radius:4px;padding:20px 24px;margin-bottom:32px; }
+    .form-info-box-title { font-family:'Syne',sans-serif;font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--cb-forest);margin-bottom:10px; }
+    .form-info-box-text { font-size:13.5px;color:var(--cb-muted);line-height:1.75; }
+    .form-info-box-text strong { color:var(--cb-ink); }
 
-    .course-card { background:#0C1120;border:1px solid rgba(255,255,255,.06);border-radius:4px;overflow:hidden;margin-bottom:24px; }
-    .course-card.featured { border-color:rgba(201,168,76,.2); }
-    .course-card::before { content:'';display:block;height:2px;background:linear-gradient(90deg,#C9A84C,transparent); }
-    .course-card.featured::before { background:linear-gradient(90deg,#C9A84C,#0FCFA4,transparent); }
+    .course-card { background:var(--cb-card);border:1px solid var(--cb-border);border-radius:4px;overflow:hidden;margin-bottom:24px; }
+    .course-card.featured { border-color:rgba(176,134,46,.2); }
+    .course-card::before { content:'';display:block;height:2px;background:linear-gradient(90deg,var(--cb-gold),transparent); }
+    .course-card.featured::before { background:linear-gradient(90deg,var(--cb-gold),var(--cb-forest),transparent); }
     .course-card-body { padding:28px 32px; }
     .course-level { font-family:'Syne',sans-serif;font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;padding:3px 10px;border-radius:100px;margin-bottom:14px;display:inline-block; }
-    .level-debut { background:rgba(15,207,164,.1);color:#0FCFA4;border:1px solid rgba(15,207,164,.2); }
-    .level-inter { background:rgba(201,168,76,.1);color:#C9A84C;border:1px solid rgba(201,168,76,.2); }
-    .level-prat  { background:rgba(99,179,237,.1);color:#63B3ED;border:1px solid rgba(99,179,237,.2); }
-    .course-title { font-family:'Playfair Display',serif;font-size:clamp(20px,3vw,28px);font-weight:700;color:#E8EAF0;margin-bottom:8px; }
-    .course-subtitle { font-family:'Syne',sans-serif;font-size:13px;font-weight:600;color:#C9A84C;margin-bottom:14px; }
-    .course-desc { font-size:14px;color:#6B7590;line-height:1.75;margin-bottom:16px; }
+    .level-debut { background:rgba(15,92,67,.08);color:var(--cb-forest);border:1px solid rgba(15,92,67,.2); }
+    .level-inter { background:rgba(176,134,46,.08);color:var(--cb-gold);border:1px solid rgba(176,134,46,.2); }
+    .level-prat  { background:rgba(99,179,237,.1);color:#2B7FC4;border:1px solid rgba(99,179,237,.3); }
+    .course-title { font-family:'Playfair Display',serif;font-size:clamp(20px,3vw,28px);font-weight:700;color:var(--cb-ink);margin-bottom:8px; }
+    .course-subtitle { font-family:'Syne',sans-serif;font-size:13px;font-weight:600;color:var(--cb-gold);margin-bottom:14px; }
+    .course-desc { font-size:14px;color:var(--cb-muted);line-height:1.75;margin-bottom:16px; }
     .course-features { list-style:none;padding:0;margin-bottom:20px; }
-    .course-features li { font-size:13px;color:#9AA3B8;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.04);display:flex;align-items:center;gap:10px; }
-    .course-features li::before { content:'✔';color:#0FCFA4;font-weight:700;flex-shrink:0; }
-    .course-hint { font-size:12px;color:#6B7590;margin-top:10px;font-style:italic; }
+    .course-features li { font-size:13px;color:var(--cb-muted);padding:6px 0;border-bottom:1px solid var(--cb-border);display:flex;align-items:center;gap:10px; }
+    .course-features li::before { content:'✔';color:var(--cb-forest);font-weight:700;flex-shrink:0; }
+    .course-hint { font-size:12px;color:var(--cb-muted);margin-top:10px;font-style:italic; }
 
-    .cb-btn-gold { display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,#C9A84C,#9B6B15);color:#050810 !important;font-family:'Syne',sans-serif;font-weight:800;font-size:12px;letter-spacing:.07em;text-transform:uppercase;padding:11px 22px;border:none;border-radius:3px;cursor:pointer;text-decoration:none;transition:all .3s; }
-    .cb-btn-gold:hover { box-shadow:0 6px 20px rgba(201,168,76,.3);transform:translateY(-1px); }
-    .cb-btn-green { display:inline-flex;align-items:center;gap:8px;background:rgba(15,207,164,.1);color:#0FCFA4 !important;font-family:'Syne',sans-serif;font-weight:700;font-size:12px;letter-spacing:.06em;text-transform:uppercase;padding:10px 20px;border:1px solid rgba(15,207,164,.2);border-radius:3px;text-decoration:none;transition:all .3s; }
-    .cb-btn-green:hover { background:rgba(15,207,164,.16);border-color:rgba(15,207,164,.4); }
+    .cb-btn-gold { display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,var(--cb-gold),#7A5412);color:var(--cb-paper) !important;font-family:'Syne',sans-serif;font-weight:800;font-size:12px;letter-spacing:.07em;text-transform:uppercase;padding:11px 22px;border:none;border-radius:3px;cursor:pointer;text-decoration:none;transition:all .3s; }
+    .cb-btn-gold:hover { box-shadow:0 6px 20px rgba(176,134,46,.3);transform:translateY(-1px); }
+    .cb-btn-green { display:inline-flex;align-items:center;gap:8px;background:rgba(15,92,67,.08);color:var(--cb-forest) !important;font-family:'Syne',sans-serif;font-weight:700;font-size:12px;letter-spacing:.06em;text-transform:uppercase;padding:10px 20px;border:1px solid rgba(15,92,67,.2);border-radius:3px;text-decoration:none;transition:all .3s; }
+    .cb-btn-green:hover { background:rgba(15,92,67,.14);border-color:rgba(15,92,67,.4); }
 
-    .course-video-wrap { background:#060910;border-radius:3px;overflow:hidden;display:flex;align-items:center;justify-content:center; }
+    .course-video-wrap { background:var(--cb-paper);border:1px solid var(--cb-border);border-radius:3px;overflow:hidden;display:flex;align-items:center;justify-content:center; }
     .course-video-wrap video { max-width:100%;border-radius:3px; }
 
     .cbr { opacity:0;transform:translateY(18px);transition:all .7s cubic-bezier(.16,1,.3,1); }
@@ -57,7 +57,7 @@
         <div class="container" style="max-width:1100px;position:relative;z-index:1;">
             <p class="form-hero-tag">Formations en ligne</p>
             <h1 class="form-hero-title">🎓 Monte en niveau, <em>à ton rythme</em></h1>
-            <p style="font-size:14px;color:#6B7590;font-weight:300;max-width:520px;">Cours débutant, intermédiaire, pratique — disponibles 24h/24, à vie une fois achetés.</p>
+            <p style="font-size:14px;color:var(--cb-muted);font-weight:300;max-width:520px;">Cours débutant, intermédiaire, pratique — disponibles 24h/24, à vie une fois achetés.</p>
         </div>
     </div>
 
@@ -68,7 +68,7 @@
             <div class="form-info-box-text">
                 • <strong>Sur Boursiv</strong> : paiement par <strong>Mobile Money</strong> (Wave, Orange Money, MTN, Moov).<br>
                 • <strong>Sur Udemy</strong> : paiement par <strong>carte bancaire</strong> (plateforme internationale).<br>
-                <span style="color:#6B7590;">Dans les deux cas, l'accès est à vie après achat.</span>
+                <span style="color:var(--cb-muted);">Dans les deux cas, l'accès est à vie après achat.</span>
             </div>
         </div>
 

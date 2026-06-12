@@ -1,95 +1,95 @@
-﻿{{-- ════════ sections/financement.blade.php ════════ --}}
+{{-- ════════ sections/financement.blade.php ════════ --}}
 @extends('layouts.app')
 @section('title','Facilitation de financement – Boursiv')
 
 @push('styles')
 <style>
-    .fin-page { background:#060910; min-height:100vh; }
+    .fin-page { background:var(--cb-paper); min-height:100vh; }
 
     /* Hero */
     .fin-hero {
-        background: radial-gradient(ellipse 80% 50% at 50% 0%, rgba(37,211,102,.1) 0%, transparent 55%), #060910;
-        border-bottom: 1px solid rgba(37,211,102,.1);
+        background: radial-gradient(ellipse 80% 50% at 50% 0%, rgba(15,92,67,.07) 0%, transparent 55%), var(--cb-paper);
+        border-bottom: 1px solid var(--cb-border);
         padding: 56px 0 48px;
         position: relative; overflow: hidden;
     }
     .fin-hero-grid {
         position: absolute; inset: 0;
-        background-image: linear-gradient(rgba(37,211,102,.03) 1px, transparent 1px),
-                          linear-gradient(90deg, rgba(37,211,102,.03) 1px, transparent 1px);
+        background-image: linear-gradient(rgba(15,92,67,.04) 1px, transparent 1px),
+                          linear-gradient(90deg, rgba(15,92,67,.04) 1px, transparent 1px);
         background-size: 56px 56px;
         mask-image: radial-gradient(ellipse 80% 70% at 50% 50%, black 0%, transparent 70%);
         pointer-events: none;
     }
     .fin-tag {
         font-family: 'Syne', sans-serif; font-size: 11px; font-weight: 600;
-        letter-spacing: .2em; text-transform: uppercase; color: #25D366;
+        letter-spacing: .2em; text-transform: uppercase; color: var(--cb-forest);
         display: flex; align-items: center; gap: 10px; margin-bottom: 14px;
     }
-    .fin-tag::before { content: ''; width: 28px; height: 1px; background: #25D366; }
+    .fin-tag::before { content: ''; width: 28px; height: 1px; background: var(--cb-forest); }
     .fin-hero-title {
         font-family: 'Playfair Display', serif;
         font-size: clamp(30px, 5vw, 52px); font-weight: 900;
-        color: #E8EAF0; line-height: 1.1; margin-bottom: 16px;
+        color: var(--cb-ink); line-height: 1.1; margin-bottom: 16px;
     }
-    .fin-hero-title em { font-style: italic; color: #25D366; }
-    .fin-hero-desc { font-size: 16px; color: #6B7590; line-height: 1.8; max-width: 560px; }
-    .fin-hero-desc strong { color: #E8EAF0; }
+    .fin-hero-title em { font-style: italic; color: var(--cb-forest); }
+    .fin-hero-desc { font-size: 16px; color: var(--cb-muted); line-height: 1.8; max-width: 560px; }
+    .fin-hero-desc strong { color: var(--cb-ink); }
 
     /* Disclaimer */
     .fin-disclaimer {
-        background: rgba(201,168,76,.06); border: 1px solid rgba(201,168,76,.2);
+        background: rgba(176,134,46,.06); border: 1px solid rgba(176,134,46,.2);
         border-radius: 6px; padding: 16px 20px;
         display: flex; align-items: flex-start; gap: 12px;
-        font-size: 13.5px; color: #9BA3B8; line-height: 1.7;
+        font-size: 13.5px; color: var(--cb-muted); line-height: 1.7;
         margin: 28px 0 0;
     }
-    .fin-disclaimer strong { color: #C9A84C; }
+    .fin-disclaimer strong { color: var(--cb-gold); }
 
     /* Cards */
     .fin-card {
-        background: #0C1120; border: 1px solid rgba(255,255,255,.06);
+        background: var(--cb-card); border: 1px solid var(--cb-border);
         border-radius: 6px; padding: 28px 24px; height: 100%;
         transition: border-color .3s, transform .3s;
     }
-    .fin-card:hover { border-color: rgba(37,211,102,.25); transform: translateY(-3px); }
+    .fin-card:hover { border-color: rgba(15,92,67,.3); transform: translateY(-3px); }
     .fin-card-icon { font-size: 28px; margin-bottom: 12px; }
     .fin-card-title {
         font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700;
-        letter-spacing: .08em; text-transform: uppercase; color: #E8EAF0; margin-bottom: 8px;
+        letter-spacing: .08em; text-transform: uppercase; color: var(--cb-ink); margin-bottom: 8px;
     }
-    .fin-card-desc { font-size: 13.5px; color: #6B7590; line-height: 1.75; margin: 0; }
+    .fin-card-desc { font-size: 13.5px; color: var(--cb-muted); line-height: 1.75; margin: 0; }
 
     /* Steps */
-    .fin-step { display: flex; gap: 20px; align-items: flex-start; padding: 20px 0; border-bottom: 1px solid rgba(255,255,255,.05); }
+    .fin-step { display: flex; gap: 20px; align-items: flex-start; padding: 20px 0; border-bottom: 1px solid var(--cb-border); }
     .fin-step:last-child { border-bottom: none; }
     .fin-step-num {
         min-width: 38px; height: 38px; border-radius: 50%;
-        background: rgba(37,211,102,.12); border: 1px solid rgba(37,211,102,.3);
+        background: rgba(15,92,67,.1); border: 1px solid rgba(15,92,67,.3);
         display: flex; align-items: center; justify-content: center;
-        font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 800; color: #25D366;
+        font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 800; color: var(--cb-forest);
         flex-shrink: 0;
     }
-    .fin-step-title { font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; color: #E8EAF0; margin-bottom: 4px; }
-    .fin-step-desc { font-size: 13.5px; color: #6B7590; line-height: 1.7; margin: 0; }
+    .fin-step-title { font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; color: var(--cb-ink); margin-bottom: 4px; }
+    .fin-step-desc { font-size: 13.5px; color: var(--cb-muted); line-height: 1.7; margin: 0; }
 
     /* FAQ */
-    .fin-faq-item { border-bottom: 1px solid rgba(255,255,255,.06); padding: 18px 0; }
-    .fin-faq-q { font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; color: #E8EAF0; margin-bottom: 8px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
-    .fin-faq-q span { color: #25D366; font-size: 18px; transition: transform .3s; }
-    .fin-faq-a { font-size: 13.5px; color: #6B7590; line-height: 1.8; }
+    .fin-faq-item { border-bottom: 1px solid var(--cb-border); padding: 18px 0; }
+    .fin-faq-q { font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; color: var(--cb-ink); margin-bottom: 8px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+    .fin-faq-q span { color: var(--cb-forest); font-size: 18px; transition: transform .3s; }
+    .fin-faq-a { font-size: 13.5px; color: var(--cb-muted); line-height: 1.8; }
 
     /* CTA finale */
     .fin-cta-box {
-        background: linear-gradient(135deg, rgba(37,211,102,.08) 0%, rgba(37,211,102,.03) 100%);
-        border: 1px solid rgba(37,211,102,.25);
+        background: rgba(15,92,67,.05);
+        border: 1px solid rgba(15,92,67,.2);
         border-radius: 8px; padding: clamp(36px,5vw,56px); text-align: center;
     }
     .fin-cta-title {
         font-family: 'Playfair Display', serif;
-        font-size: clamp(24px,3.5vw,36px); font-weight: 700; color: #E8EAF0; margin-bottom: 12px;
+        font-size: clamp(24px,3.5vw,36px); font-weight: 700; color: var(--cb-ink); margin-bottom: 12px;
     }
-    .fin-cta-title em { font-style: italic; color: #25D366; }
+    .fin-cta-title em { font-style: italic; color: var(--cb-forest); }
 
     .fin-wa-btn {
         display: inline-flex; align-items: center; gap: 10px;
@@ -107,7 +107,7 @@
 
     .fin-dot-blink {
         display: inline-block; width: 7px; height: 7px; border-radius: 50%;
-        background: #25D366; margin-right: 6px; vertical-align: middle;
+        background: var(--cb-forest); margin-right: 6px; vertical-align: middle;
         animation: finBlink 1.4s ease-in-out infinite;
     }
     @keyframes finBlink {
@@ -147,24 +147,24 @@
                     </div>
                 </div>
                 <div class="col-lg-5">
-                    <div style="background:#0C1120; border:1px solid rgba(37,211,102,.15); border-radius:6px; padding:28px;">
-                        <p style="font-family:'Syne',sans-serif;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:#6B7590;margin-bottom:16px;">En bref</p>
+                    <div style="background:var(--cb-card); border:1px solid rgba(15,92,67,.15); border-radius:6px; padding:28px;">
+                        <p style="font-family:'Syne',sans-serif;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--cb-muted);margin-bottom:16px;">En bref</p>
                         <div class="d-flex flex-column gap-3">
                             <div class="d-flex align-items-center gap-3">
-                                <span style="color:#25D366;font-size:18px;">✓</span>
-                                <span style="font-size:14px;color:#9BA3B8;">Mise en relation gratuite</span>
+                                <span style="color:var(--cb-forest);font-size:18px;">✓</span>
+                                <span style="font-size:14px;color:var(--cb-ink);">Mise en relation gratuite</span>
                             </div>
                             <div class="d-flex align-items-center gap-3">
-                                <span style="color:#25D366;font-size:18px;">✓</span>
-                                <span style="font-size:14px;color:#9BA3B8;">Structures financières agréées uniquement</span>
+                                <span style="color:var(--cb-forest);font-size:18px;">✓</span>
+                                <span style="font-size:14px;color:var(--cb-ink);">Structures financières agréées uniquement</span>
                             </div>
                             <div class="d-flex align-items-center gap-3">
-                                <span style="color:#25D366;font-size:18px;">✓</span>
-                                <span style="font-size:14px;color:#9BA3B8;">Réponse sous 24h sur WhatsApp</span>
+                                <span style="color:var(--cb-forest);font-size:18px;">✓</span>
+                                <span style="font-size:14px;color:var(--cb-ink);">Réponse sous 24h sur WhatsApp</span>
                             </div>
                             <div class="d-flex align-items-center gap-3">
-                                <span style="color:#C9A84C;font-size:18px;">⚠</span>
-                                <span style="font-size:14px;color:#9BA3B8;">Nous ne sommes <strong style="color:#C9A84C;">pas</strong> une banque</span>
+                                <span style="color:var(--cb-gold);font-size:18px;">⚠</span>
+                                <span style="font-size:14px;color:var(--cb-ink);">Nous ne sommes <strong style="color:var(--cb-gold);">pas</strong> une banque</span>
                             </div>
                         </div>
                     </div>
@@ -174,11 +174,11 @@
     </section>
 
     {{-- POUR QUI --}}
-    <section style="background:#060910; padding:64px 0;">
+    <section style="background:var(--cb-paper); padding:64px 0;">
         <div class="container" style="max-width:1100px;">
             <div class="text-center mb-5">
-                <p style="font-family:'Syne',sans-serif;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#25D366;margin-bottom:10px;">Pour qui ?</p>
-                <h2 style="font-family:'Playfair Display',serif;font-size:clamp(24px,3.5vw,34px);font-weight:700;color:#E8EAF0;margin-bottom:0;">
+                <p style="font-family:'Syne',sans-serif;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--cb-forest);margin-bottom:10px;">Pour qui ?</p>
+                <h2 style="font-family:'Playfair Display',serif;font-size:clamp(24px,3.5vw,34px);font-weight:700;color:var(--cb-ink);margin-bottom:0;">
                     Ce service est fait pour vous si…
                 </h2>
             </div>
@@ -209,15 +209,15 @@
     </section>
 
     {{-- COMMENT ÇA MARCHE --}}
-    <section style="background:#0C1120; border-top:1px solid rgba(255,255,255,.05); border-bottom:1px solid rgba(255,255,255,.05); padding:64px 0;">
+    <section style="background:var(--cb-card); border-top:1px solid var(--cb-border); border-bottom:1px solid var(--cb-border); padding:64px 0;">
         <div class="container" style="max-width:1100px;">
             <div class="row g-5 align-items-start">
                 <div class="col-lg-5">
-                    <p style="font-family:'Syne',sans-serif;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#25D366;margin-bottom:10px;">Le processus</p>
-                    <h2 style="font-family:'Playfair Display',serif;font-size:clamp(24px,3.5vw,34px);font-weight:700;color:#E8EAF0;margin-bottom:16px;">
-                        Comment ça <em style="color:#25D366;">se passe</em> ?
+                    <p style="font-family:'Syne',sans-serif;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--cb-forest);margin-bottom:10px;">Le processus</p>
+                    <h2 style="font-family:'Playfair Display',serif;font-size:clamp(24px,3.5vw,34px);font-weight:700;color:var(--cb-ink);margin-bottom:16px;">
+                        Comment ça <em style="color:var(--cb-forest);">se passe</em> ?
                     </h2>
-                    <p style="font-size:14px;color:#6B7590;line-height:1.8;">
+                    <p style="font-size:14px;color:var(--cb-muted);line-height:1.8;">
                         De votre premier message WhatsApp jusqu'à la mise en relation avec la
                         structure financière adaptée, voici les grandes étapes.
                     </p>
@@ -264,11 +264,11 @@
     </section>
 
     {{-- FAQ --}}
-    <section style="background:#060910; padding:64px 0;">
+    <section style="background:var(--cb-paper); padding:64px 0;">
         <div class="container" style="max-width:760px;">
             <div class="text-center mb-5">
-                <p style="font-family:'Syne',sans-serif;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#25D366;margin-bottom:10px;">Questions fréquentes</p>
-                <h2 style="font-family:'Playfair Display',serif;font-size:clamp(22px,3vw,32px);font-weight:700;color:#E8EAF0;">Ce que vous vous demandez sûrement</h2>
+                <p style="font-family:'Syne',sans-serif;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--cb-forest);margin-bottom:10px;">Questions fréquentes</p>
+                <h2 style="font-family:'Playfair Display',serif;font-size:clamp(22px,3vw,32px);font-weight:700;color:var(--cb-ink);">Ce que vous vous demandez sûrement</h2>
             </div>
             <div>
                 <div class="fin-faq-item">
@@ -292,14 +292,14 @@
     </section>
 
     {{-- CTA FINALE --}}
-    <section style="background:#060910; padding:clamp(64px,10vw,100px) 0;">
+    <section style="background:var(--cb-paper); padding:clamp(64px,10vw,100px) 0;">
         <div class="container" style="max-width:760px;">
             <div class="fin-cta-box">
                 <div style="font-size:40px; margin-bottom:16px;">💰</div>
                 <h2 class="fin-cta-title">
                     Prêt à concrétiser<br>votre <em>projet</em> ?
                 </h2>
-                <p style="font-size:15px;color:#6B7590;line-height:1.8;max-width:500px;margin:0 auto 32px;">
+                <p style="font-size:15px;color:var(--cb-muted);line-height:1.8;max-width:500px;margin:0 auto 32px;">
                     Envoyez-nous un message WhatsApp. On évalue votre besoin et on vous met
                     en relation avec la structure financière la mieux adaptée à votre situation.
                 </p>
@@ -308,7 +308,7 @@
                    class="fin-wa-btn">
                     <i class="bi bi-whatsapp"></i> Nous contacter sur WhatsApp
                 </a>
-                <p style="font-size:11px;color:rgba(107,117,144,.5);margin-top:20px;font-family:'Syne',sans-serif;letter-spacing:.1em;text-transform:uppercase;">
+                <p style="font-size:11px;color:var(--cb-muted);margin-top:20px;font-family:'Syne',sans-serif;letter-spacing:.1em;text-transform:uppercase;">
                     Mise en relation gratuite &nbsp;·&nbsp; Réponse sous 24h &nbsp;·&nbsp; Structures agréées
                 </p>
             </div>

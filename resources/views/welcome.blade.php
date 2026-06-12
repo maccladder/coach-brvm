@@ -9,9 +9,9 @@
     .cb-hero {
         min-height: 92vh;
         background:
-            radial-gradient(ellipse 90% 60% at 50% 0%, rgba(201,168,76,.1) 0%, transparent 55%),
-            radial-gradient(ellipse 50% 40% at 85% 80%, rgba(15,207,164,.06) 0%, transparent 50%),
-            #060910;
+            radial-gradient(ellipse 90% 60% at 50% 0%, rgba(176,134,46,.08) 0%, transparent 55%),
+            radial-gradient(ellipse 50% 40% at 85% 80%, rgba(15,92,67,.04) 0%, transparent 50%),
+            var(--cb-paper);
         position: relative;
         overflow: hidden;
         display: flex;
@@ -21,8 +21,8 @@
     .cb-hero-grid {
         position: absolute; inset: 0;
         background-image:
-            linear-gradient(rgba(201,168,76,.05) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(201,168,76,.05) 1px, transparent 1px);
+            linear-gradient(rgba(15,92,67,.05) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(15,92,67,.05) 1px, transparent 1px);
         background-size: 60px 60px;
         mask-image: radial-gradient(ellipse 80% 70% at 50% 50%, black 0%, transparent 70%);
         pointer-events: none;
@@ -35,13 +35,13 @@
     .cb-hero-orb-1 {
         width: 500px; height: 500px;
         top: -100px; left: -100px;
-        background: rgba(201,168,76,.07);
+        background: rgba(176,134,46,.06);
         animation: orbF 14s ease-in-out infinite;
     }
     .cb-hero-orb-2 {
         width: 400px; height: 400px;
         bottom: -60px; right: -60px;
-        background: rgba(15,207,164,.05);
+        background: rgba(15,92,67,.04);
         animation: orbF 18s ease-in-out infinite reverse;
     }
     @keyframes orbF {
@@ -52,23 +52,23 @@
     /* Hero badge */
     .cb-hero-badge {
         display: inline-flex; align-items: center; gap: 8px;
-        background: rgba(201,168,76,.09);
-        border: 1px solid rgba(201,168,76,.22);
+        background: rgba(176,134,46,.08);
+        border: 1px solid rgba(176,134,46,.25);
         border-radius: 100px;
         padding: 6px 16px;
         font-family: 'Syne', sans-serif;
         font-size: 11px; font-weight: 600;
         letter-spacing: .12em; text-transform: uppercase;
-        color: #C9A84C;
+        color: var(--cb-gold);
         margin-bottom: 28px;
     }
     .cb-hero-badge-dot {
         width: 6px; height: 6px;
-        background: #0FCFA4; border-radius: 50%;
+        background: var(--cb-forest); border-radius: 50%;
         animation: bdot 2s ease-in-out infinite;
     }
     @keyframes bdot {
-        0%,100% { opacity:1; box-shadow: 0 0 6px #0FCFA4; }
+        0%,100% { opacity:1; box-shadow: 0 0 6px var(--cb-forest); }
         50%      { opacity:.2; box-shadow: none; }
     }
 
@@ -79,32 +79,32 @@
         font-weight: 900;
         line-height: 1.05;
         letter-spacing: -.02em;
-        color: #E8EAF0;
+        color: var(--cb-ink);
         margin-bottom: 12px;
     }
-    .cb-hero-title .gold { color: #C9A84C; }
+    .cb-hero-title .gold { color: var(--cb-gold); }
 
     .cb-hero-tag {
         font-family: 'Syne', sans-serif;
         font-size: 11px; font-weight: 600;
         letter-spacing: .24em; text-transform: uppercase;
-        color: #6B7590; margin-bottom: 24px;
+        color: var(--cb-muted); margin-bottom: 24px;
     }
-    .cb-hero-tag span { color: #0FCFA4; }
+    .cb-hero-tag span { color: var(--cb-forest); }
 
     .cb-hero-desc {
         font-size: clamp(15px, 2vw, 17px);
-        color: #6B7590; font-weight: 300;
+        color: var(--cb-muted); font-weight: 300;
         line-height: 1.75; max-width: 560px;
         margin-bottom: 40px;
     }
-    .cb-hero-desc strong { color: #E8EAF0; font-weight: 500; }
+    .cb-hero-desc strong { color: var(--cb-ink); font-weight: 500; }
 
     /* Hero CTA buttons */
     .cb-cta-primary {
         display: inline-flex; align-items: center; gap: 8px;
-        background: linear-gradient(135deg, #C9A84C, #9B6B15);
-        color: #050810 !important; font-family: 'Syne', sans-serif;
+        background: linear-gradient(135deg, var(--cb-gold), #7A5412);
+        color: var(--cb-paper) !important; font-family: 'Syne', sans-serif;
         font-weight: 800; font-size: 13px;
         letter-spacing: .06em; text-transform: uppercase;
         padding: 14px 28px; border-radius: 3px;
@@ -112,53 +112,52 @@
         border: none;
     }
     .cb-cta-primary:hover {
-        box-shadow: 0 10px 32px rgba(201,168,76,.3);
+        box-shadow: 0 10px 32px rgba(176,134,46,.35);
         transform: translateY(-2px);
-        color: #050810 !important;
+        color: var(--cb-paper) !important;
     }
 
     .cb-cta-green {
         display: inline-flex; align-items: center; gap: 8px;
-        background: rgba(15,207,164,.1); color: #0FCFA4 !important;
+        background: rgba(15,92,67,.08); color: var(--cb-forest) !important;
         font-family: 'Syne', sans-serif; font-weight: 700;
         font-size: 13px; letter-spacing: .06em; text-transform: uppercase;
         padding: 13px 24px; border-radius: 3px;
         text-decoration: none;
-        border: 1px solid rgba(15,207,164,.22);
+        border: 1px solid rgba(15,92,67,.3);
         transition: all .3s;
     }
     .cb-cta-green:hover {
-        background: rgba(15,207,164,.16);
-        border-color: rgba(15,207,164,.4);
-        color: #0FCFA4 !important;
+        background: rgba(15,92,67,.14);
+        border-color: rgba(15,92,67,.4);
+        color: var(--cb-forest) !important;
     }
 
     .cb-cta-outline {
         display: inline-flex; align-items: center; gap: 8px;
-        background: transparent; color: #E8EAF0 !important;
+        background: transparent; color: var(--cb-ink) !important;
         font-family: 'Syne', sans-serif; font-weight: 600;
         font-size: 13px; letter-spacing: .06em; text-transform: uppercase;
         padding: 13px 22px; border-radius: 3px;
         text-decoration: none;
-        border: 1px solid rgba(255,255,255,.12);
+        border: 1px solid rgba(26,33,29,.18);
         transition: all .3s;
     }
     .cb-cta-outline:hover {
-        border-color: #C9A84C; color: #C9A84C !important;
-        background: rgba(201,168,76,.05);
+        border-color: var(--cb-gold); color: var(--cb-gold) !important;
+        background: rgba(176,134,46,.06);
     }
 
-    /* Hero card (right) */
+    /* Hero card (right) — panneau vert profond */
     .cb-hero-card {
-        background: rgba(12,17,32,.9);
-        border: 1px solid rgba(201,168,76,.12);
+        background: var(--cb-forest-dk);
+        border: 1px solid rgba(176,134,46,.25);
         border-radius: 6px;
         overflow: hidden;
-        backdrop-filter: blur(12px);
     }
     .cb-hero-card-header {
-        background: rgba(18,26,44,.9);
-        border-bottom: 1px solid rgba(201,168,76,.08);
+        background: rgba(0,0,0,.2);
+        border-bottom: 1px solid rgba(176,134,46,.2);
         padding: 14px 20px;
         display: flex; align-items: center; gap: 10px;
     }
@@ -166,24 +165,24 @@
     .cb-hero-card-title {
         font-family: 'Syne', sans-serif; font-size: 11px;
         font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
-        color: #6B7590; flex: 1; text-align: center;
+        color: rgba(245,241,232,.6); flex: 1; text-align: center;
     }
 
     /* Tools list */
     .cb-tool-item {
         display: flex; justify-content: space-between; align-items: center;
         padding: 13px 20px;
-        border-bottom: 1px solid rgba(255,255,255,.04);
+        border-bottom: 1px solid rgba(255,255,255,.07);
         transition: background .2s;
     }
-    .cb-tool-item:hover { background: rgba(201,168,76,.04); }
+    .cb-tool-item:hover { background: rgba(255,255,255,.06); }
     .cb-tool-item:last-child { border-bottom: none; }
 
     .cb-tool-name {
         font-family: 'Syne', sans-serif; font-size: 13px;
-        font-weight: 600; color: #E8EAF0;
+        font-weight: 600; color: #F5F1E8;
     }
-    .cb-tool-desc { font-size: 12px; color: #6B7590; margin-top: 1px; }
+    .cb-tool-desc { font-size: 12px; color: rgba(245,241,232,.55); margin-top: 1px; }
 
     .cb-chip {
         font-family: 'Syne', sans-serif; font-size: 9px;
@@ -199,76 +198,76 @@
 
     /* Stats strip */
     .cb-stats {
-        background: rgba(12,17,32,.95);
-        border-bottom: 1px solid rgba(201,168,76,.08);
+        background: var(--cb-card);
+        border-bottom: 1px solid var(--cb-border);
         padding: 20px 0;
     }
     .cb-stat-num {
         font-family: 'Playfair Display', serif;
         font-size: clamp(24px, 3.5vw, 34px);
-        font-weight: 700; color: #C9A84C;
+        font-weight: 700; color: var(--cb-forest);
         line-height: 1; display: block;
     }
     .cb-stat-lbl {
         font-family: 'Syne', sans-serif; font-size: 10px;
         letter-spacing: .14em; text-transform: uppercase;
-        color: #6B7590; margin-top: 5px; display: block;
+        color: var(--cb-muted); margin-top: 5px; display: block;
     }
 
     /* ============================================
        SECTIONS COMMUNES
     ============================================ */
     .cb-sec { padding: clamp(64px,9vw,120px) 0; }
-    .cb-sec-alt { background: #0C1120; }
-    .cb-sec-white { background: #f0f2f7; }
+    .cb-sec-alt { background: var(--cb-card); }
+    .cb-sec-white { background: var(--cb-paper); }
 
     .cb-sec-tag {
         font-family: 'Syne', sans-serif; font-size: 11px;
         letter-spacing: .2em; text-transform: uppercase;
-        color: #0FCFA4; margin-bottom: 14px;
+        color: var(--cb-forest); margin-bottom: 14px;
         display: flex; align-items: center; gap: 10px;
     }
-    .cb-sec-tag::before { content:''; width:28px; height:1px; background:#0FCFA4; }
+    .cb-sec-tag::before { content:''; width:28px; height:1px; background:var(--cb-forest); }
 
     .cb-sec-title {
         font-family: 'Playfair Display', serif;
         font-size: clamp(28px, 4.5vw, 48px);
-        font-weight: 700; line-height: 1.1; color: #E8EAF0;
+        font-weight: 700; line-height: 1.1; color: var(--cb-ink);
         margin-bottom: 16px;
     }
-    .cb-sec-title em { font-style: italic; color: #C9A84C; }
+    .cb-sec-title em { font-style: italic; color: var(--cb-gold); }
 
     .cb-sec-title-dark {
         font-family: 'Playfair Display', serif;
         font-size: clamp(28px, 4.5vw, 48px);
-        font-weight: 700; line-height: 1.1; color: #1a1f2e;
+        font-weight: 700; line-height: 1.1; color: var(--cb-ink);
         margin-bottom: 16px;
     }
-    .cb-sec-title-dark em { font-style: italic; color: #9B6B15; }
+    .cb-sec-title-dark em { font-style: italic; color: var(--cb-gold); }
 
-    .cb-divider { width: 52px; height: 1px; background: linear-gradient(90deg, #C9A84C, transparent); margin: 16px 0; }
-    .cb-divider-dark { width: 52px; height: 1px; background: linear-gradient(90deg, #9B6B15, transparent); margin: 16px 0; }
+    .cb-divider { width: 52px; height: 1px; background: linear-gradient(90deg, var(--cb-gold), transparent); margin: 16px 0; }
+    .cb-divider-dark { width: 52px; height: 1px; background: linear-gradient(90deg, var(--cb-gold), transparent); margin: 16px 0; }
 
-    /* Feature cards (dark) */
+    /* Feature cards */
     .cb-feature-grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
         gap: 1px;
-        background: rgba(201,168,76,.08);
-        border: 1px solid rgba(201,168,76,.08);
+        background: rgba(15,92,67,.08);
+        border: 1px solid rgba(15,92,67,.08);
         margin-top: 48px;
     }
     .cb-feature-card {
-        background: #0C1120; padding: 32px 28px;
+        background: var(--cb-card); padding: 32px 28px;
         position: relative; overflow: hidden;
         transition: background .35s;
         text-decoration: none; color: inherit;
         display: block;
     }
-    .cb-feature-card:hover { background: rgba(16,22,40,1); color: inherit; }
+    .cb-feature-card:hover { background: var(--cb-paper); color: inherit; }
     .cb-feature-card::before {
         content: ''; position: absolute; top:0;left:0;right:0;height:2px;
-        background: linear-gradient(90deg, #C9A84C, transparent);
+        background: linear-gradient(90deg, var(--cb-forest), transparent);
         opacity: 0; transition: opacity .35s;
     }
     .cb-feature-card:hover::before { opacity: 1; }
@@ -276,25 +275,25 @@
         position: absolute; top:18px; right:20px;
         font-family: 'Playfair Display', serif;
         font-size: 42px; font-weight: 900;
-        color: rgba(201,168,76,.06); line-height: 1;
+        color: rgba(15,92,67,.07); line-height: 1;
     }
     .cb-feature-emoji { font-size: 26px; margin-bottom: 18px; display: block; }
     .cb-feature-title {
         font-family: 'Syne', sans-serif; font-size: 15px;
-        font-weight: 700; color: #E8EAF0; margin-bottom: 9px;
+        font-weight: 700; color: var(--cb-ink); margin-bottom: 9px;
     }
-    .cb-feature-desc { font-size: 13px; color: #6B7590; line-height: 1.65; }
+    .cb-feature-desc { font-size: 13px; color: var(--cb-muted); line-height: 1.65; }
 
     /* BOC highlight box */
     .cb-boc-box {
-        background: rgba(15,207,164,.04);
-        border: 1px solid rgba(15,207,164,.14);
+        background: rgba(15,92,67,.04);
+        border: 1px solid rgba(15,92,67,.15);
         border-radius: 6px; padding: 36px 40px;
         position: relative; overflow: hidden;
     }
     .cb-boc-box::before {
         content:''; position:absolute; top:0;left:0;right:0;height:2px;
-        background: linear-gradient(90deg, #0FCFA4, transparent);
+        background: linear-gradient(90deg, var(--cb-forest), transparent);
     }
 
     /* How steps */
@@ -302,101 +301,101 @@
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
         gap: 1px;
-        background: rgba(201,168,76,.07);
-        border: 1px solid rgba(201,168,76,.07);
+        background: rgba(15,92,67,.08);
+        border: 1px solid rgba(15,92,67,.08);
         margin-top: 48px;
     }
-    .cb-how-step { background: #0C1120; padding: 30px 26px; }
+    .cb-how-step { background: var(--cb-card); padding: 30px 26px; }
     .cb-how-n {
         font-family: 'Playfair Display', serif;
         font-size: 40px; font-weight: 900;
-        color: rgba(201,168,76,.15); line-height: 1; margin-bottom: 14px;
+        color: rgba(15,92,67,.12); line-height: 1; margin-bottom: 14px;
     }
     .cb-how-title {
         font-family: 'Syne', sans-serif; font-size: 14px;
-        font-weight: 700; color: #E8EAF0; margin-bottom: 8px;
+        font-weight: 700; color: var(--cb-ink); margin-bottom: 8px;
     }
-    .cb-how-desc { font-size: 13px; color: #6B7590; line-height: 1.65; }
+    .cb-how-desc { font-size: 13px; color: var(--cb-muted); line-height: 1.65; }
 
     /* Pricing cards */
     .cb-price-card {
-        background: #121A2C;
-        border: 1px solid rgba(255,255,255,.06);
+        background: var(--cb-card);
+        border: 1px solid var(--cb-border);
         border-radius: 4px; padding: 30px;
         position: relative; transition: all .35s;
         height: 100%;
     }
-    .cb-price-card:hover { transform: translateY(-4px); border-color: rgba(201,168,76,.2); }
+    .cb-price-card:hover { transform: translateY(-4px); border-color: rgba(176,134,46,.3); }
     .cb-price-card.featured {
-        border-color: rgba(201,168,76,.22);
-        background: rgba(18,22,36,1);
+        border-color: rgba(176,134,46,.3);
+        background: var(--cb-card);
     }
     .cb-price-card.featured::before {
         content: 'RECOMMANDÉ';
         position: absolute; top:-1px; right:20px;
         font-family: 'Syne', sans-serif; font-size: 9px;
         font-weight: 700; letter-spacing: .12em; text-transform: uppercase;
-        background: #C9A84C; color: #050810; padding: 3px 10px;
+        background: var(--cb-gold); color: var(--cb-paper); padding: 3px 10px;
     }
     .cb-price-label {
         font-family: 'Syne', sans-serif; font-size: 10px;
         letter-spacing: .14em; text-transform: uppercase;
-        color: #6B7590; margin-bottom: 6px;
+        color: var(--cb-muted); margin-bottom: 6px;
     }
     .cb-price-title {
         font-family: 'Playfair Display', serif;
-        font-size: 20px; font-weight: 700; color: #E8EAF0; margin-bottom: 14px;
+        font-size: 20px; font-weight: 700; color: var(--cb-ink); margin-bottom: 14px;
     }
     .cb-price-num {
         font-family: 'Playfair Display', serif;
-        font-size: 34px; font-weight: 900; color: #C9A84C; margin-bottom: 10px;
+        font-size: 34px; font-weight: 900; color: var(--cb-forest); margin-bottom: 10px;
         line-height: 1;
     }
-    .cb-price-num span { font-size: 14px; color: #6B7590; font-family: 'DM Sans', sans-serif; font-weight: 300; }
-    .cb-price-desc { font-size: 13px; color: #6B7590; line-height: 1.65; margin-bottom: 20px; }
+    .cb-price-num span { font-size: 14px; color: var(--cb-muted); font-family: 'DM Sans', sans-serif; font-weight: 300; }
+    .cb-price-desc { font-size: 13px; color: var(--cb-muted); line-height: 1.65; margin-bottom: 20px; }
     .cb-price-features { list-style: none; padding: 0; margin-bottom: 24px; }
     .cb-price-features li {
-        font-size: 13px; color: #6B7590;
-        padding: 7px 0; border-bottom: 1px solid rgba(255,255,255,.04);
+        font-size: 13px; color: var(--cb-muted);
+        padding: 7px 0; border-bottom: 1px solid rgba(26,33,29,.07);
         display: flex; align-items: flex-start; gap: 9px;
     }
-    .cb-price-features li::before { content: '✓'; color: #0FCFA4; font-weight: 700; flex-shrink: 0; }
+    .cb-price-features li::before { content: '✓'; color: var(--cb-forest); font-weight: 700; flex-shrink: 0; }
 
     /* Annonces */
     .cb-ann-card {
-        background: #121A2C;
-        border: 1px solid rgba(255,255,255,.05);
+        background: var(--cb-card);
+        border: 1px solid var(--cb-border);
         border-radius: 4px; padding: 22px;
         text-decoration: none; color: inherit;
         display: block; transition: all .3s; height: 100%;
     }
-    .cb-ann-card:hover { border-color: rgba(201,168,76,.18); transform: translateY(-3px); color: inherit; }
+    .cb-ann-card:hover { border-color: rgba(176,134,46,.3); transform: translateY(-3px); color: inherit; }
     .cb-ann-date {
         font-family: 'Syne', sans-serif; font-size: 10px;
-        letter-spacing: .1em; text-transform: uppercase; color: #6B7590; margin-bottom: 7px;
+        letter-spacing: .1em; text-transform: uppercase; color: var(--cb-muted); margin-bottom: 7px;
     }
     .cb-ann-title {
         font-family: 'Syne', sans-serif; font-size: 14px;
-        font-weight: 700; color: #E8EAF0; line-height: 1.4; margin-bottom: 9px;
+        font-weight: 700; color: var(--cb-ink); line-height: 1.4; margin-bottom: 9px;
     }
-    .cb-ann-excerpt { font-size: 13px; color: #6B7590; line-height: 1.6; }
+    .cb-ann-excerpt { font-size: 13px; color: var(--cb-muted); line-height: 1.6; }
     .cb-ann-link {
         display: inline-flex; align-items: center; gap: 5px;
         margin-top: 14px; font-family: 'Syne', sans-serif;
-        font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: #C9A84C;
+        font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--cb-gold);
     }
 
     /* Social buttons */
     .cb-social-btn {
         display: inline-flex; align-items: center; gap: 7px;
-        background: rgba(255,255,255,.04);
-        border: 1px solid rgba(255,255,255,.08);
-        color: #6B7590 !important; font-family: 'Syne', sans-serif;
+        background: rgba(15,92,67,.04);
+        border: 1px solid rgba(15,92,67,.12);
+        color: var(--cb-muted) !important; font-family: 'Syne', sans-serif;
         font-size: 11px; letter-spacing: .07em; text-transform: uppercase;
         padding: 8px 14px; border-radius: 100px;
         text-decoration: none; transition: all .3s;
     }
-    .cb-social-btn:hover { border-color: #C9A84C; color: #C9A84C !important; background: rgba(201,168,76,.06); }
+    .cb-social-btn:hover { border-color: var(--cb-gold); color: var(--cb-gold) !important; background: rgba(176,134,46,.06); }
 
     /* Diaspora section */
     .cb-diaspora-badge {
@@ -434,62 +433,62 @@
     .cb-cta-finale {
         padding: clamp(100px, 14vw, 180px) 0;
         background:
-            radial-gradient(circle at 50% 50%, rgba(201,168,76,.07) 0%, transparent 60%),
-            #060910;
+            radial-gradient(circle at 50% 50%, rgba(176,134,46,.06) 0%, transparent 60%),
+            var(--cb-paper);
         text-align: center;
     }
     .cb-cta-finale-title {
         font-family: 'Playfair Display', serif;
         font-size: clamp(36px, 7vw, 80px);
-        font-weight: 900; line-height: 1.04; color: #E8EAF0;
+        font-weight: 900; line-height: 1.04; color: var(--cb-ink);
     }
-    .cb-cta-finale-title .g { color: #C9A84C; }
+    .cb-cta-finale-title .g { color: var(--cb-gold); }
 
     /* Callout boxes */
     .cb-callout {
-        background: #0C1120;
-        border: 1px solid rgba(201,168,76,.1);
+        background: var(--cb-card);
+        border: 1px solid var(--cb-border);
         border-radius: 4px; padding: 22px 28px;
         transition: border-color .3s;
     }
-    .cb-callout:hover { border-color: rgba(201,168,76,.2); }
+    .cb-callout:hover { border-color: rgba(176,134,46,.3); }
     .cb-callout-title {
         font-family: 'Syne', sans-serif; font-size: 14px;
-        font-weight: 700; color: #E8EAF0; margin-bottom: 4px;
+        font-weight: 700; color: var(--cb-ink); margin-bottom: 4px;
     }
-    .cb-callout-desc { font-size: 13px; color: #6B7590; line-height: 1.6; }
+    .cb-callout-desc { font-size: 13px; color: var(--cb-muted); line-height: 1.6; }
 
-    /* Footer dark */
+    /* Footer */
     .cb-footer {
-        background: #060910;
-        border-top: 1px solid rgba(255,255,255,.05);
+        background: var(--cb-card);
+        border-top: 1px solid var(--cb-border);
         padding: 40px 0 28px;
     }
     .cb-footer-logo {
         font-family: 'Playfair Display', serif;
-        font-size: 20px; font-weight: 900; color: #C9A84C;
+        font-size: 20px; font-weight: 900; color: var(--cb-forest);
         text-decoration: none;
     }
-    .cb-footer-logo em { font-style: normal; color: #E8EAF0; }
+    .cb-footer-logo em { font-style: normal; color: var(--cb-ink); }
     .cb-footer-link {
-        font-size: 12px; color: #6B7590 !important;
+        font-size: 12px; color: var(--cb-muted) !important;
         text-decoration: none; font-family: 'Syne', sans-serif;
         letter-spacing: .06em; transition: color .25s;
     }
-    .cb-footer-link:hover { color: #E8EAF0 !important; }
-    .cb-footer-copy { font-size: 11px; color: #6B7590; font-family: 'Syne', sans-serif; }
+    .cb-footer-link:hover { color: var(--cb-ink) !important; }
+    .cb-footer-copy { font-size: 11px; color: var(--cb-muted); font-family: 'Syne', sans-serif; }
 
     /* Radar animation */
     .cb-radar-wrap { position:relative; height:320px; display:flex; align-items:center; justify-content:center; }
     .cb-radar-ring { position:absolute; border-radius:50%; border:1px solid; animation:rp 3s ease-in-out infinite; }
-    .r1{width:300px;height:300px;border-color:rgba(201,168,76,.06);animation-delay:0s}
-    .r2{width:228px;height:228px;border-color:rgba(201,168,76,.1);animation-delay:.5s}
-    .r3{width:156px;height:156px;border-color:rgba(201,168,76,.16);animation-delay:1s}
-    .r4{width:84px;height:84px;border-color:rgba(201,168,76,.26);animation-delay:1.5s}
+    .r1{width:300px;height:300px;border-color:rgba(15,92,67,.08);animation-delay:0s}
+    .r2{width:228px;height:228px;border-color:rgba(15,92,67,.13);animation-delay:.5s}
+    .r3{width:156px;height:156px;border-color:rgba(15,92,67,.2);animation-delay:1s}
+    .r4{width:84px;height:84px;border-color:rgba(15,92,67,.32);animation-delay:1.5s}
     @keyframes rp{0%,100%{opacity:.4;transform:scale(1)}50%{opacity:1;transform:scale(1.02)}}
     .cb-radar-sweep {
         position:absolute; width:300px; height:300px; border-radius:50%;
-        background:conic-gradient(from 0deg,transparent 0deg,rgba(201,168,76,.07) 55deg,transparent 55deg);
+        background:conic-gradient(from 0deg,transparent 0deg,rgba(15,92,67,.07) 55deg,transparent 55deg);
         animation:sw 4.5s linear infinite;
     }
     @keyframes sw{from{transform:rotate(0)}to{transform:rotate(360deg)}}
@@ -499,11 +498,11 @@
         font-weight:700; cursor:default; transition:all .3s; text-align:center; line-height:1.2;
     }
     .cb-bubble:hover{z-index:10;transform:scale(1.2)!important}
-    .bu1{width:68px;height:68px;top:28px;left:90px;background:rgba(15,207,164,.12);border:1.5px solid rgba(15,207,164,.35);color:#0FCFA4;animation:bf1 6s ease-in-out infinite}
-    .bu2{width:52px;height:52px;top:50px;right:74px;background:rgba(201,168,76,.1);border:1.5px solid rgba(201,168,76,.3);color:#C9A84C;animation:bf2 7s ease-in-out infinite}
-    .bu3{width:80px;height:80px;bottom:70px;left:50px;background:rgba(201,168,76,.09);border:1.5px solid rgba(201,168,76,.26);color:#C9A84C;animation:bf1 8s ease-in-out infinite 1s}
-    .bu4{width:44px;height:44px;bottom:46px;right:90px;background:rgba(15,207,164,.09);border:1.5px solid rgba(15,207,164,.26);color:#0FCFA4;animation:bf2 5s ease-in-out infinite .5s}
-    .bu5{width:56px;height:56px;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(255,255,255,.04);border:1.5px solid rgba(255,255,255,.1);color:#E8EAF0;font-size:8px}
+    .bu1{width:68px;height:68px;top:28px;left:90px;background:rgba(15,92,67,.1);border:1.5px solid rgba(15,92,67,.3);color:var(--cb-forest);animation:bf1 6s ease-in-out infinite}
+    .bu2{width:52px;height:52px;top:50px;right:74px;background:rgba(176,134,46,.1);border:1.5px solid rgba(176,134,46,.3);color:var(--cb-gold);animation:bf2 7s ease-in-out infinite}
+    .bu3{width:80px;height:80px;bottom:70px;left:50px;background:rgba(176,134,46,.09);border:1.5px solid rgba(176,134,46,.26);color:var(--cb-gold);animation:bf1 8s ease-in-out infinite 1s}
+    .bu4{width:44px;height:44px;bottom:46px;right:90px;background:rgba(15,92,67,.09);border:1.5px solid rgba(15,92,67,.26);color:var(--cb-forest);animation:bf2 5s ease-in-out infinite .5s}
+    .bu5{width:56px;height:56px;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(15,92,67,.06);border:1.5px solid rgba(15,92,67,.2);color:var(--cb-ink);font-size:8px}
     @keyframes bf1{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
     @keyframes bf2{0%,100%{transform:translateY(0)}50%{transform:translateY(9px)}}
 
@@ -535,16 +534,16 @@
     $wBonusEndLabel = \Carbon\Carbon::parse(config('otp.wallet_bonus_end'))->locale('fr')->isoFormat('D MMMM');
 @endphp
 @if($showOtpWelcomeBanner)
-<div style="background:#080E1C;border-bottom:1px solid rgba(15,207,164,.12);padding:9px 0;text-align:center;">
+<div style="background:var(--cb-card);border-bottom:1px solid var(--cb-border);padding:9px 0;text-align:center;">
     <div class="container d-flex align-items-center justify-content-center flex-wrap gap-2" style="max-width:1100px;">
-        <span style="font-family:'Syne',sans-serif;font-size:11px;color:#6B7590;letter-spacing:.04em;">
-            🎁 <strong style="color:#E8EAF0;font-weight:600;">Cadeau membre</strong>
+        <span style="font-family:'Syne',sans-serif;font-size:11px;color:var(--cb-muted);letter-spacing:.04em;">
+            🎁 <strong style="color:var(--cb-ink);font-weight:600;">Cadeau membre</strong>
             &nbsp;—&nbsp;Reçois Abidjan Run gratuitement
-            <span style="color:rgba(201,168,76,.4);margin:0 6px;">·</span>
-            <span style="color:#C9A84C;">Jusqu'au {{ \Carbon\Carbon::parse(config('otp.reward_deadline'))->locale('fr')->isoFormat('D MMMM') }}</span>
+            <span style="color:var(--cb-border);margin:0 6px;">·</span>
+            <span style="color:var(--cb-gold);">Jusqu'au {{ \Carbon\Carbon::parse(config('otp.reward_deadline'))->locale('fr')->isoFormat('D MMMM') }}</span>
         </span>
         <a href="{{ route('phone.verify.form') }}"
-           style="display:inline-flex;align-items:center;gap:5px;background:#C9A84C;color:#060910 !important;font-family:'Syne',sans-serif;font-weight:800;font-size:10px;letter-spacing:.07em;text-transform:uppercase;padding:5px 13px;border-radius:2px;text-decoration:none;flex-shrink:0;">
+           style="display:inline-flex;align-items:center;gap:5px;background:var(--cb-gold);color:var(--cb-paper) !important;font-family:'Syne',sans-serif;font-weight:800;font-size:10px;letter-spacing:.07em;text-transform:uppercase;padding:5px 13px;border-radius:2px;text-decoration:none;flex-shrink:0;">
             Activer →
         </a>
     </div>
@@ -553,14 +552,14 @@
 
 {{-- Bannière A — bonus wallet reçu (Promo 2) --}}
 @if($showWelcomeBonusGranted)
-<div style="background:rgba(15,207,164,.05);border-bottom:1px solid rgba(15,207,164,.18);padding:9px 0;text-align:center;">
+<div style="background:rgba(15,92,67,.04);border-bottom:1px solid rgba(15,92,67,.2);padding:9px 0;text-align:center;">
     <div class="container d-flex align-items-center justify-content-center flex-wrap gap-2" style="max-width:1100px;">
-        <span style="font-family:'Syne',sans-serif;font-size:11px;color:#6B7590;letter-spacing:.04em;">
-            🎉 <strong style="color:#0FCFA4;font-weight:600;">Bonus activé</strong>
+        <span style="font-family:'Syne',sans-serif;font-size:11px;color:var(--cb-muted);letter-spacing:.04em;">
+            🎉 <strong style="color:var(--cb-forest);font-weight:600;">Bonus activé</strong>
             &nbsp;—&nbsp;{{ $wBonusAmount }} FCFA virtuels crédités sur ton portefeuille
         </span>
         <a href="{{ route('wallet.index') }}"
-           style="display:inline-flex;align-items:center;gap:5px;background:#0FCFA4;color:#060910 !important;font-family:'Syne',sans-serif;font-weight:800;font-size:10px;letter-spacing:.07em;text-transform:uppercase;padding:5px 13px;border-radius:2px;text-decoration:none;flex-shrink:0;">
+           style="display:inline-flex;align-items:center;gap:5px;background:var(--cb-forest);color:var(--cb-paper) !important;font-family:'Syne',sans-serif;font-weight:800;font-size:10px;letter-spacing:.07em;text-transform:uppercase;padding:5px 13px;border-radius:2px;text-decoration:none;flex-shrink:0;">
             Simulateur →
         </a>
     </div>
@@ -569,15 +568,15 @@
 
 {{-- Bannière B — CTA Segment B (éligible, non vérifié) --}}
 @if($showWelcomeBonusCta)
-<div style="background:#080E1C;border-bottom:1px solid rgba(201,168,76,.15);padding:9px 0;text-align:center;">
+<div style="background:var(--cb-card);border-bottom:1px solid var(--cb-border);padding:9px 0;text-align:center;">
     <div class="container d-flex align-items-center justify-content-center flex-wrap gap-2" style="max-width:1100px;">
-        <span style="font-family:'Syne',sans-serif;font-size:11px;color:#6B7590;letter-spacing:.04em;">
-            🎁 <strong style="color:#E8EAF0;font-weight:600;">{{ $wBonusAmount }} FCFA virtuels offerts</strong>
+        <span style="font-family:'Syne',sans-serif;font-size:11px;color:var(--cb-muted);letter-spacing:.04em;">
+            🎁 <strong style="color:var(--cb-ink);font-weight:600;">{{ $wBonusAmount }} FCFA virtuels offerts</strong>
             &nbsp;—&nbsp;Vérifie ton numéro avant le
-            <span style="color:#C9A84C;">{{ $wBonusEndLabel }}</span>
+            <span style="color:var(--cb-gold);">{{ $wBonusEndLabel }}</span>
         </span>
         <a href="{{ route('phone.verify.form') }}"
-           style="display:inline-flex;align-items:center;gap:5px;background:#C9A84C;color:#060910 !important;font-family:'Syne',sans-serif;font-weight:800;font-size:10px;letter-spacing:.07em;text-transform:uppercase;padding:5px 13px;border-radius:2px;text-decoration:none;flex-shrink:0;">
+           style="display:inline-flex;align-items:center;gap:5px;background:var(--cb-gold);color:var(--cb-paper) !important;font-family:'Syne',sans-serif;font-weight:800;font-size:10px;letter-spacing:.07em;text-transform:uppercase;padding:5px 13px;border-radius:2px;text-decoration:none;flex-shrink:0;">
             Activer →
         </a>
     </div>
@@ -603,7 +602,7 @@
                     ÉDUCATION FINANCIÈRE · POUR TOUS
                 </div>
 
-                <p style="font-family:'Syne',sans-serif;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:#C9A84C;margin-bottom:16px;">
+                <p style="font-family:'Syne',sans-serif;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--cb-gold);margin-bottom:16px;">
                     Plateforme d'éducation financière
                 </p>
 
@@ -636,7 +635,7 @@
                     <a href="{{ route('radar.index') }}" class="cb-cta-outline">📡 Radar Marché</a>
                 </div>
 
-                <div style="font-size:12px;color:#6B7590;display:flex;flex-wrap:wrap;gap:16px;">
+                <div style="font-size:12px;color:var(--cb-muted);display:flex;flex-wrap:wrap;gap:16px;">
                     <span>✅ BOC (J-1) gratuite</span>
                     <span>✅ Résumé pédagogique</span>
                     <span>✅ Audio + vidéo si dispo</span>
@@ -736,7 +735,7 @@
 {{-- ══════════════════════════════════════
      PILIERS
 ══════════════════════════════════════ --}}
-<section class="cb-sec" style="background:#060910;">
+<section class="cb-sec" style="background:var(--cb-paper);">
     <div class="container" style="max-width:1100px;">
         <p class="cb-sec-tag" style="justify-content:center;">Ce que Boursiv te propose</p>
         <h2 class="cb-sec-title" style="text-align:center;">
@@ -774,53 +773,53 @@
 {{-- ══════════════════════════════════════
      MARKETPLACE BANNER
 ══════════════════════════════════════ --}}
-<section style="background:#060910; border-top:1px solid rgba(201,168,76,.08); border-bottom:1px solid rgba(201,168,76,.08); padding:56px 0;">
+<section style="background:var(--cb-paper); border-top:1px solid var(--cb-border); border-bottom:1px solid var(--cb-border); padding:56px 0;">
     <div class="container" style="max-width:1100px;">
         <div class="cbr" style="
-            background: linear-gradient(135deg, rgba(201,168,76,.07) 0%, rgba(12,17,32,.9) 60%);
-            border: 1px solid rgba(201,168,76,.22);
+            background: linear-gradient(135deg, rgba(176,134,46,.06) 0%, var(--cb-card) 60%);
+            border: 1px solid rgba(176,134,46,.25);
             border-radius: 6px;
             padding: clamp(32px, 5vw, 56px) clamp(28px, 5vw, 56px);
             position: relative; overflow: hidden;
         ">
             {{-- Deco orb --}}
-            <div style="position:absolute;top:-60px;right:-60px;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle, rgba(201,168,76,.09) 0%, transparent 70%);pointer-events:none;"></div>
+            <div style="position:absolute;top:-60px;right:-60px;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle, rgba(176,134,46,.06) 0%, transparent 70%);pointer-events:none;"></div>
 
             <div class="row align-items-center g-4">
                 <div class="col-lg-8">
-                    <span style="display:inline-flex;align-items:center;gap:8px;font-family:'Syne',sans-serif;font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#C9A84C;background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.22);padding:5px 14px;border-radius:100px;margin-bottom:18px;">
+                    <span style="display:inline-flex;align-items:center;gap:8px;font-family:'Syne',sans-serif;font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--cb-gold);background:rgba(176,134,46,.08);border:1px solid rgba(176,134,46,.22);padding:5px 14px;border-radius:100px;margin-bottom:18px;">
                         ✦ Nouveau
                     </span>
-                    <h2 style="font-family:'Playfair Display',serif;font-size:clamp(24px,3.5vw,38px);font-weight:900;color:#E8EAF0;line-height:1.1;margin-bottom:14px;">
-                        La <em style="color:#C9A84C;font-style:italic;">Marketplace</em> Boursiv
+                    <h2 style="font-family:'Playfair Display',serif;font-size:clamp(24px,3.5vw,38px);font-weight:900;color:var(--cb-ink);line-height:1.1;margin-bottom:14px;">
+                        La <em style="color:var(--cb-gold);font-style:italic;">Marketplace</em> Boursiv
                     </h2>
-                    <p style="font-size:15px;color:#6B7590;line-height:1.75;max-width:520px;font-weight:300;margin-bottom:0;">
+                    <p style="font-size:15px;color:var(--cb-muted);line-height:1.75;max-width:520px;font-weight:300;margin-bottom:0;">
                         PDF, études de marché, logiciels, vidéos, jeux éducatifs —
-                        des ressources sélectionnées pour votre <strong style="color:#E8EAF0;font-weight:500;">éducation financière et développement personnel</strong>.
+                        des ressources sélectionnées pour votre <strong style="color:var(--cb-ink);font-weight:500;">éducation financière et développement personnel</strong>.
                     </p>
                 </div>
                 <div class="col-lg-4 d-flex flex-column flex-sm-row flex-lg-column gap-2 align-items-start align-items-lg-end">
                     <a href="{{ route('marketplace.index') }}" style="
                         display:inline-flex;align-items:center;gap:8px;
-                        background:linear-gradient(135deg,#C9A84C,#9B6B15);
-                        color:#050810 !important; font-family:'Syne',sans-serif;
+                        background:linear-gradient(135deg,var(--cb-gold),#7A5412);
+                        color:var(--cb-paper) !important; font-family:'Syne',sans-serif;
                         font-weight:800;font-size:13px;letter-spacing:.06em;text-transform:uppercase;
                         padding:13px 26px;border-radius:3px;text-decoration:none;
                         transition:all .3s;white-space:nowrap;
                     "
-                    onmouseover="this.style.boxShadow='0 10px 32px rgba(201,168,76,.35)';this.style.transform='translateY(-2px)'"
+                    onmouseover="this.style.boxShadow='0 10px 32px rgba(176,134,46,.35)';this.style.transform='translateY(-2px)'"
                     onmouseout="this.style.boxShadow='';this.style.transform=''">
                         🛍️ Découvrir la Marketplace
                     </a>
                     <a href="{{ route('marketplace.index') }}" style="
                         display:inline-flex;align-items:center;gap:8px;
-                        background:transparent;color:#C9A84C !important;
+                        background:transparent;color:var(--cb-gold) !important;
                         font-family:'Syne',sans-serif;font-weight:600;font-size:12px;
                         letter-spacing:.07em;text-transform:uppercase;
                         padding:12px 20px;border-radius:3px;text-decoration:none;
-                        border:1px solid rgba(201,168,76,.25);transition:all .3s;white-space:nowrap;
+                        border:1px solid rgba(176,134,46,.25);transition:all .3s;white-space:nowrap;
                     "
-                    onmouseover="this.style.background='rgba(201,168,76,.08)'"
+                    onmouseover="this.style.background='rgba(176,134,46,.08)'"
                     onmouseout="this.style.background='transparent'">
                         Voir les produits →
                     </a>
@@ -839,22 +838,22 @@
             <p class="cb-sec-tag">IA & Bourse Ouest-Africaine</p>
             <h2 class="cb-sec-title">La BOC du jour, <em>résumée par l'IA</em></h2>
             <div class="cb-divider"></div>
-            <p style="font-size:16px;color:#6B7590;max-width:520px;font-weight:300;line-height:1.75;">
+            <p style="font-size:16px;color:var(--cb-muted);max-width:520px;font-weight:300;line-height:1.75;">
                 Marre de décortiquer seul les BOC ? Boursiv publie une interprétation gratuite de la dernière BOC disponible (J-1) chaque jour.
             </p>
         </div>
 
         <div class="cb-boc-box mt-4 cbr cbr2">
-            <p style="font-family:'Syne',sans-serif;font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:#0FCFA4;margin-bottom:10px;">
+            <p style="font-family:'Syne',sans-serif;font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--cb-forest);margin-bottom:10px;">
                 📄 Bulletin Officiel de la Côte — J-1 disponible
             </p>
-            <h3 style="font-family:'Playfair Display',serif;font-size:clamp(20px,3vw,30px);font-weight:700;color:#E8EAF0;margin-bottom:12px;">
+            <h3 style="font-family:'Playfair Display',serif;font-size:clamp(20px,3vw,30px);font-weight:700;color:var(--cb-ink);margin-bottom:12px;">
                 Boursiv — l'IA qui résume la BOC pour toi
             </h3>
-            <span style="display:inline-flex;align-items:center;gap:7px;font-family:'Syne',sans-serif;font-size:11px;color:#0FCFA4;background:rgba(15,207,164,.08);border:1px solid rgba(15,207,164,.18);padding:5px 12px;border-radius:100px;margin-bottom:18px;">
+            <span style="display:inline-flex;align-items:center;gap:7px;font-family:'Syne',sans-serif;font-size:11px;color:var(--cb-forest);background:rgba(15,92,67,.08);border:1px solid rgba(15,92,67,.2);padding:5px 12px;border-radius:100px;margin-bottom:18px;">
                 ✅ Accès 100% gratuit — aucun compte requis
             </span>
-            <p style="font-size:14px;color:#6B7590;line-height:1.75;max-width:560px;margin-bottom:24px;">
+            <p style="font-size:14px;color:var(--cb-muted);line-height:1.75;max-width:560px;margin-bottom:24px;">
                 Résumé pédagogique · Points clés · Tendances · Audio + avatar vidéo si disponible.<br>
                 <em style="font-size:13px;">La BRVM ne publie pas de BOC le jour même — la dernière disponible est celle de J-1.</em>
             </p>
@@ -875,14 +874,14 @@
 {{-- ══════════════════════════════════════
      RADAR SECTION
 ══════════════════════════════════════ --}}
-<section class="cb-sec" style="background:#060910;">
+<section class="cb-sec" style="background:var(--cb-paper);">
     <div class="container" style="max-width:1100px;">
         <div class="row g-5 align-items-center">
             <div class="col-lg-6 cbr">
                 <p class="cb-sec-tag">Radar Marché</p>
                 <h2 class="cb-sec-title">Visualise les <em>opportunités</em> en 7 jours</h2>
                 <div class="cb-divider"></div>
-                <p style="font-size:16px;color:#6B7590;line-height:1.75;font-weight:300;margin-bottom:28px;">
+                <p style="font-size:16px;color:var(--cb-muted);line-height:1.75;font-weight:300;margin-bottom:28px;">
                     Repère en un coup d'œil quelles sociétés performent, lesquelles reculent, et les tendances de la bourse ouest-africaine sur la semaine.
                 </p>
                 <a href="{{ route('radar.index') }}" class="cb-cta-primary">📡 Ouvrir le Radar Marché</a>
@@ -915,7 +914,7 @@
                 <div class="cb-callout h-100 d-flex justify-content-between align-items-center gap-3 flex-wrap">
                     <div>
                         <div class="cb-callout-title">🛍️ Marketplace Boursiv</div>
-                        <div class="cb-callout-desc">PDF, vidéos, logiciels – achat instantané.<br>Paiement sécurisé par <strong style="color:#E8EAF0;">Mobile Money</strong>.</div>
+                        <div class="cb-callout-desc">PDF, vidéos, logiciels – achat instantané.<br>Paiement sécurisé par <strong style="color:var(--cb-ink);">Mobile Money</strong>.</div>
                     </div>
                     <a href="{{ route('marketplace.index') }}" class="cb-cta-primary" style="white-space:nowrap;">Découvrir →</a>
                 </div>
@@ -930,7 +929,7 @@
                 </div>
             </div>
             <div class="col-md-6 cbr">
-                <div class="cb-callout h-100 d-flex justify-content-between align-items-center gap-3 flex-wrap" style="border-color:rgba(201,168,76,.18);">
+                <div class="cb-callout h-100 d-flex justify-content-between align-items-center gap-3 flex-wrap" style="border-color:rgba(176,134,46,.2);">
                     <div>
                         <div class="cb-callout-title">💬 Forum communautaire</div>
                         <div class="cb-callout-desc">Échangez avec les autres investisseurs — analyses, questions, actualités et expériences partagées.</div>
@@ -954,20 +953,20 @@
 {{-- ══════════════════════════════════════
      CTA AFFILIATION
 ══════════════════════════════════════ --}}
-<section style="background:linear-gradient(135deg,#0C1120 0%,#060910 100%);border-top:1px solid rgba(201,168,76,.1);border-bottom:1px solid rgba(201,168,76,.1);padding:52px 0;">
+<section style="background:var(--cb-card);border-top:1px solid var(--cb-border);border-bottom:1px solid var(--cb-border);padding:52px 0;">
     <div class="container" style="max-width:1000px;">
         <div class="row g-4 align-items-center cbr">
             <div class="col-lg-7">
-                <p style="font-family:'Syne',sans-serif;font-size:11px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:#C9A84C;margin-bottom:10px;">Programme apporteur d'affaires</p>
-                <h2 style="font-family:'Playfair Display',serif;font-size:clamp(24px,4vw,36px);font-weight:900;color:#E8EAF0;line-height:1.2;margin-bottom:14px;">
-                    Gagnez <em style="color:#C9A84C;font-style:italic;">10%</em> en parrainant<br>vos contacts sur Boursiv
+                <p style="font-family:'Syne',sans-serif;font-size:11px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--cb-gold);margin-bottom:10px;">Programme apporteur d'affaires</p>
+                <h2 style="font-family:'Playfair Display',serif;font-size:clamp(24px,4vw,36px);font-weight:900;color:var(--cb-ink);line-height:1.2;margin-bottom:14px;">
+                    Gagnez <em style="color:var(--cb-gold);font-style:italic;">10%</em> en parrainant<br>vos contacts sur Boursiv
                 </h2>
-                <p style="font-size:14px;color:#6B7590;line-height:1.7;margin-bottom:24px;max-width:520px;">
-                    Partagez votre lien unique — vos contacts bénéficient de <strong style="color:#0FCFA4;">−10%</strong> à l'achat de formations et packs éligibles, et vous touchez <strong style="color:#C9A84C;">+10%</strong> de commission. Reversement dès 10 000 FCFA via mobile money.
+                <p style="font-size:14px;color:var(--cb-muted);line-height:1.7;margin-bottom:24px;max-width:520px;">
+                    Partagez votre lien unique — vos contacts bénéficient de <strong style="color:var(--cb-forest);">−10%</strong> à l'achat de formations et packs éligibles, et vous touchez <strong style="color:var(--cb-gold);">+10%</strong> de commission. Reversement dès 10 000 FCFA via mobile money.
                 </p>
                 <div class="d-flex flex-wrap gap-3">
                     <a href="{{ route('affiliate.landing') }}"
-                       style="display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,#C9A84C,#9B6B15);color:#050810;text-decoration:none;font-family:'Syne',sans-serif;font-weight:800;font-size:12px;letter-spacing:.07em;text-transform:uppercase;padding:13px 24px;border-radius:3px;transition:all .3s;">
+                       style="display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,var(--cb-gold),#7A5412);color:var(--cb-paper) !important;text-decoration:none;font-family:'Syne',sans-serif;font-weight:800;font-size:12px;letter-spacing:.07em;text-transform:uppercase;padding:13px 24px;border-radius:3px;transition:all .3s;">
                         🤝 Devenir apporteur d'affaires
                     </a>
                 </div>
@@ -975,19 +974,19 @@
             <div class="col-lg-5 cbr cbr2">
                 <div class="row g-3">
                     <div class="col-6">
-                        <div style="background:#0C1120;border:1px solid rgba(201,168,76,.12);border-radius:4px;padding:18px;text-align:center;">
-                            <div style="font-family:'Playfair Display',serif;font-size:28px;font-weight:900;color:#C9A84C;">+10%</div>
-                            <div style="font-family:'Syne',sans-serif;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#6B7590;margin-top:4px;">Pour vous</div>
+                        <div style="background:var(--cb-paper);border:1px solid var(--cb-border);border-radius:4px;padding:18px;text-align:center;">
+                            <div style="font-family:'Playfair Display',serif;font-size:28px;font-weight:900;color:var(--cb-gold);">+10%</div>
+                            <div style="font-family:'Syne',sans-serif;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--cb-muted);margin-top:4px;">Pour vous</div>
                         </div>
                     </div>
                     <div class="col-6">
-                        <div style="background:#0C1120;border:1px solid rgba(15,207,164,.12);border-radius:4px;padding:18px;text-align:center;">
-                            <div style="font-family:'Playfair Display',serif;font-size:28px;font-weight:900;color:#0FCFA4;">−10%</div>
-                            <div style="font-family:'Syne',sans-serif;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#6B7590;margin-top:4px;">Pour l'acheteur</div>
+                        <div style="background:var(--cb-paper);border:1px solid rgba(15,92,67,.2);border-radius:4px;padding:18px;text-align:center;">
+                            <div style="font-family:'Playfair Display',serif;font-size:28px;font-weight:900;color:var(--cb-forest);">−10%</div>
+                            <div style="font-family:'Syne',sans-serif;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--cb-muted);margin-top:4px;">Pour l'acheteur</div>
                         </div>
                     </div>
                     <div class="col-12">
-                        <div style="background:#0C1120;border:1px solid rgba(255,255,255,.06);border-radius:4px;padding:14px 16px;font-size:12px;color:#9AA3B8;line-height:1.7;">
+                        <div style="background:var(--cb-paper);border:1px solid var(--cb-border);border-radius:4px;padding:14px 16px;font-size:12px;color:var(--cb-muted);line-height:1.7;">
                             ✅ Lien + QR code uniques &nbsp;·&nbsp; ✅ Retrait mobile money &nbsp;·&nbsp; ✅ Tableau de bord dédié
                         </div>
                     </div>
@@ -1000,7 +999,7 @@
 {{-- ══════════════════════════════════════
      ANNONCES BRVM
 ══════════════════════════════════════ --}}
-<section class="cb-sec" style="background:#060910;">
+<section class="cb-sec" style="background:var(--cb-paper);">
     <div class="container" style="max-width:1100px;">
         <div class="cbr d-flex justify-content-between align-items-end flex-wrap gap-3 mb-4">
             <div>
@@ -1028,7 +1027,7 @@
                 </div>
             @empty
                 <div class="col-12">
-                    <div style="background:rgba(201,168,76,.04);border:1px solid rgba(201,168,76,.1);border-radius:4px;padding:24px;font-size:14px;color:#6B7590;">
+                    <div style="background:var(--cb-card);border:1px solid var(--cb-border);border-radius:4px;padding:24px;font-size:14px;color:var(--cb-muted);">
                         Aucune annonce pour le moment. Les communiqués du marché apparaîtront ici dès publication.
                     </div>
                 </div>
@@ -1075,7 +1074,7 @@
 {{-- ══════════════════════════════════════
      PRICING
 ══════════════════════════════════════ --}}
-<section class="cb-sec" style="background:#060910;">
+<section class="cb-sec" style="background:var(--cb-paper);">
     <div class="container" style="max-width:1100px;">
         <div class="cbr">
             <p class="cb-sec-tag">Tarifs</p>
@@ -1105,7 +1104,7 @@
                 <div class="cb-price-card featured">
                     <div class="cb-price-label">Pour aller plus loin</div>
                     <div class="cb-price-title">📊 Analyse état financier</div>
-                    <div class="cb-price-num" style="font-size:24px;color:#C9A84C;">Payant <span>selon service</span></div>
+                    <div class="cb-price-num" style="font-size:24px;color:var(--cb-gold);">Payant <span>selon service</span></div>
                     <p class="cb-price-desc">Pour comprendre en profondeur une entreprise cotée.</p>
                     <ul class="cb-price-features">
                         <li>Décodage des chiffres clés</li>
@@ -1120,7 +1119,7 @@
                 <div class="cb-price-card">
                     <div class="cb-price-label">Contenus premium</div>
                     <div class="cb-price-title">🛍️ Marketplace</div>
-                    <div class="cb-price-num" style="font-size:24px;color:#0FCFA4;">Mobile <span>Money</span></div>
+                    <div class="cb-price-num" style="font-size:24px;color:var(--cb-forest);">Mobile <span>Money</span></div>
                     <p class="cb-price-desc">PDF, vidéos, logiciels — achat instantané.</p>
                     <ul class="cb-price-features">
                         <li>Livres PDF thématiques bourse</li>
@@ -1145,7 +1144,7 @@
                 <p class="cb-sec-tag">Formations</p>
                 <h2 class="cb-sec-title">Monte en niveau <em>à ton rythme</em></h2>
                 <div class="cb-divider"></div>
-                <p style="font-size:15px;color:#6B7590;line-height:1.75;font-weight:300;margin-bottom:24px;">
+                <p style="font-size:15px;color:var(--cb-muted);line-height:1.75;font-weight:300;margin-bottom:24px;">
                     Cours débutant → intermédiaire, disponibles 24h/24 à vie. Accessibles smartphone, PC ou tablette. Adaptés à tous les niveaux.
                 </p>
                 <div class="d-flex flex-wrap gap-2">
@@ -1154,12 +1153,12 @@
                 </div>
             </div>
             <div class="col-lg-6 cbr cbr2">
-                <div style="background:#121A2C;border:1px solid rgba(201,168,76,.12);border-radius:4px;padding:28px;">
-                    <p style="font-family:'Syne',sans-serif;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#6B7590;margin-bottom:10px;">Exemple de formation</p>
-                    <h4 style="font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:#E8EAF0;margin-bottom:10px;">
+                <div style="background:var(--cb-card);border:1px solid var(--cb-border);border-radius:4px;padding:28px;">
+                    <p style="font-family:'Syne',sans-serif;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--cb-muted);margin-bottom:10px;">Exemple de formation</p>
+                    <h4 style="font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:var(--cb-ink);margin-bottom:10px;">
                         « Investir en bourse – Guide du débutant »
                     </h4>
-                    <p style="font-size:13px;color:#6B7590;line-height:1.65;margin-bottom:18px;">
+                    <p style="font-size:13px;color:var(--cb-muted);line-height:1.65;margin-bottom:18px;">
                         Comprendre les bases de la bourse régionale, ouvrir un compte-titres, placer tes premiers ordres en limitant les erreurs classiques.
                     </p>
                     <div class="d-flex flex-wrap gap-2">
@@ -1176,42 +1175,42 @@
 {{-- ══════════════════════════════════════
      PACK BRVM COMPLET
 ══════════════════════════════════════ --}}
-<section style="background:#060910; padding:72px 0; border-top:1px solid rgba(201,168,76,.08); border-bottom:1px solid rgba(201,168,76,.08);">
-    <style>@keyframes packBadgePulse{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(201,168,76,.5)}50%{opacity:.7;box-shadow:0 0 0 7px rgba(201,168,76,0)}}</style>
+<section style="background:var(--cb-paper); padding:72px 0; border-top:1px solid var(--cb-border); border-bottom:1px solid var(--cb-border);">
+    <style>@keyframes packBadgePulse{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(176,134,46,.5)}50%{opacity:.7;box-shadow:0 0 0 7px rgba(176,134,46,0)}}</style>
     <div class="container cbr" style="max-width:900px; text-align:center;">
 
-        <div style="display:inline-flex; align-items:center; gap:8px; background:rgba(201,168,76,.08); border:1px solid rgba(201,168,76,.28); border-radius:100px; padding:7px 18px; margin-bottom:22px;">
-            <span style="width:8px;height:8px;border-radius:50%;background:#C9A84C;animation:packBadgePulse 1.5s ease-in-out infinite;flex-shrink:0;"></span>
-            <span style="font-family:'Syne',sans-serif;font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:#C9A84C;">Pack Exclusif</span>
+        <div style="display:inline-flex; align-items:center; gap:8px; background:rgba(176,134,46,.08); border:1px solid rgba(176,134,46,.28); border-radius:100px; padding:7px 18px; margin-bottom:22px;">
+            <span style="width:8px;height:8px;border-radius:50%;background:var(--cb-gold);animation:packBadgePulse 1.5s ease-in-out infinite;flex-shrink:0;"></span>
+            <span style="font-family:'Syne',sans-serif;font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--cb-gold);">Pack Exclusif</span>
         </div>
 
-        <h2 style="font-family:'Playfair Display',serif; font-size:clamp(26px,5vw,42px); font-weight:900; color:#E8EAF0; margin-bottom:10px; line-height:1.1;">
-            🎓 Pack Boursiv <em style="color:#C9A84C;">Complet</em>
+        <h2 style="font-family:'Playfair Display',serif; font-size:clamp(26px,5vw,42px); font-weight:900; color:var(--cb-ink); margin-bottom:10px; line-height:1.1;">
+            🎓 Pack Boursiv <em style="color:var(--cb-gold);">Complet</em>
         </h2>
 
-        <p style="font-size:14px; color:#6B7590; line-height:1.75; max-width:600px; margin:0 auto 24px;">
+        <p style="font-size:14px; color:var(--cb-muted); line-height:1.75; max-width:600px; margin:0 auto 24px;">
             3 Cours + Groupe WhatsApp Privé + Aide à l'ouverture de compte titre
         </p>
 
         <div style="margin-bottom:28px;">
-            <span style="font-size:17px; color:#6B7590; text-decoration:line-through; margin-right:12px;">50 000 FCFA</span>
-            <span style="font-family:'Playfair Display',serif; font-size:clamp(32px,5vw,46px); font-weight:900; color:#C9A84C;">30 000 FCFA</span>
+            <span style="font-size:17px; color:var(--cb-muted); text-decoration:line-through; margin-right:12px;">50 000 FCFA</span>
+            <span style="font-family:'Playfair Display',serif; font-size:clamp(32px,5vw,46px); font-weight:900; color:var(--cb-gold);">30 000 FCFA</span>
         </div>
 
         <div style="display:flex; flex-wrap:wrap; gap:10px; justify-content:center; margin-bottom:36px;">
-            <span style="font-size:13px; color:#E8EAF0; background:rgba(201,168,76,.06); border:1px solid rgba(201,168,76,.15); border-radius:4px; padding:7px 14px;">✅ Cours Débutant</span>
-            <span style="font-size:13px; color:#E8EAF0; background:rgba(201,168,76,.06); border:1px solid rgba(201,168,76,.15); border-radius:4px; padding:7px 14px;">✅ Cours Intermédiaire</span>
-            <span style="font-size:13px; color:#E8EAF0; background:rgba(201,168,76,.06); border:1px solid rgba(201,168,76,.15); border-radius:4px; padding:7px 14px;">✅ Cours Pratique</span>
-            <span style="font-size:13px; color:#0FCFA4; background:rgba(15,207,164,.06); border:1px solid rgba(15,207,164,.2); border-radius:4px; padding:7px 14px;">💬 Groupe WhatsApp Privé</span>
+            <span style="font-size:13px; color:var(--cb-ink); background:rgba(176,134,46,.06); border:1px solid rgba(176,134,46,.15); border-radius:4px; padding:7px 14px;">✅ Cours Débutant</span>
+            <span style="font-size:13px; color:var(--cb-ink); background:rgba(176,134,46,.06); border:1px solid rgba(176,134,46,.15); border-radius:4px; padding:7px 14px;">✅ Cours Intermédiaire</span>
+            <span style="font-size:13px; color:var(--cb-ink); background:rgba(176,134,46,.06); border:1px solid rgba(176,134,46,.15); border-radius:4px; padding:7px 14px;">✅ Cours Pratique</span>
+            <span style="font-size:13px; color:var(--cb-forest); background:rgba(15,92,67,.06); border:1px solid rgba(15,92,67,.2); border-radius:4px; padding:7px 14px;">💬 Groupe WhatsApp Privé</span>
         </div>
 
         <a href="{{ route('pack.show') }}"
            style="display:inline-flex; align-items:center; gap:10px;
-                  background:linear-gradient(135deg,#C9A84C,#9B6B15);
-                  color:#050810 !important; font-family:'Syne',sans-serif;
+                  background:linear-gradient(135deg,var(--cb-gold),#7A5412);
+                  color:var(--cb-paper) !important; font-family:'Syne',sans-serif;
                   font-weight:800; font-size:13px; letter-spacing:.07em; text-transform:uppercase;
                   padding:15px 36px; border-radius:4px; text-decoration:none; transition:all .3s;"
-           onmouseover="this.style.boxShadow='0 10px 32px rgba(201,168,76,.35)';this.style.transform='translateY(-2px)'"
+           onmouseover="this.style.boxShadow='0 10px 32px rgba(176,134,46,.35)';this.style.transform='translateY(-2px)'"
            onmouseout="this.style.boxShadow='';this.style.transform=''">
             Découvrir le Pack →
         </a>
@@ -1222,7 +1221,7 @@
 {{-- ══════════════════════════════════════
      SERVICES — Financement + Formation présentielle
 ══════════════════════════════════════ --}}
-<section class="cb-sec" style="background:#060910;">
+<section class="cb-sec" style="background:var(--cb-paper);">
     <div class="container" style="max-width:1100px;">
         <div class="cbr">
             <p class="cb-sec-tag">Services Boursiv</p>
@@ -1234,28 +1233,28 @@
             {{-- Financement --}}
             <div class="col-md-6">
                 <div style="
-                    background:#0C1120; border:1px solid rgba(37,211,102,.15);
+                    background:var(--cb-card); border:1px solid rgba(37,211,102,.2);
                     border-radius:6px; padding:clamp(28px,4vw,40px); height:100%;
                     display:flex; flex-direction:column; transition:border-color .3s;
-                " onmouseover="this.style.borderColor='rgba(37,211,102,.3)'" onmouseout="this.style.borderColor='rgba(37,211,102,.15)'">
+                " onmouseover="this.style.borderColor='rgba(37,211,102,.45)'" onmouseout="this.style.borderColor='rgba(37,211,102,.2)'">
                     <div style="font-size:36px; margin-bottom:16px;">💰</div>
-                    <p style="font-family:'Syne',sans-serif;font-size:10px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:#25D366;margin-bottom:10px;">Facilitation de financement</p>
-                    <h3 style="font-family:'Playfair Display',serif;font-size:clamp(18px,2.5vw,24px);font-weight:700;color:#E8EAF0;line-height:1.25;margin-bottom:12px;">
+                    <p style="font-family:'Syne',sans-serif;font-size:10px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:#1A9345;margin-bottom:10px;">Facilitation de financement</p>
+                    <h3 style="font-family:'Playfair Display',serif;font-size:clamp(18px,2.5vw,24px);font-weight:700;color:var(--cb-ink);line-height:1.25;margin-bottom:12px;">
                         Besoin d'un prêt pour concrétiser votre projet ?
                     </h3>
-                    <p style="font-size:14px;color:#6B7590;line-height:1.75;margin-bottom:24px;flex-grow:1;">
-                        Boursiv joue le rôle de <strong style="color:#E8EAF0;">facilitateur</strong> entre les particuliers
+                    <p style="font-size:14px;color:var(--cb-muted);line-height:1.75;margin-bottom:24px;flex-grow:1;">
+                        Boursiv joue le rôle de <strong style="color:var(--cb-ink);">facilitateur</strong> entre les particuliers
                         et des structures financières agréées. Mise en relation gratuite, réponse sous 24h.
                     </p>
                     <a href="{{ route('financement') }}" style="
                         display:inline-flex;align-items:center;gap:8px;
-                        background:transparent;color:#25D366 !important;
+                        background:transparent;color:#1A9345 !important;
                         font-family:'Syne',sans-serif;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
                         padding:11px 22px;border-radius:4px;text-decoration:none;
-                        border:1px solid rgba(37,211,102,.35);transition:all .3s;align-self:flex-start;
+                        border:1px solid rgba(37,211,102,.4);transition:all .3s;align-self:flex-start;
                     "
-                    onmouseover="this.style.background='rgba(37,211,102,.08)';this.style.borderColor='rgba(37,211,102,.6)'"
-                    onmouseout="this.style.background='transparent';this.style.borderColor='rgba(37,211,102,.35)'">
+                    onmouseover="this.style.background='rgba(37,211,102,.08)';this.style.borderColor='rgba(37,211,102,.7)'"
+                    onmouseout="this.style.background='transparent';this.style.borderColor='rgba(37,211,102,.4)'">
                         En savoir plus →
                     </a>
                 </div>
@@ -1264,28 +1263,28 @@
             {{-- Formation présentielle --}}
             <div class="col-md-6">
                 <div style="
-                    background:#0C1120; border:1px solid rgba(201,168,76,.15);
+                    background:var(--cb-card); border:1px solid var(--cb-border);
                     border-radius:6px; padding:clamp(28px,4vw,40px); height:100%;
                     display:flex; flex-direction:column; transition:border-color .3s;
-                " onmouseover="this.style.borderColor='rgba(201,168,76,.35)'" onmouseout="this.style.borderColor='rgba(201,168,76,.15)'">
+                " onmouseover="this.style.borderColor='rgba(176,134,46,.35)'" onmouseout="this.style.borderColor='var(--cb-border)'">
                     <div style="font-size:36px; margin-bottom:16px;">🎓</div>
-                    <p style="font-family:'Syne',sans-serif;font-size:10px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:#C9A84C;margin-bottom:10px;">Formation en présentiel</p>
-                    <h3 style="font-family:'Playfair Display',serif;font-size:clamp(18px,2.5vw,24px);font-weight:700;color:#E8EAF0;line-height:1.25;margin-bottom:12px;">
+                    <p style="font-family:'Syne',sans-serif;font-size:10px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--cb-gold);margin-bottom:10px;">Formation en présentiel</p>
+                    <h3 style="font-family:'Playfair Display',serif;font-size:clamp(18px,2.5vw,24px);font-weight:700;color:var(--cb-ink);line-height:1.25;margin-bottom:12px;">
                         Maîtrisez la bourse avec une formation en présentiel
                     </h3>
-                    <p style="font-size:14px;color:#6B7590;line-height:1.75;margin-bottom:24px;flex-grow:1;">
+                    <p style="font-size:14px;color:var(--cb-muted);line-height:1.75;margin-bottom:24px;flex-grow:1;">
                         Sessions animées par des experts, adaptées à tous les niveaux — du débutant à l'investisseur confirmé.
-                        <strong style="color:#E8EAF0;">Attestation délivrée</strong> à l'issue.
+                        <strong style="color:var(--cb-ink);">Attestation délivrée</strong> à l'issue.
                     </p>
                     <a href="{{ route('formation.presentielle') }}" style="
                         display:inline-flex;align-items:center;gap:8px;
-                        background:linear-gradient(135deg,#C9A84C,#9B6B15);
-                        color:#050810 !important;font-family:'Syne',sans-serif;
+                        background:linear-gradient(135deg,var(--cb-gold),#7A5412);
+                        color:var(--cb-paper) !important;font-family:'Syne',sans-serif;
                         font-weight:800;font-size:12px;letter-spacing:.06em;text-transform:uppercase;
                         padding:11px 22px;border-radius:4px;text-decoration:none;
                         transition:all .3s;align-self:flex-start;
                     "
-                    onmouseover="this.style.boxShadow='0 8px 24px rgba(201,168,76,.3)';this.style.transform='translateY(-2px)'"
+                    onmouseover="this.style.boxShadow='0 8px 24px rgba(176,134,46,.3)';this.style.transform='translateY(-2px)'"
                     onmouseout="this.style.boxShadow='';this.style.transform=''">
                         En savoir plus →
                     </a>
@@ -1307,7 +1306,7 @@
                 <p class="cb-sec-tag">Forum</p>
                 <h2 class="cb-sec-title">La communauté des <em>investisseurs</em></h2>
                 <div class="cb-divider"></div>
-                <p style="font-size:15px;color:#6B7590;line-height:1.75;font-weight:300;margin-bottom:28px;">
+                <p style="font-size:15px;color:var(--cb-muted);line-height:1.75;font-weight:300;margin-bottom:28px;">
                     Échangez, posez vos questions, partagez vos analyses avec une communauté d'investisseurs passionnés.
                     La lecture est libre — publiez en vous connectant.
                 </p>
@@ -1318,54 +1317,54 @@
                 <div class="row g-2">
                     <div class="col-6">
                         <a href="{{ route('forum.category', 'analyses') }}" style="
-                            display:block; background:#060910; border:1px solid rgba(201,168,76,.1);
+                            display:block; background:var(--cb-card); border:1px solid var(--cb-border);
                             border-radius:6px; padding:22px 20px; text-decoration:none;
                             transition:border-color .3s, transform .3s;
                         "
-                        onmouseover="this.style.borderColor='rgba(201,168,76,.3)';this.style.transform='translateY(-3px)'"
-                        onmouseout="this.style.borderColor='rgba(201,168,76,.1)';this.style.transform=''">
+                        onmouseover="this.style.borderColor='rgba(176,134,46,.35)';this.style.transform='translateY(-3px)'"
+                        onmouseout="this.style.borderColor='var(--cb-border)';this.style.transform=''">
                             <div style="font-size:24px;margin-bottom:10px;">📊</div>
-                            <div style="font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:#E8EAF0;margin-bottom:4px;">Analyses</div>
-                            <div style="font-size:12px;color:#6B7590;line-height:1.5;">Fondamentales, techniques, revues de sociétés</div>
+                            <div style="font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:var(--cb-ink);margin-bottom:4px;">Analyses</div>
+                            <div style="font-size:12px;color:var(--cb-muted);line-height:1.5;">Fondamentales, techniques, revues de sociétés</div>
                         </a>
                     </div>
                     <div class="col-6">
                         <a href="{{ route('forum.category', 'questions-debutants') }}" style="
-                            display:block; background:#060910; border:1px solid rgba(201,168,76,.1);
+                            display:block; background:var(--cb-card); border:1px solid var(--cb-border);
                             border-radius:6px; padding:22px 20px; text-decoration:none;
                             transition:border-color .3s, transform .3s;
                         "
-                        onmouseover="this.style.borderColor='rgba(201,168,76,.3)';this.style.transform='translateY(-3px)'"
-                        onmouseout="this.style.borderColor='rgba(201,168,76,.1)';this.style.transform=''">
+                        onmouseover="this.style.borderColor='rgba(176,134,46,.35)';this.style.transform='translateY(-3px)'"
+                        onmouseout="this.style.borderColor='var(--cb-border)';this.style.transform=''">
                             <div style="font-size:24px;margin-bottom:10px;">💡</div>
-                            <div style="font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:#E8EAF0;margin-bottom:4px;">Questions débutants</div>
-                            <div style="font-size:12px;color:#6B7590;line-height:1.5;">Posez toutes vos questions sans hésiter</div>
+                            <div style="font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:var(--cb-ink);margin-bottom:4px;">Questions débutants</div>
+                            <div style="font-size:12px;color:var(--cb-muted);line-height:1.5;">Posez toutes vos questions sans hésiter</div>
                         </a>
                     </div>
                     <div class="col-6">
                         <a href="{{ route('forum.category', 'actualites-brvm') }}" style="
-                            display:block; background:#060910; border:1px solid rgba(201,168,76,.1);
+                            display:block; background:var(--cb-card); border:1px solid var(--cb-border);
                             border-radius:6px; padding:22px 20px; text-decoration:none;
                             transition:border-color .3s, transform .3s;
                         "
-                        onmouseover="this.style.borderColor='rgba(201,168,76,.3)';this.style.transform='translateY(-3px)'"
-                        onmouseout="this.style.borderColor='rgba(201,168,76,.1)';this.style.transform=''">
+                        onmouseover="this.style.borderColor='rgba(176,134,46,.35)';this.style.transform='translateY(-3px)'"
+                        onmouseout="this.style.borderColor='var(--cb-border)';this.style.transform=''">
                             <div style="font-size:24px;margin-bottom:10px;">📰</div>
-                            <div style="font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:#E8EAF0;margin-bottom:4px;">Actualités marché</div>
-                            <div style="font-size:12px;color:#6B7590;line-height:1.5;">Infos, événements, nouvelles du marché</div>
+                            <div style="font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:var(--cb-ink);margin-bottom:4px;">Actualités marché</div>
+                            <div style="font-size:12px;color:var(--cb-muted);line-height:1.5;">Infos, événements, nouvelles du marché</div>
                         </a>
                     </div>
                     <div class="col-6">
                         <a href="{{ route('forum.category', 'experiences-investisseurs') }}" style="
-                            display:block; background:#060910; border:1px solid rgba(201,168,76,.1);
+                            display:block; background:var(--cb-card); border:1px solid var(--cb-border);
                             border-radius:6px; padding:22px 20px; text-decoration:none;
                             transition:border-color .3s, transform .3s;
                         "
-                        onmouseover="this.style.borderColor='rgba(201,168,76,.3)';this.style.transform='translateY(-3px)'"
-                        onmouseout="this.style.borderColor='rgba(201,168,76,.1)';this.style.transform=''">
+                        onmouseover="this.style.borderColor='rgba(176,134,46,.35)';this.style.transform='translateY(-3px)'"
+                        onmouseout="this.style.borderColor='var(--cb-border)';this.style.transform=''">
                             <div style="font-size:24px;margin-bottom:10px;">💼</div>
-                            <div style="font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:#E8EAF0;margin-bottom:4px;">Expériences d'investisseurs</div>
-                            <div style="font-size:12px;color:#6B7590;line-height:1.5;">Témoignages, stratégies, retours d'expérience</div>
+                            <div style="font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:var(--cb-ink);margin-bottom:4px;">Expériences d'investisseurs</div>
+                            <div style="font-size:12px;color:var(--cb-muted);line-height:1.5;">Témoignages, stratégies, retours d'expérience</div>
                         </a>
                     </div>
                 </div>
@@ -1378,56 +1377,56 @@
 {{-- ══════════════════════════════════════
      DIASPORA
 ══════════════════════════════════════ --}}
-<section style="background:linear-gradient(180deg,#060910 0%,#071210 60%,#060910 100%); padding:clamp(64px,10vw,120px) 0; position:relative; overflow:hidden;" class="cbr">
-    <div style="position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at 50% 50%, rgba(37,211,102,.06) 0%, transparent 65%);"></div>
+<section style="background:var(--cb-paper); padding:clamp(64px,10vw,120px) 0; position:relative; overflow:hidden;" class="cbr">
+    <div style="position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at 50% 50%, rgba(15,92,67,.04) 0%, transparent 65%);"></div>
     <div class="container" style="max-width:860px; position:relative;">
-        <div style="border:1px solid rgba(37,211,102,.2); border-radius:8px; padding:clamp(32px,5vw,56px) clamp(24px,5vw,56px); background:rgba(37,211,102,.025); text-align:center;">
+        <div style="border:1px solid rgba(15,92,67,.2); border-radius:8px; padding:clamp(32px,5vw,56px) clamp(24px,5vw,56px); background:var(--cb-card); text-align:center;">
 
             <div class="cb-diaspora-badge cbr">
                 <span class="cb-diaspora-dot"></span>
                 Investir depuis la diaspora
             </div>
 
-            <h2 style="font-family:'Playfair Display',serif; font-size:clamp(26px,4vw,38px); font-weight:700; color:#E8EAF0; margin:0 0 14px;" class="cbr cbr2">
-                Tu es à l'étranger et tu veux<br>investir dans la <span style="color:#25D366;">bourse ouest-africaine</span> ?
+            <h2 style="font-family:'Playfair Display',serif; font-size:clamp(26px,4vw,38px); font-weight:700; color:var(--cb-ink); margin:0 0 14px;" class="cbr cbr2">
+                Tu es à l'étranger et tu veux<br>investir dans la <span style="color:var(--cb-forest);">bourse ouest-africaine</span> ?
             </h2>
 
-            <p style="font-size:clamp(14px,2vw,16px); color:#6B7590; line-height:1.85; max-width:600px; margin:0 auto 28px;" class="cbr">
-                Boursiv <strong style="color:#E8EAF0;">n'est pas une SGI</strong>. Nous t'accompagnons pas à pas dans les démarches
-                d'ouverture de ton compte-titres auprès d'une <strong style="color:#E8EAF0;">SGI agréée BRVM</strong> — que tu sois en Europe, en Amérique, ou ailleurs.
+            <p style="font-size:clamp(14px,2vw,16px); color:var(--cb-muted); line-height:1.85; max-width:600px; margin:0 auto 28px;" class="cbr">
+                Boursiv <strong style="color:var(--cb-ink);">n'est pas une SGI</strong>. Nous t'accompagnons pas à pas dans les démarches
+                d'ouverture de ton compte-titres auprès d'une <strong style="color:var(--cb-ink);">SGI agréée BRVM</strong> — que tu sois en Europe, en Amérique, ou ailleurs.
                 Tout se fait en ligne, de A à Z.
             </p>
 
             <div class="d-flex flex-wrap justify-content-center gap-3 mb-4 cbr cbr2">
-                <div style="background:rgba(255,255,255,.04); border:1px solid rgba(37,211,102,.12); border-radius:6px; padding:14px 20px; text-align:left; min-width:220px; flex:1; max-width:280px;">
+                <div style="background:var(--cb-paper); border:1px solid rgba(15,92,67,.15); border-radius:6px; padding:14px 20px; text-align:left; min-width:220px; flex:1; max-width:280px;">
                     <div style="font-size:20px; margin-bottom:6px;">🌍</div>
-                    <div style="font-family:'Syne',sans-serif; font-size:11px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:#25D366; margin-bottom:4px;">Qui peut en bénéficier</div>
-                    <p style="font-size:13px; color:#9BA3B8; margin:0; line-height:1.65;">Diaspora africaine, Européens, Américains... Toute personne hors UEMOA souhaitant investir dans la bourse ouest-africaine.</p>
+                    <div style="font-family:'Syne',sans-serif; font-size:11px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--cb-forest); margin-bottom:4px;">Qui peut en bénéficier</div>
+                    <p style="font-size:13px; color:var(--cb-muted); margin:0; line-height:1.65;">Diaspora africaine, Européens, Américains... Toute personne hors UEMOA souhaitant investir dans la bourse ouest-africaine.</p>
                 </div>
-                <div style="background:rgba(255,255,255,.04); border:1px solid rgba(37,211,102,.12); border-radius:6px; padding:14px 20px; text-align:left; min-width:220px; flex:1; max-width:280px;">
+                <div style="background:var(--cb-paper); border:1px solid rgba(15,92,67,.15); border-radius:6px; padding:14px 20px; text-align:left; min-width:220px; flex:1; max-width:280px;">
                     <div style="font-size:20px; margin-bottom:6px;">📋</div>
-                    <div style="font-family:'Syne',sans-serif; font-size:11px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:#25D366; margin-bottom:4px;">Ce qu'on fait</div>
-                    <p style="font-size:13px; color:#9BA3B8; margin:0; line-height:1.65;">Identification de la SGI, accompagnement du dossier, suivi jusqu'à l'activation de ton compte-titres.</p>
+                    <div style="font-family:'Syne',sans-serif; font-size:11px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--cb-forest); margin-bottom:4px;">Ce qu'on fait</div>
+                    <p style="font-size:13px; color:var(--cb-muted); margin:0; line-height:1.65;">Identification de la SGI, accompagnement du dossier, suivi jusqu'à l'activation de ton compte-titres.</p>
                 </div>
-                <div style="background:rgba(255,255,255,.04); border:1px solid rgba(37,211,102,.12); border-radius:6px; padding:14px 20px; text-align:left; min-width:220px; flex:1; max-width:280px;">
+                <div style="background:var(--cb-paper); border:1px solid rgba(15,92,67,.15); border-radius:6px; padding:14px 20px; text-align:left; min-width:220px; flex:1; max-width:280px;">
                     <div style="font-size:20px; margin-bottom:6px;">✅</div>
-                    <div style="font-family:'Syne',sans-serif; font-size:11px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:#25D366; margin-bottom:4px;">100% en ligne</div>
-                    <p style="font-size:13px; color:#9BA3B8; margin:0; line-height:1.65;">Valable depuis n'importe quel pays. Réponse sur WhatsApp sous 24h, sans déplacement.</p>
+                    <div style="font-family:'Syne',sans-serif; font-size:11px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--cb-forest); margin-bottom:4px;">100% en ligne</div>
+                    <p style="font-size:13px; color:var(--cb-muted); margin:0; line-height:1.65;">Valable depuis n'importe quel pays. Réponse sur WhatsApp sous 24h, sans déplacement.</p>
                 </div>
             </div>
 
             <a href="{{ route('diaspora') }}" class="cb-wa-cta">
                 <i class="bi bi-whatsapp"></i> En savoir plus &amp; nous contacter
             </a>
-            <p style="font-size:11px; color:rgba(107,117,144,.5); margin-top:14px; font-family:'Syne',sans-serif; letter-spacing:.08em; text-transform:uppercase;">
+            <p style="font-size:11px; color:var(--cb-muted); margin-top:14px; font-family:'Syne',sans-serif; letter-spacing:.08em; text-transform:uppercase;">
                 Réponse sous 24h &nbsp;·&nbsp; 100% en ligne &nbsp;·&nbsp; Accompagnement personnalisé
             </p>
 
-            <div style="margin-top:24px; padding-top:20px; border-top:1px solid rgba(255,255,255,.06);">
-                <p style="font-size:13px; color:#6B7590; margin-bottom:8px;">
+            <div style="margin-top:24px; padding-top:20px; border-top:1px solid var(--cb-border);">
+                <p style="font-size:13px; color:var(--cb-muted); margin-bottom:8px;">
                     Besoin d'un financement pour votre projet ?
                 </p>
-                <a href="{{ route('financement') }}" style="font-family:'Syne',sans-serif;font-size:12px;font-weight:700;letter-spacing:.06em;color:#25D366;text-decoration:none;">
+                <a href="{{ route('financement') }}" style="font-family:'Syne',sans-serif;font-size:12px;font-weight:700;letter-spacing:.06em;color:var(--cb-forest);text-decoration:none;">
                     Découvrez notre service de facilitation →
                 </a>
             </div>
@@ -1441,14 +1440,14 @@
 ══════════════════════════════════════ --}}
 <section class="cb-cta-finale">
     <div class="container cbr" style="max-width:1100px;">
-        <p style="font-family:'Syne',sans-serif;font-size:11px;letter-spacing:.24em;text-transform:uppercase;color:#C9A84C;margin-bottom:22px;">
+        <p style="font-family:'Syne',sans-serif;font-size:11px;letter-spacing:.24em;text-transform:uppercase;color:var(--cb-gold);margin-bottom:22px;">
             Rejoins dès maintenant
         </p>
         <h2 class="cb-cta-finale-title">
             Passe à un autre niveau<br>
             <span class="g">d'investisseur</span>
         </h2>
-        <p style="font-size:clamp(15px,2vw,17px);color:#6B7590;max-width:420px;margin:20px auto 40px;line-height:1.75;font-weight:300;">
+        <p style="font-size:clamp(15px,2vw,17px);color:var(--cb-muted);max-width:420px;margin:20px auto 40px;line-height:1.75;font-weight:300;">
             Boursiv t'accompagne à chaque étape. Commence avec la BOC gratuite, puis va aussi loin que tu veux.
         </p>
         <div class="d-flex gap-3 justify-content-center flex-wrap">
@@ -1457,8 +1456,8 @@
                 <a href="{{ route('client-bocs.latest.public') }}" class="cb-cta-green" style="padding:15px 28px;font-size:15px;">📄 Voir la BOC gratuite</a>
             @endif
         </div>
-        <p style="font-family:'Syne',sans-serif;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:#6B7590;margin-top:32px;border-top:1px solid rgba(255,255,255,.06);padding-top:24px;">
-            boursiv.com &nbsp;·&nbsp; <strong style="color:#C9A84C;">Comprends. Analyse. Progresse.</strong>
+        <p style="font-family:'Syne',sans-serif;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--cb-muted);margin-top:32px;border-top:1px solid var(--cb-border);padding-top:24px;">
+            boursiv.com &nbsp;·&nbsp; <strong style="color:var(--cb-gold);">Comprends. Analyse. Progresse.</strong>
         </p>
     </div>
 </section>
@@ -1466,9 +1465,9 @@
 {{-- ══════════════════════════════════════
      BANDE INDÉPENDANCE & TRANSPARENCE
 ══════════════════════════════════════ --}}
-<div style="background:#060910;border-top:1px solid rgba(255,255,255,.05);padding:28px 0;">
+<div style="background:var(--cb-card);border-top:1px solid var(--cb-border);padding:28px 0;">
     <div class="container" style="max-width:860px;text-align:center;">
-        <p style="font-size:12px;color:#4A5068;line-height:1.85;font-weight:300;">
+        <p style="font-size:12px;color:var(--cb-muted);line-height:1.85;font-weight:300;">
             Boursiv est une plateforme indépendante d'éducation financière. Elle n'est pas affiliée à la BRVM ni à aucune autorité, bourse ou société de gestion. Les formations et contenus sont proposés à but pédagogique par un investisseur autonome partageant son expérience et ses méthodes personnelles ; ils ne constituent pas un conseil en investissement.
         </p>
     </div>
@@ -1482,13 +1481,13 @@
         <div class="row g-4 align-items-center mb-4">
             <div class="col-lg-4">
                 <a href="{{ route('landing') }}" class="cb-footer-logo">Boursiv</a>
-                <p style="font-size:12px;color:#6B7590;margin-top:10px;line-height:1.6;">
+                <p style="font-size:12px;color:var(--cb-muted);margin-top:10px;line-height:1.6;">
                     Service indépendant, non affilié officiellement à la BRVM.<br>
                     Une solution de CHENGGONG SARL.
                 </p>
             </div>
             <div class="col-lg-4">
-                <p style="font-family:'Syne',sans-serif;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#6B7590;margin-bottom:12px;">Suivre Boursiv</p>
+                <p style="font-family:'Syne',sans-serif;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--cb-muted);margin-bottom:12px;">Suivre Boursiv</p>
                 <div class="d-flex flex-wrap gap-2">
                     <a href="https://t.me/coachbrvm" target="_blank" class="cb-social-btn"><i class="bi bi-telegram"></i> Telegram</a>
                     <a href="https://x.com/coachbrvm" target="_blank" class="cb-social-btn"><i class="bi bi-twitter-x"></i> X</a>
@@ -1499,7 +1498,7 @@
                 </div>
             </div>
             <div class="col-lg-4">
-                <p style="font-family:'Syne',sans-serif;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#6B7590;margin-bottom:12px;">Liens utiles</p>
+                <p style="font-family:'Syne',sans-serif;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--cb-muted);margin-bottom:12px;">Liens utiles</p>
                 <div class="d-flex flex-wrap gap-x-4 gap-2">
                     <a href="{{ route('notre.histoire') }}" class="cb-footer-link">Notre histoire</a>
                     <a href="{{ route('faq') }}" class="cb-footer-link">FAQ</a>
@@ -1510,7 +1509,7 @@
                 </div>
             </div>
         </div>
-        <div class="border-top pt-3" style="border-color:rgba(255,255,255,.05)!important;">
+        <div class="border-top pt-3" style="border-color:var(--cb-border)!important;">
             <div class="cb-footer-copy">© {{ date('Y') }} Boursiv · CHENGGONG SARL</div>
         </div>
     </div>

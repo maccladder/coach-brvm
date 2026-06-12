@@ -1,9 +1,9 @@
-﻿{{-- resources/views/marketplace/show.blade.php --}}
+{{-- resources/views/marketplace/show.blade.php --}}
 @extends('layouts.app')
 
 @push('styles')
 <style>
-    .mp-page { background: #060910; min-height: 100vh; }
+    .mp-page { background: var(--cb-paper); min-height: 100vh; }
 
     /* Breadcrumb */
     .mp-breadcrumb {
@@ -12,76 +12,76 @@
         font-family: 'Syne', sans-serif; font-size: 11px;
         font-weight: 600; letter-spacing: .08em; text-transform: uppercase;
     }
-    .mp-breadcrumb a { color: #6B7590; text-decoration: none; transition: color .25s; }
-    .mp-breadcrumb a:hover { color: #C9A84C; }
-    .mp-breadcrumb span { color: #6B7590; }
-    .mp-breadcrumb .current { color: #E8EAF0; }
+    .mp-breadcrumb a { color: var(--cb-muted); text-decoration: none; transition: color .25s; }
+    .mp-breadcrumb a:hover { color: var(--cb-gold); }
+    .mp-breadcrumb span { color: var(--cb-muted); }
+    .mp-breadcrumb .current { color: var(--cb-ink); }
 
     /* Vendeur callout */
     .mp-vendor-box {
-        background: rgba(201,168,76,.05);
-        border: 1px solid rgba(201,168,76,.12);
+        background: rgba(176,134,46,.05);
+        border: 1px solid rgba(176,134,46,.12);
         border-radius: 4px; padding: 18px 22px;
         position: relative; overflow: hidden; margin-bottom: 28px;
     }
     .mp-vendor-box::before {
         content:''; position:absolute; top:0;left:0;right:0;height:2px;
-        background: linear-gradient(90deg, #C9A84C, transparent);
+        background: linear-gradient(90deg, var(--cb-gold), transparent);
     }
-    .mp-vendor-title { font-family:'Syne',sans-serif; font-size:13px; font-weight:700; color:#E8EAF0; margin-bottom:3px; }
-    .mp-vendor-desc  { font-size:12px; color:#6B7590; }
-    .mp-vendor-desc a { color:#C9A84C; text-decoration:none; }
+    .mp-vendor-title { font-family:'Syne',sans-serif; font-size:13px; font-weight:700; color:var(--cb-ink); margin-bottom:3px; }
+    .mp-vendor-desc  { font-size:12px; color:var(--cb-muted); }
+    .mp-vendor-desc a { color:var(--cb-gold); text-decoration:none; }
 
     /* Boutons */
     .cb-btn-gold {
         display:inline-flex; align-items:center; gap:8px;
-        background:linear-gradient(135deg,#C9A84C,#9B6B15);
+        background:linear-gradient(135deg,var(--cb-gold),#7A5412);
         color:#050810 !important; font-family:'Syne',sans-serif;
         font-weight:800; font-size:12px; letter-spacing:.07em; text-transform:uppercase;
         padding:11px 22px; border:none; border-radius:3px; cursor:pointer;
         text-decoration:none; transition:all .3s;
     }
-    .cb-btn-gold:hover { box-shadow:0 6px 20px rgba(201,168,76,.3); transform:translateY(-1px); color:#050810 !important; }
+    .cb-btn-gold:hover { box-shadow:0 6px 20px rgba(176,134,46,.3); transform:translateY(-1px); color:#050810 !important; }
 
     .cb-btn-outline {
         display:inline-flex; align-items:center; gap:8px;
-        background:transparent; color:#E8EAF0 !important;
+        background:transparent; color:var(--cb-ink) !important;
         font-family:'Syne',sans-serif; font-weight:600;
         font-size:12px; letter-spacing:.06em; text-transform:uppercase;
-        padding:10px 18px; border:1px solid rgba(255,255,255,.12);
+        padding:10px 18px; border:1px solid var(--cb-border);
         border-radius:3px; text-decoration:none; transition:all .3s; cursor:pointer;
     }
-    .cb-btn-outline:hover { border-color:#C9A84C; color:#C9A84C !important; background:rgba(201,168,76,.05); }
+    .cb-btn-outline:hover { border-color:var(--cb-gold); color:var(--cb-gold) !important; background:rgba(176,134,46,.05); }
 
     .cb-btn-green {
         display:inline-flex; align-items:center; gap:8px;
-        background:rgba(15,207,164,.1); color:#0FCFA4 !important;
+        background:rgba(15,92,67,.08); color:var(--cb-forest) !important;
         font-family:'Syne',sans-serif; font-weight:700;
         font-size:12px; letter-spacing:.06em; text-transform:uppercase;
-        padding:10px 18px; border:1px solid rgba(15,207,164,.2);
+        padding:10px 18px; border:1px solid rgba(15,92,67,.2);
         border-radius:3px; text-decoration:none; transition:all .3s; cursor:pointer;
     }
-    .cb-btn-green:hover { background:rgba(15,207,164,.16); border-color:rgba(15,207,164,.4); }
+    .cb-btn-green:hover { background:rgba(15,92,67,.14); border-color:rgba(15,92,67,.4); }
 
     .cb-btn-success {
         display:inline-flex; align-items:center; gap:8px;
-        background:rgba(15,207,164,.12); color:#0FCFA4 !important;
+        background:rgba(15,92,67,.1); color:var(--cb-forest) !important;
         font-family:'Syne',sans-serif; font-weight:700;
         font-size:13px; letter-spacing:.06em; text-transform:uppercase;
-        padding:13px 24px; border:1px solid rgba(15,207,164,.25);
+        padding:13px 24px; border:1px solid rgba(15,92,67,.2);
         border-radius:3px; text-decoration:none; transition:all .3s; cursor:pointer;
     }
-    .cb-btn-success:hover { background:rgba(15,207,164,.2); border-color:rgba(15,207,164,.45); }
+    .cb-btn-success:hover { background:rgba(15,92,67,.18); border-color:rgba(15,92,67,.4); }
 
     .cb-btn-pay {
         display:inline-flex; align-items:center; gap:8px;
-        background:linear-gradient(135deg,#C9A84C,#9B6B15);
+        background:linear-gradient(135deg,var(--cb-gold),#7A5412);
         color:#050810 !important; font-family:'Syne',sans-serif;
         font-weight:800; font-size:14px; letter-spacing:.07em; text-transform:uppercase;
         padding:14px 28px; border:none; border-radius:3px; cursor:pointer;
         text-decoration:none; transition:all .3s; width:100%; justify-content:center;
     }
-    .cb-btn-pay:hover { box-shadow:0 8px 28px rgba(201,168,76,.3); transform:translateY(-1px); }
+    .cb-btn-pay:hover { box-shadow:0 8px 28px rgba(176,134,46,.3); transform:translateY(-1px); }
 
     /* Main layout */
     .mp-show-grid {
@@ -97,13 +97,13 @@
 
     /* Cover card */
     .mp-cover-card {
-        background: #0C1120;
-        border: 1px solid rgba(201,168,76,.1);
+        background: var(--cb-card);
+        border: 1px solid rgba(176,134,46,.1);
         border-radius: 4px; overflow: hidden;
         position: sticky; top: 80px;
     }
     .mp-cover-img {
-        position: relative; background: #121A2C;
+        position: relative; background: var(--cb-paper);
         display: flex; align-items: center; justify-content: center;
         min-height: 300px;
     }
@@ -115,36 +115,36 @@
     .mp-cover-placeholder {
         display: flex; flex-direction: column;
         align-items: center; justify-content: center;
-        color: #6B7590; font-size: 48px; padding: 60px;
+        color: var(--cb-muted); font-size: 48px; padding: 60px;
     }
     .mp-badge-owned {
         position: absolute; top: 12px; left: 12px;
         display: inline-flex; align-items: center; gap: 5px;
-        background: rgba(15,207,164,.9); color: #050810;
+        background: rgba(15,92,67,.9); color: #fff;
         font-family: 'Syne', sans-serif; font-size: 10px;
         font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
         padding: 4px 10px; border-radius: 100px;
     }
-    .mp-cover-footer { padding: 20px; border-top: 1px solid rgba(255,255,255,.05); }
+    .mp-cover-footer { padding: 20px; border-top: 1px solid var(--cb-border); }
 
     /* Prix */
     .mp-price-big {
         font-family: 'Playfair Display', serif;
-        font-size: 36px; font-weight: 900; color: #C9A84C; line-height: 1;
+        font-size: 36px; font-weight: 900; color: var(--cb-gold); line-height: 1;
         margin-bottom: 4px;
     }
-    .mp-price-big.free { color: #0FCFA4; }
-    .mp-price-sub { font-family: 'Syne', sans-serif; font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: #6B7590; margin-bottom: 18px; }
+    .mp-price-big.free { color: var(--cb-forest); }
+    .mp-price-sub { font-family: 'Syne', sans-serif; font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--cb-muted); margin-bottom: 18px; }
 
     /* Info card */
     .mp-info-card {
-        background: #0C1120;
-        border: 1px solid rgba(255,255,255,.06);
+        background: var(--cb-card);
+        border: 1px solid var(--cb-border);
         border-radius: 4px;
     }
     .mp-info-header {
         padding: 24px 28px 0;
-        border-bottom: 1px solid rgba(255,255,255,.05);
+        border-bottom: 1px solid var(--cb-border);
         padding-bottom: 20px;
     }
     .mp-chip {
@@ -152,29 +152,29 @@
         letter-spacing: .08em; text-transform: uppercase;
         padding: 3px 9px; border-radius: 100px; display: inline-block; margin-right: 6px; margin-bottom: 6px;
     }
-    .mp-chip-book     { background:rgba(99,179,237,.08);  color:#63B3ED; border:1px solid rgba(99,179,237,.2); }
-    .mp-chip-video    { background:rgba(252,129,74,.08);  color:#FC814A; border:1px solid rgba(252,129,74,.2); }
-    .mp-chip-software { background:rgba(160,120,255,.08); color:#B090FF; border:1px solid rgba(160,120,255,.2); }
-    .mp-chip-cat      { background:rgba(255,255,255,.05); color:#6B7590; border:1px solid rgba(255,255,255,.08); }
-    .mp-chip-feat     { background:rgba(201,168,76,.1);   color:#C9A84C; border:1px solid rgba(201,168,76,.2); }
+    .mp-chip-book     { background:rgba(43,127,196,.08);  color:#2B7FC4; border:1px solid rgba(43,127,196,.2); }
+    .mp-chip-video    { background:rgba(200,90,40,.08);   color:#C85A28; border:1px solid rgba(200,90,40,.2); }
+    .mp-chip-software { background:rgba(120,80,200,.08);  color:#7850C8; border:1px solid rgba(120,80,200,.2); }
+    .mp-chip-cat      { background:rgba(15,92,67,.04);    color:var(--cb-muted); border:1px solid var(--cb-border); }
+    .mp-chip-feat     { background:rgba(176,134,46,.1);   color:var(--cb-gold); border:1px solid rgba(176,134,46,.2); }
 
     .mp-product-title {
         font-family: 'Playfair Display', serif;
         font-size: clamp(22px, 3.5vw, 34px); font-weight: 700;
-        color: #E8EAF0; line-height: 1.15; margin: 14px 0 6px;
+        color: var(--cb-ink); line-height: 1.15; margin: 14px 0 6px;
     }
-    .mp-product-ref { font-family: 'Syne', sans-serif; font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: #6B7590; }
+    .mp-product-ref { font-family: 'Syne', sans-serif; font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: var(--cb-muted); }
 
     .mp-info-body { padding: 24px 28px; }
-    .mp-desc { font-size: 14px; color: #6B7590; line-height: 1.75; white-space: pre-line; margin-bottom: 20px; }
+    .mp-desc { font-size: 14px; color: var(--cb-muted); line-height: 1.75; white-space: pre-line; margin-bottom: 20px; }
 
     .mp-delivery-box {
-        background: rgba(15,207,164,.04);
-        border: 1px solid rgba(15,207,164,.1);
+        background: rgba(15,92,67,.05);
+        border: 1px solid rgba(15,92,67,.12);
         border-radius: 3px; padding: 12px 16px;
         font-family: 'Syne', sans-serif; font-size: 12px;
         font-weight: 600; letter-spacing: .06em; text-transform: uppercase;
-        color: #0FCFA4; margin-bottom: 20px;
+        color: var(--cb-forest); margin-bottom: 20px;
         display: flex; align-items: center; gap: 8px;
     }
 
@@ -182,55 +182,55 @@
     .mp-section-title {
         font-family: 'Syne', sans-serif; font-size: 11px;
         font-weight: 700; letter-spacing: .14em; text-transform: uppercase;
-        color: #6B7590; margin-bottom: 14px;
+        color: var(--cb-muted); margin-bottom: 14px;
         display: flex; align-items: center; gap: 10px;
     }
-    .mp-section-title::after { content:''; flex:1; height:1px; background:rgba(255,255,255,.06); }
+    .mp-section-title::after { content:''; flex:1; height:1px; background:var(--cb-border); }
 
     .mp-asset-item {
         display: flex; justify-content: space-between; align-items: center; gap: 12px;
         padding: 12px 0;
-        border-bottom: 1px solid rgba(255,255,255,.04);
+        border-bottom: 1px solid var(--cb-border);
     }
     .mp-asset-item:last-child { border-bottom: none; }
-    .mp-asset-name { font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 600; color: #E8EAF0; }
-    .mp-asset-sub  { font-size: 12px; color: #6B7590; margin-top: 2px; }
+    .mp-asset-name { font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 600; color: var(--cb-ink); }
+    .mp-asset-sub  { font-size: 12px; color: var(--cb-muted); margin-top: 2px; }
 
     /* Owned success */
     .mp-owned-box {
-        background: rgba(15,207,164,.05);
-        border: 1px solid rgba(15,207,164,.15);
+        background: rgba(15,92,67,.05);
+        border: 1px solid rgba(15,92,67,.15);
         border-radius: 3px; padding: 14px 18px;
         margin-top: 16px;
-        font-size: 13px; color: #6B7590; line-height: 1.65;
+        font-size: 13px; color: var(--cb-muted); line-height: 1.65;
     }
-    .mp-owned-box a { color: #0FCFA4; text-decoration: none; font-weight: 600; }
+    .mp-owned-box a { color: var(--cb-forest); text-decoration: none; font-weight: 600; }
     .mp-owned-box a:hover { text-decoration: underline; }
 
     /* Preview images */
     .mp-preview-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 8px; margin-top: 12px; }
     .mp-preview-grid a img {
         width: 100%; border-radius: 3px;
-        border: 1px solid rgba(255,255,255,.08);
+        border: 1px solid var(--cb-border);
         transition: border-color .25s;
     }
-    .mp-preview-grid a:hover img { border-color: rgba(201,168,76,.3); }
+    .mp-preview-grid a:hover img { border-color: rgba(176,134,46,.3); }
 
     /* Related */
     .mp-related-card {
-        background: #0C1120;
-        border: 1px solid rgba(255,255,255,.06);
+        background: var(--cb-card);
+        border: 1px solid var(--cb-border);
         border-radius: 4px; overflow: hidden;
         text-decoration: none; color: inherit;
         display: block; transition: all .3s;
     }
-    .mp-related-card:hover { border-color: rgba(201,168,76,.2); transform: translateY(-3px); color: inherit; }
-    .mp-related-img { aspect-ratio:16/9; background:#121A2C; overflow:hidden; }
+    .mp-related-card:hover { border-color: rgba(176,134,46,.2); transform: translateY(-3px); color: inherit; box-shadow: 0 6px 20px rgba(0,0,0,.07); }
+    .mp-related-img { aspect-ratio:16/9; background:var(--cb-paper); overflow:hidden; }
     .mp-related-img img { width:100%;height:100%;object-fit:cover; transition:transform .35s; }
     .mp-related-card:hover .mp-related-img img { transform:scale(1.04); }
     .mp-related-body { padding:14px; }
-    .mp-related-title { font-family:'Syne',sans-serif; font-size:13px; font-weight:700; color:#E8EAF0; margin-bottom:8px; line-height:1.35; }
-    .mp-related-price { font-family:'Playfair Display',serif; font-size:16px; font-weight:700; color:#C9A84C; }
+    .mp-related-title { font-family:'Syne',sans-serif; font-size:13px; font-weight:700; color:var(--cb-ink); margin-bottom:8px; line-height:1.35; }
+    .mp-related-price { font-family:'Playfair Display',serif; font-size:16px; font-weight:700; color:var(--cb-gold); }
 
     /* Reveal */
     .cbr { opacity:0; transform:translateY(20px); transition:all .7s cubic-bezier(.16,1,.3,1); }
@@ -366,10 +366,10 @@
                                    value="{{ old('affiliate_code', $cookieCode) }}"
                                    placeholder="Code apporteur (optionnel)"
                                    maxlength="20"
-                                   style="background:rgba(6,9,16,.9);border:1px solid rgba(255,255,255,.1);color:#E8EAF0;border-radius:3px;font-family:'DM Sans',sans-serif;font-size:12px;padding:8px 12px;width:100%;outline:none;margin-bottom:6px;">
+                                   style="background:var(--cb-paper);border:1px solid var(--cb-border);color:var(--cb-ink);border-radius:3px;font-family:'DM Sans',sans-serif;font-size:12px;padding:8px 12px;width:100%;outline:none;margin-bottom:6px;">
                             <div id="mp-affiliate-preview" style="min-height:16px;font-size:12px;margin-bottom:6px;"></div>
                             @if(session('warning'))
-                                <div style="font-size:12px;color:#FFC850;margin-bottom:8px;">{!! session('warning') !!}</div>
+                                <div style="font-size:12px;color:var(--cb-gold);margin-bottom:8px;">{!! session('warning') !!}</div>
                             @endif
                             <button type="submit"
                                     class="cb-btn-pay js-pay-btn"
@@ -396,11 +396,11 @@
                     </a>
                 @endif
 
-                <div style="margin-top:14px;padding-top:14px;border-top:1px solid rgba(255,255,255,.05);
+                <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--cb-border);
                             font-family:'Syne',sans-serif;font-size:10px;letter-spacing:.08em;
-                            text-transform:uppercase;color:#6B7590;text-align:center;">
+                            text-transform:uppercase;color:var(--cb-muted);text-align:center;">
                     Après achat :
-                    <strong style="color:#E8EAF0;">
+                    <strong style="color:var(--cb-ink);">
                         @if($product->type === 'game') Jeu en ligne · sans téléchargement
                         @elseif($product->type === 'video') Lecture en ligne
                         @else Téléchargement immédiat @endif
@@ -454,7 +454,7 @@
                                 </a>
                             @endforeach
                         </div>
-                        <p style="font-size:12px;color:#6B7590;margin-top:8px;">
+                        <p style="font-size:12px;color:var(--cb-muted);margin-top:8px;">
                             Aperçu basse résolution. Accès complet après achat.
                         </p>
                     @endif
@@ -464,7 +464,7 @@
                     <div class="mp-section-title" style="margin-top:24px;">Ce que tu reçois</div>
 
                     @if($assetsToShow->isEmpty())
-                        <div style="font-size:13px;color:#6B7590;padding:16px;background:rgba(255,255,255,.02);border-radius:3px;border:1px solid rgba(255,255,255,.05);">
+                        <div style="font-size:13px;color:var(--cb-muted);padding:16px;background:var(--cb-paper);border-radius:3px;border:1px solid var(--cb-border);">
                             @if($product->type === 'video')
                                 La vidéo sera disponible en lecture après validation.
                             @else
@@ -529,7 +529,7 @@
                     {{-- Owned success --}}
                     @if(!empty($isOwned))
                         <div class="mp-owned-box">
-                            <i class="bi bi-shield-check" style="color:#0FCFA4;"></i>
+                            <i class="bi bi-shield-check" style="color:var(--cb-forest);"></i>
                             Produit déjà payé —
                             @if($product->type === 'game')
                                 rejoue-y à tout moment depuis
@@ -559,8 +559,8 @@
     @if(!empty($related) && $related->count())
         <div class="mt-5 cbr">
             <div class="d-flex justify-content-between align-items-center mb-3">
-                <p style="font-family:'Syne',sans-serif;font-size:11px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:#6B7590;margin:0;display:flex;align-items:center;gap:10px;">
-                    <span style="width:28px;height:1px;background:#6B7590;display:inline-block;"></span>
+                <p style="font-family:'Syne',sans-serif;font-size:11px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--cb-muted);margin:0;display:flex;align-items:center;gap:10px;">
+                    <span style="width:28px;height:1px;background:var(--cb-muted);display:inline-block;"></span>
                     Produits similaires
                 </p>
                 <a href="{{ route('marketplace.index') }}" class="cb-btn-outline" style="font-size:11px;padding:7px 14px;">
@@ -575,7 +575,7 @@
                                 @if($p->cover_image_path)
                                     <img src="{{ asset('storage/'.$p->cover_image_path) }}" alt="{{ $p->title }}">
                                 @else
-                                    <div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:#6B7590;font-size:28px;">📦</div>
+                                    <div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--cb-muted);font-size:28px;">📦</div>
                                 @endif
                             </div>
                             <div class="mp-related-body">
@@ -620,10 +620,6 @@ document.addEventListener('DOMContentLoaded', function () {
         currency: 'XOF'
     });
 
-    // ── InitiateCheckout au clic sur "Payer maintenant" / "Débloquer" ──
-    // e.preventDefault() bloque la redirection immédiate vers Paystack
-    // setTimeout de 400ms laisse le temps au pixel d'envoyer l'événement à Meta
-    // puis form.submit() déclenche la redirection normalement
     document.querySelectorAll('.js-pay-btn').forEach(function(btn) {
         btn.addEventListener('click', function(e) {
             if (btn.dataset.fired === '1') return;
@@ -668,17 +664,17 @@ document.addEventListener('DOMContentLoaded', function () {
         if (!data) { reset(); return; }
         if (data.applicable) {
             if (priceEl) priceEl.innerHTML =
-                '<span style="text-decoration:line-through;color:#6B7590;font-size:.65em;">'
+                '<span style="text-decoration:line-through;color:var(--cb-muted);font-size:.65em;">'
                 + fmt(ORIGINAL) + ' F</span> '
-                + '<span style="color:#C9A84C;">' + fmt(data.new_price) + ' FCFA</span>';
+                + '<span style="color:var(--cb-gold);">' + fmt(data.new_price) + ' FCFA</span>';
             if (preview) preview.innerHTML =
-                '<span style="color:#0FCFA4;">✅ −' + Math.round(data.discount_rate * 100)
+                '<span style="color:var(--cb-forest);">✅ −' + Math.round(data.discount_rate * 100)
                 + '% grâce au code de ' + (data.affiliate_label ?? input.value.toUpperCase())
                 + ' — nouveau prix : ' + fmt(data.new_price) + ' FCFA</span>';
         } else {
             reset();
             if (preview && data.message)
-                preview.innerHTML = '<span style="color:#FFC850;">⚠️ ' + data.message + '</span>';
+                preview.innerHTML = '<span style="color:var(--cb-gold);">⚠️ ' + data.message + '</span>';
         }
     }
 

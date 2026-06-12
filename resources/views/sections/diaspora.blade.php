@@ -1,95 +1,95 @@
-﻿{{-- ════════ sections/diaspora.blade.php ════════ --}}
+{{-- ════════ sections/diaspora.blade.php ════════ --}}
 @extends('layouts.app')
 @section('title','Investir depuis la diaspora – Boursiv')
 
 @push('styles')
 <style>
-    .dia-page { background:#060910; min-height:100vh; }
+    .dia-page { background:var(--cb-paper); min-height:100vh; }
 
     /* Hero */
     .dia-hero {
-        background: radial-gradient(ellipse 80% 50% at 50% 0%, rgba(37,211,102,.1) 0%, transparent 55%), #060910;
-        border-bottom: 1px solid rgba(37,211,102,.1);
+        background: radial-gradient(ellipse 80% 50% at 50% 0%, rgba(15,92,67,.07) 0%, transparent 55%), var(--cb-paper);
+        border-bottom: 1px solid var(--cb-border);
         padding: 56px 0 48px;
         position: relative; overflow: hidden;
     }
     .dia-hero-grid {
         position: absolute; inset: 0;
-        background-image: linear-gradient(rgba(37,211,102,.03) 1px, transparent 1px),
-                          linear-gradient(90deg, rgba(37,211,102,.03) 1px, transparent 1px);
+        background-image: linear-gradient(rgba(15,92,67,.04) 1px, transparent 1px),
+                          linear-gradient(90deg, rgba(15,92,67,.04) 1px, transparent 1px);
         background-size: 56px 56px;
         mask-image: radial-gradient(ellipse 80% 70% at 50% 50%, black 0%, transparent 70%);
         pointer-events: none;
     }
     .dia-tag {
         font-family: 'Syne', sans-serif; font-size: 11px; font-weight: 600;
-        letter-spacing: .2em; text-transform: uppercase; color: #25D366;
+        letter-spacing: .2em; text-transform: uppercase; color: var(--cb-forest);
         display: flex; align-items: center; gap: 10px; margin-bottom: 14px;
     }
-    .dia-tag::before { content: ''; width: 28px; height: 1px; background: #25D366; }
+    .dia-tag::before { content: ''; width: 28px; height: 1px; background: var(--cb-forest); }
     .dia-hero-title {
         font-family: 'Playfair Display', serif;
         font-size: clamp(30px, 5vw, 52px); font-weight: 900;
-        color: #E8EAF0; line-height: 1.1; margin-bottom: 16px;
+        color: var(--cb-ink); line-height: 1.1; margin-bottom: 16px;
     }
-    .dia-hero-title em { font-style: italic; color: #25D366; }
-    .dia-hero-desc { font-size: 16px; color: #6B7590; line-height: 1.8; max-width: 560px; }
-    .dia-hero-desc strong { color: #E8EAF0; }
+    .dia-hero-title em { font-style: italic; color: var(--cb-forest); }
+    .dia-hero-desc { font-size: 16px; color: var(--cb-muted); line-height: 1.8; max-width: 560px; }
+    .dia-hero-desc strong { color: var(--cb-ink); }
 
     /* Disclaimer */
     .dia-disclaimer {
-        background: rgba(201,168,76,.06); border: 1px solid rgba(201,168,76,.2);
+        background: rgba(176,134,46,.06); border: 1px solid rgba(176,134,46,.2);
         border-radius: 6px; padding: 16px 20px;
         display: flex; align-items: flex-start; gap: 12px;
-        font-size: 13.5px; color: #9BA3B8; line-height: 1.7;
+        font-size: 13.5px; color: var(--cb-muted); line-height: 1.7;
         margin: 28px 0 0;
     }
-    .dia-disclaimer strong { color: #C9A84C; }
+    .dia-disclaimer strong { color: var(--cb-gold); }
 
     /* Cards */
     .dia-card {
-        background: #0C1120; border: 1px solid rgba(255,255,255,.06);
+        background: var(--cb-card); border: 1px solid var(--cb-border);
         border-radius: 6px; padding: 28px 24px; height: 100%;
         transition: border-color .3s, transform .3s;
     }
-    .dia-card:hover { border-color: rgba(37,211,102,.25); transform: translateY(-3px); }
+    .dia-card:hover { border-color: rgba(15,92,67,.3); transform: translateY(-3px); }
     .dia-card-icon { font-size: 28px; margin-bottom: 12px; }
     .dia-card-title {
         font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700;
-        letter-spacing: .08em; text-transform: uppercase; color: #E8EAF0; margin-bottom: 8px;
+        letter-spacing: .08em; text-transform: uppercase; color: var(--cb-ink); margin-bottom: 8px;
     }
-    .dia-card-desc { font-size: 13.5px; color: #6B7590; line-height: 1.75; margin: 0; }
+    .dia-card-desc { font-size: 13.5px; color: var(--cb-muted); line-height: 1.75; margin: 0; }
 
     /* Steps */
-    .dia-step { display: flex; gap: 20px; align-items: flex-start; padding: 20px 0; border-bottom: 1px solid rgba(255,255,255,.05); }
+    .dia-step { display: flex; gap: 20px; align-items: flex-start; padding: 20px 0; border-bottom: 1px solid var(--cb-border); }
     .dia-step:last-child { border-bottom: none; }
     .dia-step-num {
         min-width: 38px; height: 38px; border-radius: 50%;
-        background: rgba(37,211,102,.12); border: 1px solid rgba(37,211,102,.3);
+        background: rgba(15,92,67,.1); border: 1px solid rgba(15,92,67,.3);
         display: flex; align-items: center; justify-content: center;
-        font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 800; color: #25D366;
+        font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 800; color: var(--cb-forest);
         flex-shrink: 0;
     }
-    .dia-step-title { font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; color: #E8EAF0; margin-bottom: 4px; }
-    .dia-step-desc { font-size: 13.5px; color: #6B7590; line-height: 1.7; margin: 0; }
+    .dia-step-title { font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; color: var(--cb-ink); margin-bottom: 4px; }
+    .dia-step-desc { font-size: 13.5px; color: var(--cb-muted); line-height: 1.7; margin: 0; }
 
     /* FAQ */
-    .dia-faq-item { border-bottom: 1px solid rgba(255,255,255,.06); padding: 18px 0; }
-    .dia-faq-q { font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; color: #E8EAF0; margin-bottom: 8px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
-    .dia-faq-q span { color: #25D366; font-size: 18px; transition: transform .3s; }
-    .dia-faq-a { font-size: 13.5px; color: #6B7590; line-height: 1.8; }
+    .dia-faq-item { border-bottom: 1px solid var(--cb-border); padding: 18px 0; }
+    .dia-faq-q { font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; color: var(--cb-ink); margin-bottom: 8px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+    .dia-faq-q span { color: var(--cb-forest); font-size: 18px; transition: transform .3s; }
+    .dia-faq-a { font-size: 13.5px; color: var(--cb-muted); line-height: 1.8; }
 
     /* CTA finale */
     .dia-cta-box {
-        background: linear-gradient(135deg, rgba(37,211,102,.08) 0%, rgba(37,211,102,.03) 100%);
-        border: 1px solid rgba(37,211,102,.25);
+        background: rgba(15,92,67,.05);
+        border: 1px solid rgba(15,92,67,.2);
         border-radius: 8px; padding: clamp(36px,5vw,56px); text-align: center;
     }
     .dia-cta-title {
         font-family: 'Playfair Display', serif;
-        font-size: clamp(24px,3.5vw,36px); font-weight: 700; color: #E8EAF0; margin-bottom: 12px;
+        font-size: clamp(24px,3.5vw,36px); font-weight: 700; color: var(--cb-ink); margin-bottom: 12px;
     }
-    .dia-cta-title em { font-style: italic; color: #25D366; }
+    .dia-cta-title em { font-style: italic; color: var(--cb-forest); }
 
     .dia-wa-btn {
         display: inline-flex; align-items: center; gap: 10px;
@@ -107,7 +107,7 @@
 
     .dia-dot-blink {
         display: inline-block; width: 7px; height: 7px; border-radius: 50%;
-        background: #25D366; margin-right: 6px; vertical-align: middle;
+        background: var(--cb-forest); margin-right: 6px; vertical-align: middle;
         animation: diaBlink 1.4s ease-in-out infinite;
     }
     @keyframes diaBlink {
@@ -148,24 +148,24 @@
                     </div>
                 </div>
                 <div class="col-lg-5">
-                    <div style="background:#0C1120; border:1px solid rgba(37,211,102,.15); border-radius:6px; padding:28px;">
-                        <p style="font-family:'Syne',sans-serif;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:#6B7590;margin-bottom:16px;">En bref</p>
+                    <div style="background:var(--cb-card); border:1px solid rgba(15,92,67,.15); border-radius:6px; padding:28px;">
+                        <p style="font-family:'Syne',sans-serif;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--cb-muted);margin-bottom:16px;">En bref</p>
                         <div class="d-flex flex-column gap-3">
                             <div class="d-flex align-items-center gap-3">
-                                <span style="color:#25D366;font-size:18px;">✓</span>
-                                <span style="font-size:14px;color:#9BA3B8;">Accompagnement 100% en ligne</span>
+                                <span style="color:var(--cb-forest);font-size:18px;">✓</span>
+                                <span style="font-size:14px;color:var(--cb-ink);">Accompagnement 100% en ligne</span>
                             </div>
                             <div class="d-flex align-items-center gap-3">
-                                <span style="color:#25D366;font-size:18px;">✓</span>
-                                <span style="font-size:14px;color:#9BA3B8;">Valable depuis n'importe quel pays</span>
+                                <span style="color:var(--cb-forest);font-size:18px;">✓</span>
+                                <span style="font-size:14px;color:var(--cb-ink);">Valable depuis n'importe quel pays</span>
                             </div>
                             <div class="d-flex align-items-center gap-3">
-                                <span style="color:#25D366;font-size:18px;">✓</span>
-                                <span style="font-size:14px;color:#9BA3B8;">Réponse sous 24h sur WhatsApp</span>
+                                <span style="color:var(--cb-forest);font-size:18px;">✓</span>
+                                <span style="font-size:14px;color:var(--cb-ink);">Réponse sous 24h sur WhatsApp</span>
                             </div>
                             <div class="d-flex align-items-center gap-3">
-                                <span style="color:#C9A84C;font-size:18px;">⚠</span>
-                                <span style="font-size:14px;color:#9BA3B8;">Nous ne sommes <strong style="color:#C9A84C;">pas</strong> une SGI</span>
+                                <span style="color:var(--cb-gold);font-size:18px;">⚠</span>
+                                <span style="font-size:14px;color:var(--cb-ink);">Nous ne sommes <strong style="color:var(--cb-gold);">pas</strong> une SGI</span>
                             </div>
                         </div>
                     </div>
@@ -175,11 +175,11 @@
     </section>
 
     {{-- QUI PEUT --}}
-    <section style="background:#060910; padding:64px 0;">
+    <section style="background:var(--cb-paper); padding:64px 0;">
         <div class="container" style="max-width:1100px;">
             <div class="text-center mb-5">
-                <p style="font-family:'Syne',sans-serif;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#25D366;margin-bottom:10px;">Pour qui ?</p>
-                <h2 style="font-family:'Playfair Display',serif;font-size:clamp(24px,3.5vw,34px);font-weight:700;color:#E8EAF0;margin-bottom:0;">
+                <p style="font-family:'Syne',sans-serif;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--cb-forest);margin-bottom:10px;">Pour qui ?</p>
+                <h2 style="font-family:'Playfair Display',serif;font-size:clamp(24px,3.5vw,34px);font-weight:700;color:var(--cb-ink);margin-bottom:0;">
                     Ce service est fait pour toi si…
                 </h2>
             </div>
@@ -210,15 +210,15 @@
     </section>
 
     {{-- COMMENT CA MARCHE --}}
-    <section style="background:#0C1120; border-top:1px solid rgba(255,255,255,.05); border-bottom:1px solid rgba(255,255,255,.05); padding:64px 0;">
+    <section style="background:var(--cb-card); border-top:1px solid var(--cb-border); border-bottom:1px solid var(--cb-border); padding:64px 0;">
         <div class="container" style="max-width:1100px;">
             <div class="row g-5 align-items-start">
                 <div class="col-lg-5">
-                    <p style="font-family:'Syne',sans-serif;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#25D366;margin-bottom:10px;">Le processus</p>
-                    <h2 style="font-family:'Playfair Display',serif;font-size:clamp(24px,3.5vw,34px);font-weight:700;color:#E8EAF0;margin-bottom:16px;">
-                        Comment ça <em style="color:#25D366;">se passe</em> ?
+                    <p style="font-family:'Syne',sans-serif;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--cb-forest);margin-bottom:10px;">Le processus</p>
+                    <h2 style="font-family:'Playfair Display',serif;font-size:clamp(24px,3.5vw,34px);font-weight:700;color:var(--cb-ink);margin-bottom:16px;">
+                        Comment ça <em style="color:var(--cb-forest);">se passe</em> ?
                     </h2>
-                    <p style="font-size:14px;color:#6B7590;line-height:1.8;">
+                    <p style="font-size:14px;color:var(--cb-muted);line-height:1.8;">
                         De ton premier message WhatsApp jusqu'à l'activation de ton compte-titres,
                         voici les grandes étapes de l'accompagnement.
                     </p>
@@ -265,11 +265,11 @@
     </section>
 
     {{-- FAQ --}}
-    <section style="background:#060910; padding:64px 0;">
+    <section style="background:var(--cb-paper); padding:64px 0;">
         <div class="container" style="max-width:760px;">
             <div class="text-center mb-5">
-                <p style="font-family:'Syne',sans-serif;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#25D366;margin-bottom:10px;">Questions fréquentes</p>
-                <h2 style="font-family:'Playfair Display',serif;font-size:clamp(22px,3vw,32px);font-weight:700;color:#E8EAF0;">Ce que tu te demandes sûrement</h2>
+                <p style="font-family:'Syne',sans-serif;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--cb-forest);margin-bottom:10px;">Questions fréquentes</p>
+                <h2 style="font-family:'Playfair Display',serif;font-size:clamp(22px,3vw,32px);font-weight:700;color:var(--cb-ink);">Ce que tu te demandes sûrement</h2>
             </div>
             <div>
                 <div class="dia-faq-item">
@@ -293,14 +293,14 @@
     </section>
 
     {{-- CTA FINALE --}}
-    <section style="background:#060910; padding:clamp(64px,10vw,100px) 0;">
+    <section style="background:var(--cb-paper); padding:clamp(64px,10vw,100px) 0;">
         <div class="container" style="max-width:760px;">
             <div class="dia-cta-box">
                 <div style="font-size:40px; margin-bottom:16px;">🌍</div>
                 <h2 class="dia-cta-title">
                     Prêt à investir dans la bourse<br>depuis <em>là où tu es</em> ?
                 </h2>
-                <p style="font-size:15px;color:#6B7590;line-height:1.8;max-width:500px;margin:0 auto 32px;">
+                <p style="font-size:15px;color:var(--cb-muted);line-height:1.8;max-width:500px;margin:0 auto 32px;">
                     Envoie-nous un message WhatsApp. On t'explique tout, on évalue ta situation
                     et on t'accompagne de A à Z jusqu'à l'activation de ton compte-titres.
                 </p>
@@ -309,7 +309,7 @@
                    class="dia-wa-btn">
                     <i class="bi bi-whatsapp"></i> Nous contacter sur WhatsApp
                 </a>
-                <p style="font-size:11px;color:rgba(107,117,144,.5);margin-top:20px;font-family:'Syne',sans-serif;letter-spacing:.1em;text-transform:uppercase;">
+                <p style="font-size:11px;color:var(--cb-muted);margin-top:20px;font-family:'Syne',sans-serif;letter-spacing:.1em;text-transform:uppercase;">
                     Réponse sous 24h &nbsp;·&nbsp; 100% en ligne &nbsp;·&nbsp; Accompagnement personnalisé
                 </p>
             </div>

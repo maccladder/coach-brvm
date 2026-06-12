@@ -1,32 +1,32 @@
-﻿{{-- ════════ forum/topic.blade.php ════════ --}}
+{{-- ════════ forum/topic.blade.php ════════ --}}
 @extends('layouts.app')
 @section('title', $topic->title . ' – Forum Boursiv')
 
 @push('styles')
 <style>
-    .forum-page { background: #060910; min-height: 100vh; }
+    .forum-page { background: var(--cb-paper); min-height: 100vh; }
 
     .forum-topic-hero {
-        background: #060910; border-bottom: 1px solid rgba(255,255,255,.06);
+        background: var(--cb-paper); border-bottom: 1px solid var(--cb-border);
         padding: 36px 0 28px;
     }
     .forum-breadcrumb {
-        font-family: 'Syne', sans-serif; font-size: 12px; color: #6B7590;
+        font-family: 'Syne', sans-serif; font-size: 12px; color: var(--cb-muted);
         margin-bottom: 12px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
     }
-    .forum-breadcrumb a { color: #6B7590; text-decoration: none; }
-    .forum-breadcrumb a:hover { color: #C9A84C; }
+    .forum-breadcrumb a { color: var(--cb-muted); text-decoration: none; }
+    .forum-breadcrumb a:hover { color: var(--cb-gold); }
     .forum-breadcrumb .sep { opacity: .4; }
     .forum-topic-title-h {
         font-family: 'Playfair Display', serif;
         font-size: clamp(20px, 3vw, 32px); font-weight: 800;
-        color: #E8EAF0; line-height: 1.25; margin-bottom: 8px;
+        color: var(--cb-ink); line-height: 1.25; margin-bottom: 8px;
     }
-    .forum-topic-meta-h { font-size: 13px; color: #6B7590; }
+    .forum-topic-meta-h { font-size: 13px; color: var(--cb-muted); }
 
     /* Post cards */
     .forum-post {
-        background: #0C1120; border: 1px solid rgba(255,255,255,.06);
+        background: var(--cb-card); border: 1px solid var(--cb-border);
         border-radius: 6px; padding: 24px; margin-bottom: 12px;
     }
     .forum-post-header {
@@ -34,49 +34,49 @@
     }
     .forum-post-avatar {
         width: 40px; height: 40px; border-radius: 50%; flex-shrink: 0;
-        background: rgba(201,168,76,.12); border: 1px solid rgba(201,168,76,.2);
+        background: rgba(176,134,46,.1); border: 1px solid rgba(176,134,46,.2);
         display: flex; align-items: center; justify-content: center;
-        font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700; color: #C9A84C;
+        font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700; color: var(--cb-gold);
     }
-    .forum-post-author { font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700; color: #E8EAF0; }
-    .forum-post-date { font-size: 12px; color: #6B7590; margin-top: 2px; }
-    .forum-post-body { font-size: 14px; color: #9BA3B8; line-height: 1.8; white-space: pre-wrap; word-break: break-word; }
+    .forum-post-author { font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700; color: var(--cb-ink); }
+    .forum-post-date { font-size: 12px; color: var(--cb-muted); margin-top: 2px; }
+    .forum-post-body { font-size: 14px; color: var(--cb-ink); line-height: 1.8; white-space: pre-wrap; word-break: break-word; }
 
     /* Like button */
     .forum-like-btn {
         display: inline-flex; align-items: center; gap: 6px;
-        background: transparent; border: 1px solid rgba(255,255,255,.1);
-        color: #6B7590; padding: 6px 14px; border-radius: 4px;
+        background: transparent; border: 1px solid var(--cb-border);
+        color: var(--cb-muted); padding: 6px 14px; border-radius: 4px;
         font-family: 'Syne', sans-serif; font-size: 12px; font-weight: 600;
         cursor: pointer; transition: all .2s;
     }
-    .forum-like-btn:hover { border-color: rgba(201,168,76,.4); color: #C9A84C; }
-    .forum-like-btn.liked { border-color: rgba(201,168,76,.5); color: #C9A84C; background: rgba(201,168,76,.08); }
+    .forum-like-btn:hover { border-color: rgba(176,134,46,.4); color: var(--cb-gold); }
+    .forum-like-btn.liked { border-color: rgba(176,134,46,.5); color: var(--cb-gold); background: rgba(176,134,46,.08); }
 
     /* Original post */
-    .forum-op { border-left: 3px solid #C9A84C; }
+    .forum-op { border-left: 3px solid var(--cb-gold); }
 
     /* Reply form */
     .forum-reply-box {
-        background: #0C1120; border: 1px solid rgba(255,255,255,.06);
+        background: var(--cb-card); border: 1px solid var(--cb-border);
         border-radius: 6px; padding: 28px;
     }
     .forum-reply-textarea {
-        width: 100%; background: #060910; border: 1px solid rgba(255,255,255,.1);
-        border-radius: 4px; color: #E8EAF0; font-size: 14px; line-height: 1.7;
+        width: 100%; background: var(--cb-paper); border: 1px solid var(--cb-border);
+        border-radius: 4px; color: var(--cb-ink); font-size: 14px; line-height: 1.7;
         padding: 14px 16px; resize: vertical; min-height: 130px; font-family: inherit;
         outline: none; transition: border-color .2s;
     }
-    .forum-reply-textarea:focus { border-color: rgba(201,168,76,.4); }
-    .forum-reply-textarea::placeholder { color: #6B7590; }
+    .forum-reply-textarea:focus { border-color: rgba(176,134,46,.4); box-shadow: 0 0 0 3px rgba(176,134,46,.06); }
+    .forum-reply-textarea::placeholder { color: var(--cb-muted); }
     .forum-reply-btn {
         display: inline-flex; align-items: center; gap: 8px;
-        background: #C9A84C; color: #060910 !important; text-decoration: none !important;
+        background: var(--cb-gold); color: #060910 !important; text-decoration: none !important;
         padding: 12px 28px; border-radius: 4px; border: none;
         font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700; letter-spacing: .06em;
-        cursor: pointer; transition: background .2s;
+        cursor: pointer; transition: background .2s, box-shadow .2s;
     }
-    .forum-reply-btn:hover { background: #b8973e; }
+    .forum-reply-btn:hover { background: #9A7020; box-shadow: 0 4px 14px rgba(176,134,46,.3); }
 </style>
 @endpush
 
@@ -91,7 +91,7 @@
                 <span class="sep">›</span>
                 <a href="{{ route('forum.category', $category->slug) }}">{{ $category->name }}</a>
                 <span class="sep">›</span>
-                <span style="color:#C9A84C;">{{ Str::limit($topic->title, 50) }}</span>
+                <span style="color:var(--cb-gold);">{{ Str::limit($topic->title, 50) }}</span>
             </div>
             <h1 class="forum-topic-title-h">
                 {{ $topic->title }}
@@ -106,16 +106,16 @@
         </div>
     </section>
 
-    <section style="background:#060910; padding:36px 0 64px;">
+    <section style="background:var(--cb-paper); padding:36px 0 64px;">
         <div class="container" style="max-width:860px;">
 
             @if(session('success'))
-            <div style="background:rgba(37,211,102,.08);border:1px solid rgba(37,211,102,.2);border-radius:4px;padding:12px 16px;margin-bottom:20px;font-size:13.5px;color:#25D366;">
+            <div style="background:rgba(15,92,67,.06);border:1px solid rgba(15,92,67,.15);border-radius:4px;padding:12px 16px;margin-bottom:20px;font-size:13.5px;color:var(--cb-forest);">
                 {{ session('success') }}
             </div>
             @endif
             @if(session('error'))
-            <div style="background:rgba(220,53,69,.08);border:1px solid rgba(220,53,69,.2);border-radius:4px;padding:12px 16px;margin-bottom:20px;font-size:13.5px;color:#dc3545;">
+            <div style="background:rgba(220,53,69,.06);border:1px solid rgba(220,53,69,.2);border-radius:4px;padding:12px 16px;margin-bottom:20px;font-size:13.5px;color:#dc3545;">
                 {{ session('error') }}
             </div>
             @endif
@@ -137,7 +137,7 @@
             {{-- RÉPONSES --}}
             @if($posts->isNotEmpty())
             <div style="margin-top:24px; margin-bottom:24px;">
-                <p style="font-family:'Syne',sans-serif;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:#6B7590;margin-bottom:16px;">
+                <p style="font-family:'Syne',sans-serif;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--cb-muted);margin-bottom:16px;">
                     {{ $posts->total() }} réponse{{ $posts->total() !== 1 ? 's' : '' }}
                 </p>
 
@@ -176,7 +176,7 @@
             @auth
             @if(!$topic->is_locked)
             <div class="forum-reply-box" style="margin-top:32px;">
-                <p style="font-family:'Syne',sans-serif;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:#6B7590;margin-bottom:16px;">Votre réponse</p>
+                <p style="font-family:'Syne',sans-serif;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--cb-muted);margin-bottom:16px;">Votre réponse</p>
                 <form method="POST" action="{{ route('forum.post.store', [$category->slug, $topic->slug]) }}">
                     @csrf
                     <textarea name="body" class="forum-reply-textarea" placeholder="Rédigez votre réponse…" required>{{ old('body') }}</textarea>
@@ -189,16 +189,16 @@
                 </form>
             </div>
             @else
-            <div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:6px;padding:20px;text-align:center;margin-top:32px;">
-                <p style="font-size:14px;color:#6B7590;margin:0;">🔒 Ce sujet est verrouillé — les nouvelles réponses sont désactivées.</p>
+            <div style="background:var(--cb-paper);border:1px solid var(--cb-border);border-radius:6px;padding:20px;text-align:center;margin-top:32px;">
+                <p style="font-size:14px;color:var(--cb-muted);margin:0;">🔒 Ce sujet est verrouillé — les nouvelles réponses sont désactivées.</p>
             </div>
             @endif
             @else
-            <div style="background:rgba(201,168,76,.04);border:1px solid rgba(201,168,76,.15);border-radius:6px;padding:24px;text-align:center;margin-top:32px;">
-                <p style="font-size:14px;color:#9BA3B8;margin-bottom:16px;">
-                    <a href="{{ route('login') }}" style="color:#C9A84C;text-decoration:none;font-weight:600;">Connectez-vous</a>
+            <div style="background:rgba(176,134,46,.04);border:1px solid rgba(176,134,46,.15);border-radius:6px;padding:24px;text-align:center;margin-top:32px;">
+                <p style="font-size:14px;color:var(--cb-muted);margin-bottom:16px;">
+                    <a href="{{ route('login') }}" style="color:var(--cb-gold);text-decoration:none;font-weight:600;">Connectez-vous</a>
                     ou
-                    <a href="{{ route('register') }}" style="color:#C9A84C;text-decoration:none;font-weight:600;">créez un compte</a>
+                    <a href="{{ route('register') }}" style="color:var(--cb-gold);text-decoration:none;font-weight:600;">créez un compte</a>
                     pour participer à la discussion.
                 </p>
             </div>

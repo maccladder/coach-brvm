@@ -93,18 +93,19 @@
     display: inline-flex; align-items: center; gap: 8px;
     font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700;
     letter-spacing: .07em; text-transform: uppercase;
-    color: var(--cb-green) !important; background: transparent;
-    border: 1px solid rgba(15,207,164,.3); padding: 12px 24px; border-radius: 4px;
+    color: var(--cb-forest) !important; background: transparent;
+    border: 1px solid rgba(15,92,67,.3); padding: 12px 24px; border-radius: 4px;
     text-decoration: none; transition: all .25s;
 }
-.pnd-btn-outline:hover { background: rgba(15,207,164,.07); border-color: var(--cb-green); }
+.pnd-btn-outline:hover { background: rgba(15,92,67,.07); border-color: var(--cb-forest); }
 
 /* ═══════════════════════════════════════════════
    CITATION-CHOC
 ════════════════════════════════════════════════ */
 .pnd-cite-section {
-    background: #030508;
+    background: var(--cb-paper);
     padding: 80px 0;
+    border-top: 1px solid var(--cb-border);
 }
 .pnd-cite-block {
     max-width: 820px;
@@ -352,7 +353,7 @@
     font-weight: 700;
     letter-spacing: .1em;
     text-transform: uppercase;
-    color: var(--cb-green);
+    color: var(--cb-forest);
     margin-bottom: 8px;
 }
 .pnd-secteur-brvm p {
