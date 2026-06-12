@@ -3,99 +3,99 @@
 
 @push('styles')
 <style>
-    .wallet-page { background: #060910; min-height: 100vh; }
+    .wallet-page { background: var(--cb-paper); min-height: 100vh; }
 
     /* Hero */
-    .wallet-hero { background:#0C1120;border-bottom:1px solid rgba(201,168,76,.08);padding:36px 0 28px; }
-    .wallet-hero-tag { font-family:'Syne',sans-serif;font-size:11px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:#C9A84C;display:flex;align-items:center;gap:10px;margin-bottom:10px; }
-    .wallet-hero-tag::before { content:'';width:28px;height:1px;background:#C9A84C; }
-    .wallet-hero-title { font-family:'Playfair Display',serif;font-size:clamp(24px,4vw,36px);font-weight:900;color:#E8EAF0;margin-bottom:4px; }
-    .wallet-hero-sub { font-size:13px;color:#6B7590; }
+    .wallet-hero { background:var(--cb-card);border-bottom:1px solid rgba(176,134,46,.08);padding:36px 0 28px; }
+    .wallet-hero-tag { font-family:'Syne',sans-serif;font-size:11px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--cb-gold);display:flex;align-items:center;gap:10px;margin-bottom:10px; }
+    .wallet-hero-tag::before { content:'';width:28px;height:1px;background:var(--cb-gold); }
+    .wallet-hero-title { font-family:'Playfair Display',serif;font-size:clamp(24px,4vw,36px);font-weight:900;color:var(--cb-ink);margin-bottom:4px; }
+    .wallet-hero-sub { font-size:13px;color:var(--cb-muted); }
 
     /* Flash messages */
-    .wallet-alert-ok { background:rgba(15,207,164,.07);border:1px solid rgba(15,207,164,.2);border-radius:3px;padding:12px 16px;font-size:13px;color:#0FCFA4;font-family:'Syne',sans-serif;margin-bottom:20px; }
-    .wallet-alert-err { background:rgba(255,107,107,.07);border:1px solid rgba(255,107,107,.2);border-radius:3px;padding:12px 16px;font-size:13px;color:#FF6B6B;margin-bottom:20px; }
+    .wallet-alert-ok { background:rgba(15,92,67,.06);border:1px solid rgba(15,92,67,.2);border-radius:3px;padding:12px 16px;font-size:13px;color:var(--cb-forest);font-family:'Syne',sans-serif;margin-bottom:20px; }
+    .wallet-alert-err { background:rgba(192,57,43,.06);border:1px solid rgba(192,57,43,.2);border-radius:3px;padding:12px 16px;font-size:13px;color:var(--cb-down);margin-bottom:20px; }
     .wallet-alert-err ul { margin:6px 0 0 16px;padding:0; }
 
     /* KPI cards */
     .kpi-grid { display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:24px; }
     @media(max-width:640px){ .kpi-grid{grid-template-columns:1fr;} }
-    .kpi-card { background:#0C1120;border:1px solid rgba(255,255,255,.06);border-radius:4px;padding:20px 22px;position:relative;overflow:hidden;transition:border-color .25s; }
-    .kpi-card:hover { border-color:rgba(201,168,76,.18); }
+    .kpi-card { background:var(--cb-card);border:1px solid var(--cb-border);border-radius:4px;padding:20px 22px;position:relative;overflow:hidden;transition:border-color .25s; }
+    .kpi-card:hover { border-color:rgba(176,134,46,.25); }
     .kpi-card::before { content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--kpi-color),transparent); }
-    .kpi-label { font-family:'Syne',sans-serif;font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:#6B7590;margin-bottom:8px; }
+    .kpi-label { font-family:'Syne',sans-serif;font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--cb-muted);margin-bottom:8px; }
     .kpi-value { font-family:'Playfair Display',serif;font-size:clamp(20px,3vw,28px);font-weight:900;color:var(--kpi-color);line-height:1;margin-bottom:4px; }
-    .kpi-hint { font-size:11px;color:#6B7590; }
+    .kpi-hint { font-size:11px;color:var(--cb-muted); }
 
     /* Panneaux */
-    .wallet-card { background:#0C1120;border:1px solid rgba(255,255,255,.06);border-radius:4px;overflow:hidden;margin-bottom:20px; }
-    .wallet-card-header { background:#121A2C;border-bottom:1px solid rgba(255,255,255,.05);padding:14px 20px; }
-    .wallet-card-title { font-family:'Syne',sans-serif;font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#C9A84C;display:flex;align-items:center;gap:8px; }
+    .wallet-card { background:var(--cb-card);border:1px solid var(--cb-border);border-radius:4px;overflow:hidden;margin-bottom:20px; }
+    .wallet-card-header { background:var(--cb-paper);border-bottom:1px solid var(--cb-border);padding:14px 20px; }
+    .wallet-card-title { font-family:'Syne',sans-serif;font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--cb-gold);display:flex;align-items:center;gap:8px; }
     .wallet-card-body { padding:20px; }
 
     /* Inputs */
-    .w-input { background:rgba(6,9,16,.9) !important;border:1px solid rgba(255,255,255,.1) !important;color:#E8EAF0 !important;border-radius:3px !important;font-family:'DM Sans',sans-serif !important;font-size:13px !important;padding:9px 12px !important;outline:none;transition:border-color .25s; }
-    .w-input:focus { border-color:rgba(201,168,76,.4) !important;box-shadow:0 0 0 3px rgba(201,168,76,.07) !important; }
-    .w-input option { background:#0C1120; }
-    .w-label { font-family:'Syne',sans-serif;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#6B7590;display:block;margin-bottom:6px; }
-    .w-hint { font-size:12px;color:#6B7590;margin-top:6px; }
+    .w-input { background:var(--cb-paper) !important;border:1px solid var(--cb-border) !important;color:var(--cb-ink) !important;border-radius:3px !important;font-family:'DM Sans',sans-serif !important;font-size:13px !important;padding:9px 12px !important;outline:none;transition:border-color .25s; }
+    .w-input:focus { border-color:rgba(176,134,46,.4) !important;box-shadow:0 0 0 3px rgba(176,134,46,.07) !important; }
+    .w-input option { background:var(--cb-card); }
+    .w-label { font-family:'Syne',sans-serif;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--cb-muted);display:block;margin-bottom:6px; }
+    .w-hint { font-size:12px;color:var(--cb-muted);margin-top:6px; }
 
     /* Boutons */
-    .cb-btn-gold { display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,#C9A84C,#9B6B15);color:#050810 !important;font-family:'Syne',sans-serif;font-weight:800;font-size:12px;letter-spacing:.07em;text-transform:uppercase;padding:10px 20px;border:none;border-radius:3px;cursor:pointer;text-decoration:none;transition:all .3s;white-space:nowrap; }
-    .cb-btn-gold:hover { box-shadow:0 6px 20px rgba(201,168,76,.3);transform:translateY(-1px); }
-    .cb-btn-green { display:inline-flex;align-items:center;gap:7px;background:rgba(15,207,164,.1);color:#0FCFA4 !important;font-family:'Syne',sans-serif;font-weight:700;font-size:12px;letter-spacing:.06em;text-transform:uppercase;padding:9px 18px;border:1px solid rgba(15,207,164,.2);border-radius:3px;cursor:pointer;transition:all .3s;white-space:nowrap; }
-    .cb-btn-green:hover { background:rgba(15,207,164,.16);border-color:rgba(15,207,164,.4); }
-    .cb-btn-red { display:inline-flex;align-items:center;gap:7px;background:rgba(255,107,107,.1);color:#FF6B6B !important;font-family:'Syne',sans-serif;font-weight:700;font-size:11px;letter-spacing:.06em;text-transform:uppercase;padding:7px 12px;border:1px solid rgba(255,107,107,.2);border-radius:3px;cursor:pointer;transition:all .3s;white-space:nowrap; }
-    .cb-btn-red:hover { background:rgba(255,107,107,.16);border-color:rgba(255,107,107,.4); }
-    .cb-btn-outline { display:inline-flex;align-items:center;gap:8px;background:transparent;color:#E8EAF0 !important;font-family:'Syne',sans-serif;font-weight:600;font-size:12px;letter-spacing:.06em;text-transform:uppercase;padding:9px 18px;border:1px solid rgba(255,255,255,.12);border-radius:3px;text-decoration:none;transition:all .3s;cursor:pointer; }
-    .cb-btn-outline:hover { border-color:#C9A84C;color:#C9A84C !important;background:rgba(201,168,76,.05); }
-    .cb-btn-modal { display:inline-flex;align-items:center;gap:7px;background:rgba(255,255,255,.05);color:#6B7590 !important;font-family:'Syne',sans-serif;font-weight:600;font-size:11px;letter-spacing:.07em;text-transform:uppercase;padding:8px 16px;border:1px solid rgba(255,255,255,.1);border-radius:3px;cursor:pointer;transition:all .25s; }
-    .cb-btn-modal:hover { border-color:rgba(201,168,76,.2);color:#C9A84C !important; }
+    .cb-btn-gold { display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,var(--cb-gold),#9B6B15);color:#050810 !important;font-family:'Syne',sans-serif;font-weight:800;font-size:12px;letter-spacing:.07em;text-transform:uppercase;padding:10px 20px;border:none;border-radius:3px;cursor:pointer;text-decoration:none;transition:all .3s;white-space:nowrap; }
+    .cb-btn-gold:hover { box-shadow:0 6px 20px rgba(176,134,46,.3);transform:translateY(-1px); }
+    .cb-btn-green { display:inline-flex;align-items:center;gap:7px;background:rgba(15,92,67,.1);color:var(--cb-forest) !important;font-family:'Syne',sans-serif;font-weight:700;font-size:12px;letter-spacing:.06em;text-transform:uppercase;padding:9px 18px;border:1px solid rgba(15,92,67,.2);border-radius:3px;cursor:pointer;transition:all .3s;white-space:nowrap; }
+    .cb-btn-green:hover { background:rgba(15,92,67,.16);border-color:rgba(15,92,67,.35); }
+    .cb-btn-red { display:inline-flex;align-items:center;gap:7px;background:rgba(192,57,43,.08);color:var(--cb-down) !important;font-family:'Syne',sans-serif;font-weight:700;font-size:11px;letter-spacing:.06em;text-transform:uppercase;padding:7px 12px;border:1px solid rgba(192,57,43,.2);border-radius:3px;cursor:pointer;transition:all .3s;white-space:nowrap; }
+    .cb-btn-red:hover { background:rgba(192,57,43,.14);border-color:rgba(192,57,43,.4); }
+    .cb-btn-outline { display:inline-flex;align-items:center;gap:8px;background:transparent;color:var(--cb-ink) !important;font-family:'Syne',sans-serif;font-weight:600;font-size:12px;letter-spacing:.06em;text-transform:uppercase;padding:9px 18px;border:1px solid var(--cb-border);border-radius:3px;text-decoration:none;transition:all .3s;cursor:pointer; }
+    .cb-btn-outline:hover { border-color:var(--cb-gold);color:var(--cb-gold) !important;background:rgba(176,134,46,.05); }
+    .cb-btn-modal { display:inline-flex;align-items:center;gap:7px;background:rgba(15,92,67,.04);color:var(--cb-muted) !important;font-family:'Syne',sans-serif;font-weight:600;font-size:11px;letter-spacing:.07em;text-transform:uppercase;padding:8px 16px;border:1px solid var(--cb-border);border-radius:3px;cursor:pointer;transition:all .25s; }
+    .cb-btn-modal:hover { border-color:rgba(176,134,46,.25);color:var(--cb-gold) !important; }
 
     /* Tables */
     .w-table { width:100%;border-collapse:collapse; }
-    .w-table th { font-family:'Syne',sans-serif;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#6B7590;padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.06);text-align:right; }
+    .w-table th { font-family:'Syne',sans-serif;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--cb-muted);padding:10px 12px;border-bottom:1px solid var(--cb-border);text-align:right; }
     .w-table th:first-child,.w-table th:nth-child(2) { text-align:left; }
-    .w-table td { padding:12px 12px;border-bottom:1px solid rgba(255,255,255,.04);font-size:13px;color:#9AA3B8;text-align:right; }
-    .w-table td:first-child { text-align:left;font-family:'Syne',sans-serif;font-weight:700;color:#E8EAF0; }
-    .w-table td:nth-child(2) { text-align:left;color:#6B7590; }
+    .w-table td { padding:12px 12px;border-bottom:1px solid rgba(15,92,67,.05);font-size:13px;color:var(--cb-muted);text-align:right; }
+    .w-table td:first-child { text-align:left;font-family:'Syne',sans-serif;font-weight:700;color:var(--cb-ink); }
+    .w-table td:nth-child(2) { text-align:left;color:var(--cb-muted); }
     .w-table tr:last-child td { border-bottom:none; }
-    .w-table tr:hover td { background:rgba(201,168,76,.02); }
+    .w-table tr:hover td { background:rgba(176,134,46,.03); }
 
     /* Badges tx */
     .tx-badge { font-family:'Syne',sans-serif;font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:3px 8px;border-radius:100px; }
-    .tx-topup { background:rgba(15,207,164,.1);color:#0FCFA4;border:1px solid rgba(15,207,164,.2); }
-    .tx-buy   { background:rgba(201,168,76,.1);color:#C9A84C;border:1px solid rgba(201,168,76,.2); }
-    .tx-sell  { background:rgba(255,107,107,.1);color:#FF6B6B;border:1px solid rgba(255,107,107,.2); }
-    .tx-other { background:rgba(255,255,255,.05);color:#6B7590;border:1px solid rgba(255,255,255,.1); }
+    .tx-topup { background:rgba(15,92,67,.08);color:var(--cb-forest);border:1px solid rgba(15,92,67,.2); }
+    .tx-buy   { background:rgba(176,134,46,.1);color:var(--cb-gold);border:1px solid rgba(176,134,46,.2); }
+    .tx-sell  { background:rgba(192,57,43,.08);color:var(--cb-down);border:1px solid rgba(192,57,43,.2); }
+    .tx-other { background:rgba(15,92,67,.04);color:var(--cb-muted);border:1px solid var(--cb-border); }
 
     /* P/L colors */
-    .pl-up { color:#1fbf4a;font-weight:700; }
-    .pl-dn { color:#FF6B6B;font-weight:700; }
-    .amt-up { color:#0FCFA4;font-weight:700; }
-    .amt-dn { color:#FF6B6B;font-weight:700; }
+    .pl-up { color:var(--cb-up);font-weight:700; }
+    .pl-dn { color:var(--cb-down);font-weight:700; }
+    .amt-up { color:var(--cb-forest);font-weight:700; }
+    .amt-dn { color:var(--cb-down);font-weight:700; }
 
     /* Empty rows */
-    .w-empty { text-align:center;padding:32px;font-family:'Syne',sans-serif;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#6B7590; }
+    .w-empty { text-align:center;padding:32px;font-family:'Syne',sans-serif;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--cb-muted); }
 
     /* Note */
-    .wallet-note { font-family:'Syne',sans-serif;font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:rgba(107,117,144,.5);margin-top:14px; }
+    .wallet-note { font-family:'Syne',sans-serif;font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:rgba(108,114,105,.5);margin-top:14px; }
 
-    /* Modal dark */
-    .modal-content { background:#0C1120;border:1px solid rgba(201,168,76,.15);border-radius:6px; }
-    .modal-header { background:#121A2C;border-bottom:1px solid rgba(255,255,255,.06);padding:16px 22px; }
-    .modal-title { font-family:'Syne',sans-serif;font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#E8EAF0; }
-    .modal-body { color:#9AA3B8;font-size:13.5px;line-height:1.75; }
-    .modal-body h6 { font-family:'Syne',sans-serif;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#C9A84C;margin-bottom:10px;margin-top:0; }
+    /* Modal */
+    .modal-content { background:var(--cb-card);border:1px solid rgba(176,134,46,.15);border-radius:6px; }
+    .modal-header { background:var(--cb-paper);border-bottom:1px solid var(--cb-border);padding:16px 22px; }
+    .modal-title { font-family:'Syne',sans-serif;font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--cb-ink); }
+    .modal-body { color:var(--cb-muted);font-size:13.5px;line-height:1.75; }
+    .modal-body h6 { font-family:'Syne',sans-serif;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--cb-gold);margin-bottom:10px;margin-top:0; }
     .modal-body ul { padding-left:18px;margin-bottom:0; }
     .modal-body li { margin-bottom:5px; }
-    .modal-body b { color:#E8EAF0; }
-    .modal-body .alert-light { background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);color:#9AA3B8; }
-    .modal-body .alert-warning { background:rgba(255,200,30,.06);border:1px solid rgba(255,200,30,.15);color:#FFC850; }
-    .modal-footer { border-top:1px solid rgba(255,255,255,.06);padding:14px 20px; }
-    .btn-close { filter:invert(1) opacity(.5); }
-    .btn-secondary { background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);color:#E8EAF0;font-family:'Syne',sans-serif;font-size:12px;font-weight:600;padding:8px 18px;border-radius:3px; }
-    .btn-secondary:hover { background:rgba(255,255,255,.14);color:#E8EAF0; }
+    .modal-body b { color:var(--cb-ink); }
+    .modal-body .alert-light { background:rgba(15,92,67,.04);border:1px solid var(--cb-border);color:var(--cb-muted); }
+    .modal-body .alert-warning { background:rgba(176,134,46,.06);border:1px solid rgba(176,134,46,.15);color:var(--cb-gold); }
+    .modal-footer { border-top:1px solid var(--cb-border);padding:14px 20px; }
+    .btn-close { filter:none;opacity:.5; }
+    .btn-secondary { background:var(--cb-paper);border:1px solid var(--cb-border);color:var(--cb-ink);font-family:'Syne',sans-serif;font-size:12px;font-weight:600;padding:8px 18px;border-radius:3px; }
+    .btn-secondary:hover { background:rgba(15,92,67,.04);color:var(--cb-ink); }
 
     .cbr { opacity:0;transform:translateY(18px);transition:all .7s cubic-bezier(.16,1,.3,1); }
     .cbr.on { opacity:1;transform:translateY(0); }
@@ -146,17 +146,17 @@
 
         {{-- KPIs --}}
         <div class="kpi-grid cbr">
-            <div class="kpi-card" style="--kpi-color:#C9A84C;">
+            <div class="kpi-card" style="--kpi-color:var(--cb-gold);">
                 <div class="kpi-label">Solde cash</div>
                 <div class="kpi-value">{{ number_format($wallet->balance ?? 0, 0, ',', ' ') }}</div>
                 <div class="kpi-hint">FCFA disponibles</div>
             </div>
-            <div class="kpi-card" style="--kpi-color:#63B3ED;">
+            <div class="kpi-card" style="--kpi-color:#2B7FC4;">
                 <div class="kpi-label">Valeur positions</div>
                 <div class="kpi-value">{{ number_format($totalValue ?? 0, 0, ',', ' ') }}</div>
                 <div class="kpi-hint">Titres au cours du jour</div>
             </div>
-            <div class="kpi-card" style="--kpi-color:#0FCFA4;">
+            <div class="kpi-card" style="--kpi-color:var(--cb-forest);">
                 <div class="kpi-label">Valeur nette</div>
                 <div class="kpi-value">{{ number_format($netWorth ?? 0, 0, ',', ' ') }}</div>
                 <div class="kpi-hint">Cash + positions</div>
@@ -172,12 +172,12 @@
                         <div class="wallet-card-title">➕ Recharger</div>
                     </div>
                     <div class="wallet-card-body">
-                        <p style="font-size:13px;color:#6B7590;margin-bottom:10px;">
+                        <p style="font-size:13px;color:var(--cb-muted);margin-bottom:10px;">
                             Ajoute du cash virtuel pour tester des achats.
                         </p>
                         <div style="background:rgba(201,168,76,.07);border:1px solid rgba(201,168,76,.2);border-radius:3px;padding:8px 12px;margin-bottom:14px;display:flex;align-items:center;gap:8px;">
                             <span style="font-size:16px;">💡</span>
-                            <span style="font-family:'Syne',sans-serif;font-size:11px;font-weight:700;color:#C9A84C;letter-spacing:.04em;">
+                            <span style="font-family:'Syne',sans-serif;font-size:11px;font-weight:700;color:var(--cb-gold);letter-spacing:.04em;">
                                 1 000 F réels = 100 000 F virtuels
                             </span>
                         </div>
@@ -199,7 +199,7 @@
                     <div class="wallet-card-header">
                         <div class="d-flex justify-content-between align-items-center">
                             <div class="wallet-card-title">🛒 Acheter</div>
-                            <span style="font-size:11px;color:#6B7590;font-family:'Syne',sans-serif;">Récap + frais SGI avant confirmation</span>
+                            <span style="font-size:11px;color:var(--cb-muted);font-family:'Syne',sans-serif;">Récap + frais SGI avant confirmation</span>
                         </div>
                     </div>
                     <div class="wallet-card-body">
@@ -245,7 +245,7 @@
             <div class="wallet-card-header">
                 <div class="d-flex justify-content-between align-items-center">
                     <div class="wallet-card-title">📌 Mes positions</div>
-                    <span style="font-size:11px;color:#6B7590;font-family:'Syne',sans-serif;">P/L = (cours − PRU) × quantité</span>
+                    <span style="font-size:11px;color:var(--cb-muted);font-family:'Syne',sans-serif;">P/L = (cours − PRU) × quantité</span>
                 </div>
             </div>
             <div class="wallet-card-body" style="padding:0;">
@@ -281,7 +281,7 @@
                                         @if($price > 0)
                                             {{ number_format($price,0,',',' ') }}
                                         @else
-                                            <span style="color:#6B7590;">n/a</span>
+                                            <span style="color:var(--cb-muted);">n/a</span>
                                         @endif
                                     </td>
                                     <td>{{ number_format($value,0,',',' ') }}</td>
@@ -291,7 +291,7 @@
                                                 {{ $pl >= 0 ? '+' : '' }}{{ number_format($pl,0,',',' ') }}
                                             </span>
                                         @else
-                                            <span style="color:#6B7590;">n/a</span>
+                                            <span style="color:var(--cb-muted);">n/a</span>
                                         @endif
                                     </td>
                                     <td>
@@ -352,7 +352,7 @@
                                     $amt = (float)($tx->amount ?? 0);
                                 @endphp
                                 <tr>
-                                    <td style="text-align:left;color:#6B7590;font-size:12px;">
+                                    <td style="text-align:left;color:var(--cb-muted);font-size:12px;">
                                         {{ optional($tx->created_at)->format('d/m/Y H:i') }}
                                     </td>
                                     <td style="text-align:left;">
@@ -417,7 +417,7 @@
                     </ul>
                     <div class="alert-light p-3 rounded mt-2" style="font-size:13px;">
                         <b>Formules :</b><br>
-                        <span style="color:#9AA3B8;">Valeur = Quantité × Cours<br>P&L = (Cours − PRU) × Quantité</span>
+                        <span style="color:var(--cb-muted);">Valeur = Quantité × Cours<br>P&L = (Cours − PRU) × Quantité</span>
                     </div>
                 </div>
 

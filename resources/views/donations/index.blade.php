@@ -9,38 +9,38 @@
 <style>
   /* ── Variables locales (harmonisées avec le layout) ── */
   :root {
-    --don-or:       #C9A84C;
-    --don-or-clair: #e9c986;
-    --don-vert:     #0FCFA4;
-    --don-vert-fonce: #163d33;
-    --don-dark:     #060910;
-    --don-dark2:    #0C1120;
-    --don-carte:    #111827;
-    --don-carte2:   #161f2e;
-    --don-bord:     rgba(201,168,76,.14);
-    --don-texte:    #E8EAF0;
-    --don-doux:     #8892a4;
-    --don-faible:   #5a6475;
+    --don-or:       var(--cb-gold);
+    --don-or-clair: var(--cb-gold);
+    --don-vert:     var(--cb-forest);
+    --don-vert-fonce: var(--cb-forest-dk);
+    --don-dark:     #060910;            /* gardé : texte sombre sur boutons gold/vert */
+    --don-dark2:    var(--cb-card);
+    --don-carte:    var(--cb-card);
+    --don-carte2:   var(--cb-paper);
+    --don-bord:     var(--cb-border);
+    --don-texte:    var(--cb-ink);
+    --don-doux:     var(--cb-muted);
+    --don-faible:   var(--cb-muted);
   }
 
-  .don-page { background: var(--don-dark); color: var(--don-texte); font-family: 'DM Sans', sans-serif; }
+  .don-page { background: var(--cb-paper); color: var(--cb-ink); font-family: 'DM Sans', sans-serif; }
 
   /* ── HERO ── */
   .don-hero {
     position: relative;
     padding: 80px 0 64px;
     background:
-      radial-gradient(ellipse 70% 60% at 80% 0%, rgba(201,168,76,.12), transparent 70%),
-      radial-gradient(ellipse 60% 50% at 0% 30%, rgba(15,207,164,.07), transparent 70%),
-      var(--don-dark);
+      radial-gradient(ellipse 70% 60% at 80% 0%, rgba(176,134,46,.1), transparent 70%),
+      radial-gradient(ellipse 60% 50% at 0% 30%, rgba(15,92,67,.05), transparent 70%),
+      var(--cb-paper);
     overflow: hidden;
   }
   .don-hero::before {
     content: "";
     position: absolute; inset: 0;
     background-image:
-      linear-gradient(rgba(255,255,255,.018) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(255,255,255,.018) 1px, transparent 1px);
+      linear-gradient(rgba(15,92,67,.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(15,92,67,.04) 1px, transparent 1px);
     background-size: 54px 54px;
     -webkit-mask-image: radial-gradient(ellipse 70% 70% at 50% 30%, #000, transparent);
             mask-image: radial-gradient(ellipse 70% 70% at 50% 30%, #000, transparent);
@@ -98,7 +98,7 @@
   /* ── BLOC VISION ── */
   .don-vision {
     position: relative;
-    background: radial-gradient(ellipse 80% 100% at 100% 0%, rgba(15,207,164,.09), transparent 70%), var(--don-carte);
+    background: radial-gradient(ellipse 80% 100% at 100% 0%, rgba(15,92,67,.07), transparent 70%), var(--don-carte);
     border: 1px solid var(--don-bord);
     border-radius: 20px; padding: 44px 40px; overflow: hidden;
   }
@@ -135,7 +135,7 @@
   }
   .don-input::placeholder { color: var(--don-faible); }
   .don-input:focus { outline: none; border-color: var(--don-or); box-shadow: 0 0 0 3px rgba(201,168,76,.11); }
-  .don-input.error { border-color: #FF6B6B; }
+  .don-input.error { border-color: var(--cb-down); }
   .don-divider { height: 1px; background: var(--don-bord); margin: 24px 0; }
 
   .don-cta {
@@ -173,8 +173,8 @@
   .don-footer-local p { font-size: .9rem; color: var(--don-faible); }
 
   /* Alerte erreur */
-  .don-alert-error { background: rgba(255,107,107,.1); border: 1px solid rgba(255,107,107,.3); color: #FF9999; border-radius: 10px; padding: 14px 18px; margin-bottom: 20px; font-size: .95rem; }
-  .don-error-msg { font-size: .82rem; color: #FF6B6B; margin-top: 5px; }
+  .don-alert-error { background: rgba(192,57,43,.08); border: 1px solid rgba(192,57,43,.2); color: var(--cb-down); border-radius: 10px; padding: 14px 18px; margin-bottom: 20px; font-size: .95rem; }
+  .don-error-msg { font-size: .82rem; color: var(--cb-down); margin-top: 5px; }
 
   /* ── SÉPARATEUR OU ── */
   .don-ou {
@@ -227,7 +227,7 @@
     background: #fff;
     border-radius: 16px;
     padding: 14px;
-    box-shadow: 0 8px 32px rgba(0,0,0,.35), 0 0 0 1px rgba(41,182,246,.2);
+    box-shadow: 0 8px 32px rgba(0,0,0,.08);
     margin-bottom: 22px;
     transition: transform .2s;
   }
@@ -428,7 +428,7 @@
             <input type="hidden" name="donor_name"  value="{{ auth()->user()->name }}">
             <input type="hidden" name="donor_email" value="{{ auth()->user()->email }}">
             <div class="d-flex align-items-center gap-3 mb-3 p-3"
-                 style="background:rgba(15,207,164,.07);border:1px solid rgba(15,207,164,.18);border-radius:10px;">
+                 style="background:rgba(15,92,67,.06);border:1px solid rgba(15,92,67,.15);border-radius:10px;">
               <span style="font-size:1.3rem;">👤</span>
               <div>
                 <div style="font-size:.85rem;font-weight:700;color:var(--don-vert);letter-spacing:.08em;text-transform:uppercase;margin-bottom:2px;">Connecté en tant que</div>

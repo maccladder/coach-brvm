@@ -3,68 +3,68 @@
 
 @push('styles')
 <style>
-    .ml-page { background:#060910; min-height:100vh; }
+    .ml-page { background:var(--cb-paper); min-height:100vh; }
 
     /* Hero */
-    .ml-hero { background:#0C1120; border-bottom:1px solid rgba(201,168,76,.08); padding:36px 0 28px; }
-    .ml-hero-tag { font-family:'Syne',sans-serif; font-size:11px; font-weight:600; letter-spacing:.2em; text-transform:uppercase; color:#C9A84C; display:flex; align-items:center; gap:10px; margin-bottom:10px; }
-    .ml-hero-tag::before { content:''; width:28px; height:1px; background:#C9A84C; }
-    .ml-hero-title { font-family:'Playfair Display',serif; font-size:clamp(22px,4vw,34px); font-weight:900; color:#E8EAF0; margin-bottom:6px; }
-    .ml-hero-sub { font-size:13px; color:#6B7590; }
+    .ml-hero { background:var(--cb-card); border-bottom:1px solid var(--cb-border); padding:36px 0 28px; }
+    .ml-hero-tag { font-family:'Syne',sans-serif; font-size:11px; font-weight:600; letter-spacing:.2em; text-transform:uppercase; color:var(--cb-gold); display:flex; align-items:center; gap:10px; margin-bottom:10px; }
+    .ml-hero-tag::before { content:''; width:28px; height:1px; background:var(--cb-gold); }
+    .ml-hero-title { font-family:'Playfair Display',serif; font-size:clamp(22px,4vw,34px); font-weight:900; color:var(--cb-ink); margin-bottom:6px; }
+    .ml-hero-sub { font-size:13px; color:var(--cb-muted); }
 
     /* Toolbar */
     .ml-toolbar { display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:20px; }
-    .ml-time { font-family:'Syne',sans-serif; font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:#6B7590; }
-    .ml-time span { color:#C9A84C; }
-    .ml-search { background:rgba(6,9,16,.9); border:1px solid rgba(255,255,255,.1); color:#E8EAF0; border-radius:3px; font-family:'DM Sans',sans-serif; font-size:13px; padding:9px 14px; outline:none; transition:border-color .25s; width:260px; max-width:100%; }
-    .ml-search:focus { border-color:rgba(201,168,76,.4); box-shadow:0 0 0 3px rgba(201,168,76,.07); }
-    .ml-search::placeholder { color:#454D63; }
+    .ml-time { font-family:'Syne',sans-serif; font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--cb-muted); }
+    .ml-time span { color:var(--cb-gold); }
+    .ml-search { background:var(--cb-paper); border:1px solid var(--cb-border); color:var(--cb-ink); border-radius:3px; font-family:'DM Sans',sans-serif; font-size:13px; padding:9px 14px; outline:none; transition:border-color .25s; width:260px; max-width:100%; }
+    .ml-search:focus { border-color:rgba(176,134,46,.4); box-shadow:0 0 0 3px rgba(176,134,46,.07); }
+    .ml-search::placeholder { color:var(--cb-muted); }
 
     /* Bouton actualiser */
-    .ml-refresh { display:inline-flex; align-items:center; gap:7px; background:transparent; color:#6B7590; font-family:'Syne',sans-serif; font-weight:600; font-size:11px; letter-spacing:.07em; text-transform:uppercase; padding:8px 14px; border:1px solid rgba(255,255,255,.1); border-radius:3px; text-decoration:none; transition:all .25s; cursor:pointer; }
-    .ml-refresh:hover { border-color:#C9A84C; color:#C9A84C; background:rgba(201,168,76,.05); }
+    .ml-refresh { display:inline-flex; align-items:center; gap:7px; background:transparent; color:var(--cb-muted); font-family:'Syne',sans-serif; font-weight:600; font-size:11px; letter-spacing:.07em; text-transform:uppercase; padding:8px 14px; border:1px solid var(--cb-border); border-radius:3px; text-decoration:none; transition:all .25s; cursor:pointer; }
+    .ml-refresh:hover { border-color:var(--cb-gold); color:var(--cb-gold); background:rgba(176,134,46,.05); }
 
     /* Stats bar */
     .ml-stats { display:flex; gap:24px; flex-wrap:wrap; margin-bottom:22px; }
-    .ml-stat { font-family:'Syne',sans-serif; font-size:11px; letter-spacing:.06em; text-transform:uppercase; color:#6B7590; }
-    .ml-stat strong { color:#E8EAF0; margin-right:4px; }
+    .ml-stat { font-family:'Syne',sans-serif; font-size:11px; letter-spacing:.06em; text-transform:uppercase; color:var(--cb-muted); }
+    .ml-stat strong { color:var(--cb-ink); margin-right:4px; }
 
     /* Table wrapper */
-    .ml-card { background:#0C1120; border:1px solid rgba(255,255,255,.06); border-radius:4px; overflow:hidden; }
-    .ml-card-header { background:#121A2C; border-bottom:1px solid rgba(255,255,255,.05); padding:14px 20px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px; }
-    .ml-card-title { font-family:'Syne',sans-serif; font-size:12px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:#C9A84C; }
+    .ml-card { background:var(--cb-card); border:1px solid var(--cb-border); border-radius:4px; overflow:hidden; }
+    .ml-card-header { background:var(--cb-paper); border-bottom:1px solid var(--cb-border); padding:14px 20px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px; }
+    .ml-card-title { font-family:'Syne',sans-serif; font-size:12px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--cb-gold); }
     .ml-scroll { overflow-x:auto; -webkit-overflow-scrolling:touch; }
 
     /* Table */
     .ml-table { width:100%; border-collapse:collapse; min-width:680px; }
-    .ml-table th { font-family:'Syne',sans-serif; font-size:10px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:#454D63; padding:11px 14px; border-bottom:1px solid rgba(255,255,255,.06); text-align:right; white-space:nowrap; }
+    .ml-table th { font-family:'Syne',sans-serif; font-size:10px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--cb-muted); padding:11px 14px; border-bottom:1px solid var(--cb-border); text-align:right; white-space:nowrap; }
     .ml-table th:first-child, .ml-table th:nth-child(2) { text-align:left; }
-    .ml-table td { padding:13px 14px; border-bottom:1px solid rgba(255,255,255,.04); font-size:13px; color:#9AA3B8; text-align:right; vertical-align:middle; }
-    .ml-table td:first-child { text-align:left; font-family:'Syne',sans-serif; font-weight:700; font-size:12px; color:#E8EAF0; letter-spacing:.04em; }
-    .ml-table td:nth-child(2) { text-align:left; color:#6B7590; font-size:12.5px; }
+    .ml-table td { padding:13px 14px; border-bottom:1px solid rgba(15,92,67,.06); font-size:13px; color:var(--cb-muted); text-align:right; vertical-align:middle; }
+    .ml-table td:first-child { text-align:left; font-family:'Syne',sans-serif; font-weight:700; font-size:12px; color:var(--cb-ink); letter-spacing:.04em; }
+    .ml-table td:nth-child(2) { text-align:left; color:var(--cb-muted); font-size:12.5px; }
     .ml-table tr:last-child td { border-bottom:none; }
-    .ml-table tr:hover td { background:rgba(201,168,76,.025); }
+    .ml-table tr:hover td { background:rgba(176,134,46,.025); }
     .ml-table tr.ml-hidden { display:none; }
 
     /* Variation badges */
-    .var-up   { color:#0FCFA4; font-weight:700; }
-    .var-dn   { color:#FF6B6B; font-weight:700; }
-    .var-flat { color:#6B7590; font-weight:600; }
+    .var-up   { color:var(--cb-forest); font-weight:700; }
+    .var-dn   { color:var(--cb-down); font-weight:700; }
+    .var-flat { color:var(--cb-muted); font-weight:600; }
 
     /* Bouton acheter */
-    .ml-btn-buy { display:inline-flex; align-items:center; gap:6px; background:linear-gradient(135deg,#C9A84C,#9B6B15); color:#050810 !important; font-family:'Syne',sans-serif; font-weight:800; font-size:11px; letter-spacing:.06em; text-transform:uppercase; padding:7px 13px; border:none; border-radius:3px; text-decoration:none; white-space:nowrap; transition:all .25s; }
-    .ml-btn-buy:hover { box-shadow:0 4px 16px rgba(201,168,76,.3); transform:translateY(-1px); color:#050810 !important; }
-    .ml-btn-login { display:inline-flex; align-items:center; gap:6px; background:transparent; color:#6B7590 !important; font-family:'Syne',sans-serif; font-weight:600; font-size:11px; letter-spacing:.06em; text-transform:uppercase; padding:7px 13px; border:1px solid rgba(255,255,255,.1); border-radius:3px; text-decoration:none; white-space:nowrap; transition:all .25s; }
-    .ml-btn-login:hover { border-color:#C9A84C; color:#C9A84C !important; }
+    .ml-btn-buy { display:inline-flex; align-items:center; gap:6px; background:linear-gradient(135deg,var(--cb-gold),#9B6B15); color:#060910 !important; font-family:'Syne',sans-serif; font-weight:800; font-size:11px; letter-spacing:.06em; text-transform:uppercase; padding:7px 13px; border:none; border-radius:3px; text-decoration:none; white-space:nowrap; transition:all .25s; }
+    .ml-btn-buy:hover { box-shadow:0 4px 16px rgba(176,134,46,.3); transform:translateY(-1px); color:#060910 !important; }
+    .ml-btn-login { display:inline-flex; align-items:center; gap:6px; background:transparent; color:var(--cb-muted) !important; font-family:'Syne',sans-serif; font-weight:600; font-size:11px; letter-spacing:.06em; text-transform:uppercase; padding:7px 13px; border:1px solid var(--cb-border); border-radius:3px; text-decoration:none; white-space:nowrap; transition:all .25s; }
+    .ml-btn-login:hover { border-color:var(--cb-gold); color:var(--cb-gold) !important; }
 
     /* Error */
-    .ml-error { background:rgba(255,107,107,.07); border:1px solid rgba(255,107,107,.2); border-radius:4px; padding:20px 24px; font-family:'DM Sans',sans-serif; font-size:14px; color:#FF6B6B; text-align:center; }
+    .ml-error { background:rgba(192,57,43,.07); border:1px solid rgba(192,57,43,.2); border-radius:4px; padding:20px 24px; font-family:'DM Sans',sans-serif; font-size:14px; color:var(--cb-down); text-align:center; }
 
     /* Empty search */
-    .ml-no-results { text-align:center; padding:36px; font-family:'Syne',sans-serif; font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:#454D63; display:none; }
+    .ml-no-results { text-align:center; padding:36px; font-family:'Syne',sans-serif; font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--cb-muted); display:none; }
 
     /* Disclaimer */
-    .ml-disclaimer { font-family:'Syne',sans-serif; font-size:10px; letter-spacing:.07em; text-transform:uppercase; color:rgba(107,117,144,.4); margin-top:16px; text-align:center; }
+    .ml-disclaimer { font-family:'Syne',sans-serif; font-size:10px; letter-spacing:.07em; text-transform:uppercase; color:var(--cb-muted); opacity:.5; margin-top:16px; text-align:center; }
 
     /* Animation entrée */
     .cbr { opacity:0; transform:translateY(16px); transition:all .65s cubic-bezier(.16,1,.3,1); }
@@ -124,8 +124,8 @@
             @endphp
             <div class="ml-stats cbr cbr2">
                 <div class="ml-stat"><strong>{{ $total }}</strong> valeurs</div>
-                <div class="ml-stat" style="color:#0FCFA4;"><strong style="color:#0FCFA4;">{{ $hausse }}</strong> en hausse</div>
-                <div class="ml-stat" style="color:#FF6B6B;"><strong style="color:#FF6B6B;">{{ $baisse }}</strong> en baisse</div>
+                <div class="ml-stat" style="color:var(--cb-forest);"><strong style="color:var(--cb-forest);">{{ $hausse }}</strong> en hausse</div>
+                <div class="ml-stat" style="color:var(--cb-down);"><strong style="color:var(--cb-down);">{{ $baisse }}</strong> en baisse</div>
                 <div class="ml-stat"><strong>{{ $neutre }}</strong> stables / NC</div>
             </div>
 
@@ -133,7 +133,7 @@
             <div class="ml-card cbr cbr3">
                 <div class="ml-card-header">
                     <div class="ml-card-title">📊 Cours du jour — BRVM</div>
-                    <div style="font-size:11px;color:#454D63;font-family:'Syne',sans-serif;letter-spacing:.05em;">Trié par variation décroissante</div>
+                    <div style="font-size:11px;color:var(--cb-muted);font-family:'Syne',sans-serif;letter-spacing:.05em;">Trié par variation décroissante</div>
                 </div>
                 <div class="ml-scroll">
                     <table class="ml-table" id="mlTable">
@@ -168,8 +168,8 @@
                                     else                  { $arrow = '—'; }
                                 }
 
-                                $fmt = fn($v) => is_null($v) ? '<span style="color:#454D63;">NC</span>' : number_format($v, 0, ',', ' ') . ' F';
-                                $fmtVol = fn($v) => is_null($v) ? '<span style="color:#454D63;">—</span>' : number_format($v, 0, ',', ' ');
+                                $fmt = fn($v) => is_null($v) ? '<span style="color:var(--cb-muted);">NC</span>' : number_format($v, 0, ',', ' ') . ' F';
+                                $fmtVol = fn($v) => is_null($v) ? '<span style="color:var(--cb-muted);">—</span>' : number_format($v, 0, ',', ' ');
                             @endphp
                             <tr data-search="{{ strtolower($ticker . ' ' . $name) }}">
                                 <td>{{ $ticker }}</td>
@@ -201,7 +201,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="8" style="text-align:center;padding:32px;color:#454D63;font-family:'Syne',sans-serif;font-size:11px;letter-spacing:.08em;text-transform:uppercase;">
+                                <td colspan="8" style="text-align:center;padding:32px;color:var(--cb-muted);font-family:'Syne',sans-serif;font-size:11px;letter-spacing:.08em;text-transform:uppercase;">
                                     Aucune donnée disponible
                                 </td>
                             </tr>

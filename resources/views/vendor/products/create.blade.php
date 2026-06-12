@@ -5,30 +5,30 @@
 
 @push('styles')
 <style>
-    .vd-page { background:#060910;min-height:100vh; }
-    .vd-hero { background:#0C1120;border-bottom:1px solid rgba(201,168,76,.08);padding:28px 0; }
-    .vd-hero-title { font-family:'Playfair Display',serif;font-size:clamp(22px,3.5vw,32px);font-weight:900;color:#E8EAF0; }
-    .vd-form-card { background:#0C1120;border:1px solid rgba(201,168,76,.1);border-radius:4px;overflow:hidden;margin-top:24px;margin-bottom:48px; }
-    .vd-form-card::before { content:'';display:block;height:2px;background:linear-gradient(90deg,#C9A84C,transparent); }
+    .vd-page { background:var(--cb-paper);min-height:100vh; }
+    .vd-hero { background:var(--cb-card);border-bottom:1px solid rgba(176,134,46,.08);padding:28px 0; }
+    .vd-hero-title { font-family:'Playfair Display',serif;font-size:clamp(22px,3.5vw,32px);font-weight:900;color:var(--cb-ink); }
+    .vd-form-card { background:var(--cb-card);border:1px solid rgba(176,134,46,.1);border-radius:4px;overflow:hidden;margin-top:24px;margin-bottom:48px; }
+    .vd-form-card::before { content:'';display:block;height:2px;background:linear-gradient(90deg,var(--cb-gold),transparent); }
     .vd-form-body { padding:28px 32px; }
     @media(max-width:600px){ .vd-form-body{padding:20px;} }
-    .vd-label { font-family:'Syne',sans-serif;font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#6B7590;display:block;margin-bottom:6px; }
-    .vd-input,.vd-select,.vd-textarea { background:rgba(6,9,16,.9) !important;border:1px solid rgba(255,255,255,.1) !important;color:#E8EAF0 !important;border-radius:3px !important;font-family:'DM Sans',sans-serif !important;font-size:13px !important;padding:10px 14px !important;width:100%;outline:none;transition:border-color .25s; }
-    .vd-input:focus,.vd-select:focus,.vd-textarea:focus { border-color:rgba(201,168,76,.4) !important;box-shadow:0 0 0 3px rgba(201,168,76,.07) !important; }
-    .vd-input::placeholder,.vd-textarea::placeholder { color:#6B7590 !important; }
-    .vd-select option { background:#0C1120; }
-    .vd-file-input { background:rgba(6,9,16,.9) !important;border:1px solid rgba(255,255,255,.1) !important;color:#6B7590 !important;border-radius:3px !important;font-family:'DM Sans',sans-serif !important;font-size:13px !important;padding:8px 12px !important;width:100%; }
-    .vd-file-input:focus { border-color:rgba(201,168,76,.4) !important;box-shadow:0 0 0 3px rgba(201,168,76,.07) !important; }
-    .vd-error { font-size:12px;color:#FF6B6B;margin-top:4px; }
-    .vd-help { font-size:12px;color:#6B7590;margin-top:5px;line-height:1.6; }
-    .vd-help strong { color:#9AA3B8; }
-    .vd-divider { height:1px;background:rgba(255,255,255,.05);margin:20px 0; }
-    .vd-alert-ok  { background:rgba(15,207,164,.07);border:1px solid rgba(15,207,164,.2);border-radius:3px;padding:12px 16px;font-size:13px;color:#0FCFA4;margin-bottom:16px; }
-    .vd-alert-warn { background:rgba(255,200,30,.06);border:1px solid rgba(255,200,30,.15);border-radius:3px;padding:12px 16px;font-size:13px;color:#FFC850;margin-bottom:16px; }
-    .cb-btn-gold { display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,#C9A84C,#9B6B15);color:#050810 !important;font-family:'Syne',sans-serif;font-weight:800;font-size:12px;letter-spacing:.07em;text-transform:uppercase;padding:12px 26px;border:none;border-radius:3px;cursor:pointer;text-decoration:none;transition:all .3s; }
-    .cb-btn-gold:hover { box-shadow:0 6px 20px rgba(201,168,76,.3);transform:translateY(-1px); }
-    .cb-btn-outline { display:inline-flex;align-items:center;gap:7px;background:transparent;color:#6B7590 !important;font-family:'Syne',sans-serif;font-weight:600;font-size:11px;letter-spacing:.06em;text-transform:uppercase;padding:9px 16px;border:1px solid rgba(255,255,255,.1);border-radius:3px;text-decoration:none;transition:all .3s; }
-    .cb-btn-outline:hover { border-color:#C9A84C;color:#C9A84C !important; }
+    .vd-label { font-family:'Syne',sans-serif;font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--cb-muted);display:block;margin-bottom:6px; }
+    .vd-input,.vd-select,.vd-textarea { background:var(--cb-paper) !important;border:1px solid var(--cb-border) !important;color:var(--cb-ink) !important;border-radius:3px !important;font-family:'DM Sans',sans-serif !important;font-size:13px !important;padding:10px 14px !important;width:100%;outline:none;transition:border-color .25s; }
+    .vd-input:focus,.vd-select:focus,.vd-textarea:focus { border-color:rgba(176,134,46,.4) !important;box-shadow:0 0 0 3px rgba(176,134,46,.07) !important; }
+    .vd-input::placeholder,.vd-textarea::placeholder { color:var(--cb-muted) !important; }
+    .vd-select option { background:var(--cb-card); }
+    .vd-file-input { background:var(--cb-paper) !important;border:1px solid var(--cb-border) !important;color:var(--cb-muted) !important;border-radius:3px !important;font-family:'DM Sans',sans-serif !important;font-size:13px !important;padding:8px 12px !important;width:100%; }
+    .vd-file-input:focus { border-color:rgba(176,134,46,.4) !important;box-shadow:0 0 0 3px rgba(176,134,46,.07) !important; }
+    .vd-error { font-size:12px;color:var(--cb-down);margin-top:4px; }
+    .vd-help { font-size:12px;color:var(--cb-muted);margin-top:5px;line-height:1.6; }
+    .vd-help strong { color:var(--cb-ink); }
+    .vd-divider { height:1px;background:var(--cb-border);margin:20px 0; }
+    .vd-alert-ok  { background:rgba(15,92,67,.06);border:1px solid rgba(15,92,67,.2);border-radius:3px;padding:12px 16px;font-size:13px;color:var(--cb-forest);margin-bottom:16px; }
+    .vd-alert-warn { background:rgba(176,134,46,.06);border:1px solid rgba(176,134,46,.15);border-radius:3px;padding:12px 16px;font-size:13px;color:var(--cb-gold);margin-bottom:16px; }
+    .cb-btn-gold { display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,var(--cb-gold),#9B6B15);color:#050810 !important;font-family:'Syne',sans-serif;font-weight:800;font-size:12px;letter-spacing:.07em;text-transform:uppercase;padding:12px 26px;border:none;border-radius:3px;cursor:pointer;text-decoration:none;transition:all .3s; }
+    .cb-btn-gold:hover { box-shadow:0 6px 20px rgba(176,134,46,.3);transform:translateY(-1px); }
+    .cb-btn-outline { display:inline-flex;align-items:center;gap:7px;background:transparent;color:var(--cb-muted) !important;font-family:'Syne',sans-serif;font-weight:600;font-size:11px;letter-spacing:.06em;text-transform:uppercase;padding:9px 16px;border:1px solid var(--cb-border);border-radius:3px;text-decoration:none;transition:all .3s; }
+    .cb-btn-outline:hover { border-color:var(--cb-gold);color:var(--cb-gold) !important; }
     .cbr { opacity:0;transform:translateY(18px);transition:all .7s cubic-bezier(.16,1,.3,1); }
     .cbr.on { opacity:1;transform:translateY(0); }
 </style>
@@ -38,7 +38,7 @@
 <div class="vd-page">
     <div class="vd-hero">
         <div class="container" style="max-width:900px;">
-            <a href="{{ route('vendor.products.index') }}" style="font-family:'Syne',sans-serif;font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#6B7590;text-decoration:none;display:inline-flex;align-items:center;gap:6px;margin-bottom:12px;">← Mes produits</a>
+            <a href="{{ route('vendor.products.index') }}" style="font-family:'Syne',sans-serif;font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--cb-muted);text-decoration:none;display:inline-flex;align-items:center;gap:6px;margin-bottom:12px;">← Mes produits</a>
             <h1 class="vd-hero-title">➕ Nouveau produit</h1>
         </div>
     </div>
@@ -87,7 +87,7 @@
                         </div>
 
                         <div class="col-md-6">
-                            <label class="vd-label">WhatsApp support <span style="color:#6B7590;">(optionnel)</span></label>
+                            <label class="vd-label">WhatsApp support <span style="color:var(--cb-muted);">(optionnel)</span></label>
                             <input name="support_whatsapp" class="vd-input form-control" placeholder="+2250700000000" value="{{ old('support_whatsapp') }}">
                             @error('support_whatsapp')<div class="vd-error">{{ $message }}</div>@enderror
                         </div>
@@ -111,7 +111,7 @@
 
                         {{-- Champ fichier standard (book / software / video) --}}
                         <div class="col-12" id="fieldFile">
-                            <label class="vd-label">Fichier du produit <span style="color:#6B7590;">(optionnel au draft)</span></label>
+                            <label class="vd-label">Fichier du produit <span style="color:var(--cb-muted);">(optionnel au draft)</span></label>
                             <input name="file" type="file" class="vd-file-input form-control" id="fileInput">
                             @error('file')<div class="vd-error">{{ $message }}</div>@enderror
                             <div class="vd-help" id="fileHelp">
@@ -122,7 +122,7 @@
 
                         {{-- Champ HTML du jeu (affiché uniquement si type = game) --}}
                         <div class="col-12" id="fieldGameHtml" style="display:none;">
-                            <label class="vd-label">Fichier HTML du jeu <span style="color:#6B7590;">(optionnel au draft)</span></label>
+                            <label class="vd-label">Fichier HTML du jeu <span style="color:var(--cb-muted);">(optionnel au draft)</span></label>
                             <input name="game_html_file" type="file" accept=".html,text/html" class="vd-file-input form-control" id="gameHtmlInput">
                             @error('game_html_file')<div class="vd-error">{{ $message }}</div>@enderror
                             <div class="vd-help">

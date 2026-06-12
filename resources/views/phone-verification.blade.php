@@ -2,25 +2,25 @@
 
 @push('styles')
 <style>
-    .pv-page{background:#060910;min-height:100vh;padding:48px 0 80px;}
-    .pv-card{background:#0C1120;border:1px solid rgba(201,168,76,.15);border-radius:6px;padding:40px 36px;max-width:520px;margin:0 auto;}
-    .pv-badge{display:inline-block;font-family:'Syne',sans-serif;font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#060910;background:#0FCFA4;border-radius:2px;padding:2px 9px;margin-bottom:16px;}
-    .pv-title{font-family:'Playfair Display',serif;font-size:clamp(22px,4vw,30px);font-weight:700;color:#E8EAF0;margin-bottom:8px;line-height:1.25;}
-    .pv-sub{font-size:13.5px;color:#6B7590;line-height:1.6;margin-bottom:32px;}
-    .pv-label{font-family:'Syne',sans-serif;font-size:11px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:#C9A84C;margin-bottom:6px;display:block;}
-    .pv-input{background:#060910;border:1px solid rgba(255,255,255,.12);border-radius:3px;color:#E8EAF0;font-size:14px;padding:11px 14px;width:100%;transition:border-color .2s;}
-    .pv-input:focus{border-color:#C9A84C;outline:none;box-shadow:none;}
-    .pv-input.is-invalid{border-color:#d97272;}
-    .pv-error{font-size:12px;color:#d97272;margin-top:4px;}
-    .pv-submit{background:#C9A84C;color:#060910 !important;font-family:'Syne',sans-serif;font-weight:800;font-size:12px;letter-spacing:.07em;text-transform:uppercase;padding:12px 24px;border:none;border-radius:3px;cursor:pointer;transition:opacity .2s;display:inline-flex;align-items:center;gap:8px;width:100%;justify-content:center;}
+    .pv-page{background:var(--cb-paper);min-height:100vh;padding:48px 0 80px;}
+    .pv-card{background:var(--cb-card);border:1px solid rgba(176,134,46,.15);border-radius:6px;padding:40px 36px;max-width:520px;margin:0 auto;}
+    .pv-badge{display:inline-block;font-family:'Syne',sans-serif;font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#fff;background:var(--cb-forest);border-radius:2px;padding:2px 9px;margin-bottom:16px;}
+    .pv-title{font-family:'Playfair Display',serif;font-size:clamp(22px,4vw,30px);font-weight:700;color:var(--cb-ink);margin-bottom:8px;line-height:1.25;}
+    .pv-sub{font-size:13.5px;color:var(--cb-muted);line-height:1.6;margin-bottom:32px;}
+    .pv-label{font-family:'Syne',sans-serif;font-size:11px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--cb-gold);margin-bottom:6px;display:block;}
+    .pv-input{background:var(--cb-paper);border:1px solid var(--cb-border);border-radius:3px;color:var(--cb-ink);font-size:14px;padding:11px 14px;width:100%;transition:border-color .2s;}
+    .pv-input:focus{border-color:rgba(176,134,46,.4);outline:none;box-shadow:none;}
+    .pv-input.is-invalid{border-color:var(--cb-down);}
+    .pv-error{font-size:12px;color:var(--cb-down);margin-top:4px;}
+    .pv-submit{background:linear-gradient(135deg,var(--cb-gold),#9B6B15);color:#060910 !important;font-family:'Syne',sans-serif;font-weight:800;font-size:12px;letter-spacing:.07em;text-transform:uppercase;padding:12px 24px;border:none;border-radius:3px;cursor:pointer;transition:opacity .2s;display:inline-flex;align-items:center;gap:8px;width:100%;justify-content:center;}
     .pv-submit:hover{opacity:.85;}
     .pv-submit:disabled{opacity:.5;cursor:not-allowed;}
-    .pv-hint{font-size:12.5px;color:#6B7590;line-height:1.6;margin-bottom:24px;}
-    .pv-divider{border-top:1px solid rgba(255,255,255,.06);margin:28px 0;}
-    .pv-step-lbl{font-family:'Syne',sans-serif;font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#6B7590;margin-bottom:14px;}
-    .pv-step-lbl b{color:#C9A84C;}
-    .pv-phone-preview{font-family:'Syne',sans-serif;font-size:12px;color:#C9A84C;margin-top:5px;min-height:18px;}
-    .pv-verified{background:rgba(15,207,164,.08);border:1px solid rgba(15,207,164,.25);border-radius:4px;padding:16px 20px;color:#0FCFA4;font-size:13.5px;margin-bottom:24px;}
+    .pv-hint{font-size:12.5px;color:var(--cb-muted);line-height:1.6;margin-bottom:24px;}
+    .pv-divider{border-top:1px solid var(--cb-border);margin:28px 0;}
+    .pv-step-lbl{font-family:'Syne',sans-serif;font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--cb-muted);margin-bottom:14px;}
+    .pv-step-lbl b{color:var(--cb-gold);}
+    .pv-phone-preview{font-family:'Syne',sans-serif;font-size:12px;color:var(--cb-gold);margin-top:5px;min-height:18px;}
+    .pv-verified{background:rgba(15,92,67,.06);border:1px solid rgba(15,92,67,.2);border-radius:4px;padding:16px 20px;color:var(--cb-forest);font-size:13.5px;margin-bottom:24px;}
 </style>
 @endpush
 
@@ -28,7 +28,7 @@
 <div class="pv-page">
     <div class="container" style="max-width:560px;">
 
-        <a href="{{ route('dashboard') }}" style="display:inline-flex;align-items:center;gap:6px;font-family:'Syne',sans-serif;font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#6B7590;text-decoration:none;margin-bottom:32px;">
+        <a href="{{ route('dashboard') }}" style="display:inline-flex;align-items:center;gap:6px;font-family:'Syne',sans-serif;font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--cb-muted);text-decoration:none;margin-bottom:32px;">
             ← Retour au dashboard
         </a>
 
@@ -112,7 +112,7 @@
                 @csrf
                 <input type="hidden" name="country_code" value="{{ old('country_code', 'CI') }}">
                 <input type="hidden" name="phone_local" value="{{ old('phone_local') }}">
-                <button type="submit" style="background:none;border:none;padding:0;font-size:12px;color:#6B7590;cursor:pointer;">
+                <button type="submit" style="background:none;border:none;padding:0;font-size:12px;color:var(--cb-muted);cursor:pointer;">
                     ← Renvoyer le code ou changer de numéro
                 </button>
             </form>
