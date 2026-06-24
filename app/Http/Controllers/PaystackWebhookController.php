@@ -2,10 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\CaurisAchat;
 use App\Models\LettreCIAccess;
+use App\Services\CaurisService;
 use App\Services\Payments\PaystackPackService;
 use App\Services\Payments\PaystackWalletTopupService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class PaystackWebhookController extends Controller
@@ -38,6 +41,62 @@ class PaystackWebhookController extends Controller
 
         if ($event === 'charge.success') {
             $reference = (string) ($data['reference'] ?? '');
+
+            // ✅ Cauris (achat de monnaie de jeu)
+            if (str_starts_with($reference, 'CAURIS-')) {
+                $amountPaid = (int) round(((int) ($data['amount'] ?? 0)) / 100);
+
+                DB::transaction(function () use ($reference, $amountPaid, $data) {
+                    $achat = CaurisAchat::where('reference', $reference)
+                        ->lockForUpdate()
+                        ->first();
+
+                    if (!$achat) {
+                        Log::warning('Paystack webhook CAURIS: achat non trouvé', [
+                            'reference' => $reference,
+                        ]);
+                        return;
+                    }
+
+                    if ($achat->credited_at !== null) {
+                        Log::info('Paystack webhook CAURIS: déjà crédité, skip', [
+                            'reference' => $reference,
+                        ]);
+                        return;
+                    }
+
+                    // Anti-fraude : le montant payé doit correspondre exactement au pack
+                    if ($achat->prix !== $amountPaid) {
+                        Log::error('Paystack webhook CAURIS: montant incorrect', [
+                            'reference'  => $reference,
+                            'db_prix'    => $achat->prix,
+                            'paid'       => $amountPaid,
+                        ]);
+                        $achat->update(['status' => 'REFUSED']);
+                        return;
+                    }
+
+                    $achat->update([
+                        'status' => 'ACCEPTED',
+                        'meta'   => ['paystack' => [
+                            'event'   => 'charge.success',
+                            'channel' => $data['channel'] ?? null,
+                            'paid_at' => $data['paid_at'] ?? null,
+                        ]],
+                    ]);
+
+                    Log::info('Paystack webhook CAURIS: achat accepté', [
+                        'reference' => $reference,
+                        'user_id'   => $achat->user_id,
+                        'cauris'    => $achat->cauris,
+                    ]);
+                });
+
+                // Crédit des cauris (idempotent — sa propre transaction avec lockForUpdate)
+                app(CaurisService::class)->crediterCauris($reference);
+
+                return response()->json(['status' => 'ok'], 200);
+            }
 
             // ✅ Pack BRVM
             if (str_starts_with($reference, 'PACK-BRVM-')) {

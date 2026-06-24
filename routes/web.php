@@ -994,4 +994,18 @@ Route::middleware(['auth', 'admin.code'])->prefix('admin')->name('admin.')->grou
     Route::post('/affiliate-payouts/commissions/{commission}/cancel', [\App\Http\Controllers\Admin\AffiliatePayoutAdminController::class, 'cancelCommission'])->name('affiliate-payouts.cancel-commission');
 });
 
+// ═══════════════════════════════════════════════════════
+// Jeu Phaser — page + API sauvegarde (connecté seulement)
+// ═══════════════════════════════════════════════════════
+Route::middleware('auth')->group(function () {
+    Route::get('/jeu', fn () => view('jeu.garba'))->name('jeu');
+    Route::get('/api/jeu/load',  [\App\Http\Controllers\GameSaveController::class, 'load'])->name('jeu.load');
+    Route::post('/api/jeu/save',  [\App\Http\Controllers\GameSaveController::class, 'save']) ->name('jeu.save');
+    Route::post('/api/jeu/reset', [\App\Http\Controllers\GameSaveController::class, 'reset'])->name('jeu.reset');
+    // Cauris — achat de monnaie de jeu
+    Route::get('/api/jeu/packs',       [\App\Http\Controllers\CaurisController::class, 'packs'])   ->name('jeu.packs');
+    Route::post('/api/jeu/acheter',    [\App\Http\Controllers\CaurisController::class, 'acheter']) ->name('jeu.acheter');
+    Route::get('/jeu/paiement/retour', [\App\Http\Controllers\CaurisController::class, 'callback'])->name('jeu.paiement.retour');
+});
+
 require __DIR__.'/auth.php';
