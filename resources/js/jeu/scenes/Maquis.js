@@ -57,6 +57,29 @@ export default class Maquis extends Phaser.Scene {
         this.load.image('chef4', '/jeu-assets/img/chef4.png');
     }
     create() {
+        // --- reset état mutable (scene.restart réutilise la même instance) ---
+        this.tablesData.forEach(t => {
+            if (t.sprite) { t.sprite.destroy(); t.sprite = null; }
+            t.occupe = false;
+        });
+        this.tablesData.forEach((t, i) => { t.active = (i < 2); });
+        if (this.serveuses?.length) {
+            this.serveuses.forEach(s => { if (s?.destroy) s.destroy(); });
+        }
+        this.serveuses = [];
+        if (this.clients?.length) {
+            this.clients.forEach(c => { if (c.obj?.destroy) c.obj.destroy(); });
+        }
+        this.clients      = [];
+        this.solde        = 0;
+        this.coutTable    = 2000;
+        this.coutsServeuse = [0, 3000, 12000, 40000];
+        this.niveauMenu   = 1;
+        this._enPause     = false;
+        this._promoActive  = false;
+        this._promoCooldown = false;
+        // --- fin reset ---
+
         const cam = this.cameras.main;
         this.add.image(cam.width / 2, cam.height / 2, 'maquis-bg')
             .setOrigin(0.5)
