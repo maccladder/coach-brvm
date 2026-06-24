@@ -91,7 +91,7 @@ export default class Maquis extends Phaser.Scene {
         this.boucantier.setDepth(this.boucantier.y);
         this.serveuses.push(this.ajouterServeuse(this.posServeuses[0].x, this.posServeuses[0].y, this.spritesServeuse[0]));
 
-        this.time.addEvent({ delay: 3500, loop: true, callback: () => this.spawnClient() });
+        this.time.addEvent({ delay: 1500, loop: true, callback: () => this.spawnClient() });
 
         this.input.on('pointerdown', (p, objetsCliques) => {
             if (objetsCliques.length > 0) return;
@@ -241,8 +241,10 @@ export default class Maquis extends Phaser.Scene {
                     nb_serveuses:   this.serveuses.length,
                     niveau_menu:    this.niveauMenu,
                     cout_table:     this.coutTable,
+                    cout_serveuse:  this.coutsServeuse[this.serveuses.length] ?? 0,
                 }),
-            }).catch(() => {});
+            }).then(r => { if (!r.ok) console.warn('Sauvegarde échouée', r.status); })
+              .catch(e => console.warn('Sauvegarde erreur', e));
         }, 800);
     }
 
