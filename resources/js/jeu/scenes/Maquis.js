@@ -22,9 +22,9 @@ export default class Maquis extends Phaser.Scene {
     spritesServeuse = ['serveuse', 'serveuse2', 'serveuse3', 'serveuse4'];
     coutsServeuse   = [0, 3000, 12000, 40000];
     posServeuses    = [
-        { x: 250, y: 300 },
+        { x: 250, y: 265 },
         { x: 325, y: 285 },
-        { x: 200, y: 270 },
+        { x: 155, y: 210 },
         { x: 390, y: 270 },
     ];
     maxServeuses = 4;
@@ -55,6 +55,11 @@ export default class Maquis extends Phaser.Scene {
         this.load.image('chef2', '/jeu-assets/img/chef2.png');
         this.load.image('chef3', '/jeu-assets/img/chef3.png');
         this.load.image('chef4', '/jeu-assets/img/chef4.png');
+        this.load.audio('musique', '/jeu-assets/audio/musique.mp3');
+        this.load.audio('cash',    '/jeu-assets/audio/cash.mp3');
+        this.load.audio('client',  '/jeu-assets/audio/client.mp3');
+        this.load.audio('achat',   '/jeu-assets/audio/achat.mp3');
+        this.load.audio('promo',   '/jeu-assets/audio/promo.mp3');
     }
     create() {
         // --- reset état mutable (scene.restart réutilise la même instance) ---
@@ -78,6 +83,9 @@ export default class Maquis extends Phaser.Scene {
         this._enPause     = false;
         this._promoActive  = false;
         this._promoCooldown = false;
+        // nettoie les sons de la session précédente (scene.restart crée de nouveaux objets)
+        this.musique?.stop(); this.musique?.destroy(); this.musique = null;
+        if (this.sons) { Object.values(this.sons).forEach(s => s?.destroy()); this.sons = null; }
         // --- fin reset ---
 
         const cam = this.cameras.main;
@@ -90,6 +98,24 @@ export default class Maquis extends Phaser.Scene {
         }).setOrigin(1, 0).setDepth(10000);
 
         this.musiqueActive = true;
+        this.audioMuted = false;
+
+        this.sons = {
+            cash:   this.sound.add('cash',   { volume: 0.5 }),
+            client: this.sound.add('client', { volume: 0.5 }),
+            achat:  this.sound.add('achat',  { volume: 0.5 }),
+            promo:  this.sound.add('promo',  { volume: 0.6 }),
+        };
+        this.musique = this.sound.add('musique', { volume: 0.3, loop: true });
+        this.jouerSon = (cle) => {
+            if (this.audioMuted) return;
+            try { this.sons[cle]?.play(); } catch(e){}
+        };
+        if (!this.audioMuted) { this.musique.play(); }
+        // démarrage différé si navigateur bloque l'autoplay
+        this.input.once('pointerdown', () => {
+            if (!this.audioMuted && !this.musique.isPlaying) { this.musique.play(); }
+        });
 
         this.tablesData.forEach(t => { if (t.active) this.poserTable(t); });
 
@@ -151,7 +177,7 @@ export default class Maquis extends Phaser.Scene {
         window.jeuReprendre   = () => { if (this._enPause) this.reprendre(); };
         window.jeuTogglePause = () => this.togglePause();
         window.jeuMusique     = () => this.toggleMusique();
-        window.jeuEtatMusique = () => this.musiqueActive;
+        window.jeuEtatMusique = () => !this.audioMuted;
         window.jeuPromo       = () => this.lancerPromo();
         window.jeuPromoDispo  = () => (!this._promoActive && !this._promoCooldown);
         window.jeuQuitter     = () => {
@@ -175,6 +201,7 @@ export default class Maquis extends Phaser.Scene {
         if (this._promoActive || this._promoCooldown) return;
         this._promoActive = true;
         this.demarrerSpawn(this.delaiSpawnPromo);
+        this.jouerSon('promo');
         this.afficherMessage('📢 Promo ! Les clients affluent !');
         this.btnPromoBg?.setFillStyle(0x999088);
         this.time.delayedCall(8000, () => {
@@ -223,6 +250,7 @@ export default class Maquis extends Phaser.Scene {
             return;
         }
         this.rebond(this.btnTable);
+        this.jouerSon('achat');
         const tableVerrou = this.tablesData.find(t => !t.active);
         this.solde -= this.coutTable;
         this.soldeText.setText(this.solde.toLocaleString('fr-FR') + ' cauris');
@@ -314,6 +342,7 @@ export default class Maquis extends Phaser.Scene {
             return;
         }
         this.rebond(this.btnServeuse);
+        this.jouerSon('achat');
         this.solde -= cout;
         this.soldeText.setText(this.solde.toLocaleString('fr-FR') + ' cauris');
         const pos = this.posServeuses[n];
@@ -350,6 +379,7 @@ export default class Maquis extends Phaser.Scene {
                     this.time.delayedCall(500, () => {
                         cible.obj.servi = true;
                         cible.obj.setTint(0x9bffa8);
+                        this.jouerSon('client');
 
                         // le client mange, paie, repart
                         this.time.delayedCall(2500, () => {
@@ -357,6 +387,7 @@ export default class Maquis extends Phaser.Scene {
                             this.solde += paiement;
                             this.majSoldeAnime(this.solde);
                             this.animerPieces(cible.obj.x, cible.obj.y);
+                            this.jouerSon('cash');
                             this.tweens.add({
                                 targets: cible.obj,
                                 scaleX: cible.obj.scaleX * 1.1, scaleY: cible.obj.scaleY * 1.1,
@@ -430,6 +461,7 @@ export default class Maquis extends Phaser.Scene {
             return;
         }
         this.rebond(this.btnMenu);
+        this.jouerSon('achat');
         this.solde -= cout;
         this.niveauMenu++;
         this.soldeText.setText(this.solde.toLocaleString('fr-FR') + ' cauris');
@@ -461,10 +493,12 @@ export default class Maquis extends Phaser.Scene {
     }
 
     toggleMusique() {
-        this.musiqueActive = !this.musiqueActive;
-        this.icoMusique?.setText('♪');
-        this.icoMusique?.setAlpha(this.musiqueActive ? 1 : 0.4);
-        // TODO polish : if (this.musique) this.musiqueActive ? this.musique.resume() : this.musique.pause();
+        this.audioMuted = !this.audioMuted;
+        this.musiqueActive = !this.audioMuted;
+        if (this.audioMuted) { this.musique?.stop(); }
+        else { this.musique?.play(); }
+        this.icoMusique?.setAlpha(this.audioMuted ? 0.4 : 1);
+        if (window._htmlMusiqueUpdate) window._htmlMusiqueUpdate();
     }
 
     togglePause() {
