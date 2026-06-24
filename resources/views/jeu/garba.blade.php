@@ -160,7 +160,7 @@
         }
         .accueil-btns {
             position: absolute;
-            bottom: 12%;
+            bottom: 4%;
             left: 50%;
             transform: translateX(-50%);
             width: 74%;
