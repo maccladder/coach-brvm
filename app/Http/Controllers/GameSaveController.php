@@ -25,6 +25,7 @@ class GameSaveController extends Controller
             'tables_actives' => $save->tables_actives,
             'nb_serveuses'  => $save->nb_serveuses,
             'niveau_menu'   => $save->niveau_menu,
+            'niveau_maquis' => $save->niveau_maquis,
             'cout_table'    => $save->cout_table,
             'cout_serveuse' => $save->cout_serveuse,
         ]);
@@ -43,6 +44,7 @@ class GameSaveController extends Controller
             'tables_actives' => ['required', 'integer', 'min:1', 'max:8'],
             'nb_serveuses'   => ['required', 'integer', 'min:1', 'max:5'],
             'niveau_menu'    => ['required', 'integer', 'min:1', 'max:4'],
+            'niveau_maquis'  => ['required', 'integer', 'min:1', 'max:3'],
             'cout_table'     => ['required', 'integer', 'min:0'],
             'cout_serveuse'  => ['required', 'integer', 'min:0'],
         ]);
@@ -70,6 +72,7 @@ class GameSaveController extends Controller
                 'tables_actives' => 2,
                 'nb_serveuses'   => 1,
                 'niveau_menu'    => 1,
+                'niveau_maquis'  => 1,
                 'cout_table'     => 2000,
                 'cout_serveuse'  => 3000,
             ]

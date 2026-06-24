@@ -37,6 +37,24 @@ export default class Maquis extends Phaser.Scene {
     paiementsParNiveau  = [0, 500, 1000, 1500, 2000];
     coutsUpgradeMenu    = [0, 8000, 25000, 60000];
     spritesChef         = ['boucantier', 'chef2', 'chef3', 'chef4'];
+    niveauMaquis = 1;
+    coutsAgrandir = [0, 50000, 150000];
+
+    // Données par palier : table sprite, chef de départ, serveuses, clients
+    palierData = [
+        {  // palier 1
+            tableSprite:    'table',
+            boucantierKey:  'boucantier',
+            spritesServeuse: ['serveuse', 'serveuse2', 'serveuse3', 'serveuse4'],
+            spritesClients:  ['client1', 'client2', 'client3'],
+        },
+        {  // palier 2
+            tableSprite:    'table2',
+            boucantierKey:  'boucantier2',
+            spritesServeuse: ['serveuse5', 'serveuse6', 'serveuse3', 'serveuse4'],
+            spritesClients:  ['client4', 'client5', 'client6'],
+        },
+    ];
 
     constructor() {
         super('maquis');
@@ -55,6 +73,15 @@ export default class Maquis extends Phaser.Scene {
         this.load.image('chef2', '/jeu-assets/img/chef2.png');
         this.load.image('chef3', '/jeu-assets/img/chef3.png');
         this.load.image('chef4', '/jeu-assets/img/chef4.png');
+        this.load.image('maquis-bg-2',  '/jeu-assets/img/maquis-bg-2.png');
+        this.load.image('maquis-bg-3',  '/jeu-assets/img/maquis-bg-3.png');
+        this.load.image('table2',        '/jeu-assets/img/table2.png');
+        this.load.image('boucantier2',   '/jeu-assets/img/boucantier2.png');
+        this.load.image('serveuse5',     '/jeu-assets/img/serveuse5.png');
+        this.load.image('serveuse6',     '/jeu-assets/img/serveuse6.png');
+        this.load.image('client4',       '/jeu-assets/img/client4.png');
+        this.load.image('client5',       '/jeu-assets/img/client5.png');
+        this.load.image('client6',       '/jeu-assets/img/client6.png');
         this.load.audio('musique', '/jeu-assets/audio/musique.mp3');
         this.load.audio('cash',    '/jeu-assets/audio/cash.mp3');
         this.load.audio('client',  '/jeu-assets/audio/client.mp3');
@@ -86,12 +113,17 @@ export default class Maquis extends Phaser.Scene {
         // nettoie les sons de la session précédente (scene.restart crée de nouveaux objets)
         this.musique?.stop(); this.musique?.destroy(); this.musique = null;
         if (this.sons) { Object.values(this.sons).forEach(s => s?.destroy()); this.sons = null; }
+        this.fondMaquis?.destroy(); this.fondMaquis = null;
+        this.niveauMaquis = 1;
+        this._tweenBtnAgrandir?.stop(); this._tweenBtnAgrandir = null;
+        this.btnAgrandir?.destroy(); this.btnAgrandir = null;
         // --- fin reset ---
 
         const cam = this.cameras.main;
-        this.add.image(cam.width / 2, cam.height / 2, 'maquis-bg')
+        this.fondMaquis = this.add.image(cam.width / 2, cam.height / 2, 'maquis-bg')
             .setOrigin(0.5)
-            .setDisplaySize(cam.width, cam.height);
+            .setDisplaySize(cam.width, cam.height)
+            .setDepth(0);
         this.add.text(16, 16, 'Le Maquis', { fontSize: '20px', color: '#f4e3b4' });
         this.soldeText = this.add.text(404, 16, '0 cauris', {
             fontSize: '20px', color: '#f4e3b4', fontStyle: 'bold'
@@ -125,7 +157,10 @@ export default class Maquis extends Phaser.Scene {
             return s;
         };
 
-        this.boucantier = addPerso('boucantier', 360, 365, 155);
+        const pData = this.palierData[this.niveauMaquis - 1] ?? this.palierData[0];
+        this.spritesServeuse = pData.spritesServeuse;
+        this.spritesClients  = pData.spritesClients;
+        this.boucantier = addPerso(pData.boucantierKey, 360, 365, 155);
         this.boucantier.setDepth(this.boucantier.y);
         this.serveuses.push(this.ajouterServeuse(this.posServeuses[0].x, this.posServeuses[0].y, this.spritesServeuse[0]));
 
@@ -168,6 +203,16 @@ export default class Maquis extends Phaser.Scene {
         this.btnMenuLabel = labelM;
         bgM.setInteractive({ useHandCursor: true });
         bgM.on('pointerdown', () => this.ameliorerMenu());
+
+        this.btnAgrandir = this.add.container(210, 490).setDepth(10000);
+        const bgA = this.add.rectangle(0, 0, 170, 40, 0x7b3f00).setStrokeStyle(2, 0xffe08a);
+        this.btnAgrandirLabel = this.add.text(0, 0, '🎉 Agrandir\n50 000 cauris', {
+            fontSize: '12px', color: '#ffe08a', fontStyle: 'bold', align: 'center'
+        }).setOrigin(0.5);
+        this.btnAgrandir.add([bgA, this.btnAgrandirLabel]);
+        this.btnAgrandirBg = bgA;
+        bgA.setInteractive({ useHandCursor: true });
+        bgA.on('pointerdown', () => this.agrandirMaquis());
 
         this.pret = true;
         this.chargerSave().then(save => { if (save) this.appliquerSave(save); });
@@ -223,7 +268,7 @@ export default class Maquis extends Phaser.Scene {
         if (!table) return;
         table.occupe = true;
 
-        const key = Phaser.Utils.Array.GetRandom(['client1', 'client2', 'client3']);
+        const key = Phaser.Utils.Array.GetRandom(this.spritesClients ?? ['client1', 'client2', 'client3']);
         const c = this.add.image(this.ENTREE.x, this.ENTREE.y, key).setOrigin(0.5, 1);
         c.setScale(120 / c.height);
         c.setDepth(this.ENTREE.y);
@@ -312,6 +357,7 @@ export default class Maquis extends Phaser.Scene {
                     tables_actives: this.tablesData.filter(t => t.active).length,
                     nb_serveuses:   this.serveuses.length,
                     niveau_menu:    this.niveauMenu,
+                    niveau_maquis:  this.niveauMaquis,
                     cout_table:     this.coutTable,
                     cout_serveuse:  this.coutsServeuse[this.serveuses.length] ?? 0,
                 }),
@@ -355,7 +401,8 @@ export default class Maquis extends Phaser.Scene {
     }
 
     poserTable(t) {
-        const s = this.add.image(t.sx, t.sy, 'table').setOrigin(0.5, 0.7);
+        const tableKey = this.palierData[this.niveauMaquis - 1]?.tableSprite ?? 'table';
+        const s = this.add.image(t.sx, t.sy, tableKey).setOrigin(0.5, 0.7);
         s.setScale(60 / s.height);
         s.setDepth(t.sy);
         t.sprite = s;
@@ -448,6 +495,8 @@ export default class Maquis extends Phaser.Scene {
                 .setOrigin(0.5, 1).setScale(scale).setDepth(depth);
         }
         this.majBoutonMenu();
+        this.niveauMaquis = save.niveau_maquis || 1;
+        this.majDecorMaquis(false);
     }
 
     ameliorerMenu() {
@@ -537,6 +586,66 @@ export default class Maquis extends Phaser.Scene {
             onComplete: () => { m.destroy(); if (this._msgActif === m) this._msgActif = null; } });
     }
 
+    // Applique la texture du fond selon this.niveauMaquis (pas de calcul auto)
+    majDecorMaquis(celebrer = false) {
+        const cles = ['maquis-bg', 'maquis-bg-2', 'maquis-bg-3'];
+        const cle  = cles[this.niveauMaquis - 1] ?? 'maquis-bg';
+        const cible = this.textures.exists(cle) ? cle : 'maquis-bg';
+        const cam  = this.cameras.main;
+        this.fondMaquis.setTexture(cible).setDisplaySize(cam.width, cam.height);
+        if (celebrer) {
+            this.cameras.main.flash(300, 255, 255, 255, false);
+            this.tweens.add({
+                targets: this.fondMaquis,
+                scale: 1.05, duration: 200, yoyo: true, ease: 'Sine.InOut',
+            });
+            this.afficherMessage('Ton maquis s\'agrandit ! 🎉');
+        }
+    }
+
+    agrandirMaquis() {
+        const palierMax = 2;                          // palier 2 seulement pour l'instant
+        if (this.niveauMaquis >= palierMax) return;
+
+        const cout = this.coutsAgrandir[this.niveauMaquis];
+        if (this.solde < cout) {
+            this.tweens.add({ targets: this.btnAgrandir, x: '+=4', duration: 50, yoyo: true, repeat: 3 });
+            return;
+        }
+
+        const ok = confirm(`Agrandir ton maquis pour ${cout.toLocaleString('fr-FR')} cauris ?`);
+        if (!ok) return;
+
+        this.solde -= cout;
+        this.soldeText.setText(this.solde.toLocaleString('fr-FR') + ' cauris');
+        this.niveauMaquis++;
+        this.majDecorMaquis(true);
+        this.sauvegarder();
+    }
+
+    majBtnAgrandir() {
+        const palierMax = 2;
+        if (this.niveauMaquis >= palierMax) {
+            this.btnAgrandir.setVisible(false);
+            this._tweenBtnAgrandir?.stop(); this._tweenBtnAgrandir = null;
+            return;
+        }
+        this.btnAgrandir.setVisible(true);
+        const cout = this.coutsAgrandir[this.niveauMaquis];
+        this.btnAgrandirLabel.setText('🎉 Agrandir\n' + cout.toLocaleString('fr-FR') + ' cauris');
+        const peutPayer = this.solde >= cout;
+        this.btnAgrandirBg.setFillStyle(peutPayer ? 0x7b3f00 : 0x3a2a1a);
+        this.btnAgrandir.setAlpha(peutPayer ? 1 : 0.5);
+        if (peutPayer && !this._tweenBtnAgrandir) {
+            this._tweenBtnAgrandir = this.tweens.add({
+                targets: this.btnAgrandir, alpha: 0.7, duration: 600,
+                yoyo: true, repeat: -1, ease: 'Sine.InOut',
+            });
+        } else if (!peutPayer && this._tweenBtnAgrandir) {
+            this._tweenBtnAgrandir.stop(); this._tweenBtnAgrandir = null;
+        }
+    }
+
     animerPieces(xDepart, yDepart, nb = 5) {
         const cibleX = this.soldeText.x;
         const cibleY = this.soldeText.y;
@@ -578,5 +687,6 @@ export default class Maquis extends Phaser.Scene {
         this.servirProchain();
         this.majBoutons();
         this.majBoutonMenu();
+        this.majBtnAgrandir();
     }
 }
