@@ -222,6 +222,7 @@ export default class Maquis extends Phaser.Scene {
             }
             return;
         }
+        this.rebond(this.btnTable);
         const tableVerrou = this.tablesData.find(t => !t.active);
         this.solde -= this.coutTable;
         this.soldeText.setText(this.solde.toLocaleString('fr-FR') + ' cauris');
@@ -312,6 +313,7 @@ export default class Maquis extends Phaser.Scene {
             this.tweens.add({ targets: this.btnServeuse, x: '+=4', duration: 50, yoyo: true, repeat: 3 });
             return;
         }
+        this.rebond(this.btnServeuse);
         this.solde -= cout;
         this.soldeText.setText(this.solde.toLocaleString('fr-FR') + ' cauris');
         const pos = this.posServeuses[n];
@@ -353,7 +355,13 @@ export default class Maquis extends Phaser.Scene {
                         this.time.delayedCall(2500, () => {
                             const paiement = this.paiementsParNiveau[this.niveauMenu];
                             this.solde += paiement;
-                            this.soldeText.setText(this.solde.toLocaleString('fr-FR') + ' cauris');
+                            this.majSoldeAnime(this.solde);
+                            this.animerPieces(cible.obj.x, cible.obj.y);
+                            this.tweens.add({
+                                targets: cible.obj,
+                                scaleX: cible.obj.scaleX * 1.1, scaleY: cible.obj.scaleY * 1.1,
+                                duration: 150, yoyo: true,
+                            });
                             this.sauvegarder();
                             const pop = this.add.text(cible.obj.x, cible.obj.y - 120, '+' + paiement + ' cauris', {
                                 fontSize: '18px', color: '#ffe08a', fontStyle: 'bold'
@@ -421,6 +429,7 @@ export default class Maquis extends Phaser.Scene {
             this.tweens.add({ targets: this.btnMenu, x: '+=4', duration: 50, yoyo: true, repeat: 3 });
             return;
         }
+        this.rebond(this.btnMenu);
         this.solde -= cout;
         this.niveauMenu++;
         this.soldeText.setText(this.solde.toLocaleString('fr-FR') + ' cauris');
@@ -492,6 +501,42 @@ export default class Maquis extends Phaser.Scene {
         m.add([bg, t]); m.setAlpha(0); this._msgActif = m;
         this.tweens.add({ targets: m, alpha: 1, duration: 200, yoyo: true, hold: 1800,
             onComplete: () => { m.destroy(); if (this._msgActif === m) this._msgActif = null; } });
+    }
+
+    animerPieces(xDepart, yDepart, nb = 5) {
+        const cibleX = this.soldeText.x;
+        const cibleY = this.soldeText.y;
+        for (let i = 0; i < nb; i++) {
+            const piece = this.add.text(xDepart, yDepart, '🐚', { fontSize: '18px' })
+                .setOrigin(0.5).setDepth(15000);
+            this.tweens.add({
+                targets: piece,
+                x: cibleX, y: cibleY,
+                delay: i * 60,
+                duration: 600,
+                ease: 'Cubic.In',
+                onComplete: () => piece.destroy(),
+            });
+        }
+        this.time.delayedCall(nb * 60 + 600, () => {
+            this.tweens.add({ targets: this.soldeText, scale: 1.2, duration: 120, yoyo: true });
+        });
+    }
+
+    majSoldeAnime(nouvelleValeur) {
+        const depart = this._soldeAffiche ?? this.solde;
+        this._soldeAffiche = nouvelleValeur;
+        this.tweens.addCounter({
+            from: depart, to: nouvelleValeur, duration: 500, ease: 'Cubic.Out',
+            onUpdate: (tw) => {
+                const v = Math.floor(tw.getValue());
+                this.soldeText.setText(v.toLocaleString('fr-FR') + ' cauris');
+            },
+        });
+    }
+
+    rebond(target) {
+        this.tweens.add({ targets: target, scale: 0.92, duration: 80, yoyo: true });
     }
 
     update() {
