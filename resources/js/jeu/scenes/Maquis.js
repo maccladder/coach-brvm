@@ -29,6 +29,10 @@ export default class Maquis extends Phaser.Scene {
     ];
     maxServeuses = 4;
     _enPause = false;
+    _promoActive = false;
+    _promoCooldown = false;
+    delaiSpawnNormal = 1500;
+    delaiSpawnPromo  = 600;
     niveauMenu = 1;
     paiementsParNiveau  = [0, 500, 1000, 1500, 2000];
     coutsUpgradeMenu    = [0, 8000, 25000, 60000];
@@ -62,22 +66,7 @@ export default class Maquis extends Phaser.Scene {
             fontSize: '20px', color: '#f4e3b4', fontStyle: 'bold'
         }).setOrigin(1, 0).setDepth(10000);
 
-        this.btnPause = this.add.container(30, 75).setDepth(20000);
-        const bgP = this.add.circle(0, 0, 18, 0x000000, 0.55).setStrokeStyle(2, 0xffffff);
-        const icoP = this.add.text(0, 0, 'II', { fontSize: '16px', color: '#ffffff',
-            fontStyle: 'bold' }).setOrigin(0.5);
-        this.btnPause.add([bgP, icoP]);
-        bgP.setInteractive({ useHandCursor: true });
-        bgP.on('pointerdown', () => this.togglePause());
-
         this.musiqueActive = true;
-        this.btnMusique = this.add.container(72, 75).setDepth(20000);
-        const bgM2 = this.add.circle(0, 0, 18, 0x000000, 0.55).setStrokeStyle(2, 0xffffff);
-        this.icoMusique = this.add.text(0, 0, '♪', { fontSize: '18px', color: '#ffffff',
-            fontStyle: 'bold' }).setOrigin(0.5);
-        this.btnMusique.add([bgM2, this.icoMusique]);
-        bgM2.setInteractive({ useHandCursor: true });
-        bgM2.on('pointerdown', () => this.toggleMusique());
 
         this.tablesData.forEach(t => { if (t.active) this.poserTable(t); });
 
@@ -91,7 +80,7 @@ export default class Maquis extends Phaser.Scene {
         this.boucantier.setDepth(this.boucantier.y);
         this.serveuses.push(this.ajouterServeuse(this.posServeuses[0].x, this.posServeuses[0].y, this.spritesServeuse[0]));
 
-        this.time.addEvent({ delay: 1500, loop: true, callback: () => this.spawnClient() });
+        this.demarrerSpawn(this.delaiSpawnNormal);
 
         this.input.on('pointerdown', (p, objetsCliques) => {
             if (objetsCliques.length > 0) return;
@@ -131,20 +120,51 @@ export default class Maquis extends Phaser.Scene {
         bgM.setInteractive({ useHandCursor: true });
         bgM.on('pointerdown', () => this.ameliorerMenu());
 
-        this.btnRecharger = this.add.container(330, 70).setDepth(20000);
-        const bgR = this.add.rectangle(0, 0, 120, 36, 0xe0a030).setStrokeStyle(2, 0xffffff);
-        const labR = this.add.text(0, 0, '🐚 Recharger', { fontSize: '13px', color: '#1a1410',
-            fontStyle: 'bold' }).setOrigin(0.5);
-        this.btnRecharger.add([bgR, labR]);
-        bgR.setInteractive({ useHandCursor: true });
-        bgR.on('pointerdown', () => { if (window.ouvrirBoutique) window.ouvrirBoutique(); });
-
         this.pret = true;
         this.chargerSave().then(save => { if (save) this.appliquerSave(save); });
 
-        // Pont pause pour la boutique HTML (mobile)
-        window.jeuPause    = () => { if (!this._enPause) this.togglePause(); };
-        window.jeuReprendre = () => { if (this._enPause) this.reprendre(); };
+        // Fonctions globales pour piloter le jeu depuis le HTML
+        window.jeuPause       = () => { if (!this._enPause) this.togglePause(); };
+        window.jeuReprendre   = () => { if (this._enPause) this.reprendre(); };
+        window.jeuTogglePause = () => this.togglePause();
+        window.jeuMusique     = () => this.toggleMusique();
+        window.jeuEtatMusique = () => this.musiqueActive;
+        window.jeuPromo       = () => this.lancerPromo();
+        window.jeuPromoDispo  = () => (!this._promoActive && !this._promoCooldown);
+        window.jeuQuitter     = () => {
+            this.sauvegarder();
+            if (!this._enPause) this.togglePause();
+        };
+        window.jeuRelancer    = () => {
+            this._enPause = false;
+            this.scene.restart();
+        };
+    }
+
+    demarrerSpawn(delai) {
+        if (this._spawnTimer) this._spawnTimer.remove();
+        this._spawnTimer = this.time.addEvent({
+            delay: delai, loop: true, callback: () => this.spawnClient(),
+        });
+    }
+
+    lancerPromo() {
+        if (this._promoActive || this._promoCooldown) return;
+        this._promoActive = true;
+        this.demarrerSpawn(this.delaiSpawnPromo);
+        this.afficherMessage('📢 Promo ! Les clients affluent !');
+        this.btnPromoBg?.setFillStyle(0x999088);
+        this.time.delayedCall(8000, () => {
+            this._promoActive = false;
+            this.demarrerSpawn(this.delaiSpawnNormal);
+            this._promoCooldown = true;
+            this.btnPromoBg?.setFillStyle(0x999088);
+            this.time.delayedCall(20000, () => {
+                this._promoCooldown = false;
+                this.btnPromoBg?.setFillStyle(0xff7043);
+                window._htmlPromoUpdate?.();
+            });
+        });
     }
 
     spawnClient() {
@@ -410,8 +430,8 @@ export default class Maquis extends Phaser.Scene {
 
     toggleMusique() {
         this.musiqueActive = !this.musiqueActive;
-        this.icoMusique.setText('♪');
-        this.icoMusique.setAlpha(this.musiqueActive ? 1 : 0.4);
+        this.icoMusique?.setText('♪');
+        this.icoMusique?.setAlpha(this.musiqueActive ? 1 : 0.4);
         // TODO polish : if (this.musique) this.musiqueActive ? this.musique.resume() : this.musique.pause();
     }
 

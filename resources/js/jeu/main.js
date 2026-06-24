@@ -3,8 +3,15 @@ import Maquis from './scenes/Maquis.js';
 
 let _jeuDemarre = false;
 
-window.demarrerJeu = function () {
-    if (_jeuDemarre) return;
+window.demarrerJeu = function (forcer = false) {
+    if (_jeuDemarre) {
+        if (forcer && window.jeuRelancer) {
+            window.jeuRelancer();
+        } else if (window.jeuReprendre) {
+            window.jeuReprendre();
+        }
+        return;
+    }
     _jeuDemarre = true;
     new Phaser.Game({
         type: Phaser.AUTO,

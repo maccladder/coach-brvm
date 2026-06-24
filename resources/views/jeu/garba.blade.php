@@ -26,9 +26,40 @@
             font-family: system-ui, sans-serif;
         }
 
-        /* ── Canvas Phaser ── */
-        #jeu { flex-shrink: 0; width: 420px; height: 640px; }
+        /* ── Canvas Phaser + barre de contrôle ── */
+        #jeu-wrapper { display: flex; flex-direction: column; flex-shrink: 0; width: 420px; }
+        #jeu { width: 420px; height: 640px; }
         #jeu canvas { display: block; }
+
+        #ctrl-bar {
+            display: flex;
+            gap: 4px;
+            padding: 5px 8px;
+            background: rgba(10, 8, 5, 0.82);
+            border-radius: 10px 10px 0 0;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .ctrl-btn {
+            flex: 1;
+            background: rgba(255,255,255,.08);
+            border: 1.5px solid rgba(255,255,255,.18);
+            border-radius: 8px;
+            color: #f4e3b4;
+            font-size: 12px;
+            padding: 5px 4px;
+            cursor: pointer;
+            transition: background .15s, opacity .15s;
+            white-space: nowrap;
+            text-align: center;
+        }
+        .ctrl-btn:hover  { background: rgba(255,255,255,.18); }
+        .ctrl-btn.actif  { background: rgba(224,160,48,.25); border-color: #e0a030; }
+        .ctrl-btn:disabled { opacity: .38; cursor: default; }
+        #btn-ctrl-quitter { color: #ff8a80; border-color: rgba(255,138,128,.28); }
+        #btn-ctrl-quitter:hover { background: rgba(255,138,128,.15); }
 
         /* ══════════════════════════════════════
            BOUTIQUE — desktop : flex-child inline
@@ -164,6 +195,9 @@
                 padding: 0;
                 gap: 0;
             }
+            #jeu-wrapper { width: 100%; max-width: 420px; }
+            .ctrl-btn .cl { display: none; }
+            .ctrl-btn { font-size: 16px; padding: 6px 0; }
             #jeu {
                 width: 100%;
                 max-width: 420px;
@@ -229,8 +263,17 @@
         </div>
     </div>
 
-    {{-- Canvas Phaser --}}
-    <div id="jeu"></div>
+    {{-- Canvas Phaser + barre de contrôle système --}}
+    <div id="jeu-wrapper">
+        <div id="ctrl-bar">
+            <button class="ctrl-btn" id="btn-ctrl-pause"     title="Pause">    <span class="ci">⏸</span><span class="cl"> Pause</span></button>
+            <button class="ctrl-btn" id="btn-ctrl-musique"   title="Musique">  <span class="ci">♪</span><span class="cl"> Musique</span></button>
+            <button class="ctrl-btn" id="btn-ctrl-promo"     title="Promo">    <span class="ci">📢</span><span class="cl"> Promo</span></button>
+            <button class="ctrl-btn" id="btn-ctrl-recharger" title="Recharger"><span class="ci">🐚</span><span class="cl"> Recharger</span></button>
+            <button class="ctrl-btn" id="btn-ctrl-quitter"   title="Quitter">  <span class="ci">✕</span><span class="cl"> Quitter</span></button>
+        </div>
+        <div id="jeu"></div>
+    </div>
 
     {{-- Overlay boutique (inline sur desktop, modale sur mobile) --}}
     <div id="boutique-overlay">
@@ -283,23 +326,99 @@
             })
             .catch(() => {});
 
-        btnCont.addEventListener('click', () => demarrer());
+        btnCont.addEventListener('click', () => {
+            screen.style.display = 'none';
+            if (window.demarrerJeu) window.demarrerJeu(false);   // Continuer : reprend
+        });
 
         btnNouvelle.addEventListener('click', async () => {
             if (aProgression) {
                 const ok = confirm('Tu vas perdre ta progression actuelle. Recommencer à zéro ?');
                 if (!ok) return;
-                await fetch('/api/jeu/reset', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type':     'application/json',
-                        'X-CSRF-TOKEN':     csrf,
-                        'X-Requested-With': 'XMLHttpRequest',
-                    },
-                    body: JSON.stringify({}),
-                }).catch(() => {});
+                try {
+                    const r = await fetch('/api/jeu/reset', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type':     'application/json',
+                            'X-CSRF-TOKEN':     csrf,
+                            'X-Requested-With': 'XMLHttpRequest',
+                        },
+                        body: JSON.stringify({}),
+                    });
+                    if (!r.ok) {
+                        console.warn('Reset échoué', r.status);
+                        return;   // n'avance pas si le reset a échoué
+                    }
+                } catch (e) {
+                    console.warn('Reset erreur réseau', e);
+                    return;
+                }
             }
-            demarrer();
+            screen.style.display = 'none';
+            if (window.demarrerJeu) window.demarrerJeu(true);    // Nouvelle partie : relance
+        });
+    })();
+    </script>
+
+    {{-- JS Barre de contrôle système --}}
+    <script>
+    (function () {
+        const btnPause    = document.getElementById('btn-ctrl-pause');
+        const btnMusique  = document.getElementById('btn-ctrl-musique');
+        const btnPromo    = document.getElementById('btn-ctrl-promo');
+        const btnRechg    = document.getElementById('btn-ctrl-recharger');
+        const btnQuitter  = document.getElementById('btn-ctrl-quitter');
+        const accueil     = document.getElementById('accueil-screen');
+        const btnCont     = document.getElementById('btn-continuer');
+
+        // ── Pause ──────────────────────────────────────────────────
+        let pauseActif = false;
+        btnPause.addEventListener('click', () => {
+            if (window.jeuTogglePause) window.jeuTogglePause();
+            pauseActif = !pauseActif;
+            btnPause.textContent = pauseActif ? '▶ Reprendre' : '⏸ Pause';
+            btnPause.classList.toggle('actif', pauseActif);
+        });
+
+        // ── Musique ────────────────────────────────────────────────
+        btnMusique.addEventListener('click', () => {
+            if (window.jeuMusique) window.jeuMusique();
+            const on = window.jeuEtatMusique ? window.jeuEtatMusique() : true;
+            btnMusique.textContent = on ? '♪ Musique' : '♪ OFF';
+            btnMusique.classList.toggle('actif', !on);
+        });
+
+        // ── Promo ──────────────────────────────────────────────────
+        btnPromo.addEventListener('click', () => {
+            if (window.jeuPromo) window.jeuPromo();
+            btnPromo.disabled = true;
+        });
+        // réactive le bouton quand la promo est à nouveau disponible
+        window._htmlPromoUpdate = () => {
+            btnPromo.disabled = false;
+        };
+        // polling de sécurité au cas où la callback manque
+        setInterval(() => {
+            if (window.jeuPromoDispo) btnPromo.disabled = !window.jeuPromoDispo();
+        }, 2000);
+
+        // ── Recharger ──────────────────────────────────────────────
+        btnRechg.addEventListener('click', () => {
+            if (window.ouvrirBoutique) window.ouvrirBoutique();
+        });
+
+        // ── Quitter ────────────────────────────────────────────────
+        btnQuitter.addEventListener('click', () => {
+            const ok = confirm('Quitter le maquis ? Ta progression est sauvegardée.');
+            if (!ok) return;
+            if (window.jeuQuitter) window.jeuQuitter();
+            // Réinitialise l'état du bouton Pause dans la barre
+            pauseActif = false;
+            btnPause.textContent = '⏸ Pause';
+            btnPause.classList.remove('actif');
+            // Affiche l'accueil par-dessus (Continuer visible car save existe)
+            btnCont.style.display = '';
+            accueil.style.display = 'flex';
         });
     })();
     </script>
