@@ -38,8 +38,8 @@ export default class Maquis extends Phaser.Scene {
     coutsUpgradeMenu    = [0, 8000, 25000, 60000];
     spritesChef         = ['boucantier', 'chef2', 'chef3', 'chef4'];
     niveauMaquis = 1;
-    coutsAgrandir       = [0, 50000, 150000];
-    maxTablesParPalier  = [6, 8];   // palier 1 : 6 tables max, palier 2 : 8 tables max
+    coutsAgrandir       = [0, 50000, 150000, 1000000];
+    maxTablesParPalier  = [6, 8, 10];  // palier 1:6  palier 2:8  palier 3:10
 
     // Données par palier : table sprite, chef de départ, serveuses, clients
     palierData = [
@@ -88,6 +88,37 @@ export default class Maquis extends Phaser.Scene {
                 { sx: 228, sy: 500, x: 225, y: 512 },  // rangée 3 — centre
             ],
         },
+        {  // palier 3 — terrasse haut de gamme, 10 tables, très cher
+            tableSprite:    'table3',
+            tableHeight:    80,
+            coutTableDepart:    25000,
+            coutsServeuse:      [0, 80000, 250000, 700000],
+            coutsUpgradeMenu:   [0, 100000, 350000, 900000],
+            paiementsParNiveau: [0, 8000, 18000, 35000, 60000],
+            boucantierKey:  'boucantier3',
+            boucantierPos:  { x: 370, y: 360 },
+            spritesChef:    ['boucantier3', 'chef9', 'chef10', 'chef11'],
+            spritesServeuse: ['serveuse9', 'serveuse10', 'serveuse11', 'serveuse12'],
+            posServeuses:   [
+                { x: 220, y: 340 },
+                { x: 300, y: 325 },
+                { x: 148, y: 322 },
+                { x: 105, y: 330 },
+            ],
+            spritesClients:  ['client7', 'client8', 'client9', 'client10', 'client4'],
+            tablesCoords: [
+                { sx: 62,  sy: 368, x: 59,  y: 380 },
+                { sx: 170, sy: 352, x: 167, y: 364 },
+                { sx: 278, sy: 372, x: 275, y: 384 },
+                { sx: 75,  sy: 432, x: 72,  y: 444 },
+                { sx: 185, sy: 415, x: 182, y: 427 },
+                { sx: 292, sy: 435, x: 289, y: 447 },
+                { sx: 88,  sy: 490, x: 85,  y: 502 },
+                { sx: 200, sy: 475, x: 197, y: 487 },
+                { sx: 100, sy: 545, x: 97,  y: 557 },
+                { sx: 215, sy: 530, x: 212, y: 542 },
+            ],
+        },
     ];
 
     constructor() {
@@ -108,7 +139,7 @@ export default class Maquis extends Phaser.Scene {
         this.load.image('chef3', '/jeu-assets/img/chef3.png');
         this.load.image('chef4', '/jeu-assets/img/chef4.png');
         this.load.image('maquis-bg-2',  '/jeu-assets/img/maquis-bg-2.png');
-        // this.load.image('maquis-bg-3',  '/jeu-assets/img/maquis-bg-3.png');  // à décommenter quand disponible
+        this.load.image('maquis-bg-3',  '/jeu-assets/img/maquis-bg-3.png');
         this.load.image('table2',       '/jeu-assets/img/table2.png');
         this.load.image('boucantier2',  '/jeu-assets/img/boucantier2.png');
         this.load.image('chef5',        '/jeu-assets/img/chef5.png');
@@ -122,6 +153,19 @@ export default class Maquis extends Phaser.Scene {
         this.load.image('client4',      '/jeu-assets/img/client4.png');
         this.load.image('client5',      '/jeu-assets/img/client5.png');
         this.load.image('client6',      '/jeu-assets/img/client6.png');
+        this.load.image('client7',      '/jeu-assets/img/client7.png');
+        this.load.image('client8',      '/jeu-assets/img/client8.png');
+        this.load.image('client9',      '/jeu-assets/img/client9.png');
+        this.load.image('client10',     '/jeu-assets/img/client10.png');
+        this.load.image('table3',       '/jeu-assets/img/table3.png');
+        this.load.image('boucantier3',  '/jeu-assets/img/boucantier3.png');
+        this.load.image('chef9',        '/jeu-assets/img/chef9.png');
+        this.load.image('chef10',       '/jeu-assets/img/chef10.png');
+        this.load.image('chef11',       '/jeu-assets/img/chef11.png');
+        this.load.image('serveuse9',    '/jeu-assets/img/serveuse9.png');
+        this.load.image('serveuse10',   '/jeu-assets/img/serveuse10.png');
+        this.load.image('serveuse11',   '/jeu-assets/img/serveuse11.png');
+        this.load.image('serveuse12',   '/jeu-assets/img/serveuse12.png');
         this.load.audio('musique', '/jeu-assets/audio/musique.mp3');
         this.load.audio('cash',    '/jeu-assets/audio/cash.mp3');
         this.load.audio('client',  '/jeu-assets/audio/client.mp3');
@@ -165,6 +209,10 @@ export default class Maquis extends Phaser.Scene {
             .setDisplaySize(cam.width, cam.height)
             .setDepth(0);
         this.add.text(16, 16, 'Le Maquis', { fontSize: '20px', color: '#f4e3b4' });
+        this.niveauText = this.add.text(16, 42, 'Niveau 1', {
+            fontSize: '12px', color: '#e0a030', fontStyle: 'bold',
+            backgroundColor: '#00000066', padding: { x: 6, y: 2 },
+        }).setOrigin(0, 0).setDepth(10000);
         this.soldeText = this.add.text(404, 16, '0 cauris', {
             fontSize: '20px', color: '#f4e3b4', fontStyle: 'bold'
         }).setOrigin(1, 0).setDepth(10000);
@@ -661,6 +709,7 @@ export default class Maquis extends Phaser.Scene {
         // Met à jour les pools de sprites et les coûts du palier
         this.spritesServeuse = pData.spritesServeuse;
         this.spritesClients  = pData.spritesClients;
+        this.niveauText?.setText(`Niveau ${this.niveauMaquis}`);
         if (pData.coutsServeuse)      this.coutsServeuse      = pData.coutsServeuse;
         if (pData.coutsUpgradeMenu)   this.coutsUpgradeMenu   = pData.coutsUpgradeMenu;
         if (pData.paiementsParNiveau) this.paiementsParNiveau = pData.paiementsParNiveau;
@@ -744,8 +793,13 @@ export default class Maquis extends Phaser.Scene {
     }
 
     agrandirMaquis() {
-        const palierMax = 2;
-        if (this.niveauMaquis >= palierMax) return;
+        const palierMax = 3;
+        // Palier 3 déjà atteint → écran de fin
+        if (this.niveauMaquis >= palierMax) {
+            if (!this._enPause) this.togglePause();
+            if (window.afficherEcranFin) window.afficherEcranFin();
+            return;
+        }
 
         const cond = this._conditionsAgrandir();
         if (!cond.tout) {
@@ -817,6 +871,7 @@ export default class Maquis extends Phaser.Scene {
         this.serveuses.push(this.ajouterServeuse(pos0.x, pos0.y, pData.spritesServeuse[0]));
 
         // 7. Fond + labels
+        this.niveauText?.setText(`Niveau ${this.niveauMaquis}`);
         this.majDecorMaquis(true);
         this.soldeText.setText(this.solde.toLocaleString('fr-FR') + ' cauris');
         this.btnTableLabel.setText('+ Table\n' + this.coutTable.toLocaleString('fr-FR') + ' cauris');
@@ -828,9 +883,23 @@ export default class Maquis extends Phaser.Scene {
     }
 
     majBtnAgrandir() {
-        const palierMax = 2;
+        const palierMax = 3;
         if (this.niveauMaquis >= palierMax) {
-            this.btnAgrandir.setVisible(false);
+            const cond = this._conditionsAgrandir();
+            const cout = this.coutsAgrandir[this.niveauMaquis] ?? 1000001;
+            this.btnAgrandir.setVisible(true);
+            this.btnAgrandirLabel.setText('🎉 Agrandir le maquis\n' + cout.toLocaleString('fr-FR') + ' cauris');
+            this.btnAgrandirBg.setFillStyle(cond.tout ? 0xe0a030 : 0x3a2a1a);
+            this.btnAgrandir.setAlpha(cond.tout ? 1 : 0.4);
+            if (cond.tout && !this._tweenBtnAgrandir) {
+                this._tweenBtnAgrandir = this.tweens.add({
+                    targets: this.btnAgrandir, alpha: 0.7, duration: 600,
+                    yoyo: true, repeat: -1, ease: 'Sine.InOut',
+                });
+            } else if (!cond.tout && this._tweenBtnAgrandir) {
+                this._tweenBtnAgrandir.stop(); this._tweenBtnAgrandir = null;
+            }
+            return;
             this._tweenBtnAgrandir?.stop(); this._tweenBtnAgrandir = null;
             return;
         }

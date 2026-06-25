@@ -187,6 +187,41 @@
         }
         .btn-accueil-secondaire:hover { background: rgba(224,160,48,.15); }
 
+        /* ══════════════════════════════════════
+           ÉCRAN DE FIN
+        ═══════════════════════════════════════ */
+        #fin-screen {
+            display: none;
+            position: fixed; inset: 0; z-index: 99998;
+            background: rgba(0,0,0,0.92);
+            align-items: center; justify-content: center;
+        }
+        #fin-screen.visible { display: flex; }
+        .fin-panel {
+            background: linear-gradient(145deg, #1a1208, #2d1f0a);
+            border: 2px solid #e0a030;
+            border-radius: 16px;
+            padding: 36px 28px;
+            max-width: 400px; width: 90%;
+            text-align: center;
+            box-shadow: 0 0 60px rgba(224,160,48,.3);
+        }
+        .fin-titre { font-size: 32px; font-weight: 900; color: #e0a030; margin-bottom: 8px; }
+        .fin-sous { font-size: 14px; color: #f4e3b4; margin-bottom: 20px; line-height: 1.5; }
+        .fin-forum { font-size: 13px; color: #c8a060; font-style: italic; margin-bottom: 20px; }
+        .fin-coming { background: rgba(224,160,48,.08); border: 1px solid rgba(224,160,48,.2);
+            border-radius: 10px; padding: 14px 16px; margin-bottom: 24px; text-align: left; }
+        .fin-coming p { font-size: 12px; color: #e0a030; font-weight: 700; margin-bottom: 8px; letter-spacing:.06em; text-transform: uppercase; }
+        .fin-coming li { font-size: 13px; color: #f4e3b4; line-height: 1.8; list-style: none; }
+        .fin-coming li::before { content: '▸ '; color: #e0a030; }
+        .btn-fin { display: block; width: 100%; padding: 13px 0; margin-top: 6px;
+            background: #e0a030; color: #1a1208; font-size: 14px; font-weight: 800;
+            border: none; border-radius: 10px; cursor: pointer; transition: background .2s; }
+        .btn-fin:hover { background: #f0b840; }
+        .btn-fin-sec { background: transparent; color: #9a8060; border: 1px solid rgba(224,160,48,.3);
+            margin-top: 10px; }
+        .btn-fin-sec:hover { background: rgba(224,160,48,.08); color: #c8a060; }
+
         /* ═══════════ MOBILE ≤ 900px ═══════════ */
         @media (max-width: 900px) {
             body {
@@ -260,6 +295,40 @@
                     ✦ Nouvelle partie
                 </button>
             </div>
+        </div>
+    </div>
+
+    {{-- Écran de fin --}}
+    <div id="fin-screen">
+        <div class="fin-panel">
+            <div class="fin-titre">🏆 Félicitations !</div>
+            <p class="fin-sous">
+                Tu as atteint le sommet du Garba Master !<br>
+                Ton maquis est devenu une institution.
+            </p>
+            <p class="fin-forum">
+                Si vous avez aimé, dites-le nous sur le forum Boursiv 🙏
+            </p>
+            <div class="fin-coming">
+                <p>🔜 Bientôt dans la prochaine version</p>
+                <ul>
+                    <li>Attaquer les maquis de tes amis</li>
+                    <li>Se défendre contre les concurrents</li>
+                    <li>Prendre la police pour se protéger</li>
+                    <li>Alliances & tontines entre joueurs</li>
+                </ul>
+            </div>
+            <button class="btn-fin" onclick="
+                window.fermerFin();
+                if (window.demarrerJeu) window.demarrerJeu(true);
+                document.getElementById('accueil-screen').style.display='none';
+            ">✦ Nouvelle partie</button>
+            <button class="btn-fin btn-fin-sec" onclick="
+                window.fermerFin();
+                if (window.jeuQuitter) window.jeuQuitter();
+                document.getElementById('accueil-screen').style.display='flex';
+                document.getElementById('btn-continuer').style.display='';
+            ">✕ Quitter</button>
         </div>
     </div>
 
@@ -370,6 +439,14 @@
         const btnQuitter  = document.getElementById('btn-ctrl-quitter');
         const accueil     = document.getElementById('accueil-screen');
         const btnCont     = document.getElementById('btn-continuer');
+
+        // ── Écran de fin ──────────────────────────────────────────
+        const finScreen = document.getElementById('fin-screen');
+        window.afficherEcranFin = () => { finScreen.classList.add('visible'); };
+        window.fermerFin = () => {
+            finScreen.classList.remove('visible');
+            if (window.jeuReprendre) window.jeuReprendre();
+        };
 
         // ── Pause ──────────────────────────────────────────────────
         let pauseActif = false;
