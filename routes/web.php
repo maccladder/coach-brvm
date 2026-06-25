@@ -882,6 +882,9 @@ Route::middleware('auth')->group(function () {
 });
 
 Route::middleware('admin.code')->prefix('admin')->name('admin.')->group(function () {
+    // 🎮 Garba Master — statistiques jeu
+    Route::get('/garba-master', [\App\Http\Controllers\Admin\AdminGarbaMasterController::class, 'index'])->name('garba-master.index');
+
     Route::get('/notifications', [AdminNotificationController::class, 'index'])->name('notifications.index');
     Route::post('/notifications/{id}/read', [AdminNotificationController::class, 'read'])->name('notifications.read');
     Route::post('/notifications/read-all', [AdminNotificationController::class, 'readAll'])->name('notifications.readAll');
