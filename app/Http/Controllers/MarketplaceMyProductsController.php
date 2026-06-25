@@ -143,6 +143,11 @@ class MarketplaceMyProductsController extends Controller
             abort(404, "Ce produit n'est pas un jeu.");
         }
 
+        // Garba Master : jeu Phaser autonome à /jeu, pas de game_html
+        if ($product->slug === 'garba-master') {
+            return redirect()->route('jeu');
+        }
+
         if (empty($product->game_html)) {
             abort(404, "Fichier de jeu introuvable.");
         }
