@@ -356,6 +356,17 @@
                                 <i class="bi bi-download"></i> Télécharger
                             </a>
                         @endif
+                    @elseif((int)$product->price <= 0)
+                        {{-- Produit gratuit : claim immédiat --}}
+                        <form method="POST" action="{{ route('marketplace.claim-free', $product) }}">
+                            @csrf
+                            <button type="submit" class="cb-btn-success" style="width:100%;justify-content:center;">
+                                <i class="bi bi-unlock"></i> Accéder gratuitement
+                            </button>
+                        </form>
+                        <div style="font-size:11px;color:var(--cb-muted);text-align:center;margin-top:6px;">
+                            Gratuit · ajouté à votre espace
+                        </div>
                     @else
                         <form method="POST" action="{{ route('paystack.marketplace.buy', $product) }}">
                             @csrf

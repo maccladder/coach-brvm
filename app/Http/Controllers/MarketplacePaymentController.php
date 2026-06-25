@@ -585,4 +585,46 @@ class MarketplacePaymentController extends Controller
         return redirect()->route('my.products')
             ->with('success', "✅ Paiement Paystack confirmé. Produit débloqué.");
     }
+
+    /**
+     * Claim gratuit : ajoute un produit price=0 à la collection de l'utilisateur.
+     */
+    public function claimFree(Request $request, MarketplaceProduct $product)
+    {
+        if ((int) $product->price > 0) {
+            abort(403, 'Ce produit n\'est pas gratuit.');
+        }
+
+        $user = $request->user();
+
+        $hasAccess = $user->purchasedProducts()
+            ->where('marketplace_products.id', $product->id)
+            ->wherePivot('status', 'paid')
+            ->exists()
+            || $product->isGrantedTo($user);
+
+        if (!$hasAccess) {
+            DB::table('marketplace_purchases')->insertOrIgnore([
+                'user_id'      => $user->id,
+                'product_id'   => $product->id,
+                'amount'       => 0,
+                'currency'     => 'XOF',
+                'provider'     => 'free',
+                'provider_ref' => 'free-' . Str::uuid(),
+                'status'       => 'paid',
+                'paid_at'      => now(),
+                'created_at'   => now(),
+                'updated_at'   => now(),
+            ]);
+
+            Log::info('Marketplace claim gratuit', [
+                'user_id'    => $user->id,
+                'product_id' => $product->id,
+                'slug'       => $product->slug,
+            ]);
+        }
+
+        return redirect()->route('my.products')
+            ->with('success', '🎮 ' . $product->title . ' ajouté à votre collection !');
+    }
 }

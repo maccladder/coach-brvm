@@ -775,6 +775,11 @@ Route::middleware('auth')->group(function () {
 Route::get('/paystack/marketplace/callback', [\App\Http\Controllers\MarketplacePaymentController::class, 'paystackCallback'])
     ->name('paystack.marketplace.callback');
 
+// Claim gratuit pour les produits price=0 (ex: Garba Master)
+Route::post('/marketplace/{product}/claim-free', [\App\Http\Controllers\MarketplacePaymentController::class, 'claimFree'])
+    ->name('marketplace.claim-free')
+    ->middleware('auth');
+
 
     // ✅ Paystack courses (auth)
 Route::middleware('auth')->group(function () {
@@ -998,7 +1003,22 @@ Route::middleware(['auth', 'admin.code'])->prefix('admin')->name('admin.')->grou
 // Jeu Phaser — page + API sauvegarde (connecté seulement)
 // ═══════════════════════════════════════════════════════
 Route::middleware('auth')->group(function () {
-    Route::get('/jeu', fn () => view('jeu.garba'))->name('jeu');
+    Route::get('/jeu', function () {
+        $user    = auth()->user();
+        $product = \App\Models\MarketplaceProduct::where('slug', 'garba-master')->first();
+        if ($product) {
+            $hasAccess = $user->purchasedProducts()
+                ->where('marketplace_products.id', $product->id)
+                ->wherePivot('status', 'paid')
+                ->exists()
+                || $product->isGrantedTo($user);
+            if (!$hasAccess) {
+                return redirect()->route('marketplace.show', 'garba-master')
+                    ->with('info', 'Ajoutez Garba Master à votre collection pour jouer — c\'est gratuit !');
+            }
+        }
+        return view('jeu.garba');
+    })->name('jeu');
     Route::get('/api/jeu/load',  [\App\Http\Controllers\GameSaveController::class, 'load'])->name('jeu.load');
     Route::post('/api/jeu/save',  [\App\Http\Controllers\GameSaveController::class, 'save']) ->name('jeu.save');
     Route::post('/api/jeu/reset', [\App\Http\Controllers\GameSaveController::class, 'reset'])->name('jeu.reset');

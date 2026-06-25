@@ -198,10 +198,15 @@
 
                                 <div class="myp-card-actions">
                                     @if($p->type === 'game')
-                                        <a href="{{ route('my.products.play', $p) }}"
-                                           class="cb-btn-purple">
-                                            🎮 Jouer
-                                        </a>
+                                        @if($p->slug === 'garba-master')
+                                            <a href="{{ route('jeu') }}" class="cb-btn-purple">
+                                                🎮 Jouer
+                                            </a>
+                                        @else
+                                            <a href="{{ route('my.products.play', $p) }}" class="cb-btn-purple">
+                                                🎮 Jouer
+                                            </a>
+                                        @endif
                                     @elseif($p->type === 'video')
                                         <a href="{{ route('my.products.watch', $p) }}"
                                            class="cb-btn-green">
