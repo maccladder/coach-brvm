@@ -794,8 +794,20 @@ export default class Maquis extends Phaser.Scene {
 
     agrandirMaquis() {
         const palierMax = 3;
-        // Palier 3 déjà atteint → écran de fin
+        // Palier max → vérifier les conditions avant d'afficher l'écran de fin
         if (this.niveauMaquis >= palierMax) {
+            const cond = this._conditionsAgrandir();
+            if (!cond.tout) {
+                this.tweens.add({ targets: this.btnAgrandir, x: '+=4', duration: 50, yoyo: true, repeat: 3 });
+                const manque = [];
+                if (!cond.tablesOk) manque.push('tables au max');
+                if (!cond.servOk)   manque.push('équipe complète');
+                if (!cond.chefOk)   manque.push('chef au max');
+                if (!cond.soldOk)   manque.push('1 000 000 cauris');
+                this.afficherMessage('Il manque : ' + manque.join(', ') + ' !');
+                return;
+            }
+            // Toutes les conditions OK → félicitations
             if (!this._enPause) this.togglePause();
             if (window.afficherEcranFin) window.afficherEcranFin();
             return;
