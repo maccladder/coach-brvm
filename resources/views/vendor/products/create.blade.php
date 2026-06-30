@@ -120,6 +120,14 @@
                             </div>
                         </div>
 
+                        {{-- Lien Udemy (affiché uniquement si type = video) --}}
+                        <div class="col-12" id="fieldUdemy" style="display:none;">
+                            <label class="vd-label">Lien Udemy <span style="color:var(--cb-muted);">(optionnel)</span></label>
+                            <input name="udemy_url" type="url" class="vd-input form-control" value="{{ old('udemy_url') }}" placeholder="https://www.udemy.com/course/mon-cours/">
+                            @error('udemy_url')<div class="vd-error">{{ $message }}</div>@enderror
+                            <div class="vd-help">Si renseigné, un bouton “Payer sur Udemy” (carte/PayPal) apparaîtra sur la page du produit.</div>
+                        </div>
+
                         {{-- Champ HTML du jeu (affiché uniquement si type = game) --}}
                         <div class="col-12" id="fieldGameHtml" style="display:none;">
                             <label class="vd-label">Fichier HTML du jeu <span style="color:var(--cb-muted);">(optionnel au draft)</span></label>
@@ -153,12 +161,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const fileInput     = document.getElementById('fileInput');
     const fieldFile     = document.getElementById('fieldFile');
     const fieldGameHtml = document.getElementById('fieldGameHtml');
+    const fieldUdemy    = document.getElementById('fieldUdemy');
 
     function refresh() {
         const t = sel.value;
         const isGame = t === 'game';
         fieldFile.style.display     = isGame ? 'none' : '';
         fieldGameHtml.style.display = isGame ? ''     : 'none';
+        fieldUdemy.style.display    = t === 'video'   ? '' : 'none';
 
         if (t === 'book')     { fileInput.accept = 'application/pdf'; fileHelp.innerHTML = 'Type PDF : fichier <strong>.pdf</strong> · Obligatoire à la soumission.'; }
         else if (t === 'software') { fileInput.accept = '.zip,.rar,application/zip,application/x-rar-compressed'; fileHelp.innerHTML = 'Type ZIP : <strong>.zip</strong> ou <strong>.rar</strong> · Obligatoire à la soumission.'; }

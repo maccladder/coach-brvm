@@ -178,6 +178,17 @@
         display: flex; align-items: center; gap: 8px;
     }
 
+    .mp-udemy-box {
+        background: rgba(120,80,200,.06);
+        border: 1px solid rgba(120,80,200,.2);
+        border-radius: 3px; padding: 12px 14px;
+        font-size: 12px; color: var(--cb-muted);
+        margin-top: 10px; line-height: 1.5;
+        display: flex; align-items: center; gap: 8px;
+    }
+    .mp-udemy-box a { color: #7850C8; font-weight: 700; text-decoration: none; }
+    .mp-udemy-box a:hover { text-decoration: underline; }
+
     /* Assets list */
     .mp-section-title {
         font-family: 'Syne', sans-serif; font-size: 11px;
@@ -405,6 +416,16 @@
                        target="_blank" rel="noopener">
                         <i class="bi bi-whatsapp"></i> Contacter le développeur
                     </a>
+                @endif
+
+                @if($product->type === 'video' && !empty($product->udemy_url) && empty($isOwned))
+                    <div class="mp-udemy-box">
+                        <i class="bi bi-credit-card-2-front"></i>
+                        <span>
+                            Vous souhaitez payer par carte ou PayPal ?
+                            <a href="{{ $product->udemy_url }}" target="_blank" rel="noopener noreferrer">Payez sur Udemy ici !</a>
+                        </span>
+                    </div>
                 @endif
 
                 <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--cb-border);

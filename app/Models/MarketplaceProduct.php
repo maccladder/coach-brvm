@@ -11,7 +11,7 @@ class MarketplaceProduct extends Model
     protected $fillable = [
         'user_id',
         'category_id','title','slug','type','description',
-        'support_whatsapp',
+        'support_whatsapp','udemy_url',
         'price','pages_count',
         'game_html',
         'cover_image_path','status','is_featured',

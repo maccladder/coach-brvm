@@ -180,6 +180,14 @@
                                 <div class="vd-help" id="fileHelp">PDF → .pdf | ZIP → .zip/.rar | Vidéo → .mp4/.mov/.m4v/.avi</div>
                             </div>
 
+                            {{-- Lien Udemy (affiché uniquement si type = video) --}}
+                            <div class="col-12" id="fieldUdemy" style="display:none;">
+                                <label class="vd-label">Lien Udemy <span style="color:var(--cb-muted);">(optionnel)</span></label>
+                                <input name="udemy_url" type="url" class="vd-input form-control" value="{{ old('udemy_url',$product->udemy_url) }}" placeholder="https://www.udemy.com/course/mon-cours/">
+                                @error('udemy_url')<div class="vd-error">{{ $message }}</div>@enderror
+                                <div class="vd-help">Si renseigné, un bouton “Payer sur Udemy” (carte/PayPal) apparaîtra sur la page du produit.</div>
+                            </div>
+
                             {{-- HTML du jeu (affiché uniquement si type = game) --}}
                             <div class="col-12" id="fieldGameHtml" style="display:none;">
                                 <label class="vd-label">Fichier HTML du jeu</label>
@@ -223,6 +231,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const fileInput     = document.getElementById('fileInput');
     const fieldFile     = document.getElementById('fieldFile');
     const fieldGameHtml = document.getElementById('fieldGameHtml');
+    const fieldUdemy    = document.getElementById('fieldUdemy');
 
     function refresh() {
         if (!sel) return;
@@ -230,6 +239,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const isGame = t === 'game';
         fieldFile.style.display     = isGame ? 'none' : '';
         fieldGameHtml.style.display = isGame ? ''     : 'none';
+        fieldUdemy.style.display    = t === 'video'   ? '' : 'none';
 
         if (t === 'book')     { fileInput.accept = 'application/pdf'; fileHelp.innerHTML = 'Type PDF : fichier <strong style="color:var(--cb-ink);">.pdf</strong>'; }
         else if (t === 'software') { fileInput.accept = '.zip,.rar,application/zip,application/x-rar-compressed'; fileHelp.innerHTML = 'Type ZIP : <strong style="color:var(--cb-ink);">.zip</strong> / <strong style="color:var(--cb-ink);">.rar</strong>'; }

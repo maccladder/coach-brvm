@@ -104,12 +104,15 @@ class VendorProductController extends Controller
             'type'             => ['required','in:book,video,software,game'],
             'description'      => ['nullable','string'],
             'support_whatsapp' => ['nullable','string','max:30'],
+            'udemy_url'        => ['nullable','url','max:500'],
             'price'            => ['required','numeric','min:0'],
             'cover_image'      => ['nullable','image','max:' . self::MAX_COVER_KB],
 
             // fichier produit (optionnel au draft, sauf game qui passe par game_html_file)
             'file'             => ['nullable','file'],
             'game_html_file'   => ['nullable','file','mimes:html','max:10240'], // 10 MB max
+        ], [], [
+            'udemy_url' => 'lien Udemy',
         ]);
 
         $data['support_whatsapp'] = $this->cleanWhatsapp($data['support_whatsapp'] ?? null);
@@ -161,6 +164,7 @@ class VendorProductController extends Controller
             'type'             => $data['type'],
             'description'      => $data['description'] ?? null,
             'support_whatsapp' => $data['support_whatsapp'],
+            'udemy_url'        => $data['udemy_url'] ?? null,
             'price'            => $data['price'],
             'cover_image_path' => $coverPath,
             'status'           => 'draft',
@@ -219,10 +223,13 @@ class VendorProductController extends Controller
             'type'             => ['required','in:book,video,software,game'],
             'description'      => ['nullable','string'],
             'support_whatsapp' => ['nullable','string','max:30'],
+            'udemy_url'        => ['nullable','url','max:500'],
             'price'            => ['required','numeric','min:0'],
             'cover_image'      => ['nullable','image','max:' . self::MAX_COVER_KB],
             'file'             => ['nullable','file'],
             'game_html_file'   => ['nullable','file','mimes:html','max:10240'],
+        ], [], [
+            'udemy_url' => 'lien Udemy',
         ]);
 
         $data['support_whatsapp'] = $this->cleanWhatsapp($data['support_whatsapp'] ?? null);
@@ -253,6 +260,7 @@ class VendorProductController extends Controller
         $product->type             = $data['type'];
         $product->description      = $data['description'] ?? null;
         $product->support_whatsapp = $data['support_whatsapp'];
+        $product->udemy_url        = $data['udemy_url'] ?? null;
         $product->price            = $data['price'];
 
         // Mise à jour du HTML de jeu si un nouveau fichier est fourni

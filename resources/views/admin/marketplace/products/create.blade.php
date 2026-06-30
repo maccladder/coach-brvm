@@ -147,6 +147,18 @@
                         Colle le <b>Video ID</b> depuis Cloudflare Stream (champ “Video ID” dans le dashboard).
                     </div>
                 </div>
+
+                <div class="col-12 mt-3">
+                    <label class="form-label">Lien Udemy (optionnel)</label>
+                    <input type="url"
+                           name="udemy_url"
+                           value="{{ old('udemy_url') }}"
+                           class="form-control"
+                           placeholder="Ex: https://www.udemy.com/course/mon-cours/">
+                    <div class="form-text">
+                        Si renseigné, un bouton “Payer sur Udemy” (carte/PayPal) apparaîtra sur la page du produit.
+                    </div>
+                </div>
             </div>
 
             <hr class="my-4">

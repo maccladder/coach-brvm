@@ -88,6 +88,13 @@
                             </div>
                         @endif
 
+                        @if($product->type === 'video' && $product->udemy_url)
+                            <div class="mt-2 small">
+                                <span class="text-muted">Lien Udemy :</span>
+                                <a href="{{ $product->udemy_url }}" target="_blank" rel="noopener noreferrer">{{ $product->udemy_url }}</a>
+                            </div>
+                        @endif
+
                         @if($product->description)
                             <div class="mt-3">
                                 <div class="text-muted small mb-1">Description</div>

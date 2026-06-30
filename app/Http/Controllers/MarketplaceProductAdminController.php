@@ -128,6 +128,7 @@ class MarketplaceProductAdminController extends Controller
             'status'      => ['required', 'in:draft,published,pending,rejected'],
             'is_featured' => ['nullable', 'boolean'],
             'support_whatsapp' => ['nullable', 'string', 'max:32'],
+            'udemy_url'   => ['nullable', 'url', 'max:500'],
             'cover'       => ['nullable', 'image', 'max:' . self::MAX_COVER_KB],
             'file'        => ['nullable', 'file', 'max:' . self::MAX_FILE_KB],
             'cloudflare_video_id' => ['nullable', 'string', 'max:255'],
@@ -135,6 +136,7 @@ class MarketplaceProductAdminController extends Controller
         ], [], [
             'file'  => 'fichier produit',
             'cover' => 'image de couverture',
+            'udemy_url' => 'lien Udemy',
         ]);
 
         $data['support_whatsapp'] = $this->cleanWhatsapp($data['support_whatsapp'] ?? null);
@@ -187,6 +189,7 @@ class MarketplaceProductAdminController extends Controller
             'type'             => $data['type'],
             'description'      => $data['description'] ?? null,
             'support_whatsapp' => $data['support_whatsapp'],
+            'udemy_url'        => $data['udemy_url'] ?? null,
             'price'            => (int) $data['price'],
             'status'           => $data['status'],
             'is_featured'      => (bool) ($data['is_featured'] ?? false),
@@ -258,10 +261,13 @@ class MarketplaceProductAdminController extends Controller
             'status'      => ['required', 'in:draft,published,pending,rejected'],
             'is_featured' => ['nullable', 'boolean'],
             'support_whatsapp' => ['nullable', 'string', 'max:32'],
+            'udemy_url'   => ['nullable', 'url', 'max:500'],
             'cover'       => ['nullable', 'image', 'max:' . self::MAX_COVER_KB],
             'file'        => ['nullable', 'file', 'max:' . self::MAX_FILE_KB],
             'cloudflare_video_id' => ['nullable', 'string', 'max:255'],
             'game_html_file' => ['nullable', 'file', 'mimes:html', 'max:10240'],
+        ], [], [
+            'udemy_url' => 'lien Udemy',
         ]);
 
         $data['support_whatsapp'] = $this->cleanWhatsapp($data['support_whatsapp'] ?? null);
@@ -305,6 +311,7 @@ class MarketplaceProductAdminController extends Controller
             'type'             => $data['type'],
             'description'      => $data['description'] ?? null,
             'support_whatsapp' => $data['support_whatsapp'],
+            'udemy_url'        => $data['udemy_url'] ?? null,
             'price'            => (int) $data['price'],
             'status'           => $data['status'],
             'is_featured'      => (bool) ($data['is_featured'] ?? false),
