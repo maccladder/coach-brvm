@@ -678,6 +678,12 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/games/{product}/premium-callback', [\App\Http\Controllers\GameScoreController::class, 'premiumCallback'])
         ->name('games.premium-callback');
 
+    // Classement du jeu "Questions pour un vrai môgô" (appelé en fetch depuis le HTML du jeu)
+    Route::post('/jeux/vrai-mogo/score', [\App\Http\Controllers\VraiMogoScoreController::class, 'store'])
+        ->name('vraimogo.score.store');
+    Route::get('/jeux/vrai-mogo/classement', [\App\Http\Controllers\VraiMogoScoreController::class, 'leaderboard'])
+        ->name('vraimogo.leaderboard');
+
 });
 
 

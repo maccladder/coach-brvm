@@ -14,6 +14,7 @@ class GameScore extends Model
         'score',
         'distance',
         'coins',
+        'correct_answers',
         'created_at',
     ];
 
