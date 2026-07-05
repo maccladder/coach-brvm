@@ -12,6 +12,7 @@ class GameSave extends Model
         'tables_actives',
         'nb_serveuses',
         'niveau_menu',
+        'niveau_maquis',
         'cout_table',
         'cout_serveuse',
     ];

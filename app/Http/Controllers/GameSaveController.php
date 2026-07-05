@@ -41,7 +41,7 @@ class GameSaveController extends Controller
 
         $data = $request->validate([
             'solde'          => ['required', 'integer', 'min:0'],
-            'tables_actives' => ['required', 'integer', 'min:1', 'max:8'],
+            'tables_actives' => ['required', 'integer', 'min:1', 'max:10'],
             'nb_serveuses'   => ['required', 'integer', 'min:1', 'max:5'],
             'niveau_menu'    => ['required', 'integer', 'min:1', 'max:4'],
             'niveau_maquis'  => ['required', 'integer', 'min:1', 'max:3'],

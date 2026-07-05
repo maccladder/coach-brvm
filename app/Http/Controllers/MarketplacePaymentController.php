@@ -321,6 +321,11 @@ class MarketplacePaymentController extends Controller
             }
         }
 
+        if (!$productSlug) {
+            $pid = (int) data_get($payment?->meta, 'product_id');
+            if ($pid) $productSlug = MarketplaceProduct::where('id', $pid)->value('slug');
+        }
+
         if ($productSlug) {
             return redirect()
                 ->route('marketplace.show', $productSlug)
@@ -575,6 +580,8 @@ class MarketplacePaymentController extends Controller
         }
 
         // default redirects
+        $productSlug = $productSlug ?: $product?->slug;
+
         if ($productSlug) {
             return redirect()
                 ->route('marketplace.show', $productSlug)
@@ -624,7 +631,7 @@ class MarketplacePaymentController extends Controller
             ]);
         }
 
-        return redirect()->route('my.products')
-            ->with('success', '🎮 ' . $product->title . ' ajouté à votre collection !');
+        return redirect()->route('marketplace.show', $product->slug)
+            ->with('success', '🎮 ' . $product->title . ' ajouté à votre collection ! Tu peux y accéder maintenant.');
     }
 }

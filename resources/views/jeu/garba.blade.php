@@ -475,7 +475,8 @@
             btnPromo.disabled = false;
         };
         // polling de sécurité au cas où la callback manque
-        setInterval(() => {
+        const _promoIntervalId = setInterval(() => {
+            if (window.jeuEnPause?.()) return;
             if (window.jeuPromoDispo) btnPromo.disabled = !window.jeuPromoDispo();
         }, 2000);
 
@@ -488,6 +489,7 @@
         btnQuitter.addEventListener('click', () => {
             const ok = confirm('Quitter le maquis ? Ta progression est sauvegardée.');
             if (!ok) return;
+            clearInterval(_promoIntervalId);
             if (window.jeuQuitter) window.jeuQuitter();
             // Réinitialise l'état du bouton Pause dans la barre
             pauseActif = false;

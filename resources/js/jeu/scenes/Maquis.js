@@ -10,6 +10,8 @@ export default class Maquis extends Phaser.Scene {
         { sx: 195, sy: 400, x: 192, y: 412, occupe: false, active: false, sprite: null },
         { sx: 260, sy: 360, x: 257, y: 372, occupe: false, active: false, sprite: null },
         { sx: 160, sy: 480, x: 157, y: 492, occupe: false, active: false, sprite: null },
+        { sx: 100, sy: 545, x: 97,  y: 557, occupe: false, active: false, sprite: null },
+        { sx: 215, sy: 530, x: 212, y: 542, occupe: false, active: false, sprite: null },
     ];
     ENTREE  = { x: 300, y: 660 };
     SORTIE  = { x: 300, y: 820 };
@@ -105,7 +107,7 @@ export default class Maquis extends Phaser.Scene {
                 { x: 148, y: 322 },
                 { x: 105, y: 330 },
             ],
-            spritesClients:  ['client7', 'client8', 'client9', 'client10', 'client4'],
+            spritesClients:  ['client7', 'client8', 'client9', 'client10', 'client11', 'client4'],
             tablesCoords: [
                 { sx: 62,  sy: 368, x: 59,  y: 380 },
                 { sx: 170, sy: 352, x: 167, y: 364 },
@@ -142,7 +144,6 @@ export default class Maquis extends Phaser.Scene {
         this.load.image('maquis-bg-3',  '/jeu-assets/img/maquis-bg-3.png');
         this.load.image('table2',       '/jeu-assets/img/table2.png');
         this.load.image('boucantier2',  '/jeu-assets/img/boucantier2.png');
-        this.load.image('chef5',        '/jeu-assets/img/chef5.png');
         this.load.image('chef6',        '/jeu-assets/img/chef6.png');
         this.load.image('chef7',        '/jeu-assets/img/chef7.png');
         this.load.image('chef8',        '/jeu-assets/img/chef8.png');
@@ -157,6 +158,7 @@ export default class Maquis extends Phaser.Scene {
         this.load.image('client8',      '/jeu-assets/img/client8.png');
         this.load.image('client9',      '/jeu-assets/img/client9.png');
         this.load.image('client10',     '/jeu-assets/img/client10.png');
+        this.load.image('client11',     '/jeu-assets/img/client11.png');
         this.load.image('table3',       '/jeu-assets/img/table3.png');
         this.load.image('boucantier3',  '/jeu-assets/img/boucantier3.png');
         this.load.image('chef9',        '/jeu-assets/img/chef9.png');
@@ -323,6 +325,7 @@ export default class Maquis extends Phaser.Scene {
             this._enPause = false;
             this.scene.restart();
         };
+        window.jeuEnPause     = () => this._enPause;
     }
 
     demarrerSpawn(delai) {
@@ -338,15 +341,12 @@ export default class Maquis extends Phaser.Scene {
         this.demarrerSpawn(this.delaiSpawnPromo);
         this.jouerSon('promo');
         this.afficherMessage('📢 Promo ! Les clients affluent !');
-        this.btnPromoBg?.setFillStyle(0x999088);
         this.time.delayedCall(8000, () => {
             this._promoActive = false;
             this.demarrerSpawn(this.delaiSpawnNormal);
             this._promoCooldown = true;
-            this.btnPromoBg?.setFillStyle(0x999088);
             this.time.delayedCall(20000, () => {
                 this._promoCooldown = false;
-                this.btnPromoBg?.setFillStyle(0xff7043);
                 window._htmlPromoUpdate?.();
             });
         });
@@ -911,8 +911,6 @@ export default class Maquis extends Phaser.Scene {
             } else if (!cond.tout && this._tweenBtnAgrandir) {
                 this._tweenBtnAgrandir.stop(); this._tweenBtnAgrandir = null;
             }
-            return;
-            this._tweenBtnAgrandir?.stop(); this._tweenBtnAgrandir = null;
             return;
         }
         this.btnAgrandir.setVisible(true);
