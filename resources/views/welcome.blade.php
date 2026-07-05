@@ -666,6 +666,13 @@
                         </div>
                         <span class="cb-chip cb-chip-free">Gratuit</span>
                     </a>
+                    <a href="{{ route('bubbles.index') }}" class="cb-tool-item" style="text-decoration:none;">
+                        <div>
+                            <div class="cb-tool-name">🫧 Bulles du marché — plein écran</div>
+                            <div class="cb-tool-desc">Immersion totale dans les variations du jour</div>
+                        </div>
+                        <span class="cb-chip cb-chip-new">Nouveau</span>
+                    </a>
                     <a href="{{ route('books.index') }}" class="cb-tool-item" style="text-decoration:none;">
                         <div>
                             <div class="cb-tool-name">📚 Mini-cours en livre</div>
@@ -884,7 +891,10 @@
                 <p style="font-size:16px;color:var(--cb-muted);line-height:1.75;font-weight:300;margin-bottom:28px;">
                     Repère en un coup d'œil quelles sociétés performent, lesquelles reculent, et les tendances de la bourse ouest-africaine sur la semaine.
                 </p>
-                <a href="{{ route('radar.index') }}" class="cb-cta-primary">📡 Ouvrir le Radar Marché</a>
+                <div class="d-flex flex-wrap gap-2">
+                    <a href="{{ route('radar.index') }}" class="cb-cta-primary">📡 Ouvrir le Radar Marché</a>
+                    <a href="{{ route('bubbles.index') }}" class="cb-cta-outline">🫧 Immersion plein écran</a>
+                </div>
             </div>
             <div class="col-lg-6 cbr cbr2">
                 <div class="cb-radar-wrap">

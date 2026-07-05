@@ -539,6 +539,10 @@ Route::get('/radar-marche/data', [PerformanceController::class, 'data'])->name('
 Route::get('/radar/bubbles-latest', [App\Http\Controllers\RadarController::class, 'bubblesLatest'])
     ->name('radar.bubblesLatest');
 
+// Vue plein écran des bulles marché (style CryptoBubbles)
+Route::get('/bubbles', [App\Http\Controllers\RadarController::class, 'fullscreen'])
+    ->name('bubbles.index');
+
 // Historique de cours par ticker (utilisé par la modale Phase 3)
 Route::get('/api/stock/{ticker}/history', [App\Http\Controllers\Api\StockHistoryController::class, 'history'])
     ->name('api.stock.history');

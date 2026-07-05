@@ -29,4 +29,9 @@ class RadarController extends Controller
             'bubbles' => $rows,
         ]);
     }
+
+    public function fullscreen()
+    {
+        return view('bubbles.index');
+    }
 }
