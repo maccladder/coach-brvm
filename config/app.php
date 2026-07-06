@@ -17,6 +17,19 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Email du propriétaire de la plateforme
+    |--------------------------------------------------------------------------
+    |
+    | Quand ce compte crée un produit via le formulaire vendeur (/vendor/products),
+    | le produit est traité comme un produit officiel Boursiv (user_id = null)
+    | plutôt que comme un produit de vendeur tiers.
+    |
+    */
+
+    'owner_email' => env('OWNER_EMAIL', 'maccladder@gmail.com'),
+
+    /*
+    |--------------------------------------------------------------------------
     | Application Environment
     |--------------------------------------------------------------------------
     |

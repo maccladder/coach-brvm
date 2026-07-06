@@ -18,6 +18,25 @@ class VendorProductController extends Controller
     private const MAX_ZIP_KB   = 409600;   // 400MB
     private const MAX_VIDEO_KB = 512000;   // 500MB (ajuste si tu veux)
 
+    private function isPlatformOwner(Request $request): bool
+    {
+        return strcasecmp($request->user()->email, config('app.owner_email')) === 0;
+    }
+
+    /**
+     * Vrai si l'utilisateur peut gérer ce produit vendeur : soit il en est le
+     * propriétaire, soit c'est un produit officiel (user_id null) et lui-même
+     * est le propriétaire de la plateforme.
+     */
+    private function ownsProduct(Request $request, MarketplaceProduct $product): bool
+    {
+        if ($product->user_id === $request->user()->id) {
+            return true;
+        }
+
+        return $product->user_id === null && $this->isPlatformOwner($request);
+    }
+
     private function cleanWhatsapp(?string $value): ?string
     {
         $raw = trim((string) $value);
@@ -155,9 +174,14 @@ class VendorProductController extends Controller
             $gameHtml = $this->sanitizeGameHtml($rawHtml);
         }
 
+        // Le propriétaire de la plateforme n'est pas un vendeur tiers : ses produits
+        // sont traités comme officiels (user_id null) pour ne pas être bloqués par
+        // le garde-fou ownership de l'affiliation.
+        $isOwner = $this->isPlatformOwner($request);
+
         // create product (draft)
         $product = MarketplaceProduct::create([
-            'user_id'          => $request->user()->id,
+            'user_id'          => $isOwner ? null : $request->user()->id,
             'category_id'      => $data['category_id'],
             'title'            => $data['title'],
             'slug'             => $slug,
@@ -192,7 +216,7 @@ class VendorProductController extends Controller
 
     public function edit(Request $request, MarketplaceProduct $product)
     {
-        abort_unless($product->user_id === $request->user()->id, 403);
+        abort_unless($this->ownsProduct($request, $product), 403);
 
         $product->load('assets');
         $categories = MarketplaceCategory::orderBy('name')->get();
@@ -209,7 +233,7 @@ class VendorProductController extends Controller
 
     public function update(Request $request, MarketplaceProduct $product)
     {
-        abort_unless($product->user_id === $request->user()->id, 403);
+        abort_unless($this->ownsProduct($request, $product), 403);
 
         if ($product->status === 'pending') {
             return back()->with('warning', '⏳ Produit en validation : modification désactivée.');
@@ -315,7 +339,7 @@ class VendorProductController extends Controller
 
     public function submit(Request $request, MarketplaceProduct $product)
     {
-        abort_unless($product->user_id === $request->user()->id, 403);
+        abort_unless($this->ownsProduct($request, $product), 403);
 
         if (!in_array($product->status, ['draft','rejected'], true)) {
             return back()->with('warning', 'Action impossible pour ce statut.');
