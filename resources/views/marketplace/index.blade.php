@@ -395,52 +395,6 @@
             </div>
         </form>
 
-        {{-- ── LettreCI card ── --}}
-        <div class="row g-3 mb-2 cbr">
-            <div class="col-md-6 col-lg-4">
-                @php
-                    $hasLettreCI = auth()->check() && \App\Models\LettreCIAccess::hasActiveAccess(auth()->user());
-                    $lciPrice = number_format(config('services.lettreci.price', 5000), 0, ',', ' ');
-                @endphp
-                <a href="{{ route('lettreci.showcase') }}" class="mp-card" style="border-color:rgba(176,134,46,.18);">
-                    {{-- Cover LettreCI --}}
-                    <div class="mp-card-img" style="position:relative;overflow:hidden;">
-                        @if($hasLettreCI)
-                            <span class="mp-badge-owned">✓ Accès actif</span>
-                        @else
-                            <span class="mp-badge-featured" style="background:rgba(176,134,46,.92);color:#060910;">✨ NOUVEAU</span>
-                        @endif
-                        <img src="{{ asset('img/lettreci-cover.png') }}" alt="LettreCI" style="width:100%;height:100%;object-fit:cover;object-position:center;display:block;">
-                    </div>
-                    {{-- Body --}}
-                    <div class="mp-card-body">
-                        <div class="mp-card-chips">
-                            <span class="mp-chip" style="background:rgba(176,134,46,.08);color:var(--cb-gold);border:1px solid rgba(176,134,46,.2);">🤖 Outil IA</span>
-                            <span class="mp-chip" style="background:rgba(15,92,67,.07);color:var(--cb-forest);border:1px solid rgba(15,92,67,.18);">15 types</span>
-                        </div>
-                        <div class="mp-card-title" style="font-family:'Playfair Display',serif;font-size:16px;font-weight:900;">LettreCI</div>
-                        <div class="mp-card-desc">Lettres administratives générées par IA en 30 secondes — démission, bail, mise en demeure, motivation et bien plus.</div>
-                        <div class="mp-card-footer">
-                            <div>
-                                @if($hasLettreCI)
-                                    <span class="mp-card-price owned">✓ Accès actif</span>
-                                @else
-                                    <span class="mp-card-price">{{ $lciPrice }} FCFA · À vie</span>
-                                @endif
-                            </div>
-                            <div class="mp-card-actions">
-                                @if($hasLettreCI)
-                                    <a href="{{ route('lettreci.dashboard') }}" class="mp-btn-sm mp-btn-dl" onclick="event.stopPropagation()">Ouvrir</a>
-                                @else
-                                    <a href="{{ route('lettreci.showcase') }}" class="mp-btn-sm mp-btn-dl" onclick="event.stopPropagation()">Découvrir</a>
-                                @endif
-                            </div>
-                        </div>
-                    </div>
-                </a>
-            </div>
-        </div>
-
         {{-- ── PRODUITS ── --}}
         @if($products->isEmpty())
             <div class="mp-empty cbr">
