@@ -22,6 +22,11 @@ class GameScoreController extends Controller
             'planteur' => 1000,
             'magnat'   => 2500,
         ],
+        'roi-du-cacao-le-jeu-ivoirien-addictif' => [
+            'turbo'    => 500,
+            'planteur' => 1000,
+            'magnat'   => 2500,
+        ],
     ];
 
     private function resolveFeaturePrice(MarketplaceProduct $product, string $feature): ?int
