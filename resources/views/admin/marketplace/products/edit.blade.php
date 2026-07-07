@@ -82,6 +82,7 @@
                         <option value="book" @selected(old('type', $product->type)==='book')>📘 Livre (PDF)</option>
                         <option value="video" @selected(old('type', $product->type)==='video')>🎬 Vidéo</option>
                         <option value="software" @selected(old('type', $product->type)==='software')>🧩 Logiciel</option>
+                        <option value="game" @selected(old('type', $product->type)==='game')>🎮 Jeu (HTML)</option>
                     </select>
                 </div>
 
@@ -251,6 +252,26 @@
                 </div>
             </div>
 
+            {{-- ✅ JEU (fichier HTML autonome) --}}
+            <div class="row g-3 mt-0" id="gameBlock" style="display:none;">
+                <div class="col-12">
+                    <label class="form-label">Fichier HTML du jeu</label>
+
+                    @if($product->game_html)
+                        <div class="alert alert-light border">
+                            <div class="fw-semibold">Fichier actuel : {{ number_format(strlen($product->game_html) / 1024, 0) }} Ko déjà enregistrés.</div>
+                        </div>
+                    @else
+                        <div class="form-text mb-2">Aucun fichier de jeu uploadé pour ce produit.</div>
+                    @endif
+
+                    <input type="file" name="game_html_file" class="form-control" accept=".html,text/html">
+                    <div class="form-text">
+                        Si tu uploades ici, ça remplace le jeu actuel. (max 10MB, fichier .html)
+                    </div>
+                </div>
+            </div>
+
             <hr class="my-4">
 
             <div class="d-flex justify-content-end gap-2">
@@ -273,17 +294,27 @@
     const fileInput  = document.getElementById('fileInput');
 
     const videoBlock = document.getElementById('videoBlock');
+    const gameBlock  = document.getElementById('gameBlock');
 
     function refresh(){
         const t = typeSelect.value;
 
         if (t === 'video') {
             fileBlock.style.display  = 'none';
+            gameBlock.style.display  = 'none';
             videoBlock.style.display = 'block';
             return;
         }
 
+        if (t === 'game') {
+            fileBlock.style.display  = 'none';
+            videoBlock.style.display = 'none';
+            gameBlock.style.display  = 'block';
+            return;
+        }
+
         videoBlock.style.display = 'none';
+        gameBlock.style.display  = 'none';
         fileBlock.style.display  = 'block';
 
         if (t === 'book') {

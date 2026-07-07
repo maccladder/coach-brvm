@@ -51,6 +51,7 @@
                         <option value="book" @selected(old('type','book')==='book')>📘 Livre (PDF)</option>
                         <option value="video" @selected(old('type')==='video')>🎬 Vidéo</option>
                         <option value="software" @selected(old('type')==='software')>🧩 Logiciel</option>
+                        <option value="game" @selected(old('type')==='game')>🎮 Jeu (HTML)</option>
                     </select>
                 </div>
 
@@ -161,6 +162,17 @@
                 </div>
             </div>
 
+            {{-- ✅ JEU (fichier HTML autonome) --}}
+            <div class="row g-3 mt-0" id="gameBlock" style="display:none;">
+                <div class="col-12">
+                    <label class="form-label">Fichier HTML du jeu *</label>
+                    <input type="file" name="game_html_file" class="form-control" accept=".html,text/html">
+                    <div class="form-text">
+                        Upload obligatoire : fichier .html autonome (max 10MB).
+                    </div>
+                </div>
+            </div>
+
             <hr class="my-4">
 
             <div class="d-flex justify-content-end gap-2">
@@ -184,18 +196,29 @@
     const fileInput  = document.getElementById('fileInput');
 
     const videoBlock = document.getElementById('videoBlock');
+    const gameBlock  = document.getElementById('gameBlock');
 
     function refresh(){
         const t = typeSelect.value;
 
         if (t === 'video') {
             fileBlock.style.display  = 'none';
+            gameBlock.style.display  = 'none';
             videoBlock.style.display = 'block';
             fileInput.value = '';
             return;
         }
 
+        if (t === 'game') {
+            fileBlock.style.display  = 'none';
+            videoBlock.style.display = 'none';
+            gameBlock.style.display  = 'block';
+            fileInput.value = '';
+            return;
+        }
+
         videoBlock.style.display = 'none';
+        gameBlock.style.display  = 'none';
         fileBlock.style.display  = 'block';
 
         if (t === 'book') {
