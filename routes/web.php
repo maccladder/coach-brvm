@@ -94,6 +94,17 @@ Route::get('/marketplace', [MarketplaceController::class, 'index'])->name('marke
 Route::get('/marketplace/lettreci', [\App\Http\Controllers\LettreCI\LettreCIController::class, 'showcase'])->name('lettreci.showcase');
 Route::get('/marketplace/{slug}', [MarketplaceController::class, 'show'])->name('marketplace.show');
 
+// ✅ URL courte pour la section jeux du marketplace
+Route::get('/jeux', function () {
+    $query = array_merge(request()->query(), ['type' => 'game']);
+    return redirect('/marketplace?' . http_build_query($query), 301);
+})->name('jeux');
+
+Route::get('/games', function () {
+    $qs = request()->getQueryString();
+    return redirect('/jeux' . ($qs ? '?' . $qs : ''), 301);
+})->name('games.alias');
+
 // ✅ Activation software (après achat) — page d'instructions/licence
 Route::middleware('auth')->group(function () {
     Route::get('/marketplace/{product}/activation', [MarketplaceController::class, 'activation'])
