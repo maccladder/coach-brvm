@@ -11,6 +11,24 @@ use Illuminate\Support\Facades\Log;
 
 class GameScoreController extends Controller
 {
+    // Prix (en XOF) autorisés par feature déverrouillable, par produit — le client ne choisit
+    // jamais le prix, seulement quelle feature il veut acheter. Évite qu'un joueur falsifie le montant.
+    private const FEATURE_PRICES = [
+        'abidjan-run-le-jeu-run-a-livoirienne' => [
+            'premium_chars' => 1000,
+        ],
+        'roi-du-cacao' => [
+            'turbo'    => 500,
+            'planteur' => 1000,
+            'magnat'   => 2500,
+        ],
+    ];
+
+    private function resolveFeaturePrice(MarketplaceProduct $product, string $feature): ?int
+    {
+        return self::FEATURE_PRICES[$product->slug][$feature] ?? null;
+    }
+
     /**
      * POST /api/games/{product}/score
      * Enregistre le score d'une partie — appelé via fetch depuis la page play.
@@ -101,6 +119,10 @@ class GameScoreController extends Controller
         $ref     = (string) $request->input('ref');
         $feature = (string) ($request->input('feature', 'premium_chars'));
 
+        if ($this->resolveFeaturePrice($product, $feature) === null) {
+            return response()->json(['error' => 'Fonctionnalité inconnue'], 422);
+        }
+
         // Déjà déverrouillé → renvoyer directement
         $existing = GamePremiumUnlock::where('user_id', $user->id)
             ->where('product_id', $product->id)
@@ -179,27 +201,35 @@ class GameScoreController extends Controller
             return response()->json(['error' => 'Produit invalide'], 422);
         }
 
+        // Nom générique "feature", avec compat sur l'ancien champ "char" (Abidjan Run).
+        $feature = (string) $request->input('feature', $request->input('char', 'premium_chars'));
+
+        $price = $this->resolveFeaturePrice($product, $feature);
+        if ($price === null) {
+            return response()->json(['error' => 'Fonctionnalité inconnue'], 422);
+        }
+
         // Déjà déverrouillé → pas besoin de payer
         $existing = GamePremiumUnlock::where('user_id', $user->id)
             ->where('product_id', $product->id)
-            ->where('feature', 'premium_chars')
+            ->where('feature', $feature)
             ->first();
 
         if ($existing) {
             return response()->json(['already_unlocked' => true]);
         }
 
-        $ref = 'ABRUN_PREM_' . round(microtime(true) * 1000);
+        $ref = 'GAME' . $product->id . '_' . strtoupper($feature) . '_' . round(microtime(true) * 1000);
 
         $url = $paystack->initialize([
             'email'        => $user->email,
-            'amount'       => 1000, // 1000 XOF (service * 100 = 100000 kobo)
+            'amount'       => $price, // en XOF (le service multiplie par 100 pour Paystack)
             'currency'     => 'XOF',
             'reference'    => $ref,
             'callback_url' => route('games.premium-callback', $product),
             'metadata'     => [
                 'product_id' => $product->id,
-                'feature'    => 'premium_chars',
+                'feature'    => $feature,
                 'user_id'    => $user->id,
             ],
         ]);
@@ -234,22 +264,26 @@ class GameScoreController extends Controller
         $reference = (string) $request->query('reference', $request->query('trxref', ''));
 
         if ($reference) {
-            $existing = GamePremiumUnlock::where('user_id', $user->id)
-                ->where('product_id', $product->id)
-                ->where('feature', 'premium_chars')
-                ->first();
+            $data = $paystack->verify($reference);
 
-            if (!$existing) {
-                $data = $paystack->verify($reference);
+            if ($data && ($data['status'] ?? null) === 'success') {
+                // La feature achetée vient des métadonnées enregistrées côté serveur à l'initialisation
+                // (jamais du client), donc pas de risque de spoof.
+                $feature = (string) ($data['metadata']['feature'] ?? 'premium_chars');
 
-                if ($data && ($data['status'] ?? null) === 'success') {
+                $existing = GamePremiumUnlock::where('user_id', $user->id)
+                    ->where('product_id', $product->id)
+                    ->where('feature', $feature)
+                    ->first();
+
+                if ($this->resolveFeaturePrice($product, $feature) !== null && !$existing) {
                     $amountPaid = (int) (($data['amount'] ?? 0) / 100);
 
                     try {
                         GamePremiumUnlock::create([
                             'user_id'      => $user->id,
                             'product_id'   => $product->id,
-                            'feature'      => 'premium_chars',
+                            'feature'      => $feature,
                             'paystack_ref' => $reference,
                             'amount'       => $amountPaid,
                             'unlocked_at'  => now(),

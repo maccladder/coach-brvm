@@ -157,7 +157,14 @@ class MarketplaceMyProductsController extends Controller
             ->where('feature', 'premium_chars')
             ->exists();
 
-        return view('my-products-play', compact('product', 'isPremiumUnlocked'));
+        // Toutes les features VIP déjà débloquées pour ce jeu (générique : plusieurs packs possibles,
+        // ex. Roi du Cacao a 3 packs à des prix différents, contrairement à Abidjan Run qui n'en a qu'un).
+        $unlockedFeatures = GamePremiumUnlock::where('user_id', $user->id)
+            ->where('product_id', $product->id)
+            ->pluck('feature')
+            ->values();
+
+        return view('my-products-play', compact('product', 'isPremiumUnlocked', 'unlockedFeatures'));
     }
 
     // visualiser une vidéo Cloudflare Stream

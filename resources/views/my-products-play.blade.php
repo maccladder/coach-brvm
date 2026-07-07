@@ -192,9 +192,14 @@
         const VERIFY_PREMIUM_URL = '{{ route('games.verify-premium', $product) }}';
         // Statut DB passé par le contrôleur (source de vérité)
         const PREMIUM_UNLOCKED_DB = {{ $isPremiumUnlocked ? 'true' : 'false' }};
+        // Toutes les features VIP débloquées pour ce jeu (générique, plusieurs packs possibles)
+        const UNLOCKED_FEATURES = @json($unlockedFeatures ?? []);
 
         function notifyGameOfUnlock() {
             frame.contentWindow.postMessage({ type: 'CHARS_UNLOCKED' }, '*');
+        }
+        function notifyGameOfVipUnlocks() {
+            frame.contentWindow.postMessage({ type: 'VIP_UNLOCKED', features: UNLOCKED_FEATURES }, '*');
         }
 
         // Si déjà déverrouillé en DB → on notifie dès que l'iframe est chargée
@@ -202,6 +207,9 @@
         if (PREMIUM_UNLOCKED_DB || localStorage.getItem(PREMIUM_KEY) === '1') {
             if (PREMIUM_UNLOCKED_DB) localStorage.setItem(PREMIUM_KEY, '1'); // sync cache
             frame.addEventListener('load', notifyGameOfUnlock);
+        }
+        if (UNLOCKED_FEATURES.length) {
+            frame.addEventListener('load', notifyGameOfVipUnlocks);
         }
 
         // ── Réception du score via postMessage ────────────────
@@ -288,13 +296,15 @@
                     'X-CSRF-TOKEN': CSRF_TOKEN,
                     'Accept': 'application/json',
                 },
-                body: JSON.stringify({ char: char }),
+                body: JSON.stringify({ feature: char, char: char }),
             })
             .then(r => r.json())
             .then(res => {
                 if (res.already_unlocked) {
                     localStorage.setItem(PREMIUM_KEY, '1');
                     notifyGameOfUnlock();
+                    if (!UNLOCKED_FEATURES.includes(char)) UNLOCKED_FEATURES.push(char);
+                    notifyGameOfVipUnlocks();
                     return;
                 }
                 if (res.url) {
