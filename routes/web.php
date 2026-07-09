@@ -105,6 +105,11 @@ Route::get('/games', function () {
     return redirect('/jeux' . ($qs ? '?' . $qs : ''), 301);
 })->name('games.alias');
 
+// ✅ URN Studio — générateur d'affiche d'adhésion (PUBLIC, sans auth)
+Route::get('/urn', function () {
+    return view('urn.index');
+})->name('urn');
+
 // ✅ Activation software (après achat) — page d'instructions/licence
 Route::middleware('auth')->group(function () {
     Route::get('/marketplace/{product}/activation', [MarketplaceController::class, 'activation'])
