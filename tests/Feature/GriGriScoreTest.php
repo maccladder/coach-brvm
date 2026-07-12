@@ -99,6 +99,34 @@ class GriGriScoreTest extends TestCase
         $this->assertEquals(1, GameScore::where('user_id', $user->id)->count());
     }
 
+    public function test_final_score_is_not_blocked_by_level_up_throttle(): void
+    {
+        $product = $this->makeProduct();
+        $user = User::factory()->create();
+        $this->grantAccess($user, $product);
+
+        // Fin de niveau (final:false) puis "Quitter la partie" (final:true) juste après :
+        // le second doit passer même si le premier vient de verrouiller le throttle de niveau.
+        $this->actingAs($user)->postJson('/jeux/gri-gri/score', ['score' => 1000, 'level' => 1, 'coins' => 50, 'final' => false])->assertOk();
+        $res = $this->actingAs($user)->postJson('/jeux/gri-gri/score', ['score' => 1200, 'level' => 1, 'coins' => 60, 'final' => true]);
+
+        $res->assertOk();
+        $this->assertEquals(2, GameScore::where('user_id', $user->id)->count());
+    }
+
+    public function test_repeated_final_scores_are_still_throttled(): void
+    {
+        $product = $this->makeProduct();
+        $user = User::factory()->create();
+        $this->grantAccess($user, $product);
+
+        $this->actingAs($user)->postJson('/jeux/gri-gri/score', ['score' => 1000, 'level' => 1, 'coins' => 50, 'final' => true])->assertOk();
+        $res = $this->actingAs($user)->postJson('/jeux/gri-gri/score', ['score' => 1100, 'level' => 1, 'coins' => 55, 'final' => true]);
+
+        $res->assertStatus(422);
+        $this->assertEquals(1, GameScore::where('user_id', $user->id)->count());
+    }
+
     public function test_leaderboard_shows_best_per_player_with_level_metric(): void
     {
         $product = $this->makeProduct();

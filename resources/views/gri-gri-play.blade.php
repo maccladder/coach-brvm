@@ -239,6 +239,11 @@
                 return;
             }
 
+            if (data.type === 'GRIGRI_LEADERBOARD_REQUEST') {
+                window.open('{{ route('grigri.leaderboard') }}', '_blank');
+                return;
+            }
+
             if (data.type !== 'GRIGRI_SCORE') return;
 
             const score = parseInt(data.score ?? 0, 10);

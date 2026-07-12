@@ -27,7 +27,11 @@ class GriGriScoreController extends Controller
     private const BASE_MAX_COINS = 500;
     private const COINS_PER_LEVEL = 400;
 
-    private const THROTTLE_SECONDS = 5;
+    // Deux fenêtres distinctes : les fins de niveau (final:false) sont fréquentes et throttlées
+    // plus fort ; un score final:true (game over ou "Quitter la partie") doit presque toujours
+    // passer même s'il arrive juste après une fin de niveau, donc fenêtre courte et clé séparée.
+    private const THROTTLE_LEVEL_SECONDS = 5;
+    private const THROTTLE_FINAL_SECONDS = 2;
 
     private function resolveProduct(): ?MarketplaceProduct
     {
@@ -89,12 +93,19 @@ class GriGriScoreController extends Controller
         $data = $validator->validated();
         $user = $request->user();
 
-        // Anti-spam : throttle court par utilisateur (le jeu soumet à chaque fin de niveau).
-        $throttleKey = 'grigri_score_throttle_' . $user->id;
+        // Anti-spam : throttle court par utilisateur, avec une fenêtre séparée pour les scores
+        // finaux (game over / quitter la partie) afin qu'un final:true juste après une fin de
+        // niveau ne soit pas rejeté par le throttle des fins de niveau.
+        $isFinal = (bool) ($data['final'] ?? false);
+        $throttleKey = $isFinal
+            ? 'grigri_score_throttle_final_' . $user->id
+            : 'grigri_score_throttle_level_' . $user->id;
+        $throttleSeconds = $isFinal ? self::THROTTLE_FINAL_SECONDS : self::THROTTLE_LEVEL_SECONDS;
+
         if (Cache::has($throttleKey)) {
             return response()->json(['error' => 'Merci de patienter avant de renvoyer un score.'], 422);
         }
-        Cache::put($throttleKey, true, self::THROTTLE_SECONDS);
+        Cache::put($throttleKey, true, $throttleSeconds);
 
         GameScore::create([
             'user_id'    => $user->id,
