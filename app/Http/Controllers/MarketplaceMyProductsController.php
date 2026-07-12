@@ -119,6 +119,13 @@ class MarketplaceMyProductsController extends Controller
         $isAdmin = session('is_admin') ? 'true' : 'false';
         $html = str_replace('__ADMIN_MODE__', $isAdmin, $html);
 
+        // GRI-GRI référence son logo par un chemin relatif fixe ("grigri-logo.png") dans son HTML
+        // statique d'origine ; une fois servi depuis game_html (base de données) ce chemin n'existe
+        // plus, donc on le réécrit vers l'URL réelle de la cover stockée.
+        if ($product->cover_image_path && str_contains($html, 'grigri-logo.png')) {
+            $html = str_replace('grigri-logo.png', Storage::disk('public')->url($product->cover_image_path), $html);
+        }
+
         return response($html, 200)
             ->header('Content-Type', 'text/html; charset=UTF-8')
             ->header('X-Frame-Options', 'SAMEORIGIN')
@@ -150,6 +157,17 @@ class MarketplaceMyProductsController extends Controller
 
         if (empty($product->game_html)) {
             abort(404, "Fichier de jeu introuvable.");
+        }
+
+        // GRI-GRI : dialecte postMessage propre (GRIGRI_SCORE / GRIGRI_PREMIUM_REQUEST /
+        // GRIGRI_PREMIUM_GRANTED), vue wrapper dédiée plutôt que le listener générique.
+        if ($product->slug === 'gri-gri-la-danse-des-perles') {
+            $isPremiumUnlocked = GamePremiumUnlock::where('user_id', $user->id)
+                ->where('product_id', $product->id)
+                ->where('feature', 'unlimited_continue')
+                ->exists();
+
+            return view('gri-gri-play', compact('product', 'isPremiumUnlocked'));
         }
 
         $isPremiumUnlocked = GamePremiumUnlock::where('user_id', $user->id)

@@ -704,6 +704,12 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/jeux/vrai-mogo/classement', [\App\Http\Controllers\VraiMogoScoreController::class, 'leaderboard'])
         ->name('vraimogo.leaderboard');
 
+    // Score + classement de GRI-GRI (relayés par la page parente via postMessage, cf. gri-gri-play.blade.php)
+    Route::post('/jeux/gri-gri/score', [\App\Http\Controllers\GriGriScoreController::class, 'store'])
+        ->name('grigri.score.store');
+    Route::get('/jeux/gri-gri/classement', [\App\Http\Controllers\GriGriScoreController::class, 'leaderboard'])
+        ->name('grigri.leaderboard');
+
 });
 
 

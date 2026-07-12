@@ -27,6 +27,9 @@ class GameScoreController extends Controller
             'planteur' => 1000,
             'magnat'   => 2500,
         ],
+        'gri-gri-la-danse-des-perles' => [
+            'unlimited_continue' => 1000,
+        ],
     ];
 
     private function resolveFeaturePrice(MarketplaceProduct $product, string $feature): ?int

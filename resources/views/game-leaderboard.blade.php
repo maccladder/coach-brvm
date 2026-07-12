@@ -126,7 +126,7 @@
                             <th style="width:52px;">Rang</th>
                             <th>Joueur</th>
                             <th class="text-end">Score</th>
-                            <th class="text-end d-none d-md-table-cell">Distance</th>
+                            <th class="text-end d-none d-md-table-cell">{{ $secondaryMetricLabel ?? 'Distance' }}</th>
                             <th class="text-end d-none d-md-table-cell">Parties</th>
                             <th class="text-end d-none d-sm-table-cell">Dernière partie</th>
                         </tr>
@@ -151,7 +151,7 @@
                                     </span>
                                 </td>
                                 <td class="text-end d-none d-md-table-cell" style="color:#6B7590;">
-                                    {{ number_format($row['best_distance'], 0, ',', ' ') }} m
+                                    {{ number_format($row['best_distance'], 0, ',', ' ') }}{{ $secondaryMetricUnit ?? ' m' }}
                                 </td>
                                 <td class="text-end d-none d-md-table-cell" style="color:#6B7590;">
                                     {{ $row['games_played'] }}

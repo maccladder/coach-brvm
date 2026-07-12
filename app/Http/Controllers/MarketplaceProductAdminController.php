@@ -477,6 +477,12 @@ class MarketplaceProductAdminController extends Controller
         // Force adminMode = true — l'admin n'a pas besoin d'acheter le jeu
         $html = str_replace('__ADMIN_MODE__', 'true', $html);
 
+        // GRI-GRI référence son logo par un chemin relatif fixe ("grigri-logo.png") — on le
+        // réécrit vers l'URL réelle de la cover stockée (cf. MarketplaceMyProductsController::gameHtml).
+        if ($product->cover_image_path && str_contains($html, 'grigri-logo.png')) {
+            $html = str_replace('grigri-logo.png', Storage::disk('public')->url($product->cover_image_path), $html);
+        }
+
         return response($html, 200)
             ->header('Content-Type', 'text/html; charset=UTF-8')
             ->header('X-Frame-Options', 'SAMEORIGIN')
