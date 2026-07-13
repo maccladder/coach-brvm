@@ -38,6 +38,9 @@ return Application::configure(basePath: dirname(__DIR__))
             // ✅ Cours (NOUVEAU)
             'paiement/cinetpay/ipn',     // POST IPN cours
             'payment/cinetpay/return',   // GET/POST return cours
+
+            // ✅ News (n8n webhook, server-to-server, auth par clé API)
+            'api/n8n/news',
         ]);
 
         /**
@@ -50,6 +53,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'vendor.mode'      => \App\Http\Middleware\EnsureVendorMode::class,
             'lettreci.access'  => \App\Http\Middleware\EnsureLettreCIAccess::class,
             'affiliate.active' => \App\Http\Middleware\EnsureAffiliateActive::class,
+            'n8n.key'          => \App\Http\Middleware\N8nApiKeyMiddleware::class,
         ]);
 
         // $middleware->append(\App\Http\Middleware\TestMiddleware::class);

@@ -104,6 +104,17 @@
                         <li><a class="dropdown-item" href="{{ route('admin.donations.index') }}">🤝 Dons</a></li>
                         <li><a class="dropdown-item" href="{{ route('admin.emails.index') }}">📧 Envoyer un email</a></li>
                         <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="{{ route('admin.announcements.index') }}">📢 Annonces</a></li>
+                        @php $pendingNewsCount = \App\Models\News::where('is_published', false)->count(); @endphp
+                        <li>
+                            <a class="dropdown-item d-flex justify-content-between align-items-center" href="{{ route('admin.news.index') }}">
+                                📰 Actualités
+                                @if($pendingNewsCount > 0)
+                                    <span class="badge rounded-pill text-bg-danger ms-2">{{ $pendingNewsCount > 99 ? '99+' : $pendingNewsCount }}</span>
+                                @endif
+                            </a>
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
                         <li><h6 class="dropdown-header" style="font-size:.7rem;letter-spacing:.05em;">AFFILIATION</h6></li>
                         <li><a class="dropdown-item" href="{{ route('admin.affiliates.index') }}">🤝 Apporteurs d'affaires</a></li>
                         <li><a class="dropdown-item" href="{{ route('admin.affiliate-payouts.index') }}">💳 Reversements affiliation</a></li>

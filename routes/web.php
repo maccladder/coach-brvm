@@ -18,6 +18,9 @@ use App\Http\Controllers\AdminUserController;
 use App\Http\Controllers\AdminVirtualWalletController;
 
 use App\Http\Controllers\AnnouncementController;
+use App\Http\Controllers\NewsController;
+use App\Http\Controllers\AdminNewsController;
+use App\Http\Controllers\Api\NewsWebhookController;
 
 use App\Http\Controllers\AdminBookController;
 use App\Http\Controllers\BookController;
@@ -241,6 +244,25 @@ Route::get('/annonces/{announcement}', [AnnouncementController::class, 'show'])-
 
 /*
 |--------------------------------------------------------------------------
+| Actualités / News (PUBLIC)
+|--------------------------------------------------------------------------
+*/
+
+Route::get('/actualites', [NewsController::class, 'index'])->name('news.index');
+Route::get('/actualites/{news}', [NewsController::class, 'show'])->name('news.show');
+
+/*
+|--------------------------------------------------------------------------
+| Webhook n8n — création de News par programme (clé API)
+|--------------------------------------------------------------------------
+*/
+
+Route::post('/api/n8n/news', [NewsWebhookController::class, 'store'])
+    ->middleware('n8n.key')
+    ->name('api.n8n.news.store');
+
+/*
+|--------------------------------------------------------------------------
 | Admin (ton système admin actuel)
 |--------------------------------------------------------------------------
 */
@@ -376,6 +398,10 @@ Route::prefix('topups')->name('topups.')->group(function () {
 
         // ✅ Annonces ADMIN (CRUD)
         Route::resource('announcements', AdminAnnouncementController::class)->except(['show']);
+
+        // ✅ Actualités / News ADMIN (CRUD)
+        Route::resource('news', AdminNewsController::class)->except(['show']);
+        Route::patch('news/{news}/toggle', [AdminNewsController::class, 'toggle'])->name('news.toggle');
 
         // 📋 Logs stagiaire (admin only)
         Route::get('/stagiaire/logs', [StagiaireLogController::class, 'index'])->name('stagiaire.logs');

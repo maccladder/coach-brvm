@@ -27,6 +27,10 @@ return [
         'base_url' => env('PAYSTACK_BASE_URL', 'https://api.paystack.co'),
     ],
 
+    'n8n' => [
+        'api_key' => env('N8N_API_KEY'),
+    ],
+
     'claude' => [
         'api_key' => env('CLAUDE_API_KEY'),
         'model'   => env('CLAUDE_MODEL', 'claude-haiku-4-5-20251001'),

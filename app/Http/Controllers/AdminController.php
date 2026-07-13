@@ -6,6 +6,7 @@ use App\Models\BocStock;
 use App\Models\ClientBoc;
 use App\Models\ClientFinancial;
 use App\Models\DailyBoc;
+use App\Models\News;
 use App\Services\AiInterpreter;
 use App\Services\AiVoiceService;
 use App\Services\AvatarService;
@@ -129,8 +130,9 @@ class AdminController extends Controller
     {
         $bocs = ClientBoc::orderByDesc('created_at')->limit(50)->get();
         $financials = ClientFinancial::orderByDesc('created_at')->limit(50)->get();
+        $pendingNewsCount = News::where('is_published', false)->count();
 
-        return view('admin.dashboard', compact('bocs', 'financials'));
+        return view('admin.dashboard', compact('bocs', 'financials', 'pendingNewsCount'));
     }
 
     /**

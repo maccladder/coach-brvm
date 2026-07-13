@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Announcement;
 use App\Models\ClientBoc;
 use App\Models\DailyBoc;
+use App\Models\News;
 use Carbon\Carbon;
 
 class LandingController extends Controller
@@ -12,6 +13,12 @@ class LandingController extends Controller
     public function index()
     {
         $annonces = Announcement::published()
+            ->orderByDesc('published_at')
+            ->orderByDesc('created_at')
+            ->limit(3)
+            ->get();
+
+        $news = News::published()
             ->orderByDesc('published_at')
             ->orderByDesc('created_at')
             ->limit(3)
@@ -37,6 +44,7 @@ class LandingController extends Controller
 
         return view('welcome', [
             'annonces'        => $annonces,
+            'news'            => $news,
             'latestPublicBoc' => $latestPublicBoc,
             'exampleVideoUrl' => null,
         ]);

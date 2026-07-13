@@ -258,6 +258,7 @@
                         <li><hr class="dropdown-divider" style="border-color:rgba(26,33,29,.08);margin:4px 8px;"></li>
                         <li><a class="dropdown-item" href="{{ route('radar.index') }}">📡 Radar (7 jours)</a></li>
                         <li><a class="dropdown-item" href="{{ route('announcements.index') }}">📢 Annonces</a></li>
+                        <li><a class="dropdown-item" href="{{ route('news.index') }}">📰 Actualités</a></li>
                         <li><a class="dropdown-item" href="{{ route('docs.public.index') }}">📄 Études & Business plans</a></li>
                         <li><a class="dropdown-item" href="{{ route('chocs.index') }}">⚡ Chocs de marché</a></li>
                     </ul>

@@ -300,6 +300,24 @@
             </a>
         </div>
 
+        {{-- Actualités (News IA) --}}
+        <div class="col-6 col-md-4 col-lg-3">
+            <a href="{{ route('admin.news.index', ['status' => 'draft']) }}" class="dash-card bg-warning text-dark">
+                <div class="card-body">
+                    <div class="d-flex align-items-start gap-3 mb-3">
+                        <div class="card-icon bg-dark bg-opacity-10 border border-dark border-opacity-10">📰</div>
+                        @if($pendingNewsCount > 0)
+                            <span class="badge rounded-pill text-bg-danger ms-auto">{{ $pendingNewsCount > 99 ? '99+' : $pendingNewsCount }}</span>
+                        @else
+                            <span class="badge bg-light text-dark ms-auto">À jour</span>
+                        @endif
+                    </div>
+                    <div class="fw-bold mb-1">News en attente</div>
+                    <p class="small mb-0 opacity-75">{{ $pendingNewsCount }} brouillon(s) à valider avant publication.</p>
+                </div>
+            </a>
+        </div>
+
         {{-- Utilisateurs --}}
         <div class="col-6 col-md-4 col-lg-3">
             <a href="{{ route('admin.users.index') }}" class="dash-card bg-secondary text-white">

@@ -384,6 +384,13 @@
         margin-top: 14px; font-family: 'Syne', sans-serif;
         font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--cb-gold);
     }
+    .cb-news-pill {
+        font-family: 'Syne', sans-serif; font-size: 9px; font-weight: 700;
+        letter-spacing: .08em; text-transform: uppercase;
+        background: rgba(176,134,46,.08); color: var(--cb-gold);
+        border: 1px solid rgba(176,134,46,.2);
+        padding: 2px 8px; border-radius: 100px;
+    }
 
     /* Social buttons */
     .cb-social-btn {
@@ -1045,6 +1052,46 @@
         </div>
     </div>
 </section>
+
+@if(($news ?? collect())->isNotEmpty())
+{{-- ══════════════════════════════════════
+     DERNIÈRES ACTUALITÉS
+══════════════════════════════════════ --}}
+<section class="cb-sec">
+    <div class="container" style="max-width:1100px;">
+        <div class="cbr d-flex justify-content-between align-items-end flex-wrap gap-3 mb-4">
+            <div>
+                <p class="cb-sec-tag">Actualités BRVM</p>
+                <h2 class="cb-sec-title" style="margin-bottom:0;">Dernières <em>actualités</em></h2>
+            </div>
+            <a href="{{ route('news.index') }}" class="cb-cta-outline">Voir toutes les actualités →</a>
+        </div>
+
+        <div class="row g-3 cbr cbr2">
+            @foreach($news as $n)
+                <div class="col-md-4">
+                    <a href="{{ route('news.show', $n->slug) }}" class="cb-ann-card">
+                        <div class="d-flex align-items-center gap-2 flex-wrap mb-1">
+                            <div class="cb-ann-date" style="margin-bottom:0;">
+                                {{ optional($n->published_at ?? $n->created_at)->format('d/m/Y') }}
+                            </div>
+                            @if($n->categorie)
+                                <span class="cb-news-pill">{{ $n->categorie }}</span>
+                            @endif
+                            @if($n->impact)
+                                <span class="cb-news-pill">Impact {{ $n->impact }}</span>
+                            @endif
+                        </div>
+                        <div class="cb-ann-title">{{ $n->title }}</div>
+                        <div class="cb-ann-excerpt">{{ \Illuminate\Support\Str::limit($n->resume, 100) }}</div>
+                        <span class="cb-ann-link">Lire l'actualité →</span>
+                    </a>
+                </div>
+            @endforeach
+        </div>
+    </div>
+</section>
+@endif
 
 {{-- ══════════════════════════════════════
      COMMENT ÇA MARCHE
