@@ -41,6 +41,9 @@ return Application::configure(basePath: dirname(__DIR__))
 
             // ✅ News (n8n webhook, server-to-server, auth par clé API)
             'api/n8n/news',
+
+            // ✅ BOC (n8n webhook, server-to-server, auth par clé API)
+            'api/n8n/bocs',
         ]);
 
         /**

@@ -21,6 +21,7 @@ use App\Http\Controllers\AnnouncementController;
 use App\Http\Controllers\NewsController;
 use App\Http\Controllers\AdminNewsController;
 use App\Http\Controllers\Api\NewsWebhookController;
+use App\Http\Controllers\Api\BocWebhookController;
 
 use App\Http\Controllers\AdminBookController;
 use App\Http\Controllers\BookController;
@@ -260,6 +261,20 @@ Route::get('/actualites/{news}', [NewsController::class, 'show'])->name('news.sh
 Route::post('/api/n8n/news', [NewsWebhookController::class, 'store'])
     ->middleware('n8n.key')
     ->name('api.n8n.news.store');
+
+/*
+|--------------------------------------------------------------------------
+| Webhook n8n — upload automatique des BOC (clé API)
+|--------------------------------------------------------------------------
+*/
+
+Route::get('/api/n8n/bocs/missing', [BocWebhookController::class, 'missing'])
+    ->middleware('n8n.key')
+    ->name('api.n8n.bocs.missing');
+
+Route::post('/api/n8n/bocs', [BocWebhookController::class, 'store'])
+    ->middleware('n8n.key')
+    ->name('api.n8n.bocs.store');
 
 /*
 |--------------------------------------------------------------------------
