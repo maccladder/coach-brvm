@@ -22,6 +22,7 @@ use App\Http\Controllers\NewsController;
 use App\Http\Controllers\AdminNewsController;
 use App\Http\Controllers\Api\NewsWebhookController;
 use App\Http\Controllers\Api\BocWebhookController;
+use App\Http\Controllers\BetCouponController;
 
 use App\Http\Controllers\AdminBookController;
 use App\Http\Controllers\BookController;
@@ -275,6 +276,23 @@ Route::get('/api/n8n/bocs/missing', [BocWebhookController::class, 'missing'])
 Route::post('/api/n8n/bocs', [BocWebhookController::class, 'store'])
     ->middleware('n8n.key')
     ->name('api.n8n.bocs.store');
+
+/*
+|--------------------------------------------------------------------------
+| Coupons de paris sportifs Betclic (page publique + webhooks n8n)
+|--------------------------------------------------------------------------
+*/
+
+Route::get('/bet', [BetCouponController::class, 'index'])->name('bet.index');
+
+Route::middleware(['admin.code'])->group(function () {
+    Route::get('/bet/admin', [BetCouponController::class, 'admin'])->name('bet.admin');
+    Route::post('/bet/admin/{coupon}', [BetCouponController::class, 'publier'])->name('bet.publier');
+});
+
+Route::get('/api/bet/coupons/en-attente', [BetCouponController::class, 'apiEnAttente']);
+Route::post('/api/bet/coupons', [BetCouponController::class, 'apiStore']);
+Route::post('/api/bet/coupons/{coupon}/resultat', [BetCouponController::class, 'apiResultat']);
 
 /*
 |--------------------------------------------------------------------------

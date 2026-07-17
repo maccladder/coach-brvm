@@ -31,6 +31,10 @@ return [
         'api_key' => env('N8N_API_KEY'),
     ],
 
+    'bet' => [
+        'token' => env('BET_API_TOKEN'),
+    ],
+
     'claude' => [
         'api_key' => env('CLAUDE_API_KEY'),
         'model'   => env('CLAUDE_MODEL', 'claude-haiku-4-5-20251001'),

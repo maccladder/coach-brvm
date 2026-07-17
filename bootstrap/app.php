@@ -44,6 +44,9 @@ return Application::configure(basePath: dirname(__DIR__))
 
             // ✅ BOC (n8n webhook, server-to-server, auth par clé API)
             'api/n8n/bocs',
+
+            // ✅ Bet (webhooks n8n coupons de paris, server-to-server, auth par token)
+            'api/bet/*',
         ]);
 
         /**
