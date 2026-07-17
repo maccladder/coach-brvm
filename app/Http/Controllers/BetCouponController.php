@@ -11,6 +11,7 @@ class BetCouponController extends Controller
     {
         $ordre = ['sur' => 0, 'equilibre' => 1, 'jackpot' => 2];
         $coupons = BetCoupon::publies()->duJour()->get()
+            ->reject(fn ($c) => $c->estCommence())
             ->sortBy(fn ($c) => $ordre[$c->niveau])
             ->values();
 
@@ -29,7 +30,10 @@ class BetCouponController extends Controller
     public function admin()
     {
         $brouillons = BetCoupon::where('statut', 'brouillon')
-            ->orderByDesc('date_coupon')->get();
+            ->whereDate('date_coupon', today())
+            ->orderByDesc('date_coupon')->get()
+            ->reject(fn ($c) => $c->estCommence())
+            ->values();
 
         $publies = BetCoupon::publies()
             ->orderByDesc('date_coupon')->limit(15)->get();

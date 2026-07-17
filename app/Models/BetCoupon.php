@@ -22,6 +22,28 @@ class BetCoupon extends Model
     public function scopeDuJour($q)   { return $q->where('date_coupon', today()); }
     public function scopeVerifies($q) { return $q->whereIn('resultat', ['gagne', 'perdu']); }
 
+    public function debutPremierMatch(): ?\Carbon\Carbon
+    {
+        return collect($this->selections)
+            ->map(function ($sel) {
+                try {
+                    return \Carbon\Carbon::parse($sel['heure'] ?? null);
+                } catch (\Throwable $e) {
+                    return null;
+                }
+            })
+            ->filter()
+            ->sort()
+            ->first();
+    }
+
+    public function estCommence(): bool
+    {
+        $debut = $this->debutPremierMatch();
+
+        return $debut !== null && $debut->isPast();
+    }
+
     public function badge(): array
     {
         return match ($this->niveau) {
