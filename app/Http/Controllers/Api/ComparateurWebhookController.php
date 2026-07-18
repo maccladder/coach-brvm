@@ -13,7 +13,7 @@ class ComparateurWebhookController extends Controller
     public function store(Request $request)
     {
         $provided = (string) $request->header('X-CLE');
-        $expected = (string) env('COMPARATEUR_N8N_CLE');
+        $expected = (string) config('services.comparateur.cle');
 
         if ($expected === '' || !hash_equals($expected, $provided)) {
             return response()->json(['error' => 'unauthorized'], 403);

@@ -31,6 +31,10 @@ return [
         'api_key' => env('N8N_API_KEY'),
     ],
 
+    'comparateur' => [
+        'cle' => env('COMPARATEUR_N8N_CLE'),
+    ],
+
     'bet' => [
         'token' => env('BET_API_TOKEN'),
     ],
