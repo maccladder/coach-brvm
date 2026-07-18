@@ -68,10 +68,15 @@ class BetCouponController extends Controller
             'analyse'      => 'nullable|string',
         ]);
 
-        $coupon = BetCoupon::updateOrCreate(
-            ['date_coupon' => $data['date_coupon'], 'niveau' => $data['niveau']],
-            $data + ['statut' => 'brouillon', 'resultat' => 'en_attente']
-        );
+        $coupon = BetCoupon::whereDate('date_coupon', $data['date_coupon'])
+            ->where('niveau', $data['niveau'])
+            ->first();
+
+        if ($coupon) {
+            $coupon->update($data);
+        } else {
+            $coupon = BetCoupon::create($data + ['statut' => 'brouillon', 'resultat' => 'en_attente']);
+        }
 
         return response()->json(['ok' => true, 'id' => $coupon->id]);
     }
