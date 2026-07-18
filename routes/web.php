@@ -22,7 +22,9 @@ use App\Http\Controllers\NewsController;
 use App\Http\Controllers\AdminNewsController;
 use App\Http\Controllers\Api\NewsWebhookController;
 use App\Http\Controllers\Api\BocWebhookController;
+use App\Http\Controllers\Api\ComparateurWebhookController;
 use App\Http\Controllers\BetCouponController;
+use App\Http\Controllers\ComparateurController;
 
 use App\Http\Controllers\AdminBookController;
 use App\Http\Controllers\BookController;
@@ -276,6 +278,18 @@ Route::get('/api/n8n/bocs/missing', [BocWebhookController::class, 'missing'])
 Route::post('/api/n8n/bocs', [BocWebhookController::class, 'store'])
     ->middleware('n8n.key')
     ->name('api.n8n.bocs.store');
+
+/*
+|--------------------------------------------------------------------------
+| Comparateur de prix (page publique + webhook n8n)
+|--------------------------------------------------------------------------
+*/
+
+Route::get('/comparateur', [ComparateurController::class, 'index'])->name('comparateur.index');
+Route::get('/comparateur/produits.json', [ComparateurController::class, 'data'])->name('comparateur.data');
+
+Route::post('/api/n8n/comparateur', [ComparateurWebhookController::class, 'store'])
+    ->name('api.n8n.comparateur.store');
 
 /*
 |--------------------------------------------------------------------------
