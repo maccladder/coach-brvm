@@ -123,6 +123,7 @@ header{padding:18px 0 6px}
   border:1.5px solid var(--encre);
   box-shadow:2px 2px 0 var(--encre);
 }
+.badge-eco[hidden]{display:none}
 
 .btn-offre{
   display:block;text-align:center;text-decoration:none;
