@@ -9,7 +9,7 @@ class BetCouponController extends Controller
 {
     public function index()
     {
-        $ordre = ['sur' => 0, 'equilibre' => 1, 'jackpot' => 2];
+        $ordre = ['sur' => 0, 'equilibre' => 1, 'jackpot' => 2, 'crazy' => 3];
         $coupons = BetCoupon::publies()->duJour()->get()
             ->reject(fn ($c) => $c->estCommence())
             ->sortBy(fn ($c) => $ordre[$c->niveau])
@@ -62,7 +62,7 @@ class BetCouponController extends Controller
 
         $data = $request->validate([
             'date_coupon'  => 'required|date',
-            'niveau'       => 'required|in:sur,equilibre,jackpot',
+            'niveau'       => 'required|in:sur,equilibre,jackpot,crazy',
             'selections'   => 'required|array|min:1',
             'cote_totale'  => 'required|numeric|min:1',
             'analyse'      => 'nullable|string',

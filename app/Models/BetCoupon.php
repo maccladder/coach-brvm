@@ -50,6 +50,8 @@ class BetCoupon extends Model
             'sur'       => ['emoji' => '🟢', 'label' => 'Sûr',       'color' => '#22c55e'],
             'equilibre' => ['emoji' => '🟡', 'label' => 'Équilibré', 'color' => '#eab308'],
             'jackpot'   => ['emoji' => '🔴', 'label' => 'Jackpot',   'color' => '#ef4444'],
+            'crazy'     => ['emoji' => '🎲', 'label' => 'Crazy',     'color' => '#a855f7'],
+            default     => ['emoji' => '❓', 'label' => ucfirst($this->niveau), 'color' => '#6b7280'],
         };
     }
 

@@ -1,0 +1,22 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::table('bet_coupons', function (Blueprint $table) {
+            $table->string('niveau', 20)->change();
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::table('bet_coupons', function (Blueprint $table) {
+            $table->enum('niveau', ['sur', 'equilibre', 'jackpot'])->change();
+        });
+    }
+};
