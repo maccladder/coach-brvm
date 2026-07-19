@@ -1,88 +1,91 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Le Bon Prix CI — Compare et paie moins cher</title>
-<meta name="description" content="Compare le prix des téléphones sur les sites marchands reconnus en Côte d'Ivoire et trouve le moins cher en 2 clics.">
+{{-- resources/views/comparateur.blade.php --}}
+@extends('layouts.app')
 
+@section('title', 'Comparateur de prix — Boursiv')
+
+@push('meta')
+<meta name="description" content="Compare le prix des téléphones et des repas sur les sites marchands reconnus en Côte d'Ivoire et trouve le moins cher en 2 clics.">
+<meta property="og:title" content="Comparateur de prix — Boursiv">
+<meta property="og:description" content="Le même produit, jamais au même prix. Compare et économise sur tes téléphones et tes repas.">
+@endpush
+
+@push('styles')
 <!-- Tom Select (liste déroulante filtrante) -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tom-select/2.3.1/css/tom-select.min.css">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/tom-select/2.3.1/js/tom-select.complete.min.js"></script>
-
-<!-- Polices -->
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700&family=Archivo+Black&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
 
 <style>
 :root{
-  --encre:#0B3D2E;        /* vert billet FCFA */
-  --fond:#F2F7F4;         /* menthe très pâle */
-  --papier:#FFFFFF;
-  --accent:#FF7A1A;       /* orange marché : l'économie */
-  --etiquette:#FFD84D;    /* jaune étiquette de prix */
-  --gris:#5C6B64;
-  --whatsapp:#25D366;
+  /* Alias sur la charte Boursiv — le badge d'économie et le CTA gardent
+     des couleurs vives dédiées pour rester très visibles dans le ticket. */
+  --encre:      var(--cb-ink);
+  --fond:       var(--cb-paper);
+  --papier:     var(--cb-card);
+  --accent:     #FF7A1A;   /* orange marché : signal fort de l'économie réalisée */
+  --etiquette:  #FFD84D;   /* jaune étiquette de prix */
+  --gris:       var(--cb-muted);
+  --whatsapp:   #25D366;
   --radius:14px;
 }
-*{margin:0;padding:0;box-sizing:border-box}
-body{
-  font-family:'Archivo',system-ui,sans-serif;
-  background:var(--fond);
+.comparateur-page, .comparateur-page *{box-sizing:border-box}
+.comparateur-page{
+  font-family:'DM Sans',system-ui,sans-serif;
   color:var(--encre);
-  min-height:100vh;
 }
-.wrap{max-width:520px;margin:0 auto;padding:20px 16px 60px}
+.comparateur-page .wrap{max-width:520px;margin:0 auto;padding:32px 16px 60px}
 
 /* ---------- En-tête ---------- */
-header{padding:18px 0 6px}
-.marque{
-  font-family:'Archivo Black',sans-serif;
-  font-size:1.5rem;line-height:1.1;letter-spacing:-.02em;
+.comparateur-page .cmp-header{padding:0 0 6px}
+.comparateur-page .marque{
+  font-family:'Playfair Display',serif;
+  font-size:1.7rem;font-weight:900;line-height:1.1;letter-spacing:-.01em;
 }
-.marque em{font-style:normal;color:var(--accent)}
-.pitch{color:var(--gris);font-size:.95rem;margin-top:6px}
-.verif{
+.comparateur-page .marque em{font-style:normal;color:var(--accent)}
+.comparateur-page .pitch{color:var(--gris);font-size:.95rem;margin-top:8px;font-weight:300}
+.comparateur-page .verif{
   display:inline-flex;align-items:center;gap:6px;
-  margin-top:12px;font-family:'IBM Plex Mono',monospace;
-  font-size:.75rem;background:var(--papier);
-  border:1px solid #DCE8E1;border-radius:99px;padding:5px 12px;
+  margin-top:14px;font-family:'Syne',sans-serif;
+  font-size:.72rem;font-weight:600;letter-spacing:.04em;background:var(--papier);
+  border:1px solid var(--cb-border);border-radius:99px;padding:6px 13px;
 }
-.verif .dot{width:7px;height:7px;border-radius:50%;background:var(--whatsapp)}
+.comparateur-page .verif .dot{width:7px;height:7px;border-radius:50%;background:var(--whatsapp)}
 
 /* ---------- Sélecteur ---------- */
-.selecteur{margin-top:22px}
-.selecteur label{font-weight:700;font-size:.9rem;display:block;margin-bottom:8px}
-.chips{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 12px}
-.chip{
-  font-family:'IBM Plex Mono',monospace;font-size:.78rem;
-  padding:7px 13px;border-radius:99px;cursor:pointer;
-  border:1.5px solid var(--encre);background:var(--papier);color:var(--encre);
+.comparateur-page .selecteur{margin-top:26px}
+.comparateur-page .selecteur label{
+  font-family:'Syne',sans-serif;font-weight:700;font-size:.85rem;
+  letter-spacing:.02em;display:block;margin-bottom:10px;
 }
-.chip.actif{background:var(--encre);color:#fff}
-.ts-wrapper .ts-control{
+.comparateur-page .chips{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 12px}
+.comparateur-page .chip{
+  font-family:'Syne',sans-serif;font-size:.76rem;font-weight:600;
+  padding:7px 14px;border-radius:99px;cursor:pointer;
+  border:1.5px solid var(--encre);background:var(--papier);color:var(--encre);
+  transition:all .2s;
+}
+.comparateur-page .chip.actif{background:var(--encre);color:var(--fond);border-color:var(--encre)}
+.comparateur-page .ts-wrapper .ts-control{
   border:2px solid var(--encre);border-radius:var(--radius);
   padding:13px 14px;font-size:1rem;background:var(--papier);
   box-shadow:0 2px 0 var(--encre);
 }
-.ts-dropdown{border-radius:var(--radius);border:2px solid var(--encre);font-size:.95rem}
-.ts-dropdown .option{padding:10px 12px;display:flex;align-items:center;gap:10px}
-.ts-dropdown .active{background:var(--fond);color:var(--encre)}
-.mini{
+.comparateur-page .ts-dropdown{border-radius:var(--radius);border:2px solid var(--encre);font-size:.95rem}
+.comparateur-page .ts-dropdown .option{padding:10px 12px;display:flex;align-items:center;gap:10px}
+.comparateur-page .ts-dropdown .active{background:var(--fond);color:var(--encre)}
+.comparateur-page .mini{
   width:34px;height:34px;border-radius:8px;flex:none;
   background:var(--fond);display:flex;align-items:center;justify-content:center;
-  font-family:'IBM Plex Mono',monospace;font-size:.65rem;font-weight:600;
-  overflow:hidden;border:1px solid #DCE8E1;
+  font-family:'Syne',sans-serif;font-size:.65rem;font-weight:700;
+  overflow:hidden;border:1px solid var(--cb-border);
 }
-.mini img{width:100%;height:100%;object-fit:cover}
+.comparateur-page .mini img{width:100%;height:100%;object-fit:cover}
 
 /* ---------- Ticket de caisse (signature) ---------- */
-#resultat{margin-top:26px;display:none}
-.ticket{
+.comparateur-page #resultat{margin-top:26px;display:none}
+.comparateur-page .ticket{
   background:var(--papier);
   padding:26px 22px 30px;
   position:relative;
-  filter:drop-shadow(0 6px 14px rgba(11,61,46,.14));
+  filter:drop-shadow(0 6px 14px rgba(15,92,67,.14));
   /* bords dentelés haut et bas */
   --dent:12px;
   clip-path:polygon(
@@ -99,84 +102,88 @@ header{padding:18px 0 6px}
     4% calc(100% - var(--dent)),0 100%
   );
 }
-.ticket h2{
+.comparateur-page .ticket h2{
+  font-family:'Syne',sans-serif;
   font-size:1.05rem;font-weight:700;line-height:1.3;
-  padding-bottom:14px;border-bottom:2px dashed #D7E4DC;
+  padding-bottom:14px;border-bottom:2px dashed var(--cb-border);
 }
-.gagnant{margin-top:16px}
-.gagnant .site{
-  font-family:'IBM Plex Mono',monospace;font-size:.75rem;
+.comparateur-page .gagnant{margin-top:16px}
+.comparateur-page .gagnant .site{
+  font-family:'Syne',sans-serif;font-size:.75rem;font-weight:600;
   text-transform:uppercase;letter-spacing:.08em;color:var(--gris);
 }
-.gagnant .prix{
-  font-family:'Archivo Black',sans-serif;
-  font-size:2.3rem;letter-spacing:-.02em;line-height:1.05;margin-top:2px;
+.comparateur-page .gagnant .prix{
+  font-family:'Playfair Display',serif;font-weight:900;
+  font-size:2.3rem;letter-spacing:-.02em;line-height:1.05;margin-top:4px;
 }
-.gagnant .prix small{font-size:1rem;font-family:'IBM Plex Mono',monospace;font-weight:400}
+.comparateur-page .gagnant .prix small{font-size:1rem;font-family:'Syne',sans-serif;font-weight:600}
 
-.badge-eco{
+.comparateur-page .badge-eco{
   display:inline-block;margin-top:10px;
   background:var(--etiquette);
-  font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:.85rem;
+  font-family:'Syne',sans-serif;font-weight:700;font-size:.85rem;
   padding:6px 12px;border-radius:6px;
   transform:rotate(-1.5deg);
   border:1.5px solid var(--encre);
   box-shadow:2px 2px 0 var(--encre);
 }
-.badge-eco[hidden]{display:none}
+.comparateur-page .badge-eco[hidden]{display:none}
 
-.btn-offre{
+.comparateur-page .btn-offre{
   display:block;text-align:center;text-decoration:none;
-  background:var(--accent);color:#fff;font-weight:700;font-size:1.05rem;
+  background:var(--accent);color:#fff;
+  font-family:'Syne',sans-serif;font-weight:800;font-size:1.02rem;letter-spacing:.01em;
   padding:15px;border-radius:var(--radius);margin-top:18px;
   box-shadow:0 3px 0 #C55708;
   transition:transform .1s;
 }
-.btn-offre:active{transform:translateY(2px);box-shadow:none}
+.comparateur-page .btn-offre:active{transform:translateY(2px);box-shadow:none}
 
-.autres{margin-top:20px;border-top:2px dashed #D7E4DC;padding-top:14px}
-.autres .titre{
-  font-family:'IBM Plex Mono',monospace;font-size:.72rem;
+.comparateur-page .autres{margin-top:20px;border-top:2px dashed var(--cb-border);padding-top:14px}
+.comparateur-page .autres .titre{
+  font-family:'Syne',sans-serif;font-size:.72rem;font-weight:600;
   text-transform:uppercase;letter-spacing:.08em;color:var(--gris);margin-bottom:8px;
 }
-.ligne{
+.comparateur-page .ligne{
   display:flex;justify-content:space-between;align-items:baseline;
-  font-family:'IBM Plex Mono',monospace;font-size:.92rem;padding:6px 0;
+  font-family:'Syne',sans-serif;font-size:.9rem;padding:6px 0;
 }
-.ligne .p{text-decoration:line-through;color:#9AAaa2;color:#96A69E}
-.ligne .diff{font-size:.72rem;color:var(--accent);margin-left:8px}
+.comparateur-page .ligne .p{text-decoration:line-through;color:var(--gris)}
+.comparateur-page .ligne .diff{font-size:.72rem;color:var(--accent);margin-left:8px;font-weight:700}
 
-.btn-wa{
+.comparateur-page .btn-wa{
   display:flex;align-items:center;justify-content:center;gap:8px;
   margin-top:22px;text-decoration:none;
-  background:var(--whatsapp);color:#fff;font-weight:700;
+  background:var(--whatsapp);color:#fff;font-family:'Syne',sans-serif;font-weight:700;
   padding:13px;border-radius:var(--radius);font-size:.98rem;
   box-shadow:0 3px 0 #128C4B;
 }
-.btn-wa:active{transform:translateY(2px);box-shadow:none}
-.btn-wa svg{width:20px;height:20px;fill:#fff}
+.comparateur-page .btn-wa:active{transform:translateY(2px);box-shadow:none}
+.comparateur-page .btn-wa svg{width:20px;height:20px;fill:#fff}
 
-.note{
+.comparateur-page .note{
   margin-top:14px;text-align:center;color:var(--gris);
-  font-size:.78rem;font-family:'IBM Plex Mono',monospace;
+  font-size:.78rem;font-family:'Syne',sans-serif;
 }
 
-footer{margin-top:40px;text-align:center;color:var(--gris);font-size:.78rem}
+.comparateur-page .cmp-footer{margin-top:40px;text-align:center;color:var(--gris);font-size:.78rem}
 
 @media (prefers-reduced-motion:no-preference){
-  #resultat.montre .ticket{animation:sortie .35s ease-out}
+  .comparateur-page #resultat.montre .ticket{animation:sortie .35s ease-out}
   @keyframes sortie{from{transform:translateY(14px);opacity:0}to{transform:none;opacity:1}}
 }
 </style>
-</head>
-<body>
+@endpush
+
+@section('content')
+<div class="comparateur-page">
 <div class="wrap">
 
-  <header>
-    <div class="marque">Le Bon Prix <em>CI</em></div>
+  <div class="cmp-header">
+    <div class="marque">Comparateur <em>Boursiv</em></div>
     <p class="pitch">Le même produit, le même plat — jamais au même prix. On a comparé pour toi.</p>
     <span class="verif"><span class="dot"></span> Prix vérifiés&nbsp;: <span id="date-verif">—</span></span>
-  </header>
+  </div>
 
   <div class="selecteur">
     <label for="produit">Que veux-tu comparer&nbsp;?</label>
@@ -210,13 +217,17 @@ footer{margin-top:40px;text-align:center;color:var(--gris);font-size:.78rem}
     <p class="note">Lien marchand officiel. Le prix peut évoluer sur le site du vendeur.</p>
   </div>
 
-  <footer>Comparateur indépendant — Abidjan, Côte d'Ivoire</footer>
+  <div class="cmp-footer">Comparateur Boursiv — Abidjan, Côte d'Ivoire</div>
 </div>
+</div>
+@endsection
 
+@push('scripts')
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tom-select/2.3.1/js/tom-select.complete.min.js"></script>
 <script>
 /* =====================================================================
    DONNÉES
-   En production : n8n génère produits.json chaque nuit sur ton serveur.
+   En production : n8n génère produits.json chaque nuit sur le serveur.
    Les données ci-dessous servent d'exemple + de secours hors ligne.
    Format d'une offre : {site, prix, lien}
    Ajoute ?aff_id=TON_ID sur les liens Jumia (programme d'affiliation).
@@ -262,7 +273,7 @@ const DONNEES_EXEMPLE = {
   ]
 };
 
-const fmt = n => n.toLocaleString("fr-FR").replace(/\u202f|\u00a0/g," ");
+const fmt = n => n.toLocaleString("fr-FR").replace(/ | /g," ");
 
 function initiales(nom){
   return nom.split(/[\s—-]+/).filter(Boolean).slice(0,2).map(m=>m[0]).join("").toUpperCase();
@@ -292,7 +303,7 @@ function demarrer(data){
       option:(d,esc)=>`<div class="option"><span class="mini">${
         d.image?`<img src="${esc(d.image)}" alt="" loading="lazy">`:esc(initiales(d.text))
       }</span>${esc(d.text)}</div>`,
-      optgroup_header:(d,esc)=>`<div class="optgroup-header" style="font-family:'IBM Plex Mono',monospace;font-size:.7rem;text-transform:uppercase;letter-spacing:.08em;color:var(--gris);padding:8px 12px 4px">${esc(d.label)}</div>`
+      optgroup_header:(d,esc)=>`<div class="optgroup-header" style="font-family:'Syne',sans-serif;font-size:.7rem;text-transform:uppercase;letter-spacing:.08em;color:var(--gris);padding:8px 12px 4px">${esc(d.label)}</div>`
     },
     onChange:(id)=>{ if(id) montrer(parId[id]); }
   });
@@ -352,7 +363,7 @@ function demarrer(data){
     history.replaceState(null,"","#"+p.id);
   }
 
-  // Lien profond : comparateur.html#samsung-a15-128
+  // Lien profond : comparateur#samsung-a15-128
   const hash = location.hash.slice(1);
   if(hash && parId[hash]) select.setValue(hash);
 }
@@ -363,5 +374,4 @@ fetch("{{ route('comparateur.data') }}",{cache:"no-store"})
   .then(demarrer)
   .catch(()=>demarrer(DONNEES_EXEMPLE));
 </script>
-</body>
-</html>
+@endpush

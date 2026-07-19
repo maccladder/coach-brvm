@@ -844,6 +844,52 @@
 </section>
 
 {{-- ══════════════════════════════════════
+     COMPARATEUR DE PRIX (promo croisée)
+══════════════════════════════════════ --}}
+<section style="background:var(--cb-card); border-top:1px solid var(--cb-border); border-bottom:1px solid var(--cb-border); padding:56px 0;">
+    <div class="container" style="max-width:1100px;">
+        <div class="cbr" style="
+            background: linear-gradient(135deg, rgba(255,122,26,.06) 0%, var(--cb-paper) 60%);
+            border: 1px solid rgba(255,122,26,.22);
+            border-radius: 6px;
+            padding: clamp(32px, 5vw, 56px) clamp(28px, 5vw, 56px);
+            position: relative; overflow: hidden;
+        ">
+            <div style="position:absolute;top:-60px;right:-60px;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle, rgba(255,122,26,.08) 0%, transparent 70%);pointer-events:none;"></div>
+
+            <div class="row align-items-center g-4">
+                <div class="col-lg-8">
+                    <span style="display:inline-flex;align-items:center;gap:8px;font-family:'Syne',sans-serif;font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#C55708;background:rgba(255,122,26,.1);border:1px solid rgba(255,122,26,.28);padding:5px 14px;border-radius:100px;margin-bottom:18px;">
+                        ✦ Nouveau
+                    </span>
+                    <h2 style="font-family:'Playfair Display',serif;font-size:clamp(24px,3.5vw,38px);font-weight:900;color:var(--cb-ink);line-height:1.1;margin-bottom:14px;">
+                        Le comparateur de <em style="color:#FF7A1A;font-style:italic;">prix</em> Boursiv
+                    </h2>
+                    <p style="font-size:15px;color:var(--cb-muted);line-height:1.75;max-width:560px;font-weight:300;margin-bottom:0;">
+                        Le même produit, jamais au même prix. <strong style="color:var(--cb-ink);font-weight:500;">Économisez sur vos téléphones et vos repas</strong> en comparant les offres des sites marchands et plateformes de livraison en 2 clics.
+                    </p>
+                </div>
+                <div class="col-lg-4 d-flex flex-column flex-sm-row flex-lg-column gap-2 align-items-start align-items-lg-end">
+                    <a href="{{ route('comparateur.index') }}" style="
+                        display:inline-flex;align-items:center;gap:8px;
+                        background:#FF7A1A;
+                        color:#fff !important; font-family:'Syne',sans-serif;
+                        font-weight:800;font-size:13px;letter-spacing:.06em;text-transform:uppercase;
+                        padding:13px 26px;border-radius:3px;text-decoration:none;
+                        transition:all .3s;white-space:nowrap;
+                        box-shadow:0 4px 18px rgba(255,122,26,.3);
+                    "
+                    onmouseover="this.style.boxShadow='0 10px 32px rgba(255,122,26,.45)';this.style.transform='translateY(-2px)'"
+                    onmouseout="this.style.boxShadow='0 4px 18px rgba(255,122,26,.3)';this.style.transform=''">
+                        🛒 Comparer les prix
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+{{-- ══════════════════════════════════════
      BOC HIGHLIGHT
 ══════════════════════════════════════ --}}
 <section class="cb-sec cb-sec-alt">

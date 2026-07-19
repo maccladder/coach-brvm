@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>{{ config('app.name', 'Boursiv') }}</title>
+    <title>@yield('title', config('app.name', 'Boursiv'))</title>
 
     @stack('meta')
 
@@ -284,6 +284,11 @@
                         <li><hr class="dropdown-divider"></li>
                         <li><a class="dropdown-item" href="{{ route('dividendes.index', ['year' => 2025]) }}">🏆 Classement dividendes (2025)</a></li>
                     </ul>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link d-flex align-items-center gap-1" href="{{ route('comparateur.index') }}">
+                        🛒 Comparateur <span class="cb-badge-new">Nouveau</span>
+                    </a>
                 </li>
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">Apprendre</a>
