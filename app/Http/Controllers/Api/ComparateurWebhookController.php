@@ -21,6 +21,7 @@ class ComparateurWebhookController extends Controller
 
         $validator = Validator::make($request->all(), [
             'generated_at'          => ['required', 'string'],
+            'categorie'             => ['sometimes', 'string'],
             'produits'              => ['required', 'array', 'min:1'],
             'produits.*.id'         => ['required', 'string'],
             'produits.*.nom'        => ['required', 'string'],
@@ -51,19 +52,73 @@ class ComparateurWebhookController extends Controller
 
         File::ensureDirectoryExists($dir);
 
-        $tmpPath = $dir.'/.produits.json.'.uniqid('', true).'.tmp';
-        file_put_contents($tmpPath, json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
-        rename($tmpPath, $path);
+        if (!$request->has('categorie')) {
+            $this->writeAtomic($dir, $path, $data);
 
-        $nbProduits = count($data['produits']);
+            $nbProduits = count($data['produits']);
 
-        Log::info('Comparateur webhook n8n — produits.json mis à jour', [
-            'nb_produits' => $nbProduits,
+            Log::info('Comparateur webhook n8n — produits.json mis à jour', [
+                'nb_produits' => $nbProduits,
+            ]);
+
+            return response()->json([
+                'ok'          => true,
+                'nb_produits' => $nbProduits,
+            ]);
+        }
+
+        $categorie = $data['categorie'];
+
+        foreach ($data['produits'] as $produit) {
+            if ($produit['categorie'] !== $categorie) {
+                return response()->json([
+                    'error'   => 'validation_failed',
+                    'message' => "Chaque produit doit avoir categorie=\"{$categorie}\".",
+                ], 422);
+            }
+        }
+
+        $existant = [];
+        if (File::exists($path)) {
+            $decoded  = json_decode(File::get($path), true);
+            $existant = is_array($decoded['produits'] ?? null) ? $decoded['produits'] : [];
+        }
+
+        $conserves = array_values(array_filter($existant, function ($p) use ($categorie) {
+            return ($p['categorie'] ?? null) !== $categorie;
+        }));
+
+        $produitsFusionnes = array_merge($conserves, $data['produits']);
+
+        $nouveauContenu = [
+            'generated_at' => now()->utc()->format('Y-m-d\TH:i:s\Z'),
+            'nb_produits'  => count($produitsFusionnes),
+            'produits'     => $produitsFusionnes,
+        ];
+
+        $this->writeAtomic($dir, $path, $nouveauContenu);
+
+        $nbProduitsCategorie = count($data['produits']);
+        $nbProduitsTotal     = count($produitsFusionnes);
+
+        Log::info('Comparateur webhook n8n — produits.json fusionné par categorie', [
+            'categorie'             => $categorie,
+            'nb_produits_categorie' => $nbProduitsCategorie,
+            'nb_produits_total'     => $nbProduitsTotal,
         ]);
 
         return response()->json([
-            'ok'          => true,
-            'nb_produits' => $nbProduits,
+            'ok'                    => true,
+            'categorie'             => $categorie,
+            'nb_produits_categorie' => $nbProduitsCategorie,
+            'nb_produits_total'     => $nbProduitsTotal,
         ]);
+    }
+
+    private function writeAtomic(string $dir, string $path, array $contenu): void
+    {
+        $tmpPath = $dir.'/.produits.json.'.uniqid('', true).'.tmp';
+        file_put_contents($tmpPath, json_encode($contenu, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+        rename($tmpPath, $path);
     }
 }
