@@ -17,49 +17,53 @@ const BASE_URL = 'https://boursiv.com';
 // Pour ne capturer qu'un seul jeu (test avant de lancer les six) :
 // JEUX_A_CAPTURER = ['garba-master']
 // Tableau vide = tous les jeux de la liste JEUX ci-dessous.
-const JEUX_A_CAPTURER = ['garba-master'];
+const JEUX_A_CAPTURER = ['gri-gri-la-danse-des-perles'];
 
+// IMPORTANT : `url` pointe vers la fiche marketplace (/marketplace/{slug}), pas directement
+// vers la page de jeu. Raison : /mon-espace/mes-produits/{product}/play utilise le binding
+// Eloquent implicite sur `id` (pas de slug custom sur MarketplaceProduct), donc l'URL réelle
+// est .../play/42 et pas .../play/gri-gri-la-danse-des-perles — un ID qui peut changer.
+// On part donc toujours de la fiche marketplace (routée par slug, stable) et on clique sur
+// "Jouer maintenant" pour être redirigé vers la vraie page de jeu, quel que soit son ID.
+//
 // typeInputs possibles : 'clicker' | 'fleches' | 'viseur' | 'menu'
 const JEUX = [
   {
     slug: 'gri-gri-la-danse-des-perles',
-    url: `${BASE_URL}/mon-espace/mes-produits/gri-gri-la-danse-des-perles/play`,
+    url: `${BASE_URL}/marketplace/gri-gri-la-danse-des-perles`,
     dureeSecondes: 45,
     typeInputs: 'viseur',
   },
   {
     slug: 'garba-master',
-    // Garba Master est un jeu Phaser autonome servi sur /jeu (pas de page /play dédiée).
-    url: `${BASE_URL}/jeu`,
+    // La fiche marketplace redirige vers /jeu (jeu Phaser autonome, pas de page /play dédiée).
+    url: `${BASE_URL}/marketplace/garba-master`,
     dureeSecondes: 45,
     typeInputs: 'clicker',
   },
   {
     slug: 'abidjan-run-le-jeu-run-a-livoirienne',
-    url: `${BASE_URL}/mon-espace/mes-produits/abidjan-run-le-jeu-run-a-livoirienne/play`,
+    url: `${BASE_URL}/marketplace/abidjan-run-le-jeu-run-a-livoirienne`,
     dureeSecondes: 45,
     typeInputs: 'fleches',
   },
   {
     slug: 'awale-master',
-    // URL fournie telle quelle (page marketplace, pas encore de page /play confirmée en base
-    // au moment de l'écriture de ce script). Si ce jeu a depuis une page /play dédiée,
-    // remplace cette URL par `${BASE_URL}/mon-espace/mes-produits/awale-master/play`.
     url: `${BASE_URL}/marketplace/awale-master`,
     dureeSecondes: 45,
     typeInputs: 'viseur',
   },
   {
     slug: 'roi-du-cacao',
-    url: `${BASE_URL}/mon-espace/mes-produits/roi-du-cacao/play`,
+    url: `${BASE_URL}/marketplace/roi-du-cacao`,
     dureeSecondes: 45,
     typeInputs: 'clicker',
   },
   {
     slug: 'questions-pour-un-vrai-mogo',
     // Pas encore de produit publié en base au moment de l'écriture de ce script :
-    // si la page n'existe pas encore en prod, le script le loggera en échec et passera au suivant.
-    url: `${BASE_URL}/mon-espace/mes-produits/questions-pour-un-vrai-mogo/play`,
+    // si la fiche n'existe pas encore en prod, le script le loggera en échec et passera au suivant.
+    url: `${BASE_URL}/marketplace/questions-pour-un-vrai-mogo`,
     dureeSecondes: 45,
     typeInputs: 'menu',
   },
@@ -69,9 +73,10 @@ const RUSHES_DIR = path.join(__dirname, 'rushes');
 const VIEWPORT = { width: 1280, height: 720 };
 const ATTENTE_ECRAN_ACCUEIL_MS = 3000;
 const TIMEOUT_CHARGEMENT_MS = 20000;
+const MAX_CLICS_ENCHAINES = 3; // ex: "Jouer maintenant" (fiche) → "JOUER" (écran d'accueil du jeu)
 
 const BOUTONS_DEMARRAGE = [
-  'Jouer maintenant', 'Nouvelle partie', 'Démarrer', 'Commencer', 'Jouer', 'Rejouer', 'Start', 'Play',
+  'Jouer maintenant', 'Accéder gratuitement', 'Nouvelle partie', 'Démarrer', 'Commencer', 'Jouer', 'Rejouer', 'Start', 'Play',
 ];
 
 // ═══════════════════════════════════════════════════════
@@ -119,10 +124,17 @@ async function login(browser) {
 
 async function ecranDeverrouillageDetecte(page) {
   try {
-    return page.frames().some((f) => /paystack/i.test(f.url()));
+    if (page.frames().some((f) => /paystack/i.test(f.url()))) return true;
   } catch {
-    return false;
+    // ignore
   }
+  try {
+    // Bouton "Débloquer" (.cb-btn-outline) de la fiche marketplace pour un jeu payant non acheté.
+    if (await page.getByText('Débloquer', { exact: false }).first().isVisible()) return true;
+  } catch {
+    // ignore
+  }
+  return false;
 }
 
 // ═══════════════════════════════════════════════════════
@@ -172,13 +184,13 @@ async function essayerClicBouton(scope, texte) {
   await bouton.click({ timeout: 1500 });
 }
 
+// Retourne true si un bouton a été cliqué (page ou iframe), false si aucun trouvé.
 async function cliquerBoutonDemarrage(page) {
   for (const texte of BOUTONS_DEMARRAGE) {
     try {
       await essayerClicBouton(page, texte);
       console.log(`[capture] Bouton de démarrage cliqué : "${texte}"`);
-      await page.waitForTimeout(1000);
-      return;
+      return true;
     } catch {
       // bouton absent sur la page, on essaie le suivant
     }
@@ -191,15 +203,15 @@ async function cliquerBoutonDemarrage(page) {
       try {
         await essayerClicBouton(frame, texte);
         console.log(`[capture] Bouton de démarrage cliqué dans l'iframe : "${texte}"`);
-        await page.waitForTimeout(1000);
-        return;
+        return true;
       } catch {
         // bouton absent dans l'iframe, on essaie le suivant
       }
     }
   }
 
-  console.log('[capture] Aucun bouton de démarrage trouvé, on continue directement.');
+  console.log('[capture] Aucun bouton de démarrage trouvé sur cet écran.');
+  return false;
 }
 
 // ═══════════════════════════════════════════════════════
@@ -312,20 +324,33 @@ async function capturerJeu(browser, storageState, jeu) {
       throw new Error('écran de déverrouillage détecté');
     }
 
-    let { locator: surface } = await attendreSurfaceDeJeu(page, jeu);
     await page.waitForTimeout(ATTENTE_ECRAN_ACCUEIL_MS);
 
     if (await ecranDeverrouillageDetecte(page)) {
       throw new Error('écran de déverrouillage détecté');
     }
 
-    await cliquerBoutonDemarrage(page);
-    await page.waitForLoadState('domcontentloaded').catch(() => {});
-    // re-résout la surface au cas où le clic sur "démarrer" aurait navigué/recréé le canvas
-    const { locator: surfaceApres, trouvee } = await attendreSurfaceDeJeu(page, jeu);
-    surface = surfaceApres;
+    // On part toujours de la fiche marketplace (/marketplace/{slug}), qui n'a ni canvas ni
+    // iframe de jeu — il faut donc cliquer à travers un ou deux écrans avant d'atteindre le
+    // vrai gameplay : "Jouer maintenant" (fiche) → éventuellement un écran d'accueil du jeu
+    // lui-même ("JOUER", "Nouvelle partie", ...). On boucle clic → re-détection de la surface
+    // jusqu'à trouver le vrai canvas/iframe, ou jusqu'à épuisement des boutons connus.
+    let { locator: surface, trouvee } = await attendreSurfaceDeJeu(page, jeu);
+    for (let tentative = 0; !trouvee && tentative < MAX_CLICS_ENCHAINES; tentative++) {
+      if (await ecranDeverrouillageDetecte(page)) {
+        throw new Error('écran de déverrouillage détecté');
+      }
+
+      const aClique = await cliquerBoutonDemarrage(page);
+      if (!aClique) break;
+
+      await page.waitForLoadState('domcontentloaded').catch(() => {});
+      await page.waitForTimeout(1000);
+      ({ locator: surface, trouvee } = await attendreSurfaceDeJeu(page, jeu));
+    }
+
     if (!trouvee) {
-      console.log(`[capture] ${jeu.slug} : surface de jeu (canvas/iframe) toujours introuvable après le clic de démarrage, on interagit avec la page telle quelle.`);
+      console.log(`[capture] ${jeu.slug} : surface de jeu (canvas/iframe) introuvable, on interagit avec la page telle quelle.`);
     }
 
     await executerInputs(page, surface, jeu);
