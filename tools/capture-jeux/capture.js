@@ -285,6 +285,43 @@ async function cliquerBoutonDemarrage(page, slug) {
 }
 
 // ═══════════════════════════════════════════════════════
+// REPRISE APRÈS UN GAME OVER EN COURS D'ENREGISTREMENT
+// ═══════════════════════════════════════════════════════
+
+// Ces jeux sont des runners/arcades qui finissent tôt ou tard par une partie perdue en
+// pleine capture ("GAME OVER", écran de fin) — sans reprise, le reste des 45s ne montre
+// plus qu'un écran figé. On vérifie donc à intervalles réguliers si un de ces textes de
+// relance est visible (vérification légère : juste un comptage, pas de clic) et si oui on
+// reclique à travers les écrans (Rejouer → sélection perso → Jouer, etc.) comme au démarrage.
+const TEXTES_RELANCE = ['Rejouer', 'Nouvelle partie'];
+
+async function detecterEcranDeFin(page) {
+  try {
+    const aUneIframe = await page.locator('#game-frame').count().then((n) => n > 0).catch(() => false);
+    const scope = aUneIframe ? page.frameLocator('#game-frame') : page;
+    for (const texte of TEXTES_RELANCE) {
+      const n = await scope.locator('button:visible, a:visible').filter({ hasText: texte }).count().catch(() => 0);
+      if (n > 0) return true;
+    }
+  } catch {
+    // ignore
+  }
+  return false;
+}
+
+async function essayerReprendrePartieEnCoursSiFinie(page, jeu) {
+  if (!(await detecterEcranDeFin(page))) return;
+
+  console.log(`[capture] ${jeu.slug} : écran de fin de partie détecté pendant l'enregistrement, relance en cours...`);
+  for (let tentative = 0; tentative < MAX_CLICS_ENCHAINES; tentative++) {
+    await dismissScoreToast(page);
+    const clique = await cliquerBoutonDemarrage(page, jeu.slug);
+    await page.waitForTimeout(700);
+    if (!clique) break;
+  }
+}
+
+// ═══════════════════════════════════════════════════════
 // INPUTS SCRIPTÉS
 // ═══════════════════════════════════════════════════════
 
@@ -299,7 +336,7 @@ async function boiteDeLaSurface(page, surface) {
   return { x: 0, y: 0, width: vp.width, height: vp.height };
 }
 
-async function inputsClicker(page, surface, fin) {
+async function inputsClicker(page, surface, fin, jeu) {
   const box = await boiteDeLaSurface(page, surface);
   const cx = box.x + box.width / 2;
   const cy = box.y + box.height / 2;
@@ -309,6 +346,7 @@ async function inputsClicker(page, surface, fin) {
   // blade.php) contient Plein écran / Classement (nouvel onglet) / ← Mes produits (quitte le
   // jeu !) — un clic aléatoire dessus casserait la capture en cours.
   while (Date.now() < fin) {
+    await essayerReprendrePartieEnCoursSiFinie(page, jeu);
     const surCentre = Math.random() < 0.6;
     const x = surCentre ? cx : box.x + Math.random() * box.width;
     const y = surCentre ? cy : box.y + Math.random() * box.height;
@@ -317,25 +355,32 @@ async function inputsClicker(page, surface, fin) {
   }
 }
 
-async function inputsFleches(page, surface, fin) {
+async function inputsFleches(page, surface, fin, jeu) {
   try {
     await surface.click({ timeout: 1000 });
   } catch {
     // pas cliquable, on tente quand même les touches sur la page
   }
 
-  const touches = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Space'];
+  // Abidjan Run n'écoute QUE ArrowUp (sauter) et ArrowDown (glisser) — pas de changement de
+  // voie, ArrowLeft/ArrowRight/Space n'y font rien. D'après la config du jeu (ODEFS), les
+  // obstacles au sol à sauter (voitures, motos, police, vendeurs, animaux...) sont ~3x plus
+  // fréquents que les obstacles aériens à éviter en glissant (fils/corde/branches), d'où ce
+  // ratio de touches.
+  const touches = ['ArrowUp', 'ArrowUp', 'ArrowUp', 'ArrowDown'];
   while (Date.now() < fin) {
+    await essayerReprendrePartieEnCoursSiFinie(page, jeu);
     const touche = touches[Math.floor(Math.random() * touches.length)];
     await page.keyboard.press(touche).catch(() => {});
-    await page.waitForTimeout(200 + Math.random() * 300);
+    await page.waitForTimeout(250 + Math.random() * 300);
   }
 }
 
-async function inputsViseur(page, surface, fin) {
+async function inputsViseur(page, surface, fin, jeu) {
   const box = await boiteDeLaSurface(page, surface);
 
   while (Date.now() < fin) {
+    await essayerReprendrePartieEnCoursSiFinie(page, jeu);
     const x = box.x + Math.random() * box.width;
     const y = box.y + Math.random() * box.height;
     await page.mouse.click(x, y).catch(() => {});
@@ -358,11 +403,11 @@ async function executerInputs(page, surface, jeu) {
 
   switch (jeu.typeInputs) {
     case 'clicker':
-      return inputsClicker(page, surface, fin);
+      return inputsClicker(page, surface, fin, jeu);
     case 'fleches':
-      return inputsFleches(page, surface, fin);
+      return inputsFleches(page, surface, fin, jeu);
     case 'viseur':
-      return inputsViseur(page, surface, fin);
+      return inputsViseur(page, surface, fin, jeu);
     case 'menu':
       return inputsMenu(page, fin);
     default:
