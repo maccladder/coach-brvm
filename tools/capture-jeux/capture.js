@@ -125,6 +125,24 @@ async function login(browser) {
 // DÉTECTION ÉCRAN DE DÉVERROUILLAGE / PAIEMENT
 // ═══════════════════════════════════════════════════════
 
+// La page wrapper (my-products-play.blade.php / gri-gri-play.blade.php) affiche un toast
+// "🎮 Partie terminée" en position:fixed;z-index:200 dès qu'un score est posté par l'iframe
+// (y compris score=0 au premier chargement). Il reste affiché 12s et couvre physiquement le
+// bas de l'écran de jeu — dont le bouton "JOUER !" de l'écran de sélection de personnage
+// d'Abidjan Run — bloquant tout clic à cet endroit (l'élément intercepte réellement les
+// événements, ce n'est pas contournable par sélecteur). On le fait disparaître directement
+// via JS plutôt que d'attendre les 12s ou de deviner un clic sur son bouton "Fermer".
+async function dismissScoreToast(page) {
+  try {
+    await page.evaluate(() => {
+      const toast = document.getElementById('score-toast');
+      if (toast) toast.classList.remove('show', 'new-best');
+    });
+  } catch {
+    // page/contexte fermé ou navigation en cours, tant pis
+  }
+}
+
 async function ecranDeverrouillageDetecte(page) {
   try {
     if (page.frames().some((f) => /paystack/i.test(f.url()))) return true;
@@ -335,6 +353,8 @@ async function inputsMenu(page, fin) {
 async function executerInputs(page, surface, jeu) {
   const fin = Date.now() + jeu.dureeSecondes * 1000;
   console.log(`[capture] Inputs "${jeu.typeInputs}" pendant ${jeu.dureeSecondes}s ...`);
+  // Au cas où le toast de score réapparaîtrait juste avant qu'on commence à jouer.
+  await dismissScoreToast(page);
 
   switch (jeu.typeInputs) {
     case 'clicker':
@@ -392,6 +412,11 @@ async function capturerJeu(browser, storageState, jeu) {
       if (await ecranDeverrouillageDetecte(page)) {
         throw new Error('écran de déverrouillage détecté');
       }
+
+      // Le toast de score de la page wrapper peut apparaître dès le chargement (score=0)
+      // et couvrir physiquement des boutons du jeu (ex. "JOUER !" sur Abidjan Run) — il
+      // intercepte réellement les clics, aucun sélecteur ne peut contourner ça.
+      await dismissScoreToast(page);
 
       const aClique = await cliquerBoutonDemarrage(page, jeu.slug);
 
