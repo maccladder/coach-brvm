@@ -84,8 +84,11 @@ async function login(browser) {
 
   console.log('[capture] Connexion à boursiv.com ...');
   await page.goto(`${BASE_URL}/login`, { waitUntil: 'domcontentloaded' });
-  await page.fill('#email', process.env.BOURSIV_EMAIL);
-  await page.fill('#password', process.env.BOURSIV_PASSWORD);
+
+  // Sélecteurs alignés sur resources/views/auth/login.blade.php :
+  // <input type="email" name="email" id="email">, <input type="password" name="password" id="password">
+  await page.fill('input[name="email"]', process.env.BOURSIV_EMAIL);
+  await page.fill('input[name="password"]', process.env.BOURSIV_PASSWORD);
 
   await Promise.all([
     page.waitForURL((url) => !url.pathname.startsWith('/login'), { timeout: 15000 }).catch(() => {}),
@@ -93,8 +96,15 @@ async function login(browser) {
   ]);
   await page.waitForLoadState('networkidle').catch(() => {});
 
+  // Pause + capture d'écran de diagnostic : si le login échoue, on voit exactement
+  // ce que la page affiche (erreur de validation, throttle, etc.).
+  await page.waitForTimeout(1500);
+  const debugScreenshotPath = path.join(__dirname, 'login-debug.png');
+  await page.screenshot({ path: debugScreenshotPath, fullPage: true }).catch(() => {});
+
   if (new URL(page.url()).pathname.startsWith('/login')) {
-    throw new Error('toujours sur /login après soumission — identifiants invalides ou formulaire de connexion modifié');
+    console.error(`[capture] Capture de diagnostic enregistrée → ${debugScreenshotPath}`);
+    throw new Error('toujours sur /login après soumission — identifiants invalides ou formulaire de connexion modifié (voir login-debug.png)');
   }
 
   console.log('[capture] Connecté avec succès.');

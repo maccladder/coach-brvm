@@ -72,6 +72,13 @@ Tout se configure en tête de `capture.js` :
   - `viseur` — clics à positions aléatoires dans la surface de jeu (canvas/iframe)
   - `menu` — pas d'interaction, laisse tourner l'intro
 
+## Diagnostiquer un échec de login
+
+Si le script s'arrête avec « toujours sur /login après soumission », regarde
+`login-debug.png` (généré automatiquement dans ce dossier juste après la
+tentative de connexion) : il montre l'état exact de la page — message
+d'identifiants invalides, throttle Laravel (5 tentatives max), etc.
+
 ## Notes
 
 - Le login se fait une seule fois ; la session (storageState Playwright) est
