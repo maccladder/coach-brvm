@@ -1,0 +1,14 @@
+{
+  "name": "capture-jeux-boursiv",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Capture video automatique des jeux Boursiv (production) pour rushes de promo",
+  "main": "capture.js",
+  "scripts": {
+    "capture": "node capture.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "playwright": "^1.47.0"
+  }
+}
