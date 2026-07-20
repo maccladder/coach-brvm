@@ -127,16 +127,22 @@ async function login(browser) {
 
 // La page wrapper (my-products-play.blade.php / gri-gri-play.blade.php) affiche un toast
 // "🎮 Partie terminée" en position:fixed;z-index:200 dès qu'un score est posté par l'iframe
-// (y compris score=0 au premier chargement). Il reste affiché 12s et couvre physiquement le
-// bas de l'écran de jeu — dont le bouton "JOUER !" de l'écran de sélection de personnage
-// d'Abidjan Run — bloquant tout clic à cet endroit (l'élément intercepte réellement les
-// événements, ce n'est pas contournable par sélecteur). On le fait disparaître directement
-// via JS plutôt que d'attendre les 12s ou de deviner un clic sur son bouton "Fermer".
+// (y compris score=0 au premier chargement, ou à chaque mort du joueur). Il couvre
+// physiquement le bas de l'écran de jeu — dont le bouton "JOUER !" de l'écran de sélection
+// de personnage d'Abidjan Run — bloquant tout clic à cet endroit (l'élément intercepte
+// réellement les événements, ce n'est pas contournable par sélecteur).
+// Un simple classList.remove('show') ne suffit PAS : le wrapper garde une référence JS
+// (`const toast = document.getElementById('score-toast')`) et rappelle showToast() →
+// classList.add('show') à chaque nouveau score posté par l'iframe, ce qui peut le refaire
+// réapparaître entre notre dismiss et notre clic suivant. On retire donc l'élément du DOM
+// (`.remove()`) : une fois détaché, les appels classList.add() suivants du wrapper restent
+// inoffensifs (élément non affiché = jamais peint, jamais interceptable), sans jamais
+// pouvoir revenir bloquer un clic.
 async function dismissScoreToast(page) {
   try {
     await page.evaluate(() => {
       const toast = document.getElementById('score-toast');
-      if (toast) toast.classList.remove('show', 'new-best');
+      if (toast) toast.remove();
     });
   } catch {
     // page/contexte fermé ou navigation en cours, tant pis
@@ -291,8 +297,15 @@ async function cliquerBoutonDemarrage(page, slug) {
 // Ces jeux sont des runners/arcades qui finissent tôt ou tard par une partie perdue en
 // pleine capture ("GAME OVER", écran de fin) — sans reprise, le reste des 45s ne montre
 // plus qu'un écran figé. On vérifie donc à intervalles réguliers si un de ces textes de
-// relance est visible (vérification légère : juste un comptage, pas de clic) et si oui on
-// reclique à travers les écrans (Rejouer → sélection perso → Jouer, etc.) comme au démarrage.
+// relance est GENUINEMENT cliquable, et si oui on reclique à travers les écrans (Rejouer →
+// sélection perso → Jouer, etc.) comme au démarrage.
+//
+// IMPORTANT : on utilise click({trial:true}) et non un simple count() sur ':visible'. Sur
+// Abidjan Run, l'écran "GAME OVER" (#gs2) contient un bouton "🔄 REJOUER" — vu comme
+// ':visible' par Playwright même quand #gs2 a la classe "hidden" (opacity:0 seulement, pas
+// display:none). Un count() aurait donc détecté un faux "écran de fin" en permanence, même
+// en plein écran de sélection de personnage. click({trial:true}) vérifie la clicabilité
+// réelle (opacity, pointer-events, éléments qui recouvrent...) sans effectuer le clic.
 const TEXTES_RELANCE = ['Rejouer', 'Nouvelle partie'];
 
 async function detecterEcranDeFin(page) {
@@ -300,8 +313,12 @@ async function detecterEcranDeFin(page) {
     const aUneIframe = await page.locator('#game-frame').count().then((n) => n > 0).catch(() => false);
     const scope = aUneIframe ? page.frameLocator('#game-frame') : page;
     for (const texte of TEXTES_RELANCE) {
-      const n = await scope.locator('button:visible, a:visible').filter({ hasText: texte }).count().catch(() => 0);
-      if (n > 0) return true;
+      const boutons = scope.locator('button:visible, a:visible').filter({ hasText: texte });
+      const total = await boutons.count().catch(() => 0);
+      for (let i = 0; i < total; i++) {
+        const cliquable = await boutons.nth(i).click({ trial: true, timeout: 300 }).then(() => true).catch(() => false);
+        if (cliquable) return true;
+      }
     }
   } catch {
     // ignore
