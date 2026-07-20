@@ -61,8 +61,8 @@ const JEUX = [
   },
   {
     slug: 'questions-pour-un-vrai-mogo',
-    // Pas encore de produit publié en base au moment de l'écriture de ce script :
-    // si la fiche n'existe pas encore en prod, le script le loggera en échec et passera au suivant.
+    // Confirmé publié en prod (absent de la base locale de dev, donc pas dans marketplace_products
+    // en local) : écran d'accueil à bouton unique "C'EST PARTI 🚀".
     url: `${BASE_URL}/marketplace/questions-pour-un-vrai-mogo`,
     dureeSecondes: 45,
     typeInputs: 'menu',
@@ -73,7 +73,10 @@ const RUSHES_DIR = path.join(__dirname, 'rushes');
 const VIEWPORT = { width: 1280, height: 720 };
 const ATTENTE_ECRAN_ACCUEIL_MS = 3000;
 const TIMEOUT_CHARGEMENT_MS = 20000;
-const MAX_CLICS_ENCHAINES = 3; // ex: "Jouer maintenant" (fiche) → "JOUER" (écran d'accueil du jeu)
+// Nombre d'écrans à traverser en cliquant : ex. Abidjan Run = "Jouer maintenant" (fiche
+// marketplace) → "JOUER !" (menu du jeu) → "JOUER !" (écran de sélection de personnage) = 3,
+// +1 de marge de sécurité.
+const MAX_CLICS_ENCHAINES = 4;
 
 const BOUTONS_DEMARRAGE = [
   'Jouer maintenant', 'Accéder gratuitement', "C'est parti", 'Nouvelle partie', 'Démarrer', 'Commencer', 'Jouer', 'Rejouer', 'Start', 'Play',
@@ -178,8 +181,13 @@ async function attendreSurfaceDeJeu(page, jeu) {
 // BOUTON DE DÉMARRAGE
 // ═══════════════════════════════════════════════════════
 
+// On restreint aux vrais éléments cliquables (button/a) déjà visibles, et on filtre par texte
+// ensuite : getByText(...).first() seul se fait piéger par des boutons dupliqués au même texte
+// mais cachés (ex. Abidjan Run a deux boutons "JOUER !" — un visible sur le menu, un autre
+// caché dans l'écran de sélection de personnage, placé AVANT dans le DOM) — .first() y
+// résolvait vers le bouton caché, qui ne devenait jamais visible, et le clic échouait toujours.
 async function essayerClicBouton(scope, texte) {
-  const bouton = scope.getByText(texte, { exact: false }).first();
+  const bouton = scope.locator('button:visible, a:visible').filter({ hasText: texte }).first();
   await bouton.waitFor({ state: 'visible', timeout: 800 });
   await bouton.click({ timeout: 1500 });
 }
@@ -234,21 +242,16 @@ async function inputsClicker(page, surface, fin) {
   const cx = box.x + box.width / 2;
   const cy = box.y + box.height / 2;
 
+  // On ne clique QUE dans la surface du jeu (centre + positions aléatoires alentour), jamais
+  // sur des boutons du reste de la page : la barre de contrôle du wrapper (my-products-play.
+  // blade.php) contient Plein écran / Classement (nouvel onglet) / ← Mes produits (quitte le
+  // jeu !) — un clic aléatoire dessus casserait la capture en cours.
   while (Date.now() < fin) {
-    await page.mouse.click(cx, cy).catch(() => {});
-    await page.waitForTimeout(250 + Math.random() * 200);
-
-    if (Math.random() < 0.3) {
-      try {
-        const boutons = page.locator('button:visible, a.cb-btn-success:visible, a.cb-btn-purple:visible');
-        const total = await boutons.count();
-        if (total > 0) {
-          await boutons.nth(Math.floor(Math.random() * total)).click({ timeout: 500 }).catch(() => {});
-        }
-      } catch {
-        // pas grave, on continue les clics au centre
-      }
-    }
+    const surCentre = Math.random() < 0.6;
+    const x = surCentre ? cx : box.x + Math.random() * box.width;
+    const y = surCentre ? cy : box.y + Math.random() * box.height;
+    await page.mouse.click(x, y).catch(() => {});
+    await page.waitForTimeout(200 + Math.random() * 250);
   }
 }
 
@@ -331,22 +334,28 @@ async function capturerJeu(browser, storageState, jeu) {
     }
 
     // On part toujours de la fiche marketplace (/marketplace/{slug}), qui n'a ni canvas ni
-    // iframe de jeu — il faut donc cliquer à travers un ou deux écrans avant d'atteindre le
-    // vrai gameplay : "Jouer maintenant" (fiche) → éventuellement un écran d'accueil du jeu
-    // lui-même ("JOUER", "Nouvelle partie", ...). On boucle clic → re-détection de la surface
-    // jusqu'à trouver le vrai canvas/iframe, ou jusqu'à épuisement des boutons connus.
-    let { locator: surface, trouvee } = await attendreSurfaceDeJeu(page, jeu);
-    for (let tentative = 0; !trouvee && tentative < MAX_CLICS_ENCHAINES; tentative++) {
+    // iframe de jeu — il faut donc cliquer à travers un ou plusieurs écrans avant d'atteindre le
+    // vrai gameplay : "Jouer maintenant" (fiche) → écran d'accueil du jeu ("JOUER", "Nouvelle
+    // partie", ...) → parfois un écran intermédiaire (ex. sélection de personnage sur Abidjan
+    // Run, avec son propre bouton "JOUER !"). IMPORTANT : on ne peut PAS s'arrêter dès qu'un
+    // canvas/iframe est détecté ("trouvee"), car plusieurs jeux (Abidjan Run, GRI-GRI) ont un
+    // <canvas> présent dès le chargement de la page, alors que le menu tourne dedans ou par-
+    // dessus — on boucle donc tant qu'un bouton connu est trouvé et cliqué, jusqu'à épuisement
+    // ou jusqu'à MAX_CLICS_ENCHAINES, et on re-détecte la surface après CHAQUE clic.
+    let surface = page.locator('body');
+    let trouvee = false;
+    for (let tentative = 0; tentative < MAX_CLICS_ENCHAINES; tentative++) {
       if (await ecranDeverrouillageDetecte(page)) {
         throw new Error('écran de déverrouillage détecté');
       }
 
       const aClique = await cliquerBoutonDemarrage(page);
-      if (!aClique) break;
 
       await page.waitForLoadState('domcontentloaded').catch(() => {});
       await page.waitForTimeout(1000);
       ({ locator: surface, trouvee } = await attendreSurfaceDeJeu(page, jeu));
+
+      if (!aClique) break;
     }
 
     if (!trouvee) {
