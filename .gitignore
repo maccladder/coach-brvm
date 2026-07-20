@@ -25,3 +25,5 @@ Thumbs.db
 /tools/capture-jeux/node_modules
 /tools/capture-jeux/rushes
 /tools/capture-jeux/login-debug.png
+/tools/capture-jeux/debug-*.png
+/tools/capture-jeux/debug-*.html

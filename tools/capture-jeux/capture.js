@@ -192,8 +192,34 @@ async function essayerClicBouton(scope, texte) {
   await bouton.click({ timeout: 1500 });
 }
 
+// Screenshot + dump du HTML de l'iframe de jeu, pour diagnostiquer sans deviner quand
+// aucun bouton connu n'est trouvé (le game_html réel en prod peut différer de la copie
+// inspectée en base locale de dev).
+async function sauvegarderDiagnostic(page, slug) {
+  try {
+    const captureP = path.join(__dirname, `debug-${slug}.png`);
+    await page.screenshot({ path: captureP });
+    console.log(`[capture] Diagnostic : capture d'écran → ${captureP}`);
+  } catch {
+    // pas grave
+  }
+
+  try {
+    const iframeEl = await page.locator('#game-frame').first().elementHandle({ timeout: 1000 });
+    const frame = iframeEl ? await iframeEl.contentFrame() : null;
+    if (frame) {
+      const html = await frame.content();
+      const htmlPath = path.join(__dirname, `debug-${slug}-iframe.html`);
+      fs.writeFileSync(htmlPath, html, 'utf-8');
+      console.log(`[capture] Diagnostic : HTML de l'iframe → ${htmlPath}`);
+    }
+  } catch {
+    // pas grave — pas d'iframe, ou contenu inaccessible
+  }
+}
+
 // Retourne true si un bouton a été cliqué (page ou iframe), false si aucun trouvé.
-async function cliquerBoutonDemarrage(page) {
+async function cliquerBoutonDemarrage(page, slug) {
   for (const texte of BOUTONS_DEMARRAGE) {
     try {
       await essayerClicBouton(page, texte);
@@ -219,6 +245,7 @@ async function cliquerBoutonDemarrage(page) {
   }
 
   console.log('[capture] Aucun bouton de démarrage trouvé sur cet écran.');
+  await sauvegarderDiagnostic(page, slug);
   return false;
 }
 
@@ -349,7 +376,7 @@ async function capturerJeu(browser, storageState, jeu) {
         throw new Error('écran de déverrouillage détecté');
       }
 
-      const aClique = await cliquerBoutonDemarrage(page);
+      const aClique = await cliquerBoutonDemarrage(page, jeu.slug);
 
       await page.waitForLoadState('domcontentloaded').catch(() => {});
       await page.waitForTimeout(1000);
