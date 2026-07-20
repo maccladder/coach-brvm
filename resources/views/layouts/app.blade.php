@@ -285,11 +285,6 @@
                         <li><a class="dropdown-item" href="{{ route('dividendes.index', ['year' => 2025]) }}">🏆 Classement dividendes (2025)</a></li>
                     </ul>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link d-flex align-items-center gap-1" href="{{ route('comparateur.index') }}">
-                        🛒 Comparateur <span class="cb-badge-new">Nouveau</span>
-                    </a>
-                </li>
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">Apprendre</a>
                     <ul class="dropdown-menu">
