@@ -17,7 +17,7 @@ const BASE_URL = 'https://boursiv.com';
 // Pour ne capturer qu'un seul jeu (test avant de lancer les six) :
 // JEUX_A_CAPTURER = ['garba-master']
 // Tableau vide = tous les jeux de la liste JEUX ci-dessous.
-const JEUX_A_CAPTURER = ['gri-gri-la-danse-des-perles'];
+const JEUX_A_CAPTURER = ['abidjan-run-le-jeu-run-a-livoirienne'];
 
 // IMPORTANT : `url` pointe vers la fiche marketplace (/marketplace/{slug}), pas directement
 // vers la page de jeu. Raison : /mon-espace/mes-produits/{product}/play utilise le binding
@@ -76,7 +76,7 @@ const TIMEOUT_CHARGEMENT_MS = 20000;
 const MAX_CLICS_ENCHAINES = 3; // ex: "Jouer maintenant" (fiche) → "JOUER" (écran d'accueil du jeu)
 
 const BOUTONS_DEMARRAGE = [
-  'Jouer maintenant', 'Accéder gratuitement', 'Nouvelle partie', 'Démarrer', 'Commencer', 'Jouer', 'Rejouer', 'Start', 'Play',
+  'Jouer maintenant', 'Accéder gratuitement', "C'est parti", 'Nouvelle partie', 'Démarrer', 'Commencer', 'Jouer', 'Rejouer', 'Start', 'Play',
 ];
 
 // ═══════════════════════════════════════════════════════
