@@ -17,7 +17,7 @@ const BASE_URL = 'https://boursiv.com';
 // Pour ne capturer qu'un seul jeu (test avant de lancer les six) :
 // JEUX_A_CAPTURER = ['garba-master']
 // Tableau vide = tous les jeux de la liste JEUX ci-dessous.
-const JEUX_A_CAPTURER = [];
+const JEUX_A_CAPTURER = ['garba-master'];
 
 // typeInputs possibles : 'clicker' | 'fleches' | 'viseur' | 'menu'
 const JEUX = [
@@ -71,7 +71,7 @@ const ATTENTE_ECRAN_ACCUEIL_MS = 3000;
 const TIMEOUT_CHARGEMENT_MS = 20000;
 
 const BOUTONS_DEMARRAGE = [
-  'Jouer maintenant', 'Démarrer', 'Commencer', 'Jouer', 'Rejouer', 'Start', 'Play',
+  'Jouer maintenant', 'Nouvelle partie', 'Démarrer', 'Commencer', 'Jouer', 'Rejouer', 'Start', 'Play',
 ];
 
 // ═══════════════════════════════════════════════════════
@@ -129,30 +129,36 @@ async function ecranDeverrouillageDetecte(page) {
 // SURFACE DE JEU (canvas / iframe)
 // ═══════════════════════════════════════════════════════
 
+// Retourne { locator, trouvee } — trouvee=false signifie qu'on est retombé sur un
+// locator générique ('body') faute d'avoir trouvé le vrai canvas/iframe du jeu.
 async function attendreSurfaceDeJeu(page, jeu) {
   if (jeu.slug === 'garba-master') {
+    // L'écran d'accueil (#accueil-screen, bouton "✦ Nouvelle partie") est en DOM pur ;
+    // le canvas Phaser (#jeu canvas) n'est créé qu'après clic sur ce bouton. On ne bloque
+    // donc que 8s ici (au lieu des 20s génériques) : si le canvas n'apparaît pas, on est
+    // probablement encore sur l'écran d'accueil, ce qui est normal avant le clic sur le
+    // bouton de démarrage — la fonction est rappelée après ce clic pour re-détecter.
     try {
-      await page.waitForSelector('#jeu canvas', { timeout: TIMEOUT_CHARGEMENT_MS });
-      return page.locator('#jeu canvas');
+      await page.waitForSelector('#jeu canvas', { timeout: 8000 });
+      return { locator: page.locator('#jeu canvas'), trouvee: true };
     } catch {
-      console.log(`[capture] ${jeu.slug} : canvas #jeu introuvable, on continue quand même sur la page.`);
-      return page.locator('body');
+      return { locator: page.locator('body'), trouvee: false };
     }
   }
 
   const aUneIframe = await page.locator('#game-frame').count().then((n) => n > 0).catch(() => false);
   if (!aUneIframe) {
-    return page.locator('body');
+    return { locator: page.locator('body'), trouvee: false };
   }
 
   const frame = page.frameLocator('#game-frame');
   const canvas = frame.locator('canvas').first();
   try {
     await canvas.waitFor({ timeout: TIMEOUT_CHARGEMENT_MS });
-    return canvas;
+    return { locator: canvas, trouvee: true };
   } catch {
     console.log(`[capture] ${jeu.slug} : canvas introuvable dans l'iframe, on interagit avec l'iframe entière.`);
-    return frame.locator('body');
+    return { locator: frame.locator('body'), trouvee: false };
   }
 }
 
@@ -306,7 +312,7 @@ async function capturerJeu(browser, storageState, jeu) {
       throw new Error('écran de déverrouillage détecté');
     }
 
-    let surface = await attendreSurfaceDeJeu(page, jeu);
+    let { locator: surface } = await attendreSurfaceDeJeu(page, jeu);
     await page.waitForTimeout(ATTENTE_ECRAN_ACCUEIL_MS);
 
     if (await ecranDeverrouillageDetecte(page)) {
@@ -316,7 +322,11 @@ async function capturerJeu(browser, storageState, jeu) {
     await cliquerBoutonDemarrage(page);
     await page.waitForLoadState('domcontentloaded').catch(() => {});
     // re-résout la surface au cas où le clic sur "démarrer" aurait navigué/recréé le canvas
-    surface = await attendreSurfaceDeJeu(page, jeu).catch(() => surface);
+    const { locator: surfaceApres, trouvee } = await attendreSurfaceDeJeu(page, jeu);
+    surface = surfaceApres;
+    if (!trouvee) {
+      console.log(`[capture] ${jeu.slug} : surface de jeu (canvas/iframe) toujours introuvable après le clic de démarrage, on interagit avec la page telle quelle.`);
+    }
 
     await executerInputs(page, surface, jeu);
   } catch (err) {
