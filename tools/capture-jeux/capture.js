@@ -181,15 +181,32 @@ async function attendreSurfaceDeJeu(page, jeu) {
 // BOUTON DE DÉMARRAGE
 // ═══════════════════════════════════════════════════════
 
-// On restreint aux vrais éléments cliquables (button/a) déjà visibles, et on filtre par texte
-// ensuite : getByText(...).first() seul se fait piéger par des boutons dupliqués au même texte
-// mais cachés (ex. Abidjan Run a deux boutons "JOUER !" — un visible sur le menu, un autre
-// caché dans l'écran de sélection de personnage, placé AVANT dans le DOM) — .first() y
-// résolvait vers le bouton caché, qui ne devenait jamais visible, et le clic échouait toujours.
+// On essaie TOUS les éléments correspondants, pas juste le premier : Abidjan Run a deux
+// boutons "JOUER !" — celui du menu (cliquable) et #char-go dans l'écran de sélection de
+// personnage, qui a opacity:0 + pointer-events:none tant que l'écran n'est pas ouvert.
+// Playwright considère `:visible` uniquement via display/visibility/bounding-box — PAS
+// opacity — donc #char-go passe le filtre "button:visible" alors qu'il est invisible et
+// bloqué aux clics (pointer-events:none sur son parent). Comme il est placé AVANT le vrai
+// bouton dans le DOM, .first() le sélectionnait toujours et le clic échouait en boucle sans
+// jamais essayer le second candidat. On boucle donc sur tous les matches jusqu'à un clic
+// qui réussit réellement.
 async function essayerClicBouton(scope, texte) {
-  const bouton = scope.locator('button:visible, a:visible').filter({ hasText: texte }).first();
-  await bouton.waitFor({ state: 'visible', timeout: 800 });
-  await bouton.click({ timeout: 1500 });
+  const boutons = scope.locator('button:visible, a:visible').filter({ hasText: texte });
+  const total = await boutons.count();
+  if (total === 0) {
+    throw new Error(`aucun élément visible pour le texte "${texte}"`);
+  }
+
+  let derniereErreur = null;
+  for (let i = 0; i < total; i++) {
+    try {
+      await boutons.nth(i).click({ timeout: 1500 });
+      return;
+    } catch (err) {
+      derniereErreur = err;
+    }
+  }
+  throw derniereErreur;
 }
 
 // Screenshot + dump du HTML de l'iframe de jeu, pour diagnostiquer sans deviner quand
