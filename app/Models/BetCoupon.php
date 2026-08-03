@@ -53,6 +53,9 @@ class BetCoupon extends Model
             'crazy'     => ['emoji' => '🎲', 'label' => 'Crazy',     'color' => '#a855f7'],
             'goals'     => ['emoji' => '⚽', 'label' => 'Goals',       'color' => '#14b8a6'],
             'pepite05'  => ['emoji' => '💎', 'label' => 'Pépite +0,5', 'color' => '#38bdf8'],
+            'tennis_sur'       => ['emoji' => '🎾', 'label' => 'Tennis Sûr',       'color' => '#22c55e'],
+            'tennis_equilibre' => ['emoji' => '🎾', 'label' => 'Tennis Équilibré', 'color' => '#eab308'],
+            'tennis_jackpot'   => ['emoji' => '🎾', 'label' => 'Tennis Jackpot',   'color' => '#ef4444'],
             default     => ['emoji' => '❓', 'label' => ucfirst($this->niveau), 'color' => '#6b7280'],
         };
     }
