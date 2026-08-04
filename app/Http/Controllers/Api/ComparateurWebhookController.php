@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\ComparateurPrixHistorique;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
@@ -46,6 +47,8 @@ class ComparateurWebhookController extends Controller
         }
 
         $data = $validator->validated();
+
+        $this->archiverHistorique($data['produits']);
 
         $dir  = storage_path('app/comparateur');
         $path = $dir.'/produits.json';
@@ -113,6 +116,30 @@ class ComparateurWebhookController extends Controller
             'nb_produits_categorie' => $nbProduitsCategorie,
             'nb_produits_total'     => $nbProduitsTotal,
         ]);
+    }
+
+    /**
+     * Archive le prix du jour de chaque offre pour permettre l'historique de prix.
+     * Une ligne par (produit, site, jour) : un nouvel appel le même jour met juste à jour le prix.
+     */
+    private function archiverHistorique(array $produits): void
+    {
+        $aujourdhui = now()->toDateString();
+
+        foreach ($produits as $produit) {
+            foreach ($produit['offres'] as $offre) {
+                ComparateurPrixHistorique::updateOrCreate(
+                    [
+                        'id_produit' => $produit['id'],
+                        'site'       => $offre['site'],
+                        'date'       => $aujourdhui,
+                    ],
+                    [
+                        'prix' => (int) $offre['prix'],
+                    ]
+                );
+            }
+        }
     }
 
     private function writeAtomic(string $dir, string $path, array $contenu): void

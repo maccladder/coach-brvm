@@ -44,40 +44,59 @@
 .comparateur-page .verif{
   display:inline-flex;align-items:center;gap:6px;
   margin-top:14px;font-family:'Syne',sans-serif;
-  font-size:.72rem;font-weight:600;letter-spacing:.04em;background:var(--papier);
+  font-size:.875rem;font-weight:600;letter-spacing:.04em;background:var(--papier);
   border:1px solid var(--cb-border);border-radius:99px;padding:6px 13px;
 }
-.comparateur-page .verif .dot{width:7px;height:7px;border-radius:50%;background:var(--whatsapp)}
+.comparateur-page .verif .dot{width:7px;height:7px;border-radius:50%;background:var(--whatsapp);flex:none}
 
 /* ---------- Sélecteur ---------- */
 .comparateur-page .selecteur{margin-top:26px}
 .comparateur-page .selecteur label{
-  font-family:'Syne',sans-serif;font-weight:700;font-size:.85rem;
+  font-family:'Syne',sans-serif;font-weight:700;font-size:.9rem;
   letter-spacing:.02em;display:block;margin-bottom:10px;
 }
 .comparateur-page .chips{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 12px}
 .comparateur-page .chip{
-  font-family:'Syne',sans-serif;font-size:.76rem;font-weight:600;
+  font-family:'Syne',sans-serif;font-size:.875rem;font-weight:600;
   padding:7px 14px;border-radius:99px;cursor:pointer;
   border:1.5px solid var(--encre);background:var(--papier);color:var(--encre);
   transition:all .2s;
 }
 .comparateur-page .chip.actif{background:var(--encre);color:var(--fond);border-color:var(--encre)}
+.comparateur-page .ts-wrapper{width:100%;max-width:100%}
 .comparateur-page .ts-wrapper .ts-control{
   border:2px solid var(--encre);border-radius:var(--radius);
   padding:13px 14px;font-size:1rem;background:var(--papier);
-  box-shadow:0 2px 0 var(--encre);
+  box-shadow:0 2px 0 var(--encre);width:100%;max-width:100%;
 }
-.comparateur-page .ts-dropdown{border-radius:var(--radius);border:2px solid var(--encre);font-size:.95rem}
-.comparateur-page .ts-dropdown .option{padding:10px 12px;display:flex;align-items:center;gap:10px}
+.comparateur-page .ts-dropdown{border-radius:var(--radius);border:2px solid var(--encre);font-size:.95rem;max-width:100%}
+.comparateur-page .ts-dropdown .option{padding:12px;display:flex;align-items:center;gap:10px;min-height:44px}
 .comparateur-page .ts-dropdown .active{background:var(--fond);color:var(--encre)}
+.comparateur-page .ts-dropdown mark{background:var(--etiquette);color:inherit;padding:0;margin:0;border-radius:2px}
 .comparateur-page .mini{
   width:34px;height:34px;border-radius:8px;flex:none;
   background:var(--fond);display:flex;align-items:center;justify-content:center;
-  font-family:'Syne',sans-serif;font-size:.65rem;font-weight:700;
+  font-family:'Syne',sans-serif;font-size:.7rem;font-weight:700;
   overflow:hidden;border:1px solid var(--cb-border);
 }
 .comparateur-page .mini img{width:100%;height:100%;object-fit:cover}
+
+/* ---------- Exemples & guide ---------- */
+.comparateur-page .exemples{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:14px}
+.comparateur-page .exemples-label{
+  font-family:'Syne',sans-serif;font-size:.875rem;font-weight:700;color:var(--gris);
+}
+.comparateur-page .exemple-btn{
+  font-family:'DM Sans',system-ui,sans-serif;font-size:.875rem;font-weight:500;
+  padding:6px 12px;border-radius:99px;cursor:pointer;
+  border:1.5px dashed var(--cb-border);background:transparent;color:var(--encre);
+  transition:all .2s;
+}
+.comparateur-page .exemple-btn:hover,
+.comparateur-page .exemple-btn:active{border-color:var(--accent);color:var(--accent)}
+.comparateur-page .guide-note{
+  margin-top:10px;color:var(--gris);font-size:.875rem;line-height:1.4;
+}
 
 /* ---------- Ticket de caisse (signature) ---------- */
 .comparateur-page #resultat{margin-top:26px;display:none}
@@ -108,20 +127,28 @@
   padding-bottom:14px;border-bottom:2px dashed var(--cb-border);
 }
 .comparateur-page .gagnant{margin-top:16px}
+.comparateur-page .badge-top{
+  display:inline-flex;align-items:center;gap:5px;margin-bottom:8px;
+  background:var(--encre);color:var(--fond);
+  font-family:'Syne',sans-serif;font-weight:700;font-size:.8rem;
+  letter-spacing:.02em;padding:5px 12px;border-radius:99px;
+}
+.comparateur-page .badge-top[hidden]{display:none}
 .comparateur-page .gagnant .site{
-  font-family:'Syne',sans-serif;font-size:.75rem;font-weight:600;
+  font-family:'Syne',sans-serif;font-size:.875rem;font-weight:600;
   text-transform:uppercase;letter-spacing:.08em;color:var(--gris);
 }
 .comparateur-page .gagnant .prix{
   font-family:'Playfair Display',serif;font-weight:900;
   font-size:2.3rem;letter-spacing:-.02em;line-height:1.05;margin-top:4px;
+  word-break:break-word;
 }
 .comparateur-page .gagnant .prix small{font-size:1rem;font-family:'Syne',sans-serif;font-weight:600}
 
 .comparateur-page .badge-eco{
   display:inline-block;margin-top:10px;
   background:var(--etiquette);
-  font-family:'Syne',sans-serif;font-weight:700;font-size:.85rem;
+  font-family:'Syne',sans-serif;font-weight:700;font-size:.875rem;
   padding:6px 12px;border-radius:6px;
   transform:rotate(-1.5deg);
   border:1.5px solid var(--encre);
@@ -141,15 +168,30 @@
 
 .comparateur-page .autres{margin-top:20px;border-top:2px dashed var(--cb-border);padding-top:14px}
 .comparateur-page .autres .titre{
-  font-family:'Syne',sans-serif;font-size:.72rem;font-weight:600;
+  font-family:'Syne',sans-serif;font-size:.875rem;font-weight:600;
   text-transform:uppercase;letter-spacing:.08em;color:var(--gris);margin-bottom:8px;
 }
 .comparateur-page .ligne{
-  display:flex;justify-content:space-between;align-items:baseline;
+  display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;
+  gap:2px 10px;
   font-family:'Syne',sans-serif;font-size:.9rem;padding:6px 0;
 }
-.comparateur-page .ligne .p{text-decoration:line-through;color:var(--gris)}
-.comparateur-page .ligne .diff{font-size:.72rem;color:var(--accent);margin-left:8px;font-weight:700}
+.comparateur-page .ligne .site-o{word-break:break-word}
+.comparateur-page .ligne .valeurs{display:flex;flex-wrap:wrap;gap:2px 8px;justify-content:flex-end}
+.comparateur-page .ligne .p{text-decoration:line-through;color:var(--gris);white-space:nowrap}
+.comparateur-page .ligne .diff{font-size:.875rem;color:#D9291C;font-weight:700;white-space:nowrap}
+
+/* ---------- Historique de prix ---------- */
+.comparateur-page .historique{margin-top:20px;border-top:2px dashed var(--cb-border);padding-top:14px}
+.comparateur-page .historique[hidden]{display:none}
+.comparateur-page .histo-comp{
+  font-family:'Syne',sans-serif;font-size:.9rem;line-height:1.5;margin-bottom:6px;
+}
+.comparateur-page .histo-var{font-weight:700;white-space:nowrap}
+.comparateur-page .histo-var.baisse{color:#1F9254}
+.comparateur-page .histo-var.hausse{color:#D9291C}
+.comparateur-page .histo-var.stable{color:var(--gris)}
+.comparateur-page .histo-min{font-family:'Syne',sans-serif;font-size:.875rem;color:var(--gris)}
 
 .comparateur-page .btn-wa{
   display:flex;align-items:center;justify-content:center;gap:8px;
@@ -163,14 +205,25 @@
 
 .comparateur-page .note{
   margin-top:14px;text-align:center;color:var(--gris);
-  font-size:.78rem;font-family:'Syne',sans-serif;
+  font-size:.875rem;font-family:'Syne',sans-serif;
 }
 
-.comparateur-page .cmp-footer{margin-top:40px;text-align:center;color:var(--gris);font-size:.78rem}
+.comparateur-page .cmp-footer{margin-top:40px;text-align:center;color:var(--gris);font-size:.875rem}
 
 @media (prefers-reduced-motion:no-preference){
   .comparateur-page #resultat.montre .ticket{animation:sortie .35s ease-out}
   @keyframes sortie{from{transform:translateY(14px);opacity:0}to{transform:none;opacity:1}}
+}
+
+/* ---------- Mobile first : garde-fous 360-400px ---------- */
+html, body{overflow-x:hidden}
+.comparateur-page{overflow-x:hidden}
+.comparateur-page .wrap{width:100%}
+.comparateur-page img{max-width:100%}
+@media (max-width:400px){
+  .comparateur-page .wrap{padding:24px 14px 48px}
+  .comparateur-page .gagnant .prix{font-size:1.9rem}
+  .comparateur-page .ticket{padding:22px 16px 26px}
 }
 </style>
 @endpush
@@ -189,6 +242,15 @@
     <label for="produit">Que veux-tu comparer&nbsp;?</label>
     <div class="chips" id="chips"></div>
     <select id="produit" placeholder="Tape 2-3 lettres… ex : A15, garba, riz"></select>
+
+    <div class="exemples" id="exemples">
+      <span class="exemples-label">Essaie&nbsp;:</span>
+      <button type="button" class="exemple-btn" data-q="iPhone 13">iPhone 13</button>
+      <button type="button" class="exemple-btn" data-q="Spaghetti">Spaghetti</button>
+      <button type="button" class="exemple-btn" data-q="Infinix Hot">Infinix Hot</button>
+      <button type="button" class="exemple-btn" data-q="KFC">KFC</button>
+    </div>
+    <p class="guide-note">Choisis une catégorie, tape un produit, on t'affiche le meilleur prix vérifié cette nuit.</p>
   </div>
 
   <div id="resultat">
@@ -196,6 +258,7 @@
       <h2 id="r-nom"></h2>
 
       <div class="gagnant">
+        <div class="badge-top" id="r-badge-top" hidden>🏆 Meilleur prix trouvé</div>
         <div class="site">Meilleur prix — <span id="r-site"></span></div>
         <div class="prix"><span id="r-prix"></span> <small>FCFA</small></div>
         <div class="badge-eco" id="r-eco" hidden></div>
@@ -206,6 +269,11 @@
       <div class="autres" id="r-autres" hidden>
         <div class="titre">Ailleurs, le même modèle</div>
         <div id="r-lignes"></div>
+      </div>
+
+      <div class="historique" id="r-historique" hidden>
+        <div class="histo-comp" id="r-histo-comp"></div>
+        <div class="histo-min" id="r-histo-min"></div>
       </div>
     </div>
 
@@ -250,6 +318,13 @@ const DONNEES_EXEMPLE = {
     {id:"tecno-spark-20", nom:"Tecno Spark 20 — 256 Go", categorie:"Téléphones", image:"",
      offres:[{site:"Jumia CI",prix:78500,lien:"https://www.jumia.ci/"},
              {site:"Yaatoo",prix:81900,lien:"https://www.yaatoo.ci/"}]},
+    {id:"infinix-hot-40-128", nom:"Infinix Hot 40 — 128 Go", categorie:"Téléphones", image:"",
+     offres:[{site:"Jumia CI",prix:74900,lien:"https://www.jumia.ci/"}],
+     historique:[{site:"Jumia CI",prix:79900,date:"2026-07-08"},
+                 {site:"Jumia CI",prix:79900,date:"2026-07-15"},
+                 {site:"Jumia CI",prix:76500,date:"2026-07-22"},
+                 {site:"Jumia CI",prix:74900,date:"2026-07-29"},
+                 {site:"Jumia CI",prix:74900,date:"2026-08-04"}]},
     /* ---- Restos : même plat, même resto, plateformes différentes ---- */
     {id:"garba-choco-yop", nom:"Garba complet — Chez Choco (Yopougon)", categorie:"Restos", image:"",
      offres:[{site:"En direct (retrait)",prix:2000,lien:"#"},
@@ -286,6 +361,21 @@ function afficherDate(iso){
     isNaN(d) ? "cette nuit" : d.toLocaleDateString("fr-FR",opts);
 }
 
+/* Surligne la sous-chaîne recherchée dans un texte déjà échappé (HTML-safe),
+   sans toucher au reste du texte : pas d'espace ni de padding injecté. */
+function surligner(texteEchappe, requete){
+  const q = (requete||"").trim();
+  if(!q) return texteEchappe;
+  const echappeRegex = q.replace(/[.*+?^${}()|[\]\\]/g,"\\$&");
+  const re = new RegExp(echappeRegex,"ig");
+  return texteEchappe.replace(re, m => `<mark>${m}</mark>`);
+}
+
+function joursDepuis(dateStr){
+  const jours = Math.round((Date.now() - new Date(dateStr).getTime()) / 86400000);
+  return Math.max(1,jours);
+}
+
 function demarrer(data){
   afficherDate(data.generated_at);
   const parId = Object.fromEntries(data.produits.map(p=>[p.id,p]));
@@ -295,15 +385,19 @@ function demarrer(data){
     value:p.id, text:p.nom, image:p.image, optgroup:p.categorie||"Autres"
   }));
 
+  let requeteActuelle = "";
+
   const select = new TomSelect("#produit",{
     options: enOptions(data.produits),
     optgroups: categories.map(c=>({value:c, label:c})),
     maxItems:1,
+    highlight:false,
+    onType:(str)=>{ requeteActuelle = str; },
     render:{
       option:(d,esc)=>`<div class="option"><span class="mini">${
         d.image?`<img src="${esc(d.image)}" alt="" loading="lazy">`:esc(initiales(d.text))
-      }</span>${esc(d.text)}</div>`,
-      optgroup_header:(d,esc)=>`<div class="optgroup-header" style="font-family:'Syne',sans-serif;font-size:.7rem;text-transform:uppercase;letter-spacing:.08em;color:var(--gris);padding:8px 12px 4px">${esc(d.label)}</div>`
+      }</span>${surligner(esc(d.text),requeteActuelle)}</div>`,
+      optgroup_header:(d,esc)=>`<div class="optgroup-header" style="font-family:'Syne',sans-serif;font-size:.875rem;text-transform:uppercase;letter-spacing:.08em;color:var(--gris);padding:8px 12px 4px">${esc(d.label)}</div>`
     },
     onChange:(id)=>{ if(id) montrer(parId[id]); }
   });
@@ -326,6 +420,23 @@ function demarrer(data){
     chips.appendChild(b);
   });
 
+  /* Exemples cliquables sous la barre de recherche */
+  document.querySelectorAll("#exemples .exemple-btn").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      chips.querySelectorAll(".chip").forEach(c=>c.classList.remove("actif"));
+      chips.querySelector(".chip")?.classList.add("actif");
+      select.clear(true); select.clearOptions();
+      select.addOptions(enOptions(data.produits));
+      document.getElementById("resultat").style.display="none";
+      const q = btn.dataset.q;
+      requeteActuelle = q;
+      select.setTextboxValue(q);
+      select.refreshOptions();
+      select.open();
+      select.focus();
+    });
+  });
+
   function montrer(p){
     const offres = [...p.offres].sort((a,b)=>a.prix-b.prix);
     const top = offres[0], autres = offres.slice(1);
@@ -335,11 +446,13 @@ function demarrer(data){
     document.getElementById("r-prix").textContent = fmt(top.prix);
     document.getElementById("r-lien").href = top.lien;
 
+    document.getElementById("r-badge-top").hidden = autres.length === 0;
+
     const eco = document.getElementById("r-eco");
     if(autres.length){
       const gain = autres[autres.length-1].prix - top.prix;
       eco.hidden = gain <= 0;
-      eco.textContent = `Tu économises ${fmt(gain)} F`;
+      eco.textContent = `Tu économises ${fmt(gain)} FCFA aujourd'hui`;
     } else eco.hidden = true;
 
     const bloc = document.getElementById("r-autres");
@@ -349,9 +462,36 @@ function demarrer(data){
     for(const o of autres){
       const div = document.createElement("div");
       div.className = "ligne";
-      div.innerHTML = `<span>${o.site}</span>
-        <span><span class="p">${fmt(o.prix)} F</span><span class="diff">+${fmt(o.prix-top.prix)}</span></span>`;
+      div.innerHTML = `<span class="site-o">${o.site}</span>
+        <span class="valeurs"><span class="p">${fmt(o.prix)} FCFA</span><span class="diff">+${fmt(o.prix-top.prix)} FCFA de plus</span></span>`;
       lignes.appendChild(div);
+    }
+
+    /* Historique de prix (produits à offre unique) */
+    const histoBloc = document.getElementById("r-historique");
+    const historique = (p.offres.length === 1 && Array.isArray(p.historique))
+      ? [...p.historique].filter(h=>h && typeof h.prix==="number" && h.date).sort((a,b)=>new Date(a.date)-new Date(b.date))
+      : [];
+    if(historique.length >= 2){
+      const cutoff = new Date(); cutoff.setDate(cutoff.getDate()-7);
+      let reference = null;
+      for(const h of historique){ if(new Date(h.date) <= cutoff) reference = h; }
+      if(!reference) reference = historique[0];
+
+      const variation = reference.prix > 0 ? ((top.prix - reference.prix) / reference.prix) * 100 : 0;
+      const classeVar = variation < 0 ? "baisse" : (variation > 0 ? "hausse" : "stable");
+      const fleche = variation < 0 ? "▼" : (variation > 0 ? "▲" : "→");
+
+      document.getElementById("r-histo-comp").innerHTML =
+        `Il y a ${joursDepuis(reference.date)} j : ${fmt(reference.prix)} FCFA → aujourd'hui ${fmt(top.prix)} FCFA `+
+        `<span class="histo-var ${classeVar}">${fleche} ${Math.abs(variation).toFixed(1)}%</span>`;
+
+      const min30 = Math.min(...historique.map(h=>h.prix));
+      document.getElementById("r-histo-min").textContent = `Meilleur prix observé sur 30 jours : ${fmt(min30)} FCFA`;
+
+      histoBloc.hidden = false;
+    } else {
+      histoBloc.hidden = true;
     }
 
     const msg = `📱 ${p.nom}\n💰 Meilleur prix trouvé : ${fmt(top.prix)} FCFA sur ${top.site}\n👉 ${location.href.split("#")[0]}#${p.id}`;
