@@ -323,18 +323,17 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/users', [AdminUserController::class, 'index'])->name('users.index');
     Route::get('/users/{user}', [AdminUserController::class, 'show'])->name('users.show');
 
-    // mass mail campagne
-
-    Route::get('/emails', [\App\Http\Controllers\AdminEmailController::class, 'index'])
-    ->name('emails.index');
-
-Route::post('/emails/send', [AdminEmailController::class, 'send'])
-    ->name('emails.send');
-
     Route::middleware(['admin.code', 'stagiaire.log'])->group(function () {
 
         Route::post('/logout', [AdminController::class, 'logout'])->name('logout');
         Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
+
+        // mass mail campagne
+        Route::get('/emails', [\App\Http\Controllers\AdminEmailController::class, 'index'])
+            ->name('emails.index');
+
+        Route::post('/emails/send', [AdminEmailController::class, 'send'])
+            ->name('emails.send');
 
         Route::get('/performances', [AdminPerformanceController::class, 'index'])->name('performances.index');
         Route::get('/performances/data', [AdminPerformanceController::class, 'data'])->name('performances.data');
