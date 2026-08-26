@@ -8,6 +8,7 @@ use App\Mail\AdminBroadcastMail;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Validator;
 
 class AdminEmailController extends Controller
 {
@@ -33,6 +34,7 @@ class AdminEmailController extends Controller
             'mode' => ['required', 'in:all,selected'],
             'user_ids' => ['array'],
             'user_ids.*' => ['integer', 'exists:users,id'],
+            'free_emails' => ['nullable', 'string', 'max:5000'],
             'subject' => ['required', 'string', 'max:200'],
             'message' => ['required', 'string', 'max:10000'],
         ]);
@@ -40,37 +42,89 @@ class AdminEmailController extends Controller
         $subject = $request->subject;
         $safeHtml = $this->sanitizeHtml($request->message);
 
+        $freeEmails = $this->parseFreeEmails((string) $request->input('free_emails', ''));
+
+        if (count($freeEmails) > 50) {
+            return back()->with('error', 'Maximum 50 adresses libres par envoi (' . count($freeEmails) . ' fournies).');
+        }
+
+        $invalid = array_filter($freeEmails, function ($addr) {
+            return Validator::make(['email' => $addr], ['email' => 'email'])->fails();
+        });
+
+        if (count($invalid) > 0) {
+            return back()->with('error', 'Adresse(s) invalide(s) : ' . implode(', ', $invalid));
+        }
+
         $query = User::query();
 
         if ($request->mode === 'selected') {
             $ids = $request->user_ids ?? [];
-            if (count($ids) === 0) {
-                return back()->with('error', 'Sélectionne au moins un utilisateur.');
+            if (count($ids) === 0 && count($freeEmails) === 0) {
+                return back()->with('error', 'Sélectionne au moins un utilisateur ou une adresse libre.');
             }
             $query->whereIn('id', $ids);
         }
 
         $users = $query->select('id', 'name', 'email')->get();
 
+        // Fusion utilisateurs + adresses libres, dédoublonnée par email (insensible à la casse)
+        $recipients = [];
+        foreach ($users as $user) {
+            $recipients[strtolower($user->email)] = ['email' => $user->email, 'name' => $user->name];
+        }
+        foreach ($freeEmails as $addr) {
+            $key = strtolower($addr);
+            if (!isset($recipients[$key])) {
+                $recipients[$key] = ['email' => $addr, 'name' => null];
+            }
+        }
+
+        if (count($recipients) === 0) {
+            return back()->with('error', 'Aucun destinataire.');
+        }
+
         $sent = 0;
         $failed = 0;
 
-        foreach ($users as $user) {
+        foreach ($recipients as $r) {
             try {
-                Mail::to($user->email, $user->name)
-                    ->send(new AdminBroadcastMail($subject, $safeHtml, $user->name));
+                Mail::to($r['email'], $r['name'])
+                    ->send(new AdminBroadcastMail($subject, $safeHtml, $r['name'] ?? $r['email']));
                 $sent++;
             } catch (\Throwable $e) {
                 $failed++;
                 Log::error('Admin email failed', [
-                    'user_id' => $user->id,
-                    'email'   => $user->email,
-                    'error'   => $e->getMessage(),
+                    'email' => $r['email'],
+                    'error' => $e->getMessage(),
                 ]);
             }
         }
 
         return back()->with('success', "Emails envoyés: {$sent}. Échecs: {$failed}.");
+    }
+
+    /**
+     * Découpe le champ "adresses libres" (une par ligne, ou séparées par
+     * virgule/point-virgule) et dédoublonne (insensible à la casse).
+     */
+    private function parseFreeEmails(string $raw): array
+    {
+        $parts = preg_split('/[\r\n,;]+/', $raw) ?: [];
+
+        $emails = [];
+        foreach ($parts as $addr) {
+            $addr = trim($addr);
+            if ($addr === '') {
+                continue;
+            }
+            $key = strtolower($addr);
+            if (!isset($emails[$key])) {
+                $emails[$key] = $addr;
+            }
+        }
+
+        return array_values($emails);
     }
 
     /**

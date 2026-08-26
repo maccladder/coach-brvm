@@ -89,6 +89,18 @@
                         </small>
                     </div>
                 </div>
+
+                <div class="card shadow-sm mt-3">
+                    <div class="card-header fw-semibold">✉️ Adresses libres (hors base)</div>
+                    <div class="card-body">
+                        <textarea name="free_emails" class="form-control" rows="4"
+                                  placeholder="une@adresse.com&#10;autre@adresse.com, encore@adresse.com"></textarea>
+                        <small class="text-muted d-block mt-2">
+                            Une adresse par ligne, ou séparées par virgule/point-virgule. Max 50 adresses.
+                            Elles s'ajoutent aux destinataires ci-dessus (dédoublonnage automatique).
+                        </small>
+                    </div>
+                </div>
             </div>
 
             <div class="col-lg-5">
