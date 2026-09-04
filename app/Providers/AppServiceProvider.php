@@ -25,5 +25,10 @@ class AppServiceProvider extends ServiceProvider
         RateLimiter::for('letter-generation', function (Request $request) {
             return Limit::perHour(20)->by($request->user()?->id ?: $request->ip());
         });
+
+        // ✅ Inscription — rate limit anti-bot : 5 tentatives / minute par IP
+        RateLimiter::for('register', function (Request $request) {
+            return Limit::perMinute(5)->by($request->ip());
+        });
     }
 }
