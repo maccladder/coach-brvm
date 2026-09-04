@@ -12,6 +12,7 @@
         "laravel/framework": "^12.0",
         "laravel/socialite": "^5.24",
         "laravel/tinker": "^2.10.1",
+        "propaganistas/laravel-disposable-email": "^2.5",
         "simplesoftwareio/simple-qrcode": "^4.2",
         "smalot/pdfparser": "^2.12",
         "symfony/css-selector": "^7.4",
