@@ -88,6 +88,12 @@
                         <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
                     </div>
 
+                    <!-- hCaptcha -->
+                    <div class="mt-4">
+                        <div class="h-captcha" data-sitekey="{{ config('services.hcaptcha.site_key') }}"></div>
+                        <x-input-error :messages="$errors->get('h-captcha-response')" class="mt-2" />
+                    </div>
+
                     <div class="mt-6">
                         <x-primary-button class="w-full justify-center">
                             {{ __('Créer mon compte') }}
@@ -108,4 +114,6 @@
             </p>
         </div>
     </div>
+
+    <script src="https://js.hcaptcha.com/1/api.js" async defer></script>
 </x-guest-layout>

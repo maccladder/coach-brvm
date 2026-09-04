@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Mail\WelcomeMail;
 use App\Models\User;
+use App\Rules\ValidHcaptcha;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -35,6 +36,7 @@ class RegisteredUserController extends Controller
             'name' => ['required', 'string', 'max:50', 'regex:/^(?=.*\p{L})[\p{L}\s\'-]+$/u'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class, 'indisposable'],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
+            'h-captcha-response' => ['required', new ValidHcaptcha],
         ], [
             'name.regex' => "Le nom ne doit contenir que des lettres, espaces, apostrophes et tirets.",
             'email.indisposable' => "Les adresses email jetables ne sont pas acceptées.",
