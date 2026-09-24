@@ -20,7 +20,8 @@ class RadarController extends Controller
             ]);
         }
 
-        $rows = BocStock::where('daily_boc_id', $latest->id)
+        $rows = BocStock::excludingDelisted()
+            ->where('daily_boc_id', $latest->id)
             ->orderByDesc('change') // option: tri par perf
             ->get(['ticker','name','price','change']);
 

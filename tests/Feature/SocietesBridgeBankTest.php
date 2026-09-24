@@ -46,7 +46,7 @@ class SocietesBridgeBankTest extends TestCase
 
         $this->seed(SocietesSeeder::class);
 
-        $this->assertSame(48, Societe::count());
+        $this->assertSame(48, Societe::where('is_listed', true)->count());
         $this->assertSame(1, Societe::where('code', 'BBGC')->count());
         $this->assertSame($sonatel->id, Societe::where('code', 'SNTS')->value('id'));
         $this->assertSame(1, FinancialReport::where('societe_id', $sonatel->id)->count());

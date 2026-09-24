@@ -37,7 +37,10 @@ class VirtualWalletController extends Controller
     $totalValue = 0;
 
     foreach ($positionsDb as $pos) {
-        $price = data_get($prices, $pos->ticker . '.close');
+        // close vide (pas encore d'échange, ex. 1er jour de cotation) :
+        // repli sur buy_price (ouverture, sinon cours de référence veille)
+        $row   = $prices->get($pos->ticker, []);
+        $price = ($row['close'] ?? null) ?: ($row['buy_price'] ?? null);
         $value = ($price && $pos->qty) ? ($price * $pos->qty) : 0;
         $totalValue += $value;
 

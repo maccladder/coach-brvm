@@ -10,6 +10,7 @@ class AdminPerformanceController extends Controller
     public function index()
     {
         $companies = BocStock::query()
+            ->excludingDelisted()
             ->selectRaw('ticker, MAX(name) as name')
             ->groupBy('ticker')
             ->orderBy('ticker')
@@ -39,7 +40,8 @@ class AdminPerformanceController extends Controller
         // default : top 5 du dernier jour
         if (empty($tickers)) {
             $lastDate = $dates->last();
-            $tickers = BocStock::where('date_boc', $lastDate)
+            $tickers = BocStock::excludingDelisted()
+                ->where('date_boc', $lastDate)
                 ->whereNotNull('change')
                 ->orderByDesc('change')
                 ->limit(5)
@@ -48,6 +50,7 @@ class AdminPerformanceController extends Controller
         }
 
         $rows = BocStock::query()
+            ->excludingDelisted()
             ->whereIn('ticker', $tickers)
             ->whereIn('date_boc', $dates)
             ->get(['ticker', 'name', 'date_boc', 'change']);
@@ -62,7 +65,7 @@ class AdminPerformanceController extends Controller
             foreach ($rows->where('ticker', $ticker) as $r) {
                 $companyName = $companyName ?? ($r->name ?? $ticker);
                 $idx = array_search((string)$r->date_boc, $labels, true);
-                if ($idx !== false) $points[$idx] = (float) $r->change;
+                if ($idx !== false) $points[$idx] = $r->change === null ? null : (float) $r->change;
             }
 
             $datasets[] = [

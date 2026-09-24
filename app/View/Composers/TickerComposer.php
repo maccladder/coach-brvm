@@ -16,11 +16,14 @@ class TickerComposer
         $tickerData = Cache::remember('brvm_ticker', 900, function () {
             try {
                 $rows = $this->svc->fetchCloseAndChangeFromSite();
+                // close vide (pas encore d'échange, ex. 1er jour de cotation) :
+                // repli sur buy_price (ouverture, sinon cours de référence veille)
                 return collect($rows)
-                    ->filter(fn($s) => !empty($s['ticker']) && !empty($s['close']))
+                    ->map(fn($s) => $s + ['display' => ($s['close'] ?? null) ?: ($s['buy_price'] ?? null)])
+                    ->filter(fn($s) => !empty($s['ticker']) && !empty($s['display']))
                     ->map(fn($s) => [
                         'ticker' => $s['ticker'],
-                        'close'  => (float) $s['close'],
+                        'close'  => (float) $s['display'],
                         'change' => $s['change'] !== null ? (float) $s['change'] : null,
                     ])
                     ->values()

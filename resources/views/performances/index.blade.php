@@ -1007,7 +1007,9 @@ async function smLoadRange(ticker, range) {
                     backgroundColor:           'rgba(201,168,76,.1)',
                     fill:                      true,
                     tension:                   0.2,
-                    pointRadius:               0,
+                    // 1 seul point (titre nouvellement coté) : sans rayon, rien ne s'afficherait
+                    pointRadius:               pts.length < 2 ? 4 : 0,
+                    pointBackgroundColor:      '#C9A84C',
                     pointHoverRadius:          4,
                     pointHoverBackgroundColor: '#C9A84C',
                     borderWidth:               2,

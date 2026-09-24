@@ -138,15 +138,19 @@ SYS;
 
             $results = [];
             foreach ($json['stocks'] as $row) {
-                if (empty($row['ticker']) || !array_key_exists('change', $row)) {
+                if (empty($row['ticker'])) {
                     continue;
                 }
+
+                // Variation absente ou "NC" (ex. 1er jour de cotation) : on garde
+                // la ligne avec change = null plutôt que de perdre la société.
+                $change = $row['change'] ?? null;
 
                 $results[] = [
                     'ticker' => (string) $row['ticker'],
                     'name'   => (string) ($row['name'] ?? $row['ticker']),
-                    'price'  => isset($row['price']) ? (float) $row['price'] : null,
-                    'change' => (float) $row['change'],
+                    'price'  => isset($row['price']) && is_numeric($row['price']) ? (float) $row['price'] : null,
+                    'change' => is_numeric($change) ? (float) $change : null,
                 ];
             }
 
