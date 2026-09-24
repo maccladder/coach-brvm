@@ -1,4 +1,4 @@
-﻿{{-- resources/views/announcements/show.blade.php --}}
+{{-- resources/views/announcements/show.blade.php --}}
 @extends('layouts.app')
 
 @push('styles')

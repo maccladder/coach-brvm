@@ -1,4 +1,4 @@
-﻿{{-- ════════ books/show.blade.php ════════ --}}
+{{-- ════════ books/show.blade.php ════════ --}}
 @extends('layouts.app')
 
 @push('styles')

@@ -1,4 +1,4 @@
-﻿@extends('layouts.app')
+@extends('layouts.app')
 
 @push('meta')
 <meta name="description" content="Soutenir Boursiv — éduquer la jeunesse d'Afrique de l'Ouest à la finance et à la bourse.">

@@ -1,4 +1,4 @@
-﻿@extends('layouts.app')
+@extends('layouts.app')
 
 @push('meta')
 <meta name="description" content="Analyse du PND 2026-2030 × BRVM — Le Plan National de Développement ivoirien identifie 7 secteurs porteurs. Boursiv croise ces secteurs avec les sociétés cotées à la BRVM.">

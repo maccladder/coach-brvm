@@ -1,4 +1,4 @@
-﻿{{-- resources/views/client_bocs/show.blade.php --}}
+{{-- resources/views/client_bocs/show.blade.php --}}
 @extends('layouts.app')
 
 @push('styles')

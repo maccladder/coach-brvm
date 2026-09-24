@@ -1,4 +1,4 @@
-﻿{{-- resources/views/sgis/index.blade.php --}}
+{{-- resources/views/sgis/index.blade.php --}}
 @extends('layouts.app')
 
 @section('title', 'SGI (Courtiers) – Boursiv')

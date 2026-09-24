@@ -1,4 +1,4 @@
-﻿{{-- resources/views/sgis/show.blade.php --}}
+{{-- resources/views/sgis/show.blade.php --}}
 @extends('layouts.app')
 
 @section('title', $sgi->name . ' – SGI – Boursiv')
