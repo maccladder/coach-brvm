@@ -6,6 +6,8 @@ use App\Models\BocStock;
 use App\Models\DailyBoc;
 use App\Models\User;
 use App\Models\VirtualPosition;
+use App\Models\VirtualWallet;
+use App\Models\VirtualWalletTransaction;
 use App\Services\BrvmActionsAiService;
 use App\Services\BrvmBubbleService;
 use App\Services\BrvmMarketAiService;
@@ -14,6 +16,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
 /**
@@ -36,14 +39,29 @@ class NouvelleCotationEdgeCasesTest extends TestCase
         parent::setUp();
         Http::preventStrayRequests();
         $this->seed(SocietesSeeder::class);
+        $this->mockMarche(null);
+    }
 
-        $this->mock(BrvmActionsAiService::class, function ($mock) {
-            $mock->shouldReceive('fetchMarketTableFromSite')->andReturn([self::BBGC_JOUR_1]);
+    /**
+     * brvm.org avant le 1er échange : close peut arriver vide (null) ou à 0
+     * selon l'affichage du site ; buy_price = cours de référence (prev).
+     */
+    private function mockMarche(?float $close): void
+    {
+        $row = ['close' => $close] + self::BBGC_JOUR_1;
+
+        $this->mock(BrvmActionsAiService::class, function ($mock) use ($row) {
+            $mock->shouldReceive('fetchMarketTableFromSite')->andReturn([$row]);
         });
-        // Bandeau du layout (TickerComposer) : passe par la sous-classe
-        $this->partialMock(BrvmMarketAiService::class, function ($mock) {
-            $mock->shouldReceive('fetchMarketTableFromSite')->andReturn([self::BBGC_JOUR_1]);
+        // Bandeau du layout, achat et vente : passent par la sous-classe
+        $this->partialMock(BrvmMarketAiService::class, function ($mock) use ($row) {
+            $mock->shouldReceive('fetchMarketTableFromSite')->andReturn([$row]);
         });
+    }
+
+    public static function closeAvantPremierEchange(): array
+    {
+        return ['close null' => [null], 'close 0' => [0.0]];
     }
 
     private function bocDu(string $date, array $stocks): DailyBoc
@@ -106,8 +124,11 @@ class NouvelleCotationEdgeCasesTest extends TestCase
             ->assertJsonPath('last_date', '2026-09-24');
     }
 
-    public function test_wallet_values_position_at_reference_price_before_first_trade(): void
+    #[DataProvider('closeAvantPremierEchange')]
+    public function test_wallet_values_position_at_reference_price_before_first_trade(?float $close): void
     {
+        $this->mockMarche($close);
+
         $user = User::factory()->create();
         VirtualPosition::create([
             'user_id' => $user->id, 'ticker' => 'BBGC', 'name' => 'BRIDGE BANK',
@@ -118,16 +139,72 @@ class NouvelleCotationEdgeCasesTest extends TestCase
 
         $this->assertEquals(67500, $response->viewData('totalValue'));
         $this->assertEquals(6750, $response->viewData('positions')[0]['price']);
+        // P/L affiché = 0 (pas -67 500 / -100 %)
+        $response->assertDontSee('-67 500');
     }
 
-    public function test_ticker_banner_includes_stock_without_close(): void
+    #[DataProvider('closeAvantPremierEchange')]
+    public function test_wallet_can_sell_before_first_trade_at_reference_price(?float $close): void
     {
+        $this->mockMarche($close);
+
+        $user = User::factory()->create();
+        VirtualWallet::create(['user_id' => $user->id, 'balance' => 0]);
+        VirtualPosition::create([
+            'user_id' => $user->id, 'ticker' => 'BBGC', 'name' => 'BRIDGE BANK',
+            'qty' => 10, 'avg_price' => 6750,
+        ]);
+
+        $this->actingAs($user)
+            ->get(route('wallet.sell.recap', ['ticker' => 'BBGC', 'qty' => 4]))
+            ->assertOk();
+
+        $this->actingAs($user)
+            ->post(route('wallet.sell'), ['ticker' => 'BBGC', 'qty' => 4])
+            ->assertSessionHasNoErrors()
+            ->assertSessionMissing('error');
+
+        $this->assertSame(6, (int) VirtualPosition::where('user_id', $user->id)->value('qty'));
+        $this->assertEquals(
+            6750,
+            VirtualWalletTransaction::where('user_id', $user->id)->where('ticker', 'BBGC')->value('price')
+        );
+    }
+
+    #[DataProvider('closeAvantPremierEchange')]
+    public function test_ticker_banner_shows_reference_price_and_no_minus_100(?float $close): void
+    {
+        $this->mockMarche($close);
         Cache::forget('brvm_ticker');
 
         $this->get(route('societes.index'))->assertOk();
 
-        $this->assertContains('BBGC', collect(Cache::get('brvm_ticker'))->pluck('ticker'));
-        $this->assertEquals(6750, collect(Cache::get('brvm_ticker'))->firstWhere('ticker', 'BBGC')['close']);
+        $bbgc = collect(Cache::get('brvm_ticker'))->firstWhere('ticker', 'BBGC');
+        $this->assertNotNull($bbgc);
+        $this->assertEquals(6750, $bbgc['close']);
+        $this->assertEquals(0.0, $bbgc['change']);
+    }
+
+    /** Parseur brvm.org réel, avec les deux rendus possibles d'une clôture vide. */
+    public static function clotureAfficheeParBrvm(): array
+    {
+        return ['"0"' => ['0', null], '"0,00"' => ['0,00', 0.0], 'vide' => ['', null]];
+    }
+
+    #[DataProvider('clotureAfficheeParBrvm')]
+    public function test_brvm_parser_uses_reference_price_when_close_is_zero(string $cellule, ?float $closeAttendu): void
+    {
+        Http::fake(['www.brvm.org/*' => Http::response(
+            '<table><tr><td>BBGC</td><td>BRIDGE BANK GROUP COTE D\'IVOIRE</td><td>0</td>'
+            . '<td>6 750</td><td></td><td>' . $cellule . '</td><td>0,00 %</td></tr></table>'
+        )]);
+
+        $row = collect((new BrvmActionsAiService())->fetchMarketTableFromSite())->firstWhere('ticker', 'BBGC');
+
+        $this->assertSame(6750.0, $row['prev']);
+        $this->assertSame($closeAttendu, $row['close']);
+        $this->assertSame(6750.0, $row['buy_price']);
+        $this->assertSame(0.0, $row['change']); // variation lue sur le site, jamais recalculée
     }
 
     public function test_boc_extraction_keeps_row_without_variation(): void

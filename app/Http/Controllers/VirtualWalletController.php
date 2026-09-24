@@ -579,8 +579,9 @@ public function sellRecap(Request $request)
         return redirect()->route('wallet.index')->with('error', 'Ticker introuvable.');
     }
 
-    // ✅ vente : close en priorité
-    $price = $row['close'] ?? $row['buy_price'] ?? null;
+    // ✅ vente : close en priorité ; close vide ou 0 (pas encore d'échange,
+    // ex. 1er jour de cotation) → repli sur buy_price
+    $price = ($row['close'] ?? null) ?: ($row['buy_price'] ?? null);
     if (!$price) {
         return redirect()->route('wallet.index')->with('error', 'Cours indisponible pour ce ticker.');
     }
@@ -659,8 +660,9 @@ public function sell(Request $request)
         return back()->with('error', 'Ticker introuvable.');
     }
 
-    // ✅ vente : close en priorité (sinon buy_price fallback)
-    $price = $row['close'] ?? $row['buy_price'] ?? null;
+    // ✅ vente : close en priorité ; close vide ou 0 (pas encore d'échange,
+    // ex. 1er jour de cotation) → repli sur buy_price
+    $price = ($row['close'] ?? null) ?: ($row['buy_price'] ?? null);
     if (!$price) {
         return back()->with('error', 'Prix introuvable pour ce ticker.');
     }
