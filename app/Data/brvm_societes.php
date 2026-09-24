@@ -42,8 +42,8 @@ Aujourd'hui, SERVAIR ABIDJAN combine savoir-faire historique et adaptation conti
     'bridge-bank-ci' => [
         'ticker' => 'BBGC',
         'name' => "BRIDGE BANK GROUP CÔTE D'IVOIRE",
-        'logo' => 'img/logos/societes/bridge-bank.jpg',
-        'description' => '',
+        'logo' => 'img/logos/societes/bridge-bank.png',
+        'description' => "Fondée à Abidjan en 2006, Bridge Bank Group Côte d'Ivoire (BBGCI) s'est imposée comme la banque de référence des PME ivoiriennes avant d'élargir sa clientèle aux grandes entreprises et aux institutions, avec une expertise forte en trade finance. Introduite à la BRVM le 24 septembre 2026 via une offre publique de vente de 20 % de son capital au prix de 6 750 FCFA par action (67,5 milliards FCFA levés), elle est la 16e banque cotée et la 48e société de la cote. En 2025, elle a réalisé un résultat net de 27,2 milliards FCFA (+19 %), un PNB de 68 milliards FCFA (+15 %) et un total de bilan de 1 427 milliards FCFA. Actionnaires de référence : Bridge Group West Africa (groupe Teyliom, 57 %) et la CNPS (20 %).",
         'telephone' => null,
         'adresse' => null,
         'dirigeants' => [],

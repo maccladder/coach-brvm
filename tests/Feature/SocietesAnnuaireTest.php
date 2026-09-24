@@ -39,11 +39,15 @@ class SocietesAnnuaireTest extends TestCase
         }
     }
 
-    public function test_bridge_bank_page_renders_without_dividend_or_description(): void
+    public function test_bridge_bank_page_renders_with_logo_and_description_without_dividend(): void
     {
+        $this->assertFileExists(public_path('img/logos/societes/bridge-bank.png'));
+
         $this->get(route('societes.show', 'bridge-bank-ci'))
             ->assertOk()
-            ->assertSee('BBGC');
+            ->assertSee('BBGC')
+            ->assertSee(asset('img/logos/societes/bridge-bank.png'), false)
+            ->assertSee('Fondée à Abidjan en 2006');
     }
 
     public function test_societe_without_enrichment_gets_generated_slug(): void
