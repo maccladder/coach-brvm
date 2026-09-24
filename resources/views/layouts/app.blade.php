@@ -166,6 +166,27 @@
             50% { opacity: .2; }
         }
 
+        /* Menu desktop sur une seule ligne : aucun libellé ne passe à la ligne
+           (Diaspora / Financement avec pastille, Se connecter), espacements
+           resserrés tant que la largeur est limitée */
+        @media (min-width: 992px) {
+            .cb-navbar .nav-link,
+            .cb-btn-login,
+            .cb-btn-register { white-space: nowrap; }
+            /* conteneur du menu limité à 1100 px : mêmes espacements à toutes les largeurs desktop */
+            .cb-navbar .nav-link { padding: 20px 8px !important; letter-spacing: .04em; }
+            .cb-navbar .nav-link::after { left: 8px; right: 8px; }
+            .cb-navbar .dropdown-toggle::after { margin-left: 3px; }
+            .cb-btn-login,
+            .cb-btn-register { letter-spacing: .04em; padding-left: 12px; padding-right: 12px; }
+        }
+        @media (min-width: 992px) and (max-width: 1199.98px) {
+            .cb-navbar .nav-link { padding: 20px 5px !important; font-size: 11px; letter-spacing: .02em; }
+            .cb-navbar .nav-link::after { left: 5px; right: 5px; }
+            .cb-btn-login,
+            .cb-btn-register { font-size: 10px; letter-spacing: .02em; padding-left: 9px; padding-right: 9px; }
+        }
+
         @media (max-width:991px) {
             .cb-navbar .dropdown-menu { background:var(--cb-dark3); border:none; border-left:2px solid var(--cb-border); border-radius:0; margin-left:8px; padding:4px 0; }
             .cb-navbar .nav-link::after { display:none; }
