@@ -3,15 +3,14 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
 use App\Models\Societe;
 
 class SocietesSeeder extends Seeder
 {
     public function run(): void
     {
-        // ⚠️ Reset total (OK si tu n'as pas encore de données liées)
-        DB::table('societes')->truncate();
+        // Idempotent : pas de truncate (financial_reports est en cascadeOnDelete
+        // sur societes, un reset effacerait les rapports financiers).
 
         $societes = [
             // --- CI (Côte d’Ivoire)
@@ -47,6 +46,7 @@ class SocietesSeeder extends Seeder
             ['code' => 'TTLC', 'name' => "TOTALENERGIES MARKETING CÔTE D’IVOIRE", 'sector' => null, 'country' => 'CI'],
             ['code' => 'UNLC', 'name' => "UNILEVER CÔTE D’IVOIRE", 'sector' => null, 'country' => 'CI'],
             ['code' => 'UNXC', 'name' => "UNIWAX CÔTE D’IVOIRE", 'sector' => null, 'country' => 'CI'],
+            ['code' => 'BBGC', 'name' => "BRIDGE BANK GROUP CÔTE D’IVOIRE", 'sector' => 'Banque', 'country' => 'CI', 'listing_date' => '2026-09-24'],
             ['code' => 'NSBC', 'name' => "NSIA BANQUE COTE D'IVOIRE", 'sector' => 'Banque', 'country' => 'CI'],
 
 
@@ -80,7 +80,7 @@ class SocietesSeeder extends Seeder
         ];
 
         foreach ($societes as $s) {
-            Societe::create($s);
+            Societe::updateOrCreate(['code' => $s['code']], $s);
         }
     }
 }
