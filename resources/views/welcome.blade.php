@@ -727,11 +727,11 @@
     <div class="container" style="max-width:1100px;">
         <div class="row text-center g-3">
             <div class="col-6 col-md-3">
-                <span class="cb-stat-num">45+</span>
+                <span class="cb-stat-num">{{ $nbSocietes ?? '—' }}</span>
                 <span class="cb-stat-lbl">Sociétés cotées</span>
             </div>
             <div class="col-6 col-md-3">
-                <span class="cb-stat-num">7</span>
+                <span class="cb-stat-num">8</span>
                 <span class="cb-stat-lbl">Pays UEMOA</span>
             </div>
             <div class="col-6 col-md-3">

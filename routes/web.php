@@ -22,6 +22,7 @@ use App\Http\Controllers\NewsController;
 use App\Http\Controllers\AdminNewsController;
 use App\Http\Controllers\Api\NewsWebhookController;
 use App\Http\Controllers\Api\BocWebhookController;
+use App\Http\Controllers\Api\SocietesWebhookController;
 use App\Http\Controllers\Api\ComparateurWebhookController;
 use App\Http\Controllers\BetCouponController;
 use App\Http\Controllers\ComparateurController;
@@ -278,6 +279,16 @@ Route::get('/api/n8n/bocs/missing', [BocWebhookController::class, 'missing'])
 Route::post('/api/n8n/bocs', [BocWebhookController::class, 'store'])
     ->middleware('n8n.key')
     ->name('api.n8n.bocs.store');
+
+/*
+|--------------------------------------------------------------------------
+| n8n — liste des sociétés cotées (source de vérité : table societes)
+|--------------------------------------------------------------------------
+*/
+
+Route::get('/api/n8n/societes', [SocietesWebhookController::class, 'index'])
+    ->middleware('n8n.key')
+    ->name('api.n8n.societes.index');
 
 /*
 |--------------------------------------------------------------------------

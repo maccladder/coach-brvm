@@ -6,6 +6,7 @@ use App\Models\Announcement;
 use App\Models\ClientBoc;
 use App\Models\DailyBoc;
 use App\Models\News;
+use App\Models\Societe;
 use Carbon\Carbon;
 
 class LandingController extends Controller
@@ -47,6 +48,7 @@ class LandingController extends Controller
             'news'            => $news,
             'latestPublicBoc' => $latestPublicBoc,
             'exampleVideoUrl' => null,
+            'nbSocietes'      => Societe::listedCount(),
         ]);
     }
 }
