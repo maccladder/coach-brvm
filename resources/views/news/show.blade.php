@@ -1,6 +1,33 @@
 {{-- resources/views/news/show.blade.php --}}
 @extends('layouts.app')
 
+@php
+    $marque         = config('app.brand', 'Boursiv');
+    $seoDescription = \Illuminate\Support\Str::limit(trim(preg_replace('/\s+/u', ' ', (string) $news->resume)), 200);
+    $urlArticle     = route('news.show', $news->slug);
+@endphp
+
+@section('title', $news->title . ' — ' . $marque)
+
+@push('meta')
+<meta name="description" content="{{ $seoDescription }}">
+<link rel="canonical" href="{{ $urlArticle }}">
+<meta property="og:site_name" content="{{ $marque }}">
+<meta property="og:locale" content="fr_FR">
+<meta property="og:type" content="article">
+<meta property="og:title" content="{{ $news->title }}">
+<meta property="og:description" content="{{ $seoDescription }}">
+<meta property="og:url" content="{{ $urlArticle }}">
+@if($news->datePublication())
+<meta property="article:published_time" content="{{ $news->datePublication()->toIso8601String() }}">
+@endif
+@if($news->categorie)
+<meta property="article:section" content="{{ $news->categorie }}">
+@endif
+<meta name="twitter:title" content="{{ $news->title }}">
+<meta name="twitter:description" content="{{ $seoDescription }}">
+@endpush
+
 @push('styles')
 <style>
     .news-show-page { background: #060910; min-height: 100vh; }

@@ -1,6 +1,26 @@
 {{-- resources/views/news/index.blade.php --}}
 @extends('layouts.app')
 
+@php
+    $marque         = config('app.brand', 'Boursiv');
+    $seoTitre       = 'Actualités de la BRVM — ' . $marque;
+    $seoDescription = "L'essentiel de l'actualité boursière et financière de la BRVM et de l'UEMOA, "
+                    . 'sélectionné chaque matin : résumé, impact et sociétés citées.';
+@endphp
+
+@section('title', $seoTitre)
+
+@push('meta')
+<meta name="description" content="{{ $seoDescription }}">
+<link rel="canonical" href="{{ $newsList->currentPage() > 1 ? $newsList->url($newsList->currentPage()) : route('news.index') }}">
+<meta property="og:site_name" content="{{ $marque }}">
+<meta property="og:locale" content="fr_FR">
+<meta property="og:type" content="website">
+<meta property="og:title" content="{{ $seoTitre }}">
+<meta property="og:description" content="{{ $seoDescription }}">
+<meta property="og:url" content="{{ route('news.index') }}">
+@endpush
+
 @push('styles')
 <style>
     .news-page { background: #060910; min-height: 100vh; }
