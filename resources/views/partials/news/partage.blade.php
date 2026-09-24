@@ -20,12 +20,13 @@
         font-family: 'Syne', sans-serif; font-size: 11px; font-weight: 700;
         letter-spacing: .06em; text-transform: uppercase; text-decoration: none;
         padding: 7px 12px; border-radius: 3px; cursor: pointer; transition: all .2s;
-        background: transparent; border: 1px solid rgba(201,168,76,.3); color: #C9A84C;
+        background: transparent; border: 1px solid rgba(176,134,46,.35); color: var(--cb-gold);
     }
-    .news-partage-btn:hover { border-color: #C9A84C; color: #C9A84C; }
+    .news-partage-btn:hover { border-color: var(--cb-gold); color: var(--cb-gold); }
     .news-partage-btn .bi { font-size: 14px; }
-    .news-partage-wa { border-color: rgba(37,211,102,.45); color: #25D366; }
-    .news-partage-wa:hover { background: rgba(37,211,102,.1); border-color: #25D366; color: #25D366; }
+    .news-partage-wa { border-color: rgba(37,211,102,.45); color: var(--cb-up); }
+    .news-partage-wa:hover { background: rgba(37,211,102,.1); border-color: #25D366; color: var(--cb-up); }
+    .news-partage-wa .bi { color: #25D366; }
 </style>
 @endpush
 

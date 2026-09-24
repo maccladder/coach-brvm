@@ -115,6 +115,20 @@ class NewsPagesTest extends TestCase
         $this->assertSame(1, substr_count($html, "closest('.news-partage-copier')"));
     }
 
+    public function test_news_pages_use_charter_colors_not_old_dark_theme(): void
+    {
+        $news = $this->article();
+
+        foreach ([route('news.index'), route('news.show', $news->slug)] as $url) {
+            $html = $this->get($url)->assertOk()->getContent();
+
+            foreach (['#060910', '#050810', '#0C1120', '#E8EAF0', '#9AA3B8'] as $ancien) {
+                $this->assertStringNotContainsStringIgnoringCase($ancien, $html, "$url contient encore $ancien");
+            }
+            $this->assertMatchesRegularExpression('/\.news-(show-)?page \{ background: var\(--cb-paper\);/', $html);
+        }
+    }
+
     public function test_news_index_has_title_and_open_graph(): void
     {
         $this->article();
