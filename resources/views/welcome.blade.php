@@ -742,7 +742,7 @@
     <div class="cb-hero-orb cb-hero-orb-2"></div>
 
     <div class="container cb-hero-inner" style="max-width:1100px; position:relative; z-index:10;">
-        <div class="row g-4 g-lg-5 align-items-center">
+        <div class="row g-4 g-xl-5 align-items-center">
 
             {{-- Texte --}}
             <div class="col-lg-7">
@@ -990,7 +990,7 @@
 ══════════════════════════════════════ --}}
 <section class="cb-sec" style="background:var(--cb-paper);">
     <div class="container" style="max-width:1100px;">
-        <div class="row g-4 g-lg-5 align-items-center">
+        <div class="row g-4 g-xl-5 align-items-center">
             <div class="col-lg-6 cbr">
                 <p class="cb-sec-tag">Radar Marché</p>
                 <h2 class="cb-sec-title">Visualise les <em>opportunités</em> en 7 jours</h2>
@@ -1148,7 +1148,7 @@
 ══════════════════════════════════════ --}}
 <section class="cb-sec cb-sec-alt">
     <div class="container" style="max-width:1100px;">
-        <div class="row g-4 g-lg-5 align-items-center">
+        <div class="row g-4 g-xl-5 align-items-center">
             <div class="col-lg-6 cbr">
                 <p class="cb-sec-tag">Formations</p>
                 <h2 class="cb-sec-title">Monte en niveau <em>à ton rythme</em></h2>
@@ -1186,7 +1186,7 @@
 ══════════════════════════════════════ --}}
 <section class="cb-sec cb-sec-alt">
     <div class="container" style="max-width:1100px;">
-        <div class="row g-4 g-lg-5 align-items-center">
+        <div class="row g-4 g-xl-5 align-items-center">
 
             <div class="col-lg-5 cbr">
                 <p class="cb-sec-tag">Forum</p>
