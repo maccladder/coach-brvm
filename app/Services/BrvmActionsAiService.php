@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
@@ -49,6 +50,9 @@ class BrvmActionsAiService
         Log::warning('BRVM: aucune ligne action détectée');
         return [];
     }
+
+    // « Dernière mise à jour : Jeudi, 24 septembre, 2026 - 12:06 » (heure d'Abidjan)
+    $miseAJour = self::parseMiseAJour($html);
 
     $stocks = [];
 
@@ -102,18 +106,22 @@ class BrvmActionsAiService
         $close  = $toNumber($cells[5] ?? null);
         $change = $toNumber($cells[6] ?? null, true);
 
-        // règle prix d'achat
+        // Historique (compatibilité) : ouverture → clôture → veille.
+        // Les prix affichés et le simulateur utilisent désormais CoursBrvm.
         $buyPrice = ($open > 0) ? $open : (($close > 0) ? $close : $prev);
 
         $stocks[] = [
             'ticker'    => strtoupper($ticker),
             'name'      => $name,
             'volume'    => $volume,
+            // ⚠️ Colonne « Cours veille » du site : fiable avant séance seulement,
+            // elle ne contient plus la clôture précédente pendant la séance.
             'prev'      => $prev,
             'open'      => $open,
             'close'     => $close,
             'change'    => $change,
             'buy_price' => $buyPrice,
+            'maj'       => $miseAJour?->toIso8601String(),
         ];
     }
 
@@ -122,5 +130,30 @@ class BrvmActionsAiService
 
     return $stocks;
 }
+
+    /**
+     * Date de « Dernière mise à jour » affichée par brvm.org, ex.
+     * « Dernière mise à jour : Jeudi, 24 septembre, 2026 - 12:06 ».
+     */
+    public static function parseMiseAJour(string $html): ?Carbon
+    {
+        $texte = html_entity_decode(strip_tags($html), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+
+        if (!preg_match('/Derni[èe]re mise [àa] jour\s*:\s*\p{L}+,\s*(\d{1,2})\s+(\p{L}+),?\s+(\d{4})\s*-\s*(\d{1,2}):(\d{2})/iu', $texte, $m)) {
+            return null;
+        }
+
+        $mois = [
+            'janvier' => 1, 'février' => 2, 'fevrier' => 2, 'mars' => 3, 'avril' => 4, 'mai' => 5, 'juin' => 6,
+            'juillet' => 7, 'août' => 8, 'aout' => 8, 'septembre' => 9, 'octobre' => 10, 'novembre' => 11,
+            'décembre' => 12, 'decembre' => 12,
+        ][mb_strtolower($m[2])] ?? null;
+
+        if (!$mois) {
+            return null;
+        }
+
+        return Carbon::create((int) $m[3], $mois, (int) $m[1], (int) $m[4], (int) $m[5], 0, 'Africa/Abidjan');
+    }
 
 }
