@@ -10,7 +10,7 @@
         </div>
 
         <div class="d-flex gap-2">
-            <a href="{{ route('admin.market.actions') }}" class="btn btn-outline-primary">
+            <a href="{{ route('admin.market.index') }}" class="btn btn-outline-primary">
                 📈 Cours Actions BRVM
             </a>
             <button class="btn btn-primary" disabled>
