@@ -130,8 +130,12 @@
     .cb-hero-link:hover { text-decoration: underline; }
 
     @media (min-width: 992px) {
-        .cb-hero { min-height: 62vh; }
-        .cb-hero-inner { padding-top: 48px; padding-bottom: 48px; }
+        .cb-hero-inner { padding-top: 40px; padding-bottom: 40px; }
+        /* Desktop compact : titre sur 2-3 lignes, carte Outils resserrée (même contenu) */
+        .cb-hero-title { font-size: clamp(40px, 4vw, 52px); }
+        .cb-hero-badge { margin-bottom: 18px; }
+        .cb-hero-desc { margin-bottom: 24px; }
+        .cb-hero-card .cb-tool-item { padding-top: 8px; padding-bottom: 8px; }
     }
 
     @media (max-width: 767.98px) {
