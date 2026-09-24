@@ -11,9 +11,9 @@ use App\Models\VirtualWalletTransaction;
 use App\Services\BrvmActionsAiService;
 use App\Services\BrvmBubbleService;
 use App\Services\BrvmMarketAiService;
+use App\Services\BrvmMarketSnapshot;
 use Database\Seeders\SocietesSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -175,14 +175,12 @@ class NouvelleCotationEdgeCasesTest extends TestCase
     public function test_ticker_banner_shows_reference_price_and_no_minus_100(?float $close): void
     {
         $this->mockMarche($close);
-        Cache::forget('brvm_ticker');
+        app(BrvmMarketSnapshot::class)->refresh(); // tâche planifiée brvm:refresh-market
 
-        $this->get(route('societes.index'))->assertOk();
-
-        $bbgc = collect(Cache::get('brvm_ticker'))->firstWhere('ticker', 'BBGC');
-        $this->assertNotNull($bbgc);
-        $this->assertEquals(6750, $bbgc['close']);
-        $this->assertEquals(0.0, $bbgc['change']);
+        $this->get(route('societes.index'))
+            ->assertOk()
+            ->assertSeeInOrder(['<span class="sym">BBGC</span>', '6 750 F', '▲ +0.00%'], false)
+            ->assertDontSee('-100', false);
     }
 
     /** Parseur brvm.org réel, avec les deux rendus possibles d'une clôture vide. */

@@ -15,7 +15,8 @@ class BrvmActionsAiService
     $url = 'https://www.brvm.org/fr/cours-actions/0';
 
     try {
-        $resp = Http::timeout(30)
+        $resp = Http::timeout(8)
+            ->connectTimeout(5)
             ->withHeaders([
                 'User-Agent' => 'Boursiv/1.0 (+https://boursiv.com)',
             ])
