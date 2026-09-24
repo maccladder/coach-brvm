@@ -75,4 +75,42 @@ class News extends Model
         $dt = $this->published_at ?? $this->created_at;
         return $dt?->format('d/m/Y') ?? '';
     }
+
+    /** Date de publication effective (published_at, sinon created_at). */
+    public function datePublication(): ?Carbon
+    {
+        return $this->published_at ?? $this->created_at;
+    }
+
+    /** Ordre « plus récent d'abord », cohérent avec la page /actualites. */
+    public function scopeRecentFirst(Builder $query): Builder
+    {
+        return $query
+            ->orderByRaw('COALESCE(published_at, created_at) DESC')
+            ->orderByDesc('id');
+    }
+
+    /**
+     * Bloc « À la une » de l'accueil. Vedette : l'article d'impact « Élevé »
+     * le plus récent des dernières 24 h, sinon simplement le dernier publié
+     * (la vedette tourne donc chaque jour). Suivent les articles les plus
+     * récents, vedette exclue.
+     *
+     * @return array{vedette: ?News, suivants: \Illuminate\Support\Collection<int, News>}
+     */
+    public static function aLaUne(int $nbSuivants = 3): array
+    {
+        $vedette = static::published()
+            ->where('impact', 'Élevé')
+            ->whereRaw('COALESCE(published_at, created_at) >= ?', [now()->subDay()->toDateTimeString()])
+            ->recentFirst()
+            ->first()
+            ?? static::published()->recentFirst()->first();
+
+        $suivants = $vedette
+            ? static::published()->whereKeyNot($vedette->getKey())->recentFirst()->limit($nbSuivants)->get()
+            : collect();
+
+        return ['vedette' => $vedette, 'suivants' => $suivants];
+    }
 }

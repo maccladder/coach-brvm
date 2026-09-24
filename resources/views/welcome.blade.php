@@ -418,6 +418,53 @@
         border: 1px solid rgba(176,134,46,.2);
         padding: 2px 8px; border-radius: 100px;
     }
+    /* Impact des actualités : Élevé en rouge baissier, Moyen doré, Faible neutre */
+    .cb-news-pill.cb-impact-eleve  { background: rgba(192,57,43,.08); color: var(--cb-down); border-color: rgba(192,57,43,.3); }
+    .cb-news-pill.cb-impact-moyen  { background: rgba(176,134,46,.1);  color: var(--cb-gold); border-color: rgba(176,134,46,.3); }
+    .cb-news-pill.cb-impact-faible { background: rgba(108,114,105,.08); color: var(--cb-muted); border-color: rgba(108,114,105,.25); }
+
+    /* ── À la une ── */
+    .cb-une { padding: clamp(28px,5vw,56px) 0; background: var(--cb-card); border-top: 1px solid var(--cb-border); border-bottom: 1px solid var(--cb-border); }
+    .cb-une-titre {
+        font-family: 'Playfair Display', serif; font-weight: 700;
+        font-size: clamp(24px, 3.5vw, 34px); line-height: 1.1; color: var(--cb-ink); margin: 0;
+    }
+    .cb-une-titre em { font-style: italic; color: var(--cb-gold); }
+    .cb-une-tout {
+        font-family: 'Syne', sans-serif; font-size: 11px; font-weight: 700;
+        letter-spacing: .08em; text-transform: uppercase; color: var(--cb-forest); text-decoration: none;
+    }
+    .cb-une-tout:hover { text-decoration: underline; color: var(--cb-forest); }
+    .cb-une-pills { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+    .cb-une-vedette {
+        display: block; height: 100%; text-decoration: none; color: inherit;
+        background: var(--cb-paper); border: 1px solid var(--cb-border); border-left: 3px solid var(--cb-gold);
+        border-radius: 4px; padding: clamp(18px, 3vw, 28px); transition: all .3s;
+    }
+    .cb-une-vedette:hover { border-color: rgba(176,134,46,.4); color: inherit; transform: translateY(-2px); }
+    .cb-une-vedette-titre {
+        font-family: 'Playfair Display', serif; font-weight: 700;
+        font-size: clamp(20px, 2.6vw, 28px); line-height: 1.2; color: var(--cb-ink); margin-bottom: 10px;
+    }
+    .cb-une-resume { font-size: 15px; color: var(--cb-muted); line-height: 1.6; margin-bottom: 12px; }
+    .cb-une-meta { font-size: 12px; color: var(--cb-muted); }
+    .cb-une-meta span:first-child { font-weight: 500; color: var(--cb-ink); }
+    .cb-une-liste { display: flex; flex-direction: column; gap: 10px; height: 100%; }
+    .cb-une-item {
+        display: block; text-decoration: none; color: inherit; flex: 1;
+        background: var(--cb-paper); border: 1px solid var(--cb-border); border-radius: 4px;
+        padding: 14px 16px; transition: all .3s;
+    }
+    .cb-une-item:hover { border-color: rgba(176,134,46,.4); color: inherit; }
+    .cb-une-item-titre {
+        font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700;
+        color: var(--cb-ink); line-height: 1.35; margin-bottom: 6px;
+    }
+    .cb-une-vide {
+        background: var(--cb-paper); border: 1px solid var(--cb-border); border-radius: 4px;
+        padding: 20px; font-size: 14px; color: var(--cb-muted);
+    }
+    .cb-une-vide a { color: var(--cb-forest); }
 
     /* Social buttons */
     .cb-social-btn {
@@ -759,6 +806,9 @@
         </div>
     </div>
 </section>
+
+{{-- À LA UNE : actualités du Rédacteur en Chef (n8n), juste sous le hero --}}
+@include('partials.welcome.a-la-une')
 
 {{-- STATS --}}
 <div class="cb-stats">
@@ -1137,45 +1187,6 @@
     </div>
 </section>
 
-@if(($news ?? collect())->isNotEmpty())
-{{-- ══════════════════════════════════════
-     DERNIÈRES ACTUALITÉS
-══════════════════════════════════════ --}}
-<section class="cb-sec">
-    <div class="container" style="max-width:1100px;">
-        <div class="cbr d-flex justify-content-between align-items-end flex-wrap gap-3 mb-4">
-            <div>
-                <p class="cb-sec-tag">Actualités BRVM</p>
-                <h2 class="cb-sec-title" style="margin-bottom:0;">Dernières <em>actualités</em></h2>
-            </div>
-            <a href="{{ route('news.index') }}" class="cb-cta-outline">Voir toutes les actualités →</a>
-        </div>
-
-        <div class="row g-3 cbr cbr2">
-            @foreach($news as $n)
-                <div class="col-md-4">
-                    <a href="{{ route('news.show', $n->slug) }}" class="cb-ann-card">
-                        <div class="d-flex align-items-center gap-2 flex-wrap mb-1">
-                            <div class="cb-ann-date" style="margin-bottom:0;">
-                                {{ optional($n->published_at ?? $n->created_at)->format('d/m/Y') }}
-                            </div>
-                            @if($n->categorie)
-                                <span class="cb-news-pill">{{ $n->categorie }}</span>
-                            @endif
-                            @if($n->impact)
-                                <span class="cb-news-pill">Impact {{ $n->impact }}</span>
-                            @endif
-                        </div>
-                        <div class="cb-ann-title">{{ $n->title }}</div>
-                        <div class="cb-ann-excerpt">{{ \Illuminate\Support\Str::limit($n->resume, 100) }}</div>
-                        <span class="cb-ann-link">Lire l'actualité →</span>
-                    </a>
-                </div>
-            @endforeach
-        </div>
-    </div>
-</section>
-@endif
 
 {{-- ══════════════════════════════════════
      COMMENT ÇA MARCHE

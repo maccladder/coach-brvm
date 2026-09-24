@@ -19,11 +19,7 @@ class LandingController extends Controller
             ->limit(3)
             ->get();
 
-        $news = News::published()
-            ->orderByDesc('published_at')
-            ->orderByDesc('created_at')
-            ->limit(3)
-            ->get();
+        $aLaUne = News::aLaUne(3);
 
         // ✅ Dernière date BOC dispo = J-1 (ou avant)
         $lastDaily = DailyBoc::whereDate('date_boc', '<=', Carbon::yesterday())
@@ -45,7 +41,7 @@ class LandingController extends Controller
 
         return view('welcome', [
             'annonces'        => $annonces,
-            'news'            => $news,
+            'aLaUne'          => $aLaUne,
             'latestPublicBoc' => $latestPublicBoc,
             'exampleVideoUrl' => null,
             'nbSocietes'      => Societe::listedCount(),
