@@ -486,7 +486,7 @@
     .cb-footer-copy { font-size: 11px; color: var(--cb-muted); font-family: 'Syne', sans-serif; }
 
     /* Radar animation */
-    .cb-radar-wrap { position:relative; height:320px; display:flex; align-items:center; justify-content:center; }
+    .cb-radar-wrap { position:relative; height:320px; overflow:hidden; display:flex; align-items:center; justify-content:center; }
     .cb-radar-ring { position:absolute; border-radius:50%; border:1px solid; animation:rp 3s ease-in-out infinite; }
     .r1{width:300px;height:300px;border-color:rgba(15,92,67,.08);animation-delay:0s}
     .r2{width:228px;height:228px;border-color:rgba(15,92,67,.13);animation-delay:.5s}
@@ -600,7 +600,7 @@
     <div class="cb-hero-orb cb-hero-orb-2"></div>
 
     <div class="container" style="max-width:1100px; position:relative; z-index:10; padding-top:40px; padding-bottom:40px;">
-        <div class="row g-5 align-items-center">
+        <div class="row g-4 g-lg-5 align-items-center">
 
             {{-- Texte --}}
             <div class="col-lg-7">
@@ -936,7 +936,7 @@
 ══════════════════════════════════════ --}}
 <section class="cb-sec" style="background:var(--cb-paper);">
     <div class="container" style="max-width:1100px;">
-        <div class="row g-5 align-items-center">
+        <div class="row g-4 g-lg-5 align-items-center">
             <div class="col-lg-6 cbr">
                 <p class="cb-sec-tag">Radar Marché</p>
                 <h2 class="cb-sec-title">Visualise les <em>opportunités</em> en 7 jours</h2>
@@ -1242,7 +1242,7 @@
 ══════════════════════════════════════ --}}
 <section class="cb-sec cb-sec-alt">
     <div class="container" style="max-width:1100px;">
-        <div class="row g-5 align-items-center">
+        <div class="row g-4 g-lg-5 align-items-center">
             <div class="col-lg-6 cbr">
                 <p class="cb-sec-tag">Formations</p>
                 <h2 class="cb-sec-title">Monte en niveau <em>à ton rythme</em></h2>
@@ -1403,7 +1403,7 @@
 ══════════════════════════════════════ --}}
 <section class="cb-sec cb-sec-alt">
     <div class="container" style="max-width:1100px;">
-        <div class="row g-5 align-items-center">
+        <div class="row g-4 g-lg-5 align-items-center">
 
             <div class="col-lg-5 cbr">
                 <p class="cb-sec-tag">Forum</p>
