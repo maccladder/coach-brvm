@@ -134,6 +134,37 @@ class WelcomePageTest extends TestCase
         $this->assertGreaterThan(strpos($html, 'class="cb-hero"'), strpos($html, 'id="a-la-une"'));
     }
 
+    public function test_new_badge_only_on_news_under_24h(): void
+    {
+        $this->news('Article frais', ['published_at' => now()->subHours(3)]);
+        $this->news('Article de la veille', ['published_at' => now()->subHours(30)]);
+
+        $bloc = $this->blocUne();
+
+        $this->assertSame(1, substr_count($bloc, 'cb-news-nouveau'));
+        $this->assertLessThan(
+            strpos($bloc, 'Article frais'),
+            strpos($bloc, 'cb-news-nouveau')
+        );
+    }
+
+    public function test_counter_of_today_articles(): void
+    {
+        $this->travelTo(now()->setTime(11, 0));
+
+        // 0 article aujourd'hui : pas de compteur
+        $this->news('Hier soir', ['published_at' => now()->subDay()->setTime(20, 0)]);
+        $this->assertStringNotContainsString('cb-une-compteur"', $this->blocUne());
+
+        $this->news('Ce matin 1', ['published_at' => now()->setTime(8, 0)]);
+        $this->assertStringContainsString("1 article aujourd'hui", $this->blocUne());
+
+        $this->news('Ce matin 2', ['published_at' => now()->setTime(8, 1)]);
+        $this->news('Ce matin 3', ['published_at' => now()->setTime(8, 2)]);
+        $this->news('Non publié', ['published_at' => now()->setTime(8, 3), 'is_published' => false]);
+        $this->assertStringContainsString("3 articles aujourd'hui", $this->blocUne());
+    }
+
     public function test_promo_sections_are_kept_but_moved_below_community_sections(): void
     {
         $this->get('/welcome')->assertOk()->assertSeeInOrder([

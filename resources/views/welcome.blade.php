@@ -422,6 +422,19 @@
     .cb-news-pill.cb-impact-eleve  { background: rgba(192,57,43,.08); color: var(--cb-down); border-color: rgba(192,57,43,.3); }
     .cb-news-pill.cb-impact-moyen  { background: rgba(176,134,46,.1);  color: var(--cb-gold); border-color: rgba(176,134,46,.3); }
     .cb-news-pill.cb-impact-faible { background: rgba(108,114,105,.08); color: var(--cb-muted); border-color: rgba(108,114,105,.25); }
+    .cb-news-pill.cb-news-nouveau  { background: var(--cb-forest); color: var(--cb-paper); border-color: var(--cb-forest); }
+
+    /* Compteur « N articles aujourd'hui » (dans le sur-titre À la une) */
+    .cb-une-compteur {
+        display: inline-flex; align-items: center; gap: 6px; margin-left: 4px;
+        font-size: 10px; letter-spacing: .08em; color: var(--cb-gold);
+        background: rgba(176,134,46,.08); border: 1px solid rgba(176,134,46,.25);
+        border-radius: 100px; padding: 2px 10px;
+    }
+    .cb-une-compteur-dot {
+        width: 6px; height: 6px; border-radius: 50%; background: var(--cb-down);
+        animation: bdot 2s ease-in-out infinite;
+    }
 
     /* ── À la une ── */
     .cb-une { padding: clamp(28px,5vw,56px) 0; background: var(--cb-card); border-top: 1px solid var(--cb-border); border-bottom: 1px solid var(--cb-border); }

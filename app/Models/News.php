@@ -96,7 +96,7 @@ class News extends Model
      * (la vedette tourne donc chaque jour). Suivent les articles les plus
      * récents, vedette exclue.
      *
-     * @return array{vedette: ?News, suivants: \Illuminate\Support\Collection<int, News>}
+     * @return array{vedette: ?News, suivants: \Illuminate\Support\Collection<int, News>, aujourdhui: int}
      */
     public static function aLaUne(int $nbSuivants = 3): array
     {
@@ -111,6 +111,18 @@ class News extends Model
             ? static::published()->whereKeyNot($vedette->getKey())->recentFirst()->limit($nbSuivants)->get()
             : collect();
 
-        return ['vedette' => $vedette, 'suivants' => $suivants];
+        return [
+            'vedette'     => $vedette,
+            'suivants'    => $suivants,
+            'aujourdhui'  => static::published()
+                ->whereRaw('COALESCE(published_at, created_at) >= ?', [today()->toDateTimeString()])
+                ->count(),
+        ];
+    }
+
+    /** Publié depuis moins de 24 h : pastille « Nouveau ». */
+    public function estNouveau(): bool
+    {
+        return (bool) $this->datePublication()?->gte(now()->subDay());
     }
 }

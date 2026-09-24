@@ -1,8 +1,9 @@
 {{-- resources/views/partials/welcome/a-la-une.blade.php --}}
-{{-- Bloc « À la une » de l'accueil : $aLaUne = ['vedette' => ?News, 'suivants' => Collection] --}}
+{{-- Bloc « À la une » de l'accueil : $aLaUne = ['vedette' => ?News, 'suivants' => Collection, 'aujourdhui' => int] --}}
 @php
-    $vedette  = $aLaUne['vedette'] ?? null;
-    $suivants = $aLaUne['suivants'] ?? collect();
+    $vedette    = $aLaUne['vedette'] ?? null;
+    $suivants   = $aLaUne['suivants'] ?? collect();
+    $aujourdhui = (int) ($aLaUne['aujourdhui'] ?? 0);
 
     $dateNews = function ($n) {
         $d = $n->datePublication();
@@ -24,7 +25,15 @@
 
         <div class="d-flex justify-content-between align-items-end flex-wrap gap-2 mb-3">
             <div>
-                <p class="cb-sec-tag" style="margin-bottom:6px;">À la une</p>
+                <p class="cb-sec-tag" style="margin-bottom:6px;">
+                    À la une
+                    @if($aujourdhui > 0)
+                        <span class="cb-une-compteur">
+                            <span class="cb-une-compteur-dot"></span>
+                            {{ $aujourdhui }} {{ $aujourdhui > 1 ? 'articles' : 'article' }} aujourd'hui
+                        </span>
+                    @endif
+                </p>
                 <h2 class="cb-une-titre">L'actu de la <em>BRVM</em></h2>
             </div>
             <a href="{{ route('news.index') }}" class="cb-une-tout">Toutes les actualités →</a>
@@ -36,6 +45,9 @@
                 <div class="col-lg-7">
                     <a href="{{ route('news.show', $vedette->slug) }}" class="cb-une-vedette">
                         <div class="cb-une-pills">
+                            @if($vedette->estNouveau())
+                                <span class="cb-news-pill cb-news-nouveau">Nouveau</span>
+                            @endif
                             @if($vedette->impact)
                                 <span class="cb-news-pill {{ $classeImpact($vedette->impact) }}">Impact {{ $vedette->impact }}</span>
                             @endif
@@ -62,6 +74,9 @@
                             @foreach($suivants as $n)
                                 <a href="{{ route('news.show', $n->slug) }}" class="cb-une-item">
                                     <div class="cb-une-pills">
+                                        @if($n->estNouveau())
+                                            <span class="cb-news-pill cb-news-nouveau">Nouveau</span>
+                                        @endif
                                         @if($n->impact)
                                             <span class="cb-news-pill {{ $classeImpact($n->impact) }}">Impact {{ $n->impact }}</span>
                                         @endif
