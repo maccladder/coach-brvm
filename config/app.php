@@ -17,6 +17,19 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Nom de marque (SEO, balises de partage)
+    |--------------------------------------------------------------------------
+    |
+    | Nom public affiché dans les <title> et balises Open Graph. Distinct de
+    | APP_NAME, dont dépendent le cookie de session et le préfixe de cache
+    | (le modifier déconnecterait tous les utilisateurs).
+    |
+    */
+
+    'brand' => env('APP_BRAND', 'Boursiv'),
+
+    /*
+    |--------------------------------------------------------------------------
     | Email du propriétaire de la plateforme
     |--------------------------------------------------------------------------
     |

@@ -183,6 +183,23 @@ class WelcomePageTest extends TestCase
         ], false);
     }
 
+    public function test_seo_title_description_and_open_graph_use_brand_not_app_name(): void
+    {
+        config(['app.name' => 'Coach BRVM']); // APP_NAME inchangé (session, cache)
+
+        $html = $this->get('/welcome')->assertOk()->getContent();
+
+        $this->assertMatchesRegularExpression('#<title>Boursiv — Actualités de la BRVM et éducation financière</title>#u', $html);
+        $this->assertStringNotContainsString('<title>Coach BRVM', $html);
+        $this->assertStringContainsString('<meta name="description" content="Les actualités de la BRVM chaque matin', $html);
+        $this->assertStringContainsString('<meta property="og:title" content="Boursiv — Actualités de la BRVM', $html);
+        $this->assertStringContainsString('<meta property="og:description" content="Les actualités de la BRVM', $html);
+        $this->assertStringContainsString('<meta property="og:url" content="' . route('landing') . '">', $html);
+        $this->assertStringContainsString('<meta property="og:type" content="website">', $html);
+        $this->assertStringContainsString('<meta property="og:site_name" content="Boursiv">', $html);
+        $this->assertStringContainsString('<meta property="og:image"', $html);
+    }
+
     public function test_hero_hides_signup_for_logged_in_users(): void
     {
         $user = \App\Models\User::factory()->create();

@@ -1,6 +1,25 @@
 {{-- resources/views/welcome.blade.php --}}
 @extends('layouts.app')
 
+@php
+    $seoTitre       = config('app.brand', 'Boursiv') . ' — Actualités de la BRVM et éducation financière';
+    $seoDescription = "Les actualités de la BRVM chaque matin, la BOC gratuite résumée par l'IA, "
+                    . 'le radar du marché, un simulateur de portefeuille et des formations pour investir en bourse dans l\'UEMOA.';
+@endphp
+
+@section('title', $seoTitre)
+
+@push('meta')
+<meta name="description" content="{{ $seoDescription }}">
+<link rel="canonical" href="{{ route('landing') }}">
+<meta property="og:site_name" content="{{ config('app.brand', 'Boursiv') }}">
+<meta property="og:locale" content="fr_FR">
+<meta property="og:type" content="website">
+<meta property="og:title" content="{{ $seoTitre }}">
+<meta property="og:description" content="{{ $seoDescription }}">
+<meta property="og:url" content="{{ route('landing') }}">
+@endpush
+
 @push('styles')
 <style>
     /* ============================================
