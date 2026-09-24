@@ -68,7 +68,12 @@
                     <span class="recap-row-value">{{ number_format($qty,0,',',' ') }} titre(s)</span>
                 </div>
                 <div class="recap-row">
-                    <span class="recap-row-label">Prix du jour</span>
+                    <span class="recap-row-label">
+                        Dernier cours
+                        @isset($coursMaj)
+                            <small style="display:block;font-size:11px;opacity:.7;">brvm.org, mis à jour le {{ $coursMaj->format('d/m') }} à {{ $coursMaj->format('H\hi') }}</small>
+                        @endisset
+                    </span>
                     <span class="recap-row-value">{{ number_format($price,0,',',' ') }} FCFA</span>
                 </div>
 

@@ -214,7 +214,7 @@
                                         @php
                                             $t = $s['ticker'] ?? '';
                                             $n = $s['name'] ?? '';
-                                            $p = $s['buy_price'] ?? ($s['close'] ?? null);
+                                            $p = $s['cours'] ?? null; // dernier cours (CoursBrvm)
                                         @endphp
                                         <option value="{{ $t }}" @selected($t === ($preSelectedTicker ?? ''))>
                                             {{ $t }} — {{ $n }}

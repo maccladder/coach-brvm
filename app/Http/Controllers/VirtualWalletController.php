@@ -15,6 +15,8 @@ use Illuminate\Support\Facades\Log;
 use App\Services\BrvmActionsAiService;
 use App\Models\VirtualWalletTransaction;
 use App\Services\BrvmMarketAiService; // adapte au bon service
+use App\Services\CoursBrvm;
+use Illuminate\Support\Carbon;
 
 
 class VirtualWalletController extends Controller
@@ -28,7 +30,8 @@ class VirtualWalletController extends Controller
         ['balance' => 0]
     );
 
-    $market = $svc->fetchMarketTableFromSite();
+    // Règle CoursBrvm : cours = clôture → ouverture → clôture préc.
+    $market = app(CoursBrvm::class)->marcheEnDirect();
     $prices = collect($market)->keyBy('ticker');
 
     $positionsDb = VirtualPosition::where('user_id', $user->id)->get();
@@ -37,10 +40,7 @@ class VirtualWalletController extends Controller
     $totalValue = 0;
 
     foreach ($positionsDb as $pos) {
-        // close vide (pas encore d'échange, ex. 1er jour de cotation) :
-        // repli sur buy_price (ouverture, sinon cours de référence veille)
-        $row   = $prices->get($pos->ticker, []);
-        $price = ($row['close'] ?? null) ?: ($row['buy_price'] ?? null);
+        $price = $prices->get($pos->ticker)['cours'] ?? null;
         $value = ($price && $pos->qty) ? ($price * $pos->qty) : 0;
         $totalValue += $value;
 
@@ -212,7 +212,8 @@ public function buy(Request $request)
         }
 
         // 1) Market
-        $market = app(\App\Services\BrvmMarketAiService::class)->fetchCloseAndChangeFromSite();
+        // Achat au dernier cours, même règle que la vente (clôture → ouverture → veille)
+        $market = app(CoursBrvm::class)->marcheEnDirect();
         Log::info('BUY:market_count', ['count' => is_array($market) ? count($market) : null]);
 
         $ticker = strtoupper(trim((string)$request->ticker));
@@ -224,7 +225,8 @@ public function buy(Request $request)
             'keys'      => is_array($row) ? array_keys($row) : null,
         ]);
 
-        $price = $row['buy_price'] ?? null;
+        $price    = $row['cours'] ?? null;
+        $coursMaj = $this->heureCours($row);
         if (!$price) {
             Log::warning('BUY:no_price', ['ticker' => $ticker, 'row' => $row]);
             return back()->with('error', 'Cours indisponible pour ce ticker.');
@@ -252,7 +254,7 @@ public function buy(Request $request)
             'min'        => $min,
         ]);
 
-        DB::transaction(function () use ($user, $ticker, $row, $price, $qty, $grossAmount, $fee, $totalDebit, $rate, $min) {
+        DB::transaction(function () use ($user, $ticker, $row, $price, $qty, $grossAmount, $fee, $totalDebit, $rate, $min, $coursMaj) {
 
             // Wallet (lock pour éviter concurrence)
             $wallet = \App\Models\VirtualWallet::where('user_id', $user->id)->lockForUpdate()->first();
@@ -335,6 +337,7 @@ public function buy(Request $request)
                     'sgi_fee'      => $fee,
                     'sgi_rate'     => $rate,
                     'sgi_min'      => $min,
+                    'cours_maj'    => $coursMaj->toIso8601String(),
                 ],
             ]);
 
@@ -348,7 +351,8 @@ public function buy(Request $request)
 
         return redirect()
             ->route('wallet.index')
-            ->with('success', 'Achat effectué ✅ (frais SGI inclus)');
+            ->with('success', 'Achat effectué ✅ au cours de ' . number_format($price, 0, ',', ' ')
+                . ' FCFA (brvm.org, ' . $coursMaj->format('d/m à H\hi') . ') — frais SGI inclus');
     }
     catch (\Throwable $e) {
         Log::error('BUY:FAILED', [
@@ -525,11 +529,11 @@ public function buyRecap(Request $request)
             ->with('error', 'Sélectionne une action et une quantité pour afficher le récapitulatif.');
     }
 
-    $market = app(\App\Services\BrvmMarketAiService::class)
-        ->fetchCloseAndChangeFromSite();
+    // Dernier cours, même règle que la vente (clôture → ouverture → veille)
+    $market = app(CoursBrvm::class)->marcheEnDirect();
 
     $row = collect($market)->firstWhere('ticker', $ticker);
-    $price = $row['buy_price'] ?? null;
+    $price = $row['cours'] ?? null;
 
     if (!$price) {
         return redirect()
@@ -556,6 +560,7 @@ public function buyRecap(Request $request)
         'total'       => $total,
         'rate'        => $rate,
         'min'         => $min,
+        'coursMaj'    => $this->heureCours($row),
     ]);
 }
 
@@ -572,16 +577,15 @@ public function sellRecap(Request $request)
     }
 
     // ✅ marché (comme buy)
-    $market = app(\App\Services\BrvmMarketAiService::class)->fetchCloseAndChangeFromSite();
+    $market = app(CoursBrvm::class)->marcheEnDirect();
     $row = collect($market)->firstWhere('ticker', $ticker);
 
     if (!$row) {
         return redirect()->route('wallet.index')->with('error', 'Ticker introuvable.');
     }
 
-    // ✅ vente : close en priorité ; close vide ou 0 (pas encore d'échange,
-    // ex. 1er jour de cotation) → repli sur buy_price
-    $price = ($row['close'] ?? null) ?: ($row['buy_price'] ?? null);
+    // ✅ vente au dernier cours (CoursBrvm) : clôture → ouverture → clôture préc.
+    $price = $row['cours'] ?? null;
     if (!$price) {
         return redirect()->route('wallet.index')->with('error', 'Cours indisponible pour ce ticker.');
     }
@@ -646,7 +650,7 @@ public function sell(Request $request)
     $qty    = (int) $data['qty'];
 
     // ✅ Prix du jour via TON service (comme buy)
-    $market = app(\App\Services\BrvmMarketAiService::class)->fetchCloseAndChangeFromSite();
+    $market = app(CoursBrvm::class)->marcheEnDirect();
     Log::info('SELL:market_count', ['count' => is_array($market) ? count($market) : 0]);
 
     $row = collect($market)->firstWhere('ticker', $ticker);
@@ -660,9 +664,8 @@ public function sell(Request $request)
         return back()->with('error', 'Ticker introuvable.');
     }
 
-    // ✅ vente : close en priorité ; close vide ou 0 (pas encore d'échange,
-    // ex. 1er jour de cotation) → repli sur buy_price
-    $price = ($row['close'] ?? null) ?: ($row['buy_price'] ?? null);
+    // ✅ vente au dernier cours (CoursBrvm) : clôture → ouverture → clôture préc.
+    $price = $row['cours'] ?? null;
     if (!$price) {
         return back()->with('error', 'Prix introuvable pour ce ticker.');
     }
@@ -785,4 +788,10 @@ public function sell(Request $request)
 }
 
 
+
+    /** Heure du cours utilisé : « Dernière mise à jour » de brvm.org, sinon maintenant. */
+    private function heureCours(?array $row): Carbon
+    {
+        return !empty($row['maj']) ? Carbon::parse($row['maj']) : now();
+    }
 }
