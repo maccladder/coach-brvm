@@ -3,28 +3,34 @@
 namespace App\View\Composers;
 
 use App\Services\BrvmMarketSnapshot;
+use App\Services\CoursBrvm;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\View\View;
 
 class TickerComposer
 {
-    public function __construct(protected BrvmMarketSnapshot $snapshot) {}
+    public function __construct(
+        protected BrvmMarketSnapshot $snapshot,
+        protected CoursBrvm $cours,
+    ) {}
 
     public function compose(View $view): void
     {
         // Lecture seule du dernier relevé (tâche planifiée brvm:refresh-market) :
-        // aucune page n'attend brvm.org.
-        $tickerData = collect($this->snapshot->rows())
-            // close vide ou 0 (pas encore d'échange, ex. 1er jour de cotation) :
-            // repli sur buy_price (ouverture, sinon cours de référence veille)
-            ->map(fn ($s) => $s + ['display' => ($s['close'] ?? null) ?: ($s['buy_price'] ?? null)])
-            ->filter(fn ($s) => !empty($s['ticker']) && !empty($s['display']))
+        // aucune page n'attend brvm.org. Mis en forme une fois par relevé.
+        $cle = 'brvm_bandeau:' . ($this->snapshot->fetchedAt()?->timestamp ?? 'aucun') . ':' . today()->toDateString();
+
+        $tickerData = Cache::remember($cle, 900, fn () => collect($this->cours->enrichir($this->snapshot->rows()))
+            // Même règle que /marche-en-direct : cours = clôture → ouverture → clôture préc. ;
+            // variation officielle (calculée sur l'OPV le 1er jour d'une cotation)
+            ->filter(fn ($s) => !empty($s['ticker']) && !empty($s['cours']))
             ->map(fn ($s) => [
                 'ticker' => $s['ticker'],
-                'close'  => (float) $s['display'],
-                'change' => ($s['change'] ?? null) !== null ? (float) $s['change'] : null,
+                'close'  => (float) $s['cours'],
+                'change' => $s['variation'],
             ])
             ->values()
-            ->toArray();
+            ->toArray());
 
         $view->with('tickerData', $tickerData);
     }

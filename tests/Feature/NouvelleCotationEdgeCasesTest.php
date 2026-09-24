@@ -31,12 +31,13 @@ class NouvelleCotationEdgeCasesTest extends TestCase
     private const BBGC_JOUR_1 = [
         'ticker' => 'BBGC', 'name' => "BRIDGE BANK GROUP COTE D'IVOIRE",
         'volume' => null, 'prev' => 6750.0, 'open' => null, 'close' => null,
-        'change' => 0.0, 'buy_price' => 6750.0,
+        'change' => 0.0, 'buy_price' => 6750.0, 'maj' => '2026-09-24T10:00:00+00:00',
     ];
 
     protected function setUp(): void
     {
         parent::setUp();
+        $this->travelTo('2026-09-24 10:00:00'); // 1er jour de cotation de BBGC (config/cotations.php)
         Http::preventStrayRequests();
         $this->seed(SocietesSeeder::class);
         $this->mockMarche(null);

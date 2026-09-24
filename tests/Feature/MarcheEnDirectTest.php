@@ -57,6 +57,17 @@ class MarcheEnDirectTest extends TestCase
         }
     }
 
+    public function test_ticker_banner_uses_same_rule_bbgc_first_day_vs_ipo_price(): void
+    {
+        $this->artisan('brvm:refresh-market')->assertSuccessful(); // relevé = page de 12:06
+
+        $this->get('/welcome')
+            ->assertOk()
+            ->assertSeeInOrder(['<span class="sym">BBGC</span>', '7 255 F', '▲ +7.48%'], false)   // site : 0,00
+            ->assertSeeInOrder(['<span class="sym">LNBB</span>', '3 975 F', '▲ +7.43%'], false)   // clôture, pas l'ouverture
+            ->assertSeeInOrder(['<span class="sym">SHEC</span>', '2 295 F', '▼ -7.27%'], false);  // variation officielle
+    }
+
     public function test_shows_brvm_update_time(): void
     {
         $this->get(route('market.live'))->assertOk()->assertSee('cours brvm.org de <span>12h06</span>', false);
