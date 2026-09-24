@@ -107,7 +107,7 @@
 
             {{-- Toolbar --}}
             <div class="ml-toolbar cbr">
-                <div class="ml-time">Chargé à <span>{{ $loadedAt }}</span> (heure Abidjan)</div>
+                <div class="ml-time">Chargé à <span>{{ $loadedAt }}</span> (heure Abidjan)@if($majSite) · cours brvm.org de <span>{{ $majSite }}</span>@endif</div>
                 <input id="mlSearch"
                        class="ml-search"
                        type="search"
@@ -118,8 +118,8 @@
             {{-- Stats rapides --}}
             @php
                 $total    = count($stocks);
-                $hausse   = collect($stocks)->filter(fn($s) => ($s['change'] ?? 0) > 0)->count();
-                $baisse   = collect($stocks)->filter(fn($s) => ($s['change'] ?? 0) < 0)->count();
+                $hausse   = collect($stocks)->filter(fn($s) => ($s['variation'] ?? 0) > 0)->count();
+                $baisse   = collect($stocks)->filter(fn($s) => ($s['variation'] ?? 0) < 0)->count();
                 $neutre   = $total - $hausse - $baisse;
             @endphp
             <div class="ml-stats cbr cbr2">
@@ -154,10 +154,12 @@
                             @php
                                 $ticker = $s['ticker'] ?? '';
                                 $name   = $s['name']   ?? '—';
-                                $cours  = $s['buy_price'] ?? ($s['open'] ?? ($s['close'] ?? null));
+                                // Règle CoursBrvm : clôture → ouverture → clôture préc. ; jamais la
+                                // colonne « Cours veille » du site (fausse pendant la séance)
+                                $cours  = $s['cours'] ?? null;
                                 $open   = $s['open']   ?? null;
-                                $prev   = $s['prev']   ?? null;
-                                $change = $s['change'] ?? null;
+                                $prev   = $s['cloture_prec'] ?? null;
+                                $change = $s['variation'] ?? null;
                                 $volume = $s['volume'] ?? null;
 
                                 $varClass = 'var-flat';
