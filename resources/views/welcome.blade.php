@@ -7,7 +7,7 @@
        WELCOME — variables locales
     ============================================ */
     .cb-hero {
-        min-height: 92vh;
+        min-height: 0;
         background:
             radial-gradient(ellipse 90% 60% at 50% 0%, rgba(176,134,46,.08) 0%, transparent 55%),
             radial-gradient(ellipse 50% 40% at 85% 80%, rgba(15,92,67,.04) 0%, transparent 50%),
@@ -99,6 +99,33 @@
         margin-bottom: 40px;
     }
     .cb-hero-desc strong { color: var(--cb-ink); font-weight: 500; }
+
+    /* Hero compact : les actualités doivent apparaître dès le 1er écran mobile */
+    .cb-hero-inner { padding-top: 28px; padding-bottom: 24px; }
+    .cb-hero-link {
+        font-family: 'Syne', sans-serif; font-weight: 700; font-size: 12px;
+        letter-spacing: .04em; text-transform: uppercase;
+        color: var(--cb-forest) !important; text-decoration: none;
+        padding: 10px 4px;
+    }
+    .cb-hero-link:hover { text-decoration: underline; }
+
+    @media (min-width: 992px) {
+        .cb-hero { min-height: 62vh; }
+        .cb-hero-inner { padding-top: 48px; padding-bottom: 48px; }
+    }
+
+    @media (max-width: 767.98px) {
+        .cb-hero-badge { margin-bottom: 14px; font-size: 10px; padding: 5px 12px; }
+        .cb-hero-title { font-size: clamp(32px, 9.5vw, 40px); margin-bottom: 8px; }
+        .cb-hero-tag { margin-bottom: 12px; letter-spacing: .18em; }
+        .cb-hero-desc { font-size: 15px; line-height: 1.6; margin-bottom: 18px; }
+        /* Bouton principal sur une seule ligne, pleine largeur */
+        .cb-hero-ctas .cb-cta-primary {
+            width: 100%; justify-content: center; white-space: nowrap;
+            letter-spacing: .02em; font-size: 12.5px; padding: 14px 16px;
+        }
+    }
 
     /* Hero CTA buttons */
     .cb-cta-primary {
@@ -599,7 +626,7 @@
     <div class="cb-hero-orb cb-hero-orb-1"></div>
     <div class="cb-hero-orb cb-hero-orb-2"></div>
 
-    <div class="container" style="max-width:1100px; position:relative; z-index:10; padding-top:40px; padding-bottom:40px;">
+    <div class="container cb-hero-inner" style="max-width:1100px; position:relative; z-index:10;">
         <div class="row g-4 g-lg-5 align-items-center">
 
             {{-- Texte --}}
@@ -609,7 +636,7 @@
                     ÉDUCATION FINANCIÈRE · POUR TOUS
                 </div>
 
-                <p style="font-family:'Syne',sans-serif;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--cb-gold);margin-bottom:16px;">
+                <p class="d-none d-md-block" style="font-family:'Syne',sans-serif;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--cb-gold);margin-bottom:16px;">
                     Plateforme d'éducation financière
                 </p>
 
@@ -624,7 +651,12 @@
                     <span>Progresse</span>
                 </p>
 
-                <p class="cb-hero-desc">
+                {{-- Mobile : version courte ; desktop : texte complet --}}
+                <p class="cb-hero-desc d-md-none">
+                    Formations à la bourse, analyses de la BRVM, simulateur sans risque
+                    et marketplace : <strong>l'avenir appartient à ceux qui se forment.</strong>
+                </p>
+                <p class="cb-hero-desc d-none d-md-block">
                     Boursiv est une plateforme d'éducation financière multiservice : formations à la bourse,
                     analyses du marché régional, portefeuille virtuel pour s'entraîner sans risque, et une
                     <strong>marketplace de produits variés</strong> (cours, e-books, outils, logiciels —
@@ -632,25 +664,31 @@
                     Parce que <strong>l'avenir appartient à ceux qui se forment.</strong>
                 </p>
 
-                <div class="d-flex flex-wrap gap-2 mb-4">
+                <div class="cb-hero-ctas d-flex flex-wrap align-items-center gap-2 mb-3 mb-md-4">
                     @guest
                         <a href="{{ route('register') }}" class="cb-cta-primary">✦ S'inscrire gratuitement</a>
+                        @if(!empty($latestPublicBoc))
+                            <a href="{{ route('client-bocs.latest.public') }}" class="cb-hero-link">📄 BOC gratuite (J-1) ›</a>
+                        @else
+                            <a href="{{ route('radar.index') }}" class="cb-hero-link">📡 Radar Marché ›</a>
+                        @endif
+                    @else
+                        @if(!empty($latestPublicBoc))
+                            <a href="{{ route('client-bocs.latest.public') }}" class="cb-cta-green">📄 BOC gratuite (J-1)</a>
+                        @endif
+                        <a href="{{ route('radar.index') }}" class="cb-cta-outline">📡 Radar Marché</a>
                     @endguest
-                    @if(!empty($latestPublicBoc))
-                        <a href="{{ route('client-bocs.latest.public') }}" class="cb-cta-green">📄 BOC gratuite (J-1)</a>
-                    @endif
-                    <a href="{{ route('radar.index') }}" class="cb-cta-outline">📡 Radar Marché</a>
                 </div>
 
-                <div style="font-size:12px;color:var(--cb-muted);display:flex;flex-wrap:wrap;gap:16px;">
+                <div class="d-none d-md-flex" style="font-size:12px;color:var(--cb-muted);flex-wrap:wrap;gap:16px;">
                     <span>✅ BOC (J-1) gratuite</span>
                     <span>✅ Résumé pédagogique</span>
                     <span>✅ Audio + vidéo si dispo</span>
                 </div>
             </div>
 
-            {{-- Card outils --}}
-            <div class="col-lg-5">
+            {{-- Card outils (desktop : sur mobile, ces liens sont dans le menu) --}}
+            <div class="col-lg-5 d-none d-lg-block">
                 <div class="cb-hero-card">
                     <div class="cb-hero-card-header">
                         <span class="cb-hero-card-dot" style="background:#FF5F57;"></span>
