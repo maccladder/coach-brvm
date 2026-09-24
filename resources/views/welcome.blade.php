@@ -502,6 +502,30 @@
     }
     .cb-une-vide a { color: var(--cb-forest); }
 
+    /* ── Joue & entraîne-toi ── */
+    .cb-joue { padding: clamp(28px,5vw,48px) 0; background: var(--cb-paper); }
+    .cb-joue-carte {
+        display: block; height: 100%; text-decoration: none; color: inherit;
+        background: var(--cb-card); border: 1px solid var(--cb-border); border-radius: 4px;
+        padding: 20px 22px; transition: all .3s;
+    }
+    a.cb-joue-carte:hover { border-color: rgba(176,134,46,.4); transform: translateY(-2px); color: inherit; }
+    .cb-joue-icone { font-size: 24px; line-height: 1; margin-bottom: 10px; }
+    .cb-joue-titre { font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 700; color: var(--cb-ink); margin-bottom: 6px; }
+    .cb-joue-texte { font-size: 14px; color: var(--cb-muted); line-height: 1.6; margin-bottom: 10px; }
+    .cb-joue-liste { list-style: none; padding: 0; margin: 0 0 4px; }
+    .cb-joue-liste li {
+        display: flex; justify-content: space-between; align-items: baseline; gap: 12px;
+        padding: 7px 0; border-bottom: 1px dashed var(--cb-border); font-size: 14px;
+    }
+    .cb-joue-liste li:last-child { border-bottom: none; }
+    .cb-joue-liste a { color: var(--cb-ink); text-decoration: none; font-weight: 500; }
+    .cb-joue-liste a:hover { color: var(--cb-gold); }
+    .cb-joue-liste span {
+        flex: 0 0 auto; font-family: 'Syne', sans-serif; font-size: 10px; font-weight: 700;
+        letter-spacing: .08em; text-transform: uppercase; color: var(--cb-forest);
+    }
+
     /* ── Nouvelle cotation (config/cotations.php) ── */
     .cb-cotation-sec { padding: 0 0 clamp(20px,4vw,40px); background: var(--cb-card); }
     .cb-cotation {
@@ -880,6 +904,9 @@
 
 {{-- NOUVELLE COTATION : encart piloté par config/cotations.php --}}
 @include('partials.welcome.nouvelle-cotation')
+
+{{-- JOUE & ENTRAÎNE-TOI : simulateur + jeux publiés --}}
+@include('partials.welcome.joue')
 
 {{-- STATS --}}
 <div class="cb-stats">

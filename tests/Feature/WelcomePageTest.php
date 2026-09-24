@@ -200,6 +200,71 @@ class WelcomePageTest extends TestCase
         $this->assertStringContainsString('<meta property="og:image"', $html);
     }
 
+    private function jeu(string $titre, array $attrs = []): \App\Models\MarketplaceProduct
+    {
+        return \App\Models\MarketplaceProduct::create(array_merge([
+            'title' => $titre, 'slug' => \Illuminate\Support\Str::slug($titre), 'type' => 'game',
+            'status' => 'published', 'price' => 0, 'game_html' => '<html></html>',
+        ], $attrs));
+    }
+
+    /** Contenu HTML du bloc « Joue & entraîne-toi ». */
+    private function blocJoue(): string
+    {
+        $html  = $this->get('/welcome')->assertOk()->getContent();
+        $debut = strpos($html, '<section class="cb-joue">');
+        $this->assertNotFalse($debut, 'Bloc « Joue & entraîne-toi » absent');
+
+        return substr($html, $debut, strpos($html, '</section>', $debut) - $debut);
+    }
+
+    public function test_play_block_lists_published_games_and_links_simulator(): void
+    {
+        $this->jeu('Garba Master');
+        $this->jeu('Roi du cacao', ['price' => 1000]);
+        $this->jeu('Jeu en brouillon', ['status' => 'draft']);
+        $this->jeu('Pas un jeu', ['type' => 'course']);
+
+        $bloc = $this->blocJoue();
+
+        $this->assertStringContainsString(route('wallet.index'), $bloc);
+        $this->assertStringContainsString(route('marketplace.show', 'garba-master'), $bloc);
+        $this->assertStringContainsString('Gratuit', $bloc);
+        $this->assertStringContainsString('1 000 F', $bloc);
+        $this->assertStringContainsString(route('jeux'), $bloc);
+        $this->assertStringNotContainsString('Jeu en brouillon', $bloc);
+        $this->assertStringNotContainsString('Pas un jeu', $bloc);
+        $this->assertStringNotContainsString('<img', $bloc); // pas de couvertures lourdes sur l'accueil
+    }
+
+    public function test_play_block_shows_at_most_4_games_and_works_without_games(): void
+    {
+        $this->assertStringContainsString("Des jeux pour apprendre la bourse", $this->blocJoue());
+
+        foreach (range(1, 6) as $i) {
+            $this->jeu("Jeu $i");
+        }
+        $this->assertSame(4, substr_count($this->blocJoue(), '<li>'));
+    }
+
+    public function test_simulator_bonus_shown_only_during_its_period(): void
+    {
+        config([
+            'otp.wallet_bonus_amount' => 50000,
+            'otp.wallet_bonus_start'  => '2026-10-01 00:00:00',
+            'otp.wallet_bonus_end'    => '2026-10-15 23:59:59',
+        ]);
+
+        $this->travelTo('2026-09-30 12:00:00');
+        $this->assertStringNotContainsString('FCFA virtuels offerts', $this->blocJoue());
+
+        $this->travelTo('2026-10-05 12:00:00');
+        $this->assertStringContainsString('50 000 FCFA virtuels offerts', $this->blocJoue());
+
+        $this->travelTo('2026-10-16 00:00:01');
+        $this->assertStringNotContainsString('FCFA virtuels offerts', $this->blocJoue());
+    }
+
     public function test_hero_hides_signup_for_logged_in_users(): void
     {
         $user = \App\Models\User::factory()->create();

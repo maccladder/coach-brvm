@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Announcement;
 use App\Models\ClientBoc;
 use App\Models\DailyBoc;
+use App\Models\MarketplaceProduct;
 use App\Models\News;
 use App\Models\Societe;
 use App\Services\NouvellesCotations;
@@ -47,6 +48,17 @@ class LandingController extends Controller
             'exampleVideoUrl'    => null,
             'nbSocietes'         => Societe::listedCount(),
             'nouvellesCotations' => $cotations->actives(),
+            'jeux'               => MarketplaceProduct::published()
+                ->where('type', 'game')
+                ->orderByDesc('is_featured')
+                ->latest()
+                ->limit(4)
+                ->get(['title', 'slug', 'price']),
+            // Bonus simulateur affiché seulement pendant sa période (config/otp.php)
+            'bonusSimulateur'    => now()->between(
+                Carbon::parse(config('otp.wallet_bonus_start')),
+                Carbon::parse(config('otp.wallet_bonus_end'))
+            ) ? (int) config('otp.wallet_bonus_amount') : null,
         ]);
     }
 }
