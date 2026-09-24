@@ -110,6 +110,15 @@
     }
     .news-source-label strong { color: #C9A84C; }
 
+    .news-partage-bloc {
+        margin: 0 36px 24px;
+        display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+    }
+    .news-partage-titre {
+        font-family: 'Syne', sans-serif; font-size: 10px; letter-spacing: .14em;
+        text-transform: uppercase; color: #6B7590;
+    }
+
     .news-tags {
         margin: 0 36px 28px;
         display: flex; flex-wrap: wrap; gap: 8px;
@@ -156,6 +165,7 @@
         .news-article-header,
         .news-article-body { padding-left: 20px; padding-right: 20px; }
         .news-source-box,
+        .news-partage-bloc,
         .news-tags { margin-left: 20px; margin-right: 20px; }
     }
 
@@ -205,6 +215,11 @@
             @endif
         </div>
         @endif
+
+        <div class="news-partage-bloc">
+            <span class="news-partage-titre">Partager cet article</span>
+            @include('partials.news.partage', ['news' => $news])
+        </div>
 
         @if(!empty($news->societes) || !empty($news->mots_cles))
         <div class="news-tags">

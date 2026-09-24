@@ -63,6 +63,58 @@ class NewsPagesTest extends TestCase
         $this->assertStringNotContainsString("\n", $m[1]);
     }
 
+    public function test_whatsapp_text_contains_title_and_link_in_french_without_emoji(): void
+    {
+        $news = $this->article();
+        $url  = route('news.show', $news->slug);
+
+        $texte = $news->texteWhatsApp();
+
+        $this->assertSame(
+            "Bridge Bank : +7,5 % pour sa première séance à la BRVM\n\nÀ lire sur Boursiv : $url",
+            $texte
+        );
+        // Aucun emoji ni caractère hors du plan multilingue de base (rendu cassé sur WhatsApp)
+        $this->assertDoesNotMatchRegularExpression('/[\x{1F000}-\x{1FFFF}\x{2600}-\x{27BF}\x{FE0F}]/u', $texte);
+        $this->assertTrue(mb_check_encoding($texte, 'UTF-8'));
+
+        // Lien wa.me : texte encodé en UTF-8 (accents compris) et décodable à l'identique
+        $lien = $news->lienWhatsApp();
+        $this->assertStringStartsWith('https://wa.me/?text=', $lien);
+        $this->assertSame($texte, rawurldecode(substr($lien, strlen('https://wa.me/?text='))));
+        $this->assertStringContainsString('%C3%80%20lire%20sur%20Boursiv', $lien); // « À lire sur Boursiv »
+    }
+
+    public function test_share_buttons_on_article_page(): void
+    {
+        $news = $this->article();
+
+        $this->get(route('news.show', $news->slug))
+            ->assertOk()
+            ->assertSee('Partager cet article')
+            ->assertSee(e($news->lienWhatsApp()), false)
+            ->assertSee('data-url="' . route('news.show', $news->slug) . '"', false)
+            ->assertSee('Copier le lien');
+    }
+
+    public function test_share_buttons_on_each_news_card_outside_card_link(): void
+    {
+        $a = $this->article();
+        $b = $this->article(['title' => 'Deuxième article', 'source_url' => 'https://example.com/2', 'published_at' => '2026-09-24 08:05:00']);
+
+        $html = $this->get(route('news.index'))->assertOk()->getContent();
+
+        $this->assertSame(2, substr_count($html, 'class="news-partage"'));
+        $this->assertStringContainsString(e($a->lienWhatsApp()), $html);
+        $this->assertStringContainsString(e($b->lienWhatsApp()), $html);
+
+        // Pas de lien imbriqué : le partage suit la fermeture du lien de la carte
+        $carte = strpos($html, 'class="news-card"');
+        $this->assertLessThan(strpos($html, 'class="news-partage"', $carte), strpos($html, '</a>', $carte));
+        // Script de copie inclus une seule fois
+        $this->assertSame(1, substr_count($html, "closest('.news-partage-copier')"));
+    }
+
     public function test_news_index_has_title_and_open_graph(): void
     {
         $this->article();

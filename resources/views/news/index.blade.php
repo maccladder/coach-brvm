@@ -122,6 +122,11 @@
     }
     .news-card:hover .news-card-arrow { color: #C9A84C; transform: translateY(-50%) translateX(4px); }
 
+    /* Partage : posé en bas de la carte, en dehors du lien */
+    .news-card-wrap { position: relative; }
+    .news-card-wrap .news-card { padding-bottom: 60px; }
+    .news-card-wrap .news-partage { position: absolute; left: 24px; bottom: 16px; z-index: 2; }
+
     /* Empty */
     .news-empty {
         text-align: center; padding: 80px 20px;
@@ -160,7 +165,8 @@
     <div class="container py-5" style="max-width:1100px;">
 
         @forelse($newsList as $n)
-            <a href="{{ route('news.show', $n->slug) }}" class="news-card mb-3 cbr">
+            <div class="news-card-wrap mb-3 cbr">
+            <a href="{{ route('news.show', $n->slug) }}" class="news-card">
                 <div class="news-card-top">
                     <div class="news-card-date">{{ $n->public_date }}</div>
                     @if($n->categorie)
@@ -177,6 +183,9 @@
                 @endif
                 <span class="news-card-arrow">→</span>
             </a>
+            {{-- Hors du lien de la carte (pas de lien imbriqué) --}}
+            @include('partials.news.partage', ['news' => $n])
+            </div>
         @empty
             <div class="news-empty cbr">
                 <div style="font-size:32px;margin-bottom:12px;opacity:.4;">📰</div>

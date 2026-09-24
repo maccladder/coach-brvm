@@ -120,6 +120,19 @@ class News extends Model
         ];
     }
 
+    /** Texte de partage WhatsApp : titre + lien, en français, sans emoji. */
+    public function texteWhatsApp(): string
+    {
+        return $this->title . "\n\n"
+            . 'À lire sur ' . config('app.brand', 'Boursiv') . ' : '
+            . route('news.show', $this->slug);
+    }
+
+    public function lienWhatsApp(): string
+    {
+        return 'https://wa.me/?text=' . rawurlencode($this->texteWhatsApp());
+    }
+
     /** Publié depuis moins de 24 h : pastille « Nouveau ». */
     public function estNouveau(): bool
     {
