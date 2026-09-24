@@ -873,111 +873,6 @@
 </section>
 
 {{-- ══════════════════════════════════════
-     MARKETPLACE BANNER
-══════════════════════════════════════ --}}
-<section style="background:var(--cb-paper); border-top:1px solid var(--cb-border); border-bottom:1px solid var(--cb-border); padding:56px 0;">
-    <div class="container" style="max-width:1100px;">
-        <div class="cbr" style="
-            background: linear-gradient(135deg, rgba(176,134,46,.06) 0%, var(--cb-card) 60%);
-            border: 1px solid rgba(176,134,46,.25);
-            border-radius: 6px;
-            padding: clamp(32px, 5vw, 56px) clamp(28px, 5vw, 56px);
-            position: relative; overflow: hidden;
-        ">
-            {{-- Deco orb --}}
-            <div style="position:absolute;top:-60px;right:-60px;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle, rgba(176,134,46,.06) 0%, transparent 70%);pointer-events:none;"></div>
-
-            <div class="row align-items-center g-4">
-                <div class="col-lg-8">
-                    <span style="display:inline-flex;align-items:center;gap:8px;font-family:'Syne',sans-serif;font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--cb-gold);background:rgba(176,134,46,.08);border:1px solid rgba(176,134,46,.22);padding:5px 14px;border-radius:100px;margin-bottom:18px;">
-                        ✦ Nouveau
-                    </span>
-                    <h2 style="font-family:'Playfair Display',serif;font-size:clamp(24px,3.5vw,38px);font-weight:900;color:var(--cb-ink);line-height:1.1;margin-bottom:14px;">
-                        La <em style="color:var(--cb-gold);font-style:italic;">Marketplace</em> Boursiv
-                    </h2>
-                    <p style="font-size:15px;color:var(--cb-muted);line-height:1.75;max-width:520px;font-weight:300;margin-bottom:0;">
-                        PDF, études de marché, logiciels, vidéos, jeux éducatifs —
-                        des ressources sélectionnées pour votre <strong style="color:var(--cb-ink);font-weight:500;">éducation financière et développement personnel</strong>.
-                    </p>
-                </div>
-                <div class="col-lg-4 d-flex flex-column flex-sm-row flex-lg-column gap-2 align-items-start align-items-lg-end">
-                    <a href="{{ route('marketplace.index') }}" style="
-                        display:inline-flex;align-items:center;gap:8px;
-                        background:linear-gradient(135deg,var(--cb-gold),#7A5412);
-                        color:var(--cb-paper) !important; font-family:'Syne',sans-serif;
-                        font-weight:800;font-size:13px;letter-spacing:.06em;text-transform:uppercase;
-                        padding:13px 26px;border-radius:3px;text-decoration:none;
-                        transition:all .3s;white-space:nowrap;
-                    "
-                    onmouseover="this.style.boxShadow='0 10px 32px rgba(176,134,46,.35)';this.style.transform='translateY(-2px)'"
-                    onmouseout="this.style.boxShadow='';this.style.transform=''">
-                        🛍️ Découvrir la Marketplace
-                    </a>
-                    <a href="{{ route('marketplace.index') }}" style="
-                        display:inline-flex;align-items:center;gap:8px;
-                        background:transparent;color:var(--cb-gold) !important;
-                        font-family:'Syne',sans-serif;font-weight:600;font-size:12px;
-                        letter-spacing:.07em;text-transform:uppercase;
-                        padding:12px 20px;border-radius:3px;text-decoration:none;
-                        border:1px solid rgba(176,134,46,.25);transition:all .3s;white-space:nowrap;
-                    "
-                    onmouseover="this.style.background='rgba(176,134,46,.08)'"
-                    onmouseout="this.style.background='transparent'">
-                        Voir les produits →
-                    </a>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
-
-{{-- ══════════════════════════════════════
-     COMPARATEUR DE PRIX (promo croisée)
-══════════════════════════════════════ --}}
-<section style="background:var(--cb-card); border-top:1px solid var(--cb-border); border-bottom:1px solid var(--cb-border); padding:56px 0;">
-    <div class="container" style="max-width:1100px;">
-        <div class="cbr" style="
-            background: linear-gradient(135deg, rgba(255,122,26,.06) 0%, var(--cb-paper) 60%);
-            border: 1px solid rgba(255,122,26,.22);
-            border-radius: 6px;
-            padding: clamp(32px, 5vw, 56px) clamp(28px, 5vw, 56px);
-            position: relative; overflow: hidden;
-        ">
-            <div style="position:absolute;top:-60px;right:-60px;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle, rgba(255,122,26,.08) 0%, transparent 70%);pointer-events:none;"></div>
-
-            <div class="row align-items-center g-4">
-                <div class="col-lg-8">
-                    <span style="display:inline-flex;align-items:center;gap:8px;font-family:'Syne',sans-serif;font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#C55708;background:rgba(255,122,26,.1);border:1px solid rgba(255,122,26,.28);padding:5px 14px;border-radius:100px;margin-bottom:18px;">
-                        ✦ Nouveau
-                    </span>
-                    <h2 style="font-family:'Playfair Display',serif;font-size:clamp(24px,3.5vw,38px);font-weight:900;color:var(--cb-ink);line-height:1.1;margin-bottom:14px;">
-                        Le comparateur de <em style="color:#FF7A1A;font-style:italic;">prix</em> Boursiv
-                    </h2>
-                    <p style="font-size:15px;color:var(--cb-muted);line-height:1.75;max-width:560px;font-weight:300;margin-bottom:0;">
-                        Le même produit, jamais au même prix. <strong style="color:var(--cb-ink);font-weight:500;">Économisez sur vos téléphones et vos repas</strong> en comparant les offres des sites marchands et plateformes de livraison en 2 clics.
-                    </p>
-                </div>
-                <div class="col-lg-4 d-flex flex-column flex-sm-row flex-lg-column gap-2 align-items-start align-items-lg-end">
-                    <a href="{{ route('comparateur.index') }}" style="
-                        display:inline-flex;align-items:center;gap:8px;
-                        background:#FF7A1A;
-                        color:#fff !important; font-family:'Syne',sans-serif;
-                        font-weight:800;font-size:13px;letter-spacing:.06em;text-transform:uppercase;
-                        padding:13px 26px;border-radius:3px;text-decoration:none;
-                        transition:all .3s;white-space:nowrap;
-                        box-shadow:0 4px 18px rgba(255,122,26,.3);
-                    "
-                    onmouseover="this.style.boxShadow='0 10px 32px rgba(255,122,26,.45)';this.style.transform='translateY(-2px)'"
-                    onmouseout="this.style.boxShadow='0 4px 18px rgba(255,122,26,.3)';this.style.transform=''">
-                        🛒 Comparer les prix
-                    </a>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
-
-{{-- ══════════════════════════════════════
      BOC HIGHLIGHT
 ══════════════════════════════════════ --}}
 <section class="cb-sec cb-sec-alt">
@@ -1102,52 +997,6 @@
 </section>
 
 {{-- ══════════════════════════════════════
-     CTA AFFILIATION
-══════════════════════════════════════ --}}
-<section style="background:var(--cb-card);border-top:1px solid var(--cb-border);border-bottom:1px solid var(--cb-border);padding:52px 0;">
-    <div class="container" style="max-width:1000px;">
-        <div class="row g-4 align-items-center cbr">
-            <div class="col-lg-7">
-                <p style="font-family:'Syne',sans-serif;font-size:11px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--cb-gold);margin-bottom:10px;">Programme apporteur d'affaires</p>
-                <h2 style="font-family:'Playfair Display',serif;font-size:clamp(24px,4vw,36px);font-weight:900;color:var(--cb-ink);line-height:1.2;margin-bottom:14px;">
-                    Gagnez <em style="color:var(--cb-gold);font-style:italic;">10%</em> en parrainant<br>vos contacts sur Boursiv
-                </h2>
-                <p style="font-size:14px;color:var(--cb-muted);line-height:1.7;margin-bottom:24px;max-width:520px;">
-                    Partagez votre lien unique — vos contacts bénéficient de <strong style="color:var(--cb-forest);">−10%</strong> à l'achat de formations et packs éligibles, et vous touchez <strong style="color:var(--cb-gold);">+10%</strong> de commission. Reversement dès 10 000 FCFA via mobile money.
-                </p>
-                <div class="d-flex flex-wrap gap-3">
-                    <a href="{{ route('affiliate.landing') }}"
-                       style="display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,var(--cb-gold),#7A5412);color:var(--cb-paper) !important;text-decoration:none;font-family:'Syne',sans-serif;font-weight:800;font-size:12px;letter-spacing:.07em;text-transform:uppercase;padding:13px 24px;border-radius:3px;transition:all .3s;">
-                        🤝 Devenir apporteur d'affaires
-                    </a>
-                </div>
-            </div>
-            <div class="col-lg-5 cbr cbr2">
-                <div class="row g-3">
-                    <div class="col-6">
-                        <div style="background:var(--cb-paper);border:1px solid var(--cb-border);border-radius:4px;padding:18px;text-align:center;">
-                            <div style="font-family:'Playfair Display',serif;font-size:28px;font-weight:900;color:var(--cb-gold);">+10%</div>
-                            <div style="font-family:'Syne',sans-serif;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--cb-muted);margin-top:4px;">Pour vous</div>
-                        </div>
-                    </div>
-                    <div class="col-6">
-                        <div style="background:var(--cb-paper);border:1px solid rgba(15,92,67,.2);border-radius:4px;padding:18px;text-align:center;">
-                            <div style="font-family:'Playfair Display',serif;font-size:28px;font-weight:900;color:var(--cb-forest);">−10%</div>
-                            <div style="font-family:'Syne',sans-serif;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--cb-muted);margin-top:4px;">Pour l'acheteur</div>
-                        </div>
-                    </div>
-                    <div class="col-12">
-                        <div style="background:var(--cb-paper);border:1px solid var(--cb-border);border-radius:4px;padding:14px 16px;font-size:12px;color:var(--cb-muted);line-height:1.7;">
-                            ✅ Lien + QR code uniques &nbsp;·&nbsp; ✅ Retrait mobile money &nbsp;·&nbsp; ✅ Tableau de bord dédié
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
-
-{{-- ══════════════════════════════════════
      ANNONCES BRVM
 ══════════════════════════════════════ --}}
 <section class="cb-sec" style="background:var(--cb-paper);">
@@ -1224,69 +1073,6 @@
 </section>
 
 {{-- ══════════════════════════════════════
-     PRICING
-══════════════════════════════════════ --}}
-<section class="cb-sec" style="background:var(--cb-paper);">
-    <div class="container" style="max-width:1100px;">
-        <div class="cbr">
-            <p class="cb-sec-tag">Tarifs</p>
-            <h2 class="cb-sec-title">Commence <em>gratuitement,</em> va plus loin si besoin</h2>
-            <div class="cb-divider"></div>
-        </div>
-        <div class="row g-3 mt-2 cbr cbr2">
-            <div class="col-md-4">
-                <div class="cb-price-card">
-                    <div class="cb-price-label">Pour débuter</div>
-                    <div class="cb-price-title">📄 BOC (J-1) gratuite</div>
-                    <div class="cb-price-num">0 <span>FCFA</span></div>
-                    <p class="cb-price-desc">Idéal pour suivre rapidement le marché chaque jour.</p>
-                    <ul class="cb-price-features">
-                        <li>Interprétation IA de la dernière BOC (J-1)</li>
-                        <li>Résumé clair en français simple</li>
-                        <li>Audio + avatar vidéo si disponible</li>
-                        <li>Radar Marché 7 jours</li>
-                        <li>Mini-cours en livre gratuit</li>
-                    </ul>
-                    @if(!empty($latestPublicBoc))
-                        <a href="{{ route('client-bocs.latest.public') }}" class="cb-cta-green d-block text-center">Voir la BOC gratuite →</a>
-                    @endif
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="cb-price-card featured">
-                    <div class="cb-price-label">Pour aller plus loin</div>
-                    <div class="cb-price-title">📊 Analyse état financier</div>
-                    <div class="cb-price-num" style="font-size:24px;color:var(--cb-gold);">Payant <span>selon service</span></div>
-                    <p class="cb-price-desc">Pour comprendre en profondeur une entreprise cotée.</p>
-                    <ul class="cb-price-features">
-                        <li>Décodage des chiffres clés</li>
-                        <li>Points forts / points de vigilance</li>
-                        <li>Résumé orienté investisseur long terme</li>
-                        <li>Analyse pédagogique et claire</li>
-                    </ul>
-                    <a href="{{ route('client-financials.create') }}" class="cb-cta-primary d-block text-center">Analyser →</a>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="cb-price-card">
-                    <div class="cb-price-label">Contenus premium</div>
-                    <div class="cb-price-title">🛍️ Marketplace</div>
-                    <div class="cb-price-num" style="font-size:24px;color:var(--cb-forest);">Mobile <span>Money</span></div>
-                    <p class="cb-price-desc">PDF, vidéos, logiciels — achat instantané.</p>
-                    <ul class="cb-price-features">
-                        <li>Livres PDF thématiques bourse</li>
-                        <li>Vidéos de formation</li>
-                        <li>Logiciels & outils pratiques</li>
-                        <li>Accès immédiat après paiement</li>
-                    </ul>
-                    <a href="{{ route('marketplace.index') }}" class="cb-cta-outline d-block text-center">Ouvrir la Marketplace →</a>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
-
-{{-- ══════════════════════════════════════
      FORMATIONS
 ══════════════════════════════════════ --}}
 <section class="cb-sec cb-sec-alt">
@@ -1320,129 +1106,6 @@
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
-</section>
-
-{{-- ══════════════════════════════════════
-     PACK BRVM COMPLET
-══════════════════════════════════════ --}}
-<section style="background:var(--cb-paper); padding:72px 0; border-top:1px solid var(--cb-border); border-bottom:1px solid var(--cb-border);">
-    <style>@keyframes packBadgePulse{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(176,134,46,.5)}50%{opacity:.7;box-shadow:0 0 0 7px rgba(176,134,46,0)}}</style>
-    <div class="container cbr" style="max-width:900px; text-align:center;">
-
-        <div style="display:inline-flex; align-items:center; gap:8px; background:rgba(176,134,46,.08); border:1px solid rgba(176,134,46,.28); border-radius:100px; padding:7px 18px; margin-bottom:22px;">
-            <span style="width:8px;height:8px;border-radius:50%;background:var(--cb-gold);animation:packBadgePulse 1.5s ease-in-out infinite;flex-shrink:0;"></span>
-            <span style="font-family:'Syne',sans-serif;font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--cb-gold);">Pack Exclusif</span>
-        </div>
-
-        <h2 style="font-family:'Playfair Display',serif; font-size:clamp(26px,5vw,42px); font-weight:900; color:var(--cb-ink); margin-bottom:10px; line-height:1.1;">
-            🎓 Pack Boursiv <em style="color:var(--cb-gold);">Complet</em>
-        </h2>
-
-        <p style="font-size:14px; color:var(--cb-muted); line-height:1.75; max-width:600px; margin:0 auto 24px;">
-            3 Cours + Groupe WhatsApp Privé + Aide à l'ouverture de compte titre
-        </p>
-
-        <div style="margin-bottom:28px;">
-            <span style="font-size:17px; color:var(--cb-muted); text-decoration:line-through; margin-right:12px;">50 000 FCFA</span>
-            <span style="font-family:'Playfair Display',serif; font-size:clamp(32px,5vw,46px); font-weight:900; color:var(--cb-gold);">30 000 FCFA</span>
-        </div>
-
-        <div style="display:flex; flex-wrap:wrap; gap:10px; justify-content:center; margin-bottom:36px;">
-            <span style="font-size:13px; color:var(--cb-ink); background:rgba(176,134,46,.06); border:1px solid rgba(176,134,46,.15); border-radius:4px; padding:7px 14px;">✅ Cours Débutant</span>
-            <span style="font-size:13px; color:var(--cb-ink); background:rgba(176,134,46,.06); border:1px solid rgba(176,134,46,.15); border-radius:4px; padding:7px 14px;">✅ Cours Intermédiaire</span>
-            <span style="font-size:13px; color:var(--cb-ink); background:rgba(176,134,46,.06); border:1px solid rgba(176,134,46,.15); border-radius:4px; padding:7px 14px;">✅ Cours Pratique</span>
-            <span style="font-size:13px; color:var(--cb-forest); background:rgba(15,92,67,.06); border:1px solid rgba(15,92,67,.2); border-radius:4px; padding:7px 14px;">💬 Groupe WhatsApp Privé</span>
-        </div>
-
-        <a href="{{ route('pack.show') }}"
-           style="display:inline-flex; align-items:center; gap:10px;
-                  background:linear-gradient(135deg,var(--cb-gold),#7A5412);
-                  color:var(--cb-paper) !important; font-family:'Syne',sans-serif;
-                  font-weight:800; font-size:13px; letter-spacing:.07em; text-transform:uppercase;
-                  padding:15px 36px; border-radius:4px; text-decoration:none; transition:all .3s;"
-           onmouseover="this.style.boxShadow='0 10px 32px rgba(176,134,46,.35)';this.style.transform='translateY(-2px)'"
-           onmouseout="this.style.boxShadow='';this.style.transform=''">
-            Découvrir le Pack →
-        </a>
-
-    </div>
-</section>
-
-{{-- ══════════════════════════════════════
-     SERVICES — Financement + Formation présentielle
-══════════════════════════════════════ --}}
-<section class="cb-sec" style="background:var(--cb-paper);">
-    <div class="container" style="max-width:1100px;">
-        <div class="cbr">
-            <p class="cb-sec-tag">Services Boursiv</p>
-            <h2 class="cb-sec-title">Bien plus qu'une plateforme — <em>un accompagnement</em></h2>
-            <div class="cb-divider"></div>
-        </div>
-        <div class="row g-3 mt-2 cbr cbr2">
-
-            {{-- Financement --}}
-            <div class="col-md-6">
-                <div style="
-                    background:var(--cb-card); border:1px solid rgba(37,211,102,.2);
-                    border-radius:6px; padding:clamp(28px,4vw,40px); height:100%;
-                    display:flex; flex-direction:column; transition:border-color .3s;
-                " onmouseover="this.style.borderColor='rgba(37,211,102,.45)'" onmouseout="this.style.borderColor='rgba(37,211,102,.2)'">
-                    <div style="font-size:36px; margin-bottom:16px;">💰</div>
-                    <p style="font-family:'Syne',sans-serif;font-size:10px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:#1A9345;margin-bottom:10px;">Facilitation de financement</p>
-                    <h3 style="font-family:'Playfair Display',serif;font-size:clamp(18px,2.5vw,24px);font-weight:700;color:var(--cb-ink);line-height:1.25;margin-bottom:12px;">
-                        Besoin d'un prêt pour concrétiser votre projet ?
-                    </h3>
-                    <p style="font-size:14px;color:var(--cb-muted);line-height:1.75;margin-bottom:24px;flex-grow:1;">
-                        Boursiv joue le rôle de <strong style="color:var(--cb-ink);">facilitateur</strong> entre les particuliers
-                        et des structures financières agréées. Mise en relation gratuite, réponse sous 24h.
-                    </p>
-                    <a href="{{ route('financement') }}" style="
-                        display:inline-flex;align-items:center;gap:8px;
-                        background:transparent;color:#1A9345 !important;
-                        font-family:'Syne',sans-serif;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
-                        padding:11px 22px;border-radius:4px;text-decoration:none;
-                        border:1px solid rgba(37,211,102,.4);transition:all .3s;align-self:flex-start;
-                    "
-                    onmouseover="this.style.background='rgba(37,211,102,.08)';this.style.borderColor='rgba(37,211,102,.7)'"
-                    onmouseout="this.style.background='transparent';this.style.borderColor='rgba(37,211,102,.4)'">
-                        En savoir plus →
-                    </a>
-                </div>
-            </div>
-
-            {{-- Formation présentielle --}}
-            <div class="col-md-6">
-                <div style="
-                    background:var(--cb-card); border:1px solid var(--cb-border);
-                    border-radius:6px; padding:clamp(28px,4vw,40px); height:100%;
-                    display:flex; flex-direction:column; transition:border-color .3s;
-                " onmouseover="this.style.borderColor='rgba(176,134,46,.35)'" onmouseout="this.style.borderColor='var(--cb-border)'">
-                    <div style="font-size:36px; margin-bottom:16px;">🎓</div>
-                    <p style="font-family:'Syne',sans-serif;font-size:10px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--cb-gold);margin-bottom:10px;">Formation en présentiel</p>
-                    <h3 style="font-family:'Playfair Display',serif;font-size:clamp(18px,2.5vw,24px);font-weight:700;color:var(--cb-ink);line-height:1.25;margin-bottom:12px;">
-                        Maîtrisez la bourse avec une formation en présentiel
-                    </h3>
-                    <p style="font-size:14px;color:var(--cb-muted);line-height:1.75;margin-bottom:24px;flex-grow:1;">
-                        Sessions animées par des experts, adaptées à tous les niveaux — du débutant à l'investisseur confirmé.
-                        <strong style="color:var(--cb-ink);">Attestation délivrée</strong> à l'issue.
-                    </p>
-                    <a href="{{ route('formation.presentielle') }}" style="
-                        display:inline-flex;align-items:center;gap:8px;
-                        background:linear-gradient(135deg,var(--cb-gold),#7A5412);
-                        color:var(--cb-paper) !important;font-family:'Syne',sans-serif;
-                        font-weight:800;font-size:12px;letter-spacing:.06em;text-transform:uppercase;
-                        padding:11px 22px;border-radius:4px;text-decoration:none;
-                        transition:all .3s;align-self:flex-start;
-                    "
-                    onmouseover="this.style.boxShadow='0 8px 24px rgba(176,134,46,.3)';this.style.transform='translateY(-2px)'"
-                    onmouseout="this.style.boxShadow='';this.style.transform=''">
-                        En savoir plus →
-                    </a>
-                </div>
-            </div>
-
         </div>
     </div>
 </section>
@@ -1581,6 +1244,343 @@
                 <a href="{{ route('financement') }}" style="font-family:'Syne',sans-serif;font-size:12px;font-weight:700;letter-spacing:.06em;color:var(--cb-forest);text-decoration:none;">
                     Découvrez notre service de facilitation →
                 </a>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+{{-- ══════════════════════════════════════
+     MARKETPLACE BANNER
+══════════════════════════════════════ --}}
+<section style="background:var(--cb-paper); border-top:1px solid var(--cb-border); border-bottom:1px solid var(--cb-border); padding:56px 0;">
+    <div class="container" style="max-width:1100px;">
+        <div class="cbr" style="
+            background: linear-gradient(135deg, rgba(176,134,46,.06) 0%, var(--cb-card) 60%);
+            border: 1px solid rgba(176,134,46,.25);
+            border-radius: 6px;
+            padding: clamp(32px, 5vw, 56px) clamp(28px, 5vw, 56px);
+            position: relative; overflow: hidden;
+        ">
+            {{-- Deco orb --}}
+            <div style="position:absolute;top:-60px;right:-60px;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle, rgba(176,134,46,.06) 0%, transparent 70%);pointer-events:none;"></div>
+
+            <div class="row align-items-center g-4">
+                <div class="col-lg-8">
+                    <span style="display:inline-flex;align-items:center;gap:8px;font-family:'Syne',sans-serif;font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--cb-gold);background:rgba(176,134,46,.08);border:1px solid rgba(176,134,46,.22);padding:5px 14px;border-radius:100px;margin-bottom:18px;">
+                        ✦ Nouveau
+                    </span>
+                    <h2 style="font-family:'Playfair Display',serif;font-size:clamp(24px,3.5vw,38px);font-weight:900;color:var(--cb-ink);line-height:1.1;margin-bottom:14px;">
+                        La <em style="color:var(--cb-gold);font-style:italic;">Marketplace</em> Boursiv
+                    </h2>
+                    <p style="font-size:15px;color:var(--cb-muted);line-height:1.75;max-width:520px;font-weight:300;margin-bottom:0;">
+                        PDF, études de marché, logiciels, vidéos, jeux éducatifs —
+                        des ressources sélectionnées pour votre <strong style="color:var(--cb-ink);font-weight:500;">éducation financière et développement personnel</strong>.
+                    </p>
+                </div>
+                <div class="col-lg-4 d-flex flex-column flex-sm-row flex-lg-column gap-2 align-items-start align-items-lg-end">
+                    <a href="{{ route('marketplace.index') }}" style="
+                        display:inline-flex;align-items:center;gap:8px;
+                        background:linear-gradient(135deg,var(--cb-gold),#7A5412);
+                        color:var(--cb-paper) !important; font-family:'Syne',sans-serif;
+                        font-weight:800;font-size:13px;letter-spacing:.06em;text-transform:uppercase;
+                        padding:13px 26px;border-radius:3px;text-decoration:none;
+                        transition:all .3s;white-space:nowrap;
+                    "
+                    onmouseover="this.style.boxShadow='0 10px 32px rgba(176,134,46,.35)';this.style.transform='translateY(-2px)'"
+                    onmouseout="this.style.boxShadow='';this.style.transform=''">
+                        🛍️ Découvrir la Marketplace
+                    </a>
+                    <a href="{{ route('marketplace.index') }}" style="
+                        display:inline-flex;align-items:center;gap:8px;
+                        background:transparent;color:var(--cb-gold) !important;
+                        font-family:'Syne',sans-serif;font-weight:600;font-size:12px;
+                        letter-spacing:.07em;text-transform:uppercase;
+                        padding:12px 20px;border-radius:3px;text-decoration:none;
+                        border:1px solid rgba(176,134,46,.25);transition:all .3s;white-space:nowrap;
+                    "
+                    onmouseover="this.style.background='rgba(176,134,46,.08)'"
+                    onmouseout="this.style.background='transparent'">
+                        Voir les produits →
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+{{-- ══════════════════════════════════════
+     COMPARATEUR DE PRIX (promo croisée)
+══════════════════════════════════════ --}}
+<section style="background:var(--cb-card); border-top:1px solid var(--cb-border); border-bottom:1px solid var(--cb-border); padding:56px 0;">
+    <div class="container" style="max-width:1100px;">
+        <div class="cbr" style="
+            background: linear-gradient(135deg, rgba(255,122,26,.06) 0%, var(--cb-paper) 60%);
+            border: 1px solid rgba(255,122,26,.22);
+            border-radius: 6px;
+            padding: clamp(32px, 5vw, 56px) clamp(28px, 5vw, 56px);
+            position: relative; overflow: hidden;
+        ">
+            <div style="position:absolute;top:-60px;right:-60px;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle, rgba(255,122,26,.08) 0%, transparent 70%);pointer-events:none;"></div>
+
+            <div class="row align-items-center g-4">
+                <div class="col-lg-8">
+                    <span style="display:inline-flex;align-items:center;gap:8px;font-family:'Syne',sans-serif;font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#C55708;background:rgba(255,122,26,.1);border:1px solid rgba(255,122,26,.28);padding:5px 14px;border-radius:100px;margin-bottom:18px;">
+                        ✦ Nouveau
+                    </span>
+                    <h2 style="font-family:'Playfair Display',serif;font-size:clamp(24px,3.5vw,38px);font-weight:900;color:var(--cb-ink);line-height:1.1;margin-bottom:14px;">
+                        Le comparateur de <em style="color:#FF7A1A;font-style:italic;">prix</em> Boursiv
+                    </h2>
+                    <p style="font-size:15px;color:var(--cb-muted);line-height:1.75;max-width:560px;font-weight:300;margin-bottom:0;">
+                        Le même produit, jamais au même prix. <strong style="color:var(--cb-ink);font-weight:500;">Économisez sur vos téléphones et vos repas</strong> en comparant les offres des sites marchands et plateformes de livraison en 2 clics.
+                    </p>
+                </div>
+                <div class="col-lg-4 d-flex flex-column flex-sm-row flex-lg-column gap-2 align-items-start align-items-lg-end">
+                    <a href="{{ route('comparateur.index') }}" style="
+                        display:inline-flex;align-items:center;gap:8px;
+                        background:#FF7A1A;
+                        color:#fff !important; font-family:'Syne',sans-serif;
+                        font-weight:800;font-size:13px;letter-spacing:.06em;text-transform:uppercase;
+                        padding:13px 26px;border-radius:3px;text-decoration:none;
+                        transition:all .3s;white-space:nowrap;
+                        box-shadow:0 4px 18px rgba(255,122,26,.3);
+                    "
+                    onmouseover="this.style.boxShadow='0 10px 32px rgba(255,122,26,.45)';this.style.transform='translateY(-2px)'"
+                    onmouseout="this.style.boxShadow='0 4px 18px rgba(255,122,26,.3)';this.style.transform=''">
+                        🛒 Comparer les prix
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+{{-- ══════════════════════════════════════
+     CTA AFFILIATION
+══════════════════════════════════════ --}}
+<section style="background:var(--cb-card);border-top:1px solid var(--cb-border);border-bottom:1px solid var(--cb-border);padding:52px 0;">
+    <div class="container" style="max-width:1000px;">
+        <div class="row g-4 align-items-center cbr">
+            <div class="col-lg-7">
+                <p style="font-family:'Syne',sans-serif;font-size:11px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--cb-gold);margin-bottom:10px;">Programme apporteur d'affaires</p>
+                <h2 style="font-family:'Playfair Display',serif;font-size:clamp(24px,4vw,36px);font-weight:900;color:var(--cb-ink);line-height:1.2;margin-bottom:14px;">
+                    Gagnez <em style="color:var(--cb-gold);font-style:italic;">10%</em> en parrainant<br>vos contacts sur Boursiv
+                </h2>
+                <p style="font-size:14px;color:var(--cb-muted);line-height:1.7;margin-bottom:24px;max-width:520px;">
+                    Partagez votre lien unique — vos contacts bénéficient de <strong style="color:var(--cb-forest);">−10%</strong> à l'achat de formations et packs éligibles, et vous touchez <strong style="color:var(--cb-gold);">+10%</strong> de commission. Reversement dès 10 000 FCFA via mobile money.
+                </p>
+                <div class="d-flex flex-wrap gap-3">
+                    <a href="{{ route('affiliate.landing') }}"
+                       style="display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,var(--cb-gold),#7A5412);color:var(--cb-paper) !important;text-decoration:none;font-family:'Syne',sans-serif;font-weight:800;font-size:12px;letter-spacing:.07em;text-transform:uppercase;padding:13px 24px;border-radius:3px;transition:all .3s;">
+                        🤝 Devenir apporteur d'affaires
+                    </a>
+                </div>
+            </div>
+            <div class="col-lg-5 cbr cbr2">
+                <div class="row g-3">
+                    <div class="col-6">
+                        <div style="background:var(--cb-paper);border:1px solid var(--cb-border);border-radius:4px;padding:18px;text-align:center;">
+                            <div style="font-family:'Playfair Display',serif;font-size:28px;font-weight:900;color:var(--cb-gold);">+10%</div>
+                            <div style="font-family:'Syne',sans-serif;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--cb-muted);margin-top:4px;">Pour vous</div>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div style="background:var(--cb-paper);border:1px solid rgba(15,92,67,.2);border-radius:4px;padding:18px;text-align:center;">
+                            <div style="font-family:'Playfair Display',serif;font-size:28px;font-weight:900;color:var(--cb-forest);">−10%</div>
+                            <div style="font-family:'Syne',sans-serif;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--cb-muted);margin-top:4px;">Pour l'acheteur</div>
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <div style="background:var(--cb-paper);border:1px solid var(--cb-border);border-radius:4px;padding:14px 16px;font-size:12px;color:var(--cb-muted);line-height:1.7;">
+                            ✅ Lien + QR code uniques &nbsp;·&nbsp; ✅ Retrait mobile money &nbsp;·&nbsp; ✅ Tableau de bord dédié
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+{{-- ══════════════════════════════════════
+     PRICING
+══════════════════════════════════════ --}}
+<section class="cb-sec" style="background:var(--cb-paper);">
+    <div class="container" style="max-width:1100px;">
+        <div class="cbr">
+            <p class="cb-sec-tag">Tarifs</p>
+            <h2 class="cb-sec-title">Commence <em>gratuitement,</em> va plus loin si besoin</h2>
+            <div class="cb-divider"></div>
+        </div>
+        <div class="row g-3 mt-2 cbr cbr2">
+            <div class="col-md-4">
+                <div class="cb-price-card">
+                    <div class="cb-price-label">Pour débuter</div>
+                    <div class="cb-price-title">📄 BOC (J-1) gratuite</div>
+                    <div class="cb-price-num">0 <span>FCFA</span></div>
+                    <p class="cb-price-desc">Idéal pour suivre rapidement le marché chaque jour.</p>
+                    <ul class="cb-price-features">
+                        <li>Interprétation IA de la dernière BOC (J-1)</li>
+                        <li>Résumé clair en français simple</li>
+                        <li>Audio + avatar vidéo si disponible</li>
+                        <li>Radar Marché 7 jours</li>
+                        <li>Mini-cours en livre gratuit</li>
+                    </ul>
+                    @if(!empty($latestPublicBoc))
+                        <a href="{{ route('client-bocs.latest.public') }}" class="cb-cta-green d-block text-center">Voir la BOC gratuite →</a>
+                    @endif
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="cb-price-card featured">
+                    <div class="cb-price-label">Pour aller plus loin</div>
+                    <div class="cb-price-title">📊 Analyse état financier</div>
+                    <div class="cb-price-num" style="font-size:24px;color:var(--cb-gold);">Payant <span>selon service</span></div>
+                    <p class="cb-price-desc">Pour comprendre en profondeur une entreprise cotée.</p>
+                    <ul class="cb-price-features">
+                        <li>Décodage des chiffres clés</li>
+                        <li>Points forts / points de vigilance</li>
+                        <li>Résumé orienté investisseur long terme</li>
+                        <li>Analyse pédagogique et claire</li>
+                    </ul>
+                    <a href="{{ route('client-financials.create') }}" class="cb-cta-primary d-block text-center">Analyser →</a>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="cb-price-card">
+                    <div class="cb-price-label">Contenus premium</div>
+                    <div class="cb-price-title">🛍️ Marketplace</div>
+                    <div class="cb-price-num" style="font-size:24px;color:var(--cb-forest);">Mobile <span>Money</span></div>
+                    <p class="cb-price-desc">PDF, vidéos, logiciels — achat instantané.</p>
+                    <ul class="cb-price-features">
+                        <li>Livres PDF thématiques bourse</li>
+                        <li>Vidéos de formation</li>
+                        <li>Logiciels & outils pratiques</li>
+                        <li>Accès immédiat après paiement</li>
+                    </ul>
+                    <a href="{{ route('marketplace.index') }}" class="cb-cta-outline d-block text-center">Ouvrir la Marketplace →</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+{{-- ══════════════════════════════════════
+     PACK BRVM COMPLET
+══════════════════════════════════════ --}}
+<section style="background:var(--cb-paper); padding:72px 0; border-top:1px solid var(--cb-border); border-bottom:1px solid var(--cb-border);">
+    <style>@keyframes packBadgePulse{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(176,134,46,.5)}50%{opacity:.7;box-shadow:0 0 0 7px rgba(176,134,46,0)}}</style>
+    <div class="container cbr" style="max-width:900px; text-align:center;">
+
+        <div style="display:inline-flex; align-items:center; gap:8px; background:rgba(176,134,46,.08); border:1px solid rgba(176,134,46,.28); border-radius:100px; padding:7px 18px; margin-bottom:22px;">
+            <span style="width:8px;height:8px;border-radius:50%;background:var(--cb-gold);animation:packBadgePulse 1.5s ease-in-out infinite;flex-shrink:0;"></span>
+            <span style="font-family:'Syne',sans-serif;font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--cb-gold);">Pack Exclusif</span>
+        </div>
+
+        <h2 style="font-family:'Playfair Display',serif; font-size:clamp(26px,5vw,42px); font-weight:900; color:var(--cb-ink); margin-bottom:10px; line-height:1.1;">
+            🎓 Pack Boursiv <em style="color:var(--cb-gold);">Complet</em>
+        </h2>
+
+        <p style="font-size:14px; color:var(--cb-muted); line-height:1.75; max-width:600px; margin:0 auto 24px;">
+            3 Cours + Groupe WhatsApp Privé + Aide à l'ouverture de compte titre
+        </p>
+
+        <div style="margin-bottom:28px;">
+            <span style="font-size:17px; color:var(--cb-muted); text-decoration:line-through; margin-right:12px;">50 000 FCFA</span>
+            <span style="font-family:'Playfair Display',serif; font-size:clamp(32px,5vw,46px); font-weight:900; color:var(--cb-gold);">30 000 FCFA</span>
+        </div>
+
+        <div style="display:flex; flex-wrap:wrap; gap:10px; justify-content:center; margin-bottom:36px;">
+            <span style="font-size:13px; color:var(--cb-ink); background:rgba(176,134,46,.06); border:1px solid rgba(176,134,46,.15); border-radius:4px; padding:7px 14px;">✅ Cours Débutant</span>
+            <span style="font-size:13px; color:var(--cb-ink); background:rgba(176,134,46,.06); border:1px solid rgba(176,134,46,.15); border-radius:4px; padding:7px 14px;">✅ Cours Intermédiaire</span>
+            <span style="font-size:13px; color:var(--cb-ink); background:rgba(176,134,46,.06); border:1px solid rgba(176,134,46,.15); border-radius:4px; padding:7px 14px;">✅ Cours Pratique</span>
+            <span style="font-size:13px; color:var(--cb-forest); background:rgba(15,92,67,.06); border:1px solid rgba(15,92,67,.2); border-radius:4px; padding:7px 14px;">💬 Groupe WhatsApp Privé</span>
+        </div>
+
+        <a href="{{ route('pack.show') }}"
+           style="display:inline-flex; align-items:center; gap:10px;
+                  background:linear-gradient(135deg,var(--cb-gold),#7A5412);
+                  color:var(--cb-paper) !important; font-family:'Syne',sans-serif;
+                  font-weight:800; font-size:13px; letter-spacing:.07em; text-transform:uppercase;
+                  padding:15px 36px; border-radius:4px; text-decoration:none; transition:all .3s;"
+           onmouseover="this.style.boxShadow='0 10px 32px rgba(176,134,46,.35)';this.style.transform='translateY(-2px)'"
+           onmouseout="this.style.boxShadow='';this.style.transform=''">
+            Découvrir le Pack →
+        </a>
+
+    </div>
+</section>
+
+{{-- ══════════════════════════════════════
+     SERVICES — Financement + Formation présentielle
+══════════════════════════════════════ --}}
+<section class="cb-sec" style="background:var(--cb-paper);">
+    <div class="container" style="max-width:1100px;">
+        <div class="cbr">
+            <p class="cb-sec-tag">Services Boursiv</p>
+            <h2 class="cb-sec-title">Bien plus qu'une plateforme — <em>un accompagnement</em></h2>
+            <div class="cb-divider"></div>
+        </div>
+        <div class="row g-3 mt-2 cbr cbr2">
+
+            {{-- Financement --}}
+            <div class="col-md-6">
+                <div style="
+                    background:var(--cb-card); border:1px solid rgba(37,211,102,.2);
+                    border-radius:6px; padding:clamp(28px,4vw,40px); height:100%;
+                    display:flex; flex-direction:column; transition:border-color .3s;
+                " onmouseover="this.style.borderColor='rgba(37,211,102,.45)'" onmouseout="this.style.borderColor='rgba(37,211,102,.2)'">
+                    <div style="font-size:36px; margin-bottom:16px;">💰</div>
+                    <p style="font-family:'Syne',sans-serif;font-size:10px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:#1A9345;margin-bottom:10px;">Facilitation de financement</p>
+                    <h3 style="font-family:'Playfair Display',serif;font-size:clamp(18px,2.5vw,24px);font-weight:700;color:var(--cb-ink);line-height:1.25;margin-bottom:12px;">
+                        Besoin d'un prêt pour concrétiser votre projet ?
+                    </h3>
+                    <p style="font-size:14px;color:var(--cb-muted);line-height:1.75;margin-bottom:24px;flex-grow:1;">
+                        Boursiv joue le rôle de <strong style="color:var(--cb-ink);">facilitateur</strong> entre les particuliers
+                        et des structures financières agréées. Mise en relation gratuite, réponse sous 24h.
+                    </p>
+                    <a href="{{ route('financement') }}" style="
+                        display:inline-flex;align-items:center;gap:8px;
+                        background:transparent;color:#1A9345 !important;
+                        font-family:'Syne',sans-serif;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+                        padding:11px 22px;border-radius:4px;text-decoration:none;
+                        border:1px solid rgba(37,211,102,.4);transition:all .3s;align-self:flex-start;
+                    "
+                    onmouseover="this.style.background='rgba(37,211,102,.08)';this.style.borderColor='rgba(37,211,102,.7)'"
+                    onmouseout="this.style.background='transparent';this.style.borderColor='rgba(37,211,102,.4)'">
+                        En savoir plus →
+                    </a>
+                </div>
+            </div>
+
+            {{-- Formation présentielle --}}
+            <div class="col-md-6">
+                <div style="
+                    background:var(--cb-card); border:1px solid var(--cb-border);
+                    border-radius:6px; padding:clamp(28px,4vw,40px); height:100%;
+                    display:flex; flex-direction:column; transition:border-color .3s;
+                " onmouseover="this.style.borderColor='rgba(176,134,46,.35)'" onmouseout="this.style.borderColor='var(--cb-border)'">
+                    <div style="font-size:36px; margin-bottom:16px;">🎓</div>
+                    <p style="font-family:'Syne',sans-serif;font-size:10px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--cb-gold);margin-bottom:10px;">Formation en présentiel</p>
+                    <h3 style="font-family:'Playfair Display',serif;font-size:clamp(18px,2.5vw,24px);font-weight:700;color:var(--cb-ink);line-height:1.25;margin-bottom:12px;">
+                        Maîtrisez la bourse avec une formation en présentiel
+                    </h3>
+                    <p style="font-size:14px;color:var(--cb-muted);line-height:1.75;margin-bottom:24px;flex-grow:1;">
+                        Sessions animées par des experts, adaptées à tous les niveaux — du débutant à l'investisseur confirmé.
+                        <strong style="color:var(--cb-ink);">Attestation délivrée</strong> à l'issue.
+                    </p>
+                    <a href="{{ route('formation.presentielle') }}" style="
+                        display:inline-flex;align-items:center;gap:8px;
+                        background:linear-gradient(135deg,var(--cb-gold),#7A5412);
+                        color:var(--cb-paper) !important;font-family:'Syne',sans-serif;
+                        font-weight:800;font-size:12px;letter-spacing:.06em;text-transform:uppercase;
+                        padding:11px 22px;border-radius:4px;text-decoration:none;
+                        transition:all .3s;align-self:flex-start;
+                    "
+                    onmouseover="this.style.boxShadow='0 8px 24px rgba(176,134,46,.3)';this.style.transform='translateY(-2px)'"
+                    onmouseout="this.style.boxShadow='';this.style.transform=''">
+                        En savoir plus →
+                    </a>
+                </div>
             </div>
 
         </div>

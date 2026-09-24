@@ -134,6 +134,24 @@ class WelcomePageTest extends TestCase
         $this->assertGreaterThan(strpos($html, 'class="cb-hero"'), strpos($html, 'id="a-la-une"'));
     }
 
+    public function test_promo_sections_are_kept_but_moved_below_community_sections(): void
+    {
+        $this->get('/welcome')->assertOk()->assertSeeInOrder([
+            'id="a-la-une"',
+            'Annonces récentes',
+            'Comment ça marche ?',
+            'La communauté des',
+            "Tu es à l'étranger",
+            // Déplacées vers le bas (aucune supprimée)
+            route('comparateur.index'),
+            'Programme apporteur',
+            'Commence <em>gratuitement',
+            'Pack Bours',
+            'Services Boursiv',
+            'Passe à un autre niveau', // appel final
+        ], false);
+    }
+
     public function test_hero_hides_signup_for_logged_in_users(): void
     {
         $user = \App\Models\User::factory()->create();
