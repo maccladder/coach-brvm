@@ -479,6 +479,38 @@
     }
     .cb-une-vide a { color: var(--cb-forest); }
 
+    /* ── Nouvelle cotation (config/cotations.php) ── */
+    .cb-cotation-sec { padding: 0 0 clamp(20px,4vw,40px); background: var(--cb-card); }
+    .cb-cotation {
+        display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 14px 24px;
+        text-decoration: none; color: inherit;
+        background: linear-gradient(135deg, rgba(176,134,46,.08) 0%, var(--cb-paper) 70%);
+        border: 1px solid rgba(176,134,46,.3); border-radius: 4px; padding: 16px 20px; transition: all .3s;
+    }
+    .cb-cotation + .cb-cotation { margin-top: 10px; }
+    .cb-cotation:hover { border-color: var(--cb-gold); color: inherit; transform: translateY(-2px); }
+    .cb-cotation-id { display: flex; align-items: center; gap: 14px; min-width: 0; }
+    .cb-cotation-logo {
+        flex: 0 0 auto; width: 92px; height: 44px; background: #fff; border: 1px solid var(--cb-border);
+        border-radius: 4px; display: flex; align-items: center; justify-content: center; padding: 4px;
+    }
+    .cb-cotation-logo img { max-width: 100%; max-height: 100%; object-fit: contain; }
+    .cb-cotation-tag {
+        font-family: 'Syne', sans-serif; font-size: 10px; font-weight: 700;
+        letter-spacing: .1em; text-transform: uppercase; color: var(--cb-gold); margin-bottom: 3px;
+    }
+    .cb-cotation-nom { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700; color: var(--cb-ink); line-height: 1.3; }
+    .cb-cotation-nom span { color: var(--cb-muted); font-weight: 600; }
+    .cb-cotation-prix { font-family: 'Playfair Display', serif; font-size: 26px; font-weight: 900; color: var(--cb-ink); line-height: 1; }
+    .cb-cotation-var { font-family: 'Syne', sans-serif; font-size: 12px; font-weight: 700; margin-top: 4px; }
+    .cb-cotation-var.up { color: var(--cb-up); }
+    .cb-cotation-var.dn { color: var(--cb-down); }
+    .cb-cotation-source { font-size: 11px; color: var(--cb-muted); margin-top: 3px; }
+    .cb-cotation-lien {
+        font-family: 'Syne', sans-serif; font-size: 11px; font-weight: 700;
+        letter-spacing: .08em; text-transform: uppercase; color: var(--cb-forest);
+    }
+
     /* Social buttons */
     .cb-social-btn {
         display: inline-flex; align-items: center; gap: 7px;
@@ -822,6 +854,9 @@
 
 {{-- À LA UNE : actualités du Rédacteur en Chef (n8n), juste sous le hero --}}
 @include('partials.welcome.a-la-une')
+
+{{-- NOUVELLE COTATION : encart piloté par config/cotations.php --}}
+@include('partials.welcome.nouvelle-cotation')
 
 {{-- STATS --}}
 <div class="cb-stats">

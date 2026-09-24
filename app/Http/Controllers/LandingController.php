@@ -7,11 +7,12 @@ use App\Models\ClientBoc;
 use App\Models\DailyBoc;
 use App\Models\News;
 use App\Models\Societe;
+use App\Services\NouvellesCotations;
 use Carbon\Carbon;
 
 class LandingController extends Controller
 {
-    public function index()
+    public function index(NouvellesCotations $cotations)
     {
         $annonces = Announcement::published()
             ->orderByDesc('published_at')
@@ -40,11 +41,12 @@ class LandingController extends Controller
             ->first();
 
         return view('welcome', [
-            'annonces'        => $annonces,
-            'aLaUne'          => $aLaUne,
-            'latestPublicBoc' => $latestPublicBoc,
-            'exampleVideoUrl' => null,
-            'nbSocietes'      => Societe::listedCount(),
+            'annonces'           => $annonces,
+            'aLaUne'             => $aLaUne,
+            'latestPublicBoc'    => $latestPublicBoc,
+            'exampleVideoUrl'    => null,
+            'nbSocietes'         => Societe::listedCount(),
+            'nouvellesCotations' => $cotations->actives(),
         ]);
     }
 }
