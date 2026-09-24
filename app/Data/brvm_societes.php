@@ -39,6 +39,16 @@ Aujourd'hui, SERVAIR ABIDJAN combine savoir-faire historique et adaptation conti
         'dirigeants' => [],
     ],
 
+    'bridge-bank-ci' => [
+        'ticker' => 'BBGC',
+        'name' => "BRIDGE BANK GROUP CÔTE D'IVOIRE",
+        'logo' => 'img/logos/societes/bridge-bank.jpg',
+        'description' => '',
+        'telephone' => null,
+        'adresse' => null,
+        'dirigeants' => [],
+    ],
+
     'bernabe-ci' => [
         'ticker' => 'BNBC',
         'name' => "BERNABÉ CÔTE D'IVOIRE",
