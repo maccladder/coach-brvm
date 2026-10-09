@@ -513,17 +513,43 @@
     .cb-joue-icone { font-size: 24px; line-height: 1; margin-bottom: 10px; }
     .cb-joue-titre { font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 700; color: var(--cb-ink); margin-bottom: 6px; }
     .cb-joue-texte { font-size: 14px; color: var(--cb-muted); line-height: 1.6; margin-bottom: 10px; }
-    .cb-joue-liste { list-style: none; padding: 0; margin: 0 0 4px; }
-    .cb-joue-liste li {
-        display: flex; justify-content: space-between; align-items: baseline; gap: 12px;
-        padding: 7px 0; border-bottom: 1px dashed var(--cb-border); font-size: 14px;
+    /* Jeux ivoiriens : bande défilante au doigt sur mobile, grille de 4 sur desktop */
+    .cb-jeux { background: linear-gradient(135deg, rgba(176,134,46,.10) 0%, var(--cb-card) 55%); border-color: rgba(176,134,46,.3); }
+    .cb-jeux-accroche {
+        font-family: 'Playfair Display', serif; font-weight: 900;
+        font-size: clamp(20px, 2.4vw, 26px); line-height: 1.2; color: var(--cb-ink); margin-bottom: 6px;
     }
-    .cb-joue-liste li:last-child { border-bottom: none; }
-    .cb-joue-liste a { color: var(--cb-ink); text-decoration: none; font-weight: 500; }
-    .cb-joue-liste a:hover { color: var(--cb-gold); }
-    .cb-joue-liste span {
-        flex: 0 0 auto; font-family: 'Syne', sans-serif; font-size: 10px; font-weight: 700;
-        letter-spacing: .08em; text-transform: uppercase; color: var(--cb-forest);
+    .cb-jeux-bande {
+        /* 40 % : la 3e carte dépasse et invite à faire défiler */
+        display: grid; grid-auto-flow: column; grid-auto-columns: 40%; gap: 12px;
+        overflow-x: auto; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch;
+        padding-bottom: 6px; margin-bottom: 14px;
+    }
+    @media (min-width: 768px) {
+        .cb-jeux-bande { grid-auto-flow: row; grid-template-columns: repeat(4, 1fr); overflow: visible; }
+    }
+    .cb-jeu {
+        display: flex; flex-direction: column; scroll-snap-align: start;
+        text-decoration: none; color: inherit; background: var(--cb-card);
+        border: 1px solid var(--cb-border); border-radius: 4px; overflow: hidden; transition: all .3s;
+    }
+    .cb-jeu:hover { border-color: var(--cb-gold); transform: translateY(-3px); color: inherit; box-shadow: 0 10px 24px rgba(26,33,29,.08); }
+    .cb-jeu-img { display: block; aspect-ratio: 4 / 3; background: var(--cb-forest-dk); }
+    .cb-jeu-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .cb-jeu-sans-img { display: flex; align-items: center; justify-content: center; height: 100%; font-size: 34px; }
+    .cb-jeu-nom { font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700; color: var(--cb-ink); line-height: 1.3; padding: 9px 10px 2px; }
+    .cb-jeu-prix {
+        font-family: 'Syne', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: .08em;
+        text-transform: uppercase; color: var(--cb-forest); padding: 0 10px 10px; margin-top: auto;
+    }
+    .cb-jeux-cta { margin-top: 2px; white-space: nowrap; }
+    @media (max-width: 767.98px) {
+        .cb-jeux-cta { width: 100%; justify-content: center; letter-spacing: .02em; font-size: 12.5px; padding: 14px 16px; }
+    }
+    .cb-drapeau-ci {
+        display: inline-block; width: 1.1em; height: .75em; vertical-align: .02em; margin-right: 6px;
+        border-radius: 2px; box-shadow: 0 0 0 1px rgba(26,33,29,.12);
+        background: linear-gradient(90deg, #F77F00 0 33.33%, #FFFFFF 33.33% 66.66%, #009E60 66.66% 100%);
     }
 
     /* ── Nouvelle cotation (config/cotations.php) ── */

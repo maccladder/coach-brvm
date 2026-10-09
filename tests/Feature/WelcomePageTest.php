@@ -234,17 +234,50 @@ class WelcomePageTest extends TestCase
         $this->assertStringContainsString(route('jeux'), $bloc);
         $this->assertStringNotContainsString('Jeu en brouillon', $bloc);
         $this->assertStringNotContainsString('Pas un jeu', $bloc);
-        $this->assertStringNotContainsString('<img', $bloc); // pas de couvertures lourdes sur l'accueil
+        $this->assertStringContainsString('Sur Boursiv, on apprend aussi en jouant', $bloc);
+        $this->assertStringContainsString('Des jeux 100&nbsp;% ivoiriens :', $bloc);
+        $this->assertStringNotContainsString('<img', $bloc); // pas de vignette générée : pas d'image du tout
+    }
+
+    public function test_play_block_shows_light_thumbnails_never_original_covers(): void
+    {
+        \Illuminate\Support\Facades\Storage::fake('public');
+        $img = imagecreatetruecolor(1920, 1440);
+        ob_start(); imagepng($img); $png = ob_get_clean();
+        \Illuminate\Support\Facades\Storage::disk('public')->put('marketplace/covers/garba-master.png', $png);
+
+        $this->jeu('Garba Master', ['cover_image_path' => 'marketplace/covers/garba-master.png']); // vignette auto
+
+        $bloc = $this->blocJoue();
+
+        $this->assertMatchesRegularExpression('#<img src="[^"]*/storage/marketplace/covers/thumbs/garba-master-400\.(webp|jpg)"#', $bloc);
+        $this->assertStringNotContainsString('covers/garba-master.png', $bloc);
+        $this->assertStringContainsString('loading="lazy"', $bloc);
+        $this->assertStringContainsString('width="400" height="300"', $bloc);
+    }
+
+    public function test_game_names_are_shortened_in_cards_and_tagline(): void
+    {
+        $this->jeu("Abidjan Run 🏃🏿 - Le jeu RUN à l'ivoirienne");
+        $this->jeu('roi du cacao');
+
+        $bloc = $this->blocJoue();
+
+        $this->assertStringContainsString('Abidjan Run 🏃🏿', $bloc);
+        $this->assertStringNotContainsString('Le jeu RUN', $bloc);
+        $this->assertStringContainsString('Roi du cacao', $bloc);
     }
 
     public function test_play_block_shows_at_most_4_games_and_works_without_games(): void
     {
-        $this->assertStringContainsString("Des jeux pour apprendre la bourse", $this->blocJoue());
+        $this->assertStringContainsString('Des jeux 100&nbsp;% ivoiriens pour apprendre la bourse', $this->blocJoue());
 
         foreach (range(1, 6) as $i) {
             $this->jeu("Jeu $i");
         }
-        $this->assertSame(4, substr_count($this->blocJoue(), '<li>'));
+        $bloc = $this->blocJoue();
+        $this->assertSame(4, substr_count($bloc, 'class="cb-jeu"'));
+        $this->assertStringContainsString('…', $bloc); // d'autres jeux existent
     }
 
     public function test_simulator_bonus_shown_only_during_its_period(): void

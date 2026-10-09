@@ -53,7 +53,8 @@ class LandingController extends Controller
                 ->orderByDesc('is_featured')
                 ->latest()
                 ->limit(4)
-                ->get(['title', 'slug', 'price']),
+                ->get(['title', 'slug', 'price', 'cover_image_path']),
+            'nbJeux'             => MarketplaceProduct::published()->where('type', 'game')->count(),
             // Bonus simulateur affiché seulement pendant sa période (config/otp.php)
             'bonusSimulateur'    => now()->between(
                 Carbon::parse(config('otp.wallet_bonus_start')),
