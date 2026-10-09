@@ -2,8 +2,10 @@
 
 namespace App\Models;
 
+use App\Services\Marketplace\VignetteService;
 use App\Traits\HasAdminGrants;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Log;
 
 class MarketplaceProduct extends Model
 {
@@ -41,5 +43,25 @@ class MarketplaceProduct extends Model
     public function scopePublished($q)
     {
         return $q->where('status', 'published');
+    }
+
+    protected static function booted(): void
+    {
+        // Nouvelle couverture : générer sa miniature légère tout de suite
+        static::saved(function (MarketplaceProduct $p) {
+            if ($p->cover_image_path && ($p->wasRecentlyCreated || $p->wasChanged('cover_image_path'))) {
+                try {
+                    app(VignetteService::class)->generer($p->cover_image_path, true);
+                } catch (\Throwable $e) {
+                    Log::warning('Vignette non générée', ['product_id' => $p->id, 'msg' => $e->getMessage()]);
+                }
+            }
+        });
+    }
+
+    /** URL de la miniature 400×300 (null si absente : ne jamais servir l'original lourd). */
+    public function getVignetteUrlAttribute(): ?string
+    {
+        return app(VignetteService::class)->url($this->cover_image_path);
     }
 }
