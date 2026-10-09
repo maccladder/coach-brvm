@@ -23,7 +23,7 @@ return [
             'nom'               => "Bridge Bank Group Côte d'Ivoire",
             'prix_opv'          => 6750,
             'premiere_cotation' => '2026-09-24',
-            'fin_affichage'     => '2026-10-08',
+            'fin_affichage'     => '2026-10-23',
             'fiche'             => 'bridge-bank-ci',
             'logo'              => 'img/logos/societes/bridge-bank.png',
         ],

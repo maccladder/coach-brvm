@@ -93,10 +93,10 @@ class NouvelleCotationEncartTest extends TestCase
     {
         $this->releve(7255.0);
 
-        $this->travelTo('2026-10-08 23:59:00');
+        $this->travelTo('2026-10-23 23:59:00');
         $this->assertNotNull($this->encart(), 'Encart attendu le dernier jour');
 
-        $this->travelTo('2026-10-09 00:00:01');
+        $this->travelTo('2026-10-24 00:00:01');
         $this->assertNull($this->encart(), "L'encart doit disparaître après la date de fin");
     }
 
