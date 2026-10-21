@@ -793,6 +793,14 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/jeux/gri-gri/classement', [\App\Http\Controllers\GriGriScoreController::class, 'leaderboard'])
         ->name('grigri.leaderboard');
 
+    // Progression du Prince de Yop (relayée par la page parente via postMessage, cf. prince-de-yop-play.blade.php)
+    Route::get('/jeux/prince-de-yop/progression', [\App\Http\Controllers\PrinceDeYopProgressController::class, 'show'])
+        ->middleware('throttle:60,1')
+        ->name('prince-yop.progress.show');
+    Route::post('/jeux/prince-de-yop/progression', [\App\Http\Controllers\PrinceDeYopProgressController::class, 'store'])
+        ->middleware('throttle:60,1')
+        ->name('prince-yop.progress.store');
+
 });
 
 

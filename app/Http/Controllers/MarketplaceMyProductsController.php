@@ -170,6 +170,12 @@ class MarketplaceMyProductsController extends Controller
             return view('gri-gri-play', compact('product', 'isPremiumUnlocked'));
         }
 
+        // Le Prince de Yop : progression sauvegardée côté serveur (PRINCE_YOP_* via postMessage),
+        // pas de classement ni de toast de score → vue wrapper dédiée.
+        if ($product->slug === 'le-prince-de-yop') {
+            return view('prince-de-yop-play', compact('product'));
+        }
+
         $isPremiumUnlocked = GamePremiumUnlock::where('user_id', $user->id)
             ->where('product_id', $product->id)
             ->where('feature', 'premium_chars')
