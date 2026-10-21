@@ -6,7 +6,12 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    {{-- Raccourci « Sur l'écran d'accueil » (iPhone) : ouvre le jeu sans les barres de Safari --}}
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Prince de Yop">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>🎮 {{ $product->title }} — Boursiv</title>
     <style>
@@ -61,6 +66,40 @@
             #game-frame { top: 36px; height: calc(100% - 36px); }
             #bar-toggle.up { top: 36px; }
         }
+
+        /* ── Mobile paysage et pseudo plein écran (iPhone) : le jeu occupe tout l'écran ──
+           Le jeu gère lui-même sa mise en page paysage à l'intérieur de l'iframe. */
+        @media (pointer: coarse) and (orientation: landscape) {
+            #game-bar, #bar-toggle, #saving-indicator { display: none !important; }
+            #game-frame { position: fixed; inset: 0; width: 100vw; height: 100vh; height: 100dvh; border: 0; z-index: 1000; }
+        }
+        body.pseudo-fs #game-bar, body.pseudo-fs #bar-toggle, body.pseudo-fs #saving-indicator { display: none !important; }
+        body.pseudo-fs #game-frame { position: fixed; inset: 0; width: 100vw; height: 100vh; height: 100dvh; border: 0; z-index: 1000; }
+
+        #fs-exit {
+            display: none; position: fixed; z-index: 1001;
+            top: max(6px, env(safe-area-inset-top, 0px)); left: 50%; transform: translateX(-50%);
+            width: 32px; height: 32px; border-radius: 50%;
+            background: rgba(7,8,15,.7); color: #E8EAF0; border: 1px solid rgba(255,255,255,.25);
+            font-size: 15px; line-height: 1; cursor: pointer;
+        }
+        body.pseudo-fs #fs-exit { display: block; }
+        /* Portrait : en haut à droite, à côté du logo du jeu (en paysage, le haut-centre est libre) */
+        @media (orientation: portrait) {
+            #fs-exit { left: auto; right: max(8px, env(safe-area-inset-right, 0px)); transform: none; }
+        }
+
+        #ios-tip {
+            display: none; position: fixed; z-index: 1002;
+            left: 50%; transform: translateX(-50%);
+            bottom: max(12px, env(safe-area-inset-bottom, 0px));
+            width: min(92vw, 420px); padding: 10px 36px 10px 14px; border-radius: 8px;
+            background: rgba(7,8,15,.94); border: 1px solid rgba(240,138,36,.4);
+            color: #E8EAF0; font-size: 12px; line-height: 1.45;
+        }
+        #ios-tip.show { display: block; }
+        #ios-tip b { color: #F08A24; }
+        #ios-tip button { position: absolute; top: 6px; right: 8px; background: none; border: 0; color: #6B7590; font-size: 16px; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -96,6 +135,15 @@
         title="Jeu : {{ $product->title }}"
     ></iframe>
 
+    {{-- Sortie du pseudo plein écran (iPhone : pas d'API Fullscreen sur une iframe) --}}
+    <button id="fs-exit" type="button" aria-label="Quitter le plein écran">✕</button>
+
+    <div id="ios-tip" role="status">
+        Astuce : pour jouer sans les barres de Safari, touche <b>Partager</b> puis
+        <b>« Sur l'écran d'accueil »</b> et lance le jeu depuis l'icône Boursiv.
+        <button type="button" id="ios-tip-close" aria-label="Fermer">✕</button>
+    </div>
+
     <script>
     (function () {
         const PROGRESS_URL = '{{ route('prince-yop.progress.show') }}';
@@ -121,10 +169,32 @@
         document.addEventListener('keydown', e => { if (e.key === 'Escape' && !barVisible) toggleBar(); });
 
         // ── Plein écran ───────────────────────────────────────
+        // Android / ordinateur : API Fullscreen. iPhone (Safari n'a pas cette API pour une iframe) :
+        // pseudo plein écran en CSS, avec un bouton ✕ pour en sortir.
+        const fsExit  = document.getElementById('fs-exit');
+        const iosTip  = document.getElementById('ios-tip');
+        const isIOS   = /iPhone|iPad|iPod/.test(navigator.userAgent)
+            || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+        const isStandalone = window.navigator.standalone === true
+            || window.matchMedia('(display-mode: standalone)').matches;
+
+        function setPseudoFullscreen(on) {
+            document.body.classList.toggle('pseudo-fs', on);
+            if (on && isIOS && !isStandalone) iosTip.classList.add('show');
+            if (!on) iosTip.classList.remove('show');
+        }
+
         btnFs.addEventListener('click', () => {
-            const req = frame.requestFullscreen || frame.webkitRequestFullscreen || frame.mozRequestFullScreen || frame.msRequestFullscreen;
-            if (req) req.call(frame);
+            const req = frame.requestFullscreen || frame.webkitRequestFullscreen;
+            if (req) {
+                const p = req.call(frame);
+                if (p && p.catch) p.catch(() => setPseudoFullscreen(true));
+            } else {
+                setPseudoFullscreen(true);
+            }
         });
+        fsExit.addEventListener('click', () => setPseudoFullscreen(false));
+        document.getElementById('ios-tip-close').addEventListener('click', () => iosTip.classList.remove('show'));
 
         // ── Progression : le serveur fait foi ─────────────────
         // L'état serveur est toujours renvoyé au jeu, même au niveau 0 : il écrase le

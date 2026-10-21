@@ -1,4 +1,6 @@
 <!DOCTYPE html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Le Prince de Yop</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <style>
@@ -60,6 +62,44 @@ canvas{display:block;width:100%;height:auto;max-width:100%}
 .help{color:var(--muted);font-size:14px;margin:0}
 kbd{font-family:var(--body);background:var(--panel);border:1px solid #2a2f55;border-radius:4px;padding:0 5px;color:var(--ink)}
 @media (max-width:420px){.dpad{grid-template-columns:repeat(3,52px);grid-template-rows:repeat(2,50px)}.acts .hit{width:84px;height:84px}.acts .hint{display:none}}
+
+/* ===== MOBILE (écrans tactiles) ===== */
+.rotate{display:none}
+@media (pointer:coarse){
+  html,body{touch-action:manipulation;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;overscroll-behavior:none}
+  .help,.acts .hint{display:none}
+  .pad{gap:8px}
+  .dpad{grid-template-columns:repeat(3,min(14vw,60px));grid-template-rows:repeat(2,min(13vw,56px));gap:min(1.6vw,6px)}
+  .acts{gap:min(2.6vw,12px)}
+  .acts .hit{width:min(22vw,100px);height:min(22vw,100px);font-size:min(3.8vw,17px)}
+  .acts .run{width:min(16vw,74px);height:min(16vw,74px);font-size:min(3.2vw,15px)}
+  .rotate{display:block;text-align:center;color:var(--gold);font-size:14px;margin:0}
+}
+@media (pointer:coarse) and (orientation:landscape){
+  body{padding:0;overflow:hidden;height:100%}
+  .wrap{max-width:none;padding:0;gap:0;height:100%;justify-content:center}
+  .rotate{display:none}
+  .bar{position:fixed;top:max(6px,env(safe-area-inset-top,0px));right:max(8px,env(safe-area-inset-right,0px));z-index:20;flex-wrap:nowrap}
+  .bar .logo,.bar .lvl{display:none}
+  .tbtn{font-size:11px;padding:4px 8px;opacity:.85}
+  .screen{position:fixed;inset:0;margin:auto;width:min(100vw,calc(100vh * 960 / 609));height:min(100vh,calc(100vw * 609 / 960));border:0;border-radius:0}
+  .screen canvas{width:100%;height:100%}
+  .msg{position:fixed;top:max(6px,env(safe-area-inset-top,0px));left:max(8px,env(safe-area-inset-left,0px));max-width:46vw;min-height:0;font-size:11px;line-height:1.35;padding:5px 9px;background:rgba(17,20,43,.85);z-index:15;pointer-events:none}
+  .pad{position:fixed;left:0;right:0;bottom:max(8px,env(safe-area-inset-bottom,0px));padding:0 max(12px,env(safe-area-inset-right,0px)) 0 max(12px,env(safe-area-inset-left,0px));justify-content:space-between;align-items:flex-end;pointer-events:none;z-index:10}
+  .pad button{pointer-events:auto;background:rgba(26,30,61,.38);border-color:rgba(255,255,255,.25)}
+  .dpad{grid-template-columns:repeat(3,min(9vw,62px));grid-template-rows:repeat(2,min(9vw,58px))}
+  .acts .hit{width:min(13vw,92px);height:min(13vw,92px);background:rgba(192,21,79,.65)}
+  .acts .run{width:min(10vw,70px);height:min(10vw,70px);background:rgba(42,42,20,.55)}
+}
+
+@media (pointer:coarse) and (orientation:portrait){
+  .ov{gap:6px;padding:8px 10px;justify-content:center}
+  .ov h1{font-size:15px}
+  .ov p{font-size:11.5px;line-height:1.4}
+  .ov .small{display:none}
+  .ov button{font-size:10px;padding:8px 12px}
+  .ov .donate{padding:8px 10px}.ov .donate a{font-size:9px;padding:8px 10px;margin-top:4px}
+}
 </style>
 
 <div class="wrap">
@@ -102,6 +142,7 @@ kbd{font-family:var(--body);background:var(--panel);border:1px solid #2a2f55;bor
     </div>
   </div>
 
+  <p class="rotate">📱 Tourne ton téléphone à l'horizontale pour jouer en plein écran</p>
   <div class="msg" id="msg" role="status">Appuie sur Jouer.</div>
 
   <div class="pad" aria-label="Manette">
