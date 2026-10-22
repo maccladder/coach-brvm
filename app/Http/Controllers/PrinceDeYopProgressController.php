@@ -20,6 +20,8 @@ use Illuminate\Support\Facades\Validator;
  * - game_complete : seulement depuis le dernier niveau ; remet la reprise à 0 mais garde
  *   "completed" pour les stats.
  * - level_complete : stats seulement, pour un niveau déjà franchi.
+ * - tips : tutoriels déjà vus, liste blanche stricte, fusion par union (jamais effacés),
+ *   indépendant des règles de niveau et conservé après game_complete.
  */
 class PrinceDeYopProgressController extends Controller
 {
@@ -29,6 +31,13 @@ class PrinceDeYopProgressController extends Controller
     private const MAX_BONUS = 6;
     private const MAX_LEVEL_TIME = 300; // LVL_TIME du jeu, en secondes
     private const MAX_DEATHS = 1000;
+    private const MAX_TIPS = 20;
+
+    // Clés des tutoriels du jeu (objet TIPS de resources/games/prince-de-yop.html)
+    private const TIP_KEYS = [
+        'climb', 'jump', 'fight', 'boss', 'combo', 'heavy', 'bissap',
+        'garba', 'marche', 'car', 'elec', 'dog', 'dark', 'torch',
+    ];
 
     private const DEFAULTS = [
         'level'              => 0,
@@ -39,6 +48,7 @@ class PrinceDeYopProgressController extends Controller
         'first_completed_at' => null,
         'best_times'         => [], // index du niveau => meilleur temps (s)
         'total_deaths'       => 0,
+        'tips'               => [], // tutoriels déjà vus
     ];
 
     private function resolveProduct(): ?MarketplaceProduct
@@ -68,6 +78,7 @@ class PrinceDeYopProgressController extends Controller
             'best_level'  => (int) $data['best_level'],
             'completed'   => (bool) $data['completed'],
             'completions' => (int) $data['completions'],
+            'tips'        => array_values($data['tips']),
         ];
     }
 
@@ -96,7 +107,7 @@ class PrinceDeYopProgressController extends Controller
 
     /**
      * POST /jeux/prince-de-yop/progression
-     * Corps : {type: progress|level_complete|game_complete, ...}
+     * Corps : {type: progress|level_complete|game_complete|tips, ...}
      */
     public function store(Request $request)
     {
@@ -123,6 +134,9 @@ class PrinceDeYopProgressController extends Controller
             ],
             'game_complete' => [
                 'deaths' => ['required', 'integer', 'min:0', 'max:' . self::MAX_DEATHS],
+            ],
+            'tips' => [
+                'tips' => ['present', 'array', 'max:' . self::MAX_TIPS],
             ],
             default => null,
         };
@@ -152,7 +166,20 @@ class PrinceDeYopProgressController extends Controller
 
             $data = array_merge(self::DEFAULTS, $progress->data ?? []);
 
-            if ($type === 'progress') {
+            if ($type === 'tips') {
+                // Seules les clés connues sont gardées ; le reste est ignoré sans erreur.
+                $seen = array_values(array_filter(
+                    $input['tips'],
+                    fn ($k) => is_string($k) && in_array($k, self::TIP_KEYS, true)
+                ));
+                $merged = array_values(array_unique(array_merge($data['tips'], $seen)));
+
+                if ($merged === array_values($data['tips'])) {
+                    return response()->json($this->payload($data, false));
+                }
+
+                $data['tips'] = $merged;
+            } elseif ($type === 'progress') {
                 $level = (int) $input['level'];
 
                 // Partie rejouée depuis le début : on garde la meilleure progression.

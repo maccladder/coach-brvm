@@ -162,6 +162,78 @@ class PrinceDeYopProgressTest extends TestCase
         $this->assertNotNull($data['first_completed_at']);
     }
 
+    private function tips(User $user, $tips)
+    {
+        return $this->actingAs($user)->postJson(self::URL, ['type' => 'tips', 'tips' => $tips]);
+    }
+
+    public function test_tips_keep_only_whitelisted_keys(): void
+    {
+        $product = $this->makeProduct();
+        $user = $this->buyer($product);
+
+        $this->tips($user, ['climb', 'hack', '<script>', 42, null, ['jump'], 'jump', 'climb'])
+            ->assertOk()
+            ->assertJson(['saved' => true, 'tips' => ['climb', 'jump']]);
+
+        $this->actingAs($user)->getJson(self::URL)->assertJson(['tips' => ['climb', 'jump']]);
+    }
+
+    public function test_tips_are_merged_by_union_and_never_erased(): void
+    {
+        $product = $this->makeProduct();
+        $user = $this->buyer($product);
+
+        $this->tips($user, ['climb', 'jump'])->assertOk();
+        $this->tips($user, ['fight', 'climb'])->assertOk()->assertJson(['tips' => ['climb', 'jump', 'fight']]);
+
+        // Liste plus courte ou vide : rien n'est effacé.
+        $this->tips($user, ['boss'])->assertOk()->assertJson(['tips' => ['climb', 'jump', 'fight', 'boss']]);
+        $this->tips($user, [])->assertOk()->assertJson(['saved' => false, 'tips' => ['climb', 'jump', 'fight', 'boss']]);
+        $this->tips($user, ['hack'])->assertOk()->assertJson(['saved' => false]);
+    }
+
+    public function test_tips_input_is_bounded(): void
+    {
+        $product = $this->makeProduct();
+        $user = $this->buyer($product);
+
+        $this->tips($user, array_fill(0, 21, 'climb'))->assertStatus(422);
+        $this->tips($user, 'climb')->assertStatus(422);
+        $this->actingAs($user)->postJson(self::URL, ['type' => 'tips'])->assertStatus(422);
+    }
+
+    public function test_tips_are_independent_of_level_rules(): void
+    {
+        $product = $this->makeProduct();
+        $user = $this->buyer($product);
+        $this->advanceTo($user, 2);
+
+        // Progression inchangée (pas d'avancée de niveau) : les tutoriels sont quand même enregistrés.
+        $this->tips($user, ['car'])->assertOk()->assertJson(['saved' => true, 'level' => 2, 'tips' => ['car']]);
+        $this->progress($user, 1)->assertOk()->assertJson(['saved' => false, 'tips' => ['car']]);
+    }
+
+    public function test_game_complete_keeps_tips(): void
+    {
+        $product = $this->makeProduct();
+        $user = $this->buyer($product);
+        $this->tips($user, ['climb', 'boss']);
+        $this->advanceTo($user, 5);
+
+        $this->actingAs($user)->postJson(self::URL, ['type' => 'game_complete', 'deaths' => 0])
+            ->assertOk()
+            ->assertJson(['level' => 0, 'completed' => true, 'tips' => ['climb', 'boss']]);
+    }
+
+    public function test_requires_purchase_for_tips(): void
+    {
+        $this->makeProduct();
+        $user = User::factory()->create();
+
+        $this->tips($user, ['climb'])->assertStatus(403);
+    }
+
     public function test_level_complete_records_best_time_for_reached_levels_only(): void
     {
         $product = $this->makeProduct();

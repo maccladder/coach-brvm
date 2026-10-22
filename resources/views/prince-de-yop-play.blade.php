@@ -214,6 +214,7 @@
                 type: 'PRINCE_YOP_PROGRESS_LOAD',
                 level: state.level,
                 bonus: state.bonus,
+                tips: Array.isArray(state.tips) ? state.tips : [],
             }, window.location.origin);
         }
 
@@ -264,6 +265,9 @@
                     break;
                 case 'PRINCE_YOP_GAME_COMPLETE':
                     save({ type: 'game_complete', deaths: data.deaths });
+                    break;
+                case 'PRINCE_YOP_TIPS':
+                    if (Array.isArray(data.tips)) save({ type: 'tips', tips: data.tips });
                     break;
             }
         });
