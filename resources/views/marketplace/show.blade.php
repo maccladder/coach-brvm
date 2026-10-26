@@ -92,7 +92,25 @@
         margin-top: 28px;
     }
     @media(max-width:900px) {
-        .mp-show-grid { grid-template-columns: 1fr; }
+        /* minmax(0,1fr) : un mot long (URL dans la description…) ne peut plus
+           élargir la colonne unique au-delà de l'écran */
+        .mp-show-grid { grid-template-columns: minmax(0, 1fr); }
+    }
+    .mp-show-grid > * { min-width: 0; }
+    .mp-desc, .mp-product-title, .mp-product-ref, .mp-asset-name, .mp-breadcrumb .current { overflow-wrap: anywhere; }
+
+    /* Petits écrans : boutons de paiement / contact toujours dans l'écran */
+    @media (max-width: 576px) {
+        .mp-cover-footer .cb-btn-pay,
+        .mp-cover-footer .cb-btn-outline,
+        .mp-cover-footer .cb-btn-gold,
+        .mp-cover-footer .cb-btn-success {
+            width: 100%; max-width: 100%; box-sizing: border-box;
+            white-space: normal; text-align: center; flex-wrap: wrap;
+            letter-spacing: .03em; font-size: 12.5px; padding-left: 14px; padding-right: 14px;
+        }
+        .mp-cover-footer .cb-btn-pay { font-size: 13.5px; }
+        .mp-price-big { font-size: 30px; overflow-wrap: anywhere; }
     }
 
     /* Cover card */
@@ -631,6 +649,14 @@
 
 @push('scripts')
 <script>
+// Retour arrière (cache de page iOS) : Safari peut redonner le focus au champ
+// "Code apporteur" et rouvrir le clavier → on le retire, le clavier ne s'ouvre
+// que si l'utilisateur touche le champ.
+window.addEventListener('pageshow', function (e) {
+    var el = document.activeElement;
+    if (e.persisted && el && el.matches('input, select, textarea')) el.blur();
+});
+
 document.addEventListener('DOMContentLoaded', function () {
     // Scroll reveal
     const cbEls = document.querySelectorAll('.cbr');

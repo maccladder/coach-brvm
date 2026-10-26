@@ -261,6 +261,12 @@
             html.cb-nav-open body { overflow: hidden; }
             html.cb-nav-open .cb-wa-float { display: none; }
         }
+        /* iOS zoome sur tout champ < 16px qui reçoit le focus (et le zoom reste) :
+           16px minimum sur mobile, y compris face aux tailles en ligne. Le zoom
+           manuel reste autorisé (pas de maximum-scale / user-scalable=no). */
+        @media (max-width: 768px) {
+            input, select, textarea { font-size: 16px !important; }
+        }
         @media (max-width:576px) {
             .cb-notif-menu { width:calc(100vw - 24px) !important; max-width:calc(100vw - 24px) !important; }
             .market-badge-owned { font-size:.75rem; }

@@ -378,6 +378,12 @@
     const RING        = 364.4;
 
     const $ = (id) => document.getElementById(id);
+
+    // Retour arrière (cache de page iOS) : pas de champ refocalisé, donc pas de clavier
+    window.addEventListener('pageshow', (e) => {
+        const el = document.activeElement;
+        if (e.persisted && el && el.matches('input, select, textarea')) el.blur();
+    });
     const screens = ['screen-pay', 'screen-wait', 'screen-success', 'screen-fail'];
 
     let operator = null, operatorLabel = '', reference = null;
@@ -491,7 +497,8 @@
 
         const otpWasHidden = $('otp-form').hidden;
         $('otp-form').hidden = !d.needs_otp;
-        if (d.needs_otp && otpWasHidden) { $('otp').focus(); announce('Saisis le code reçu par SMS.'); }
+        // Pas de focus automatique sur le champ : le clavier ne s'ouvre que si l'utilisateur le touche
+        if (d.needs_otp && otpWasHidden) announce('Saisis le code reçu par SMS dans le champ ci-dessous.');
         if (d.needs_otp && d.message) $('otp-error').textContent = d.message;
     }
 
