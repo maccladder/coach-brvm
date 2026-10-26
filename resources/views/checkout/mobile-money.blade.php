@@ -173,6 +173,13 @@
         .dark .error { color: #fdba74; }
         .dark .linklike { color: #c9d3e6; }
 
+        /* L'attribut hidden l'emporte toujours (sinon .btn / img en display:flex/block restent visibles) */
+        [hidden] { display: none !important; }
+        .raw { font-size: 12px; color: #9fb0cc; margin: 8px 0 0; font-style: italic; }
+        .otp-icon { font-size: 44px; margin-top: 18px; }
+        .otp-box input { min-height: 60px; font-size: 26px; }
+        .sim-banner { background: #fff3cd; color: #664d03; border: 1px solid #ffe69c; border-radius: 10px; padding: 8px 12px; font-size: 13px; font-weight: 600; margin-bottom: 12px; text-align: center; }
+
         /* Succès / échec */
         .result { text-align: center; padding-top: 18px; }
         .result h2 { font-size: 24px; margin: 14px 0 4px; }
@@ -210,6 +217,9 @@
 <main>
     {{-- ═══ Écran 1 : paiement ═══ --}}
     <section class="screen" id="screen-pay" aria-labelledby="pay-title">
+        @if($simulating)
+            <div class="sim-banner" role="status">Mode simulation : aucun appel à Paystack (numéros de test …0001 à …0005)</div>
+        @endif
         <div class="card">
             <div class="thumb" aria-hidden="true">
                 @if($payable->image)
@@ -279,7 +289,28 @@
         </div>
     </section>
 
-    {{-- ═══ Écran 2 : attente ═══ --}}
+    {{-- ═══ Écran 2a : code de paiement (send_otp, ex. Orange Money) — pas de compte à rebours ═══ --}}
+    <section class="screen dark" id="screen-otp" aria-labelledby="otp-title" hidden>
+        <div class="otp-icon" aria-hidden="true">🔐</div>
+        <h2 id="otp-title" tabindex="-1">Saisis ton code de paiement</h2>
+        <p class="sub" id="otp-help"></p>
+
+        <form class="otp-box" id="otp-form" novalidate>
+            <label for="otp">Code de paiement</label>
+            <input id="otp" name="otp" type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="one-time-code"
+                   maxlength="8" aria-describedby="otp-error otp-raw">
+            <p class="error" id="otp-error" role="alert"></p>
+            <button type="submit" class="btn btn-gold" id="otp-btn" style="margin-top:12px;">Valider le paiement</button>
+        </form>
+        <p class="raw" id="otp-raw" hidden></p>
+
+        <div class="footer-links">
+            <p><button type="button" class="linklike" data-change>Changer de numéro ou d'opérateur</button></p>
+            <p><a class="wa-link" href="{{ $whatsapp }}" target="_blank" rel="noopener" style="color:#7ee2a8;">Un souci ? Écris-nous sur WhatsApp</a></p>
+        </div>
+    </section>
+
+    {{-- ═══ Écran 2b : attente de validation ═══ --}}
     <section class="screen dark" id="screen-wait" aria-labelledby="wait-title" hidden>
         <div class="timer" role="timer" aria-label="Temps restant pour valider">
             <svg width="132" height="132" viewBox="0 0 132 132" aria-hidden="true">
@@ -299,21 +330,16 @@
             <li><span class="n" aria-hidden="true">3</span><span>Confirme avec ton code secret. Cette page se met à jour toute seule.</span></li>
         </ol>
 
+        {{-- Rempli seulement avec ce que Paystack renvoie réellement (texte, lien valide, image valide) --}}
         <div class="instructions" id="instructions" hidden>
-            <p id="display-text" style="margin:0;"></p>
-            <a id="action-url" class="btn btn-gold" href="#" target="_blank" rel="noopener" style="margin-top:12px;" hidden>Ouvrir l'application</a>
+            <p id="display-text" style="margin:0;" hidden></p>
+            <p class="raw" id="display-raw" hidden></p>
+            <a id="action-url" class="btn btn-gold" href="#" target="_blank" rel="noopener" style="margin-top:12px;" hidden></a>
             <img id="qr" alt="QR code à scanner avec ton application" hidden>
         </div>
 
-        <form class="otp-box" id="otp-form" hidden novalidate>
-            <label for="otp">Code reçu par SMS</label>
-            <input id="otp" name="otp" inputmode="numeric" autocomplete="one-time-code" maxlength="8" aria-describedby="otp-error">
-            <p class="error" id="otp-error" role="alert"></p>
-            <button type="submit" class="btn btn-gold" style="margin-top:10px;">Valider le code</button>
-        </form>
-
         <div class="footer-links">
-            <p><button type="button" class="linklike" id="change-btn">Changer de numéro ou d'opérateur</button></p>
+            <p><button type="button" class="linklike" data-change>Changer de numéro ou d'opérateur</button></p>
             <p><a class="wa-link" href="{{ $whatsapp }}" target="_blank" rel="noopener" style="color:#7ee2a8;">Un souci ? Écris-nous sur WhatsApp</a></p>
         </div>
     </section>
@@ -340,22 +366,23 @@
         <a class="btn btn-gold" id="success-btn" href="{{ $payable->successUrl }}">{{ $payable->successLabel }}</a>
     </section>
 
-    {{-- ═══ Écran 4 : échec / expiration ═══ --}}
+    {{-- ═══ Écran 4 : échec / expiration / paiement non démarré ═══ --}}
     <section class="screen result" id="screen-fail" aria-labelledby="fail-title" hidden>
         <div class="badge-icon ko" aria-hidden="true">
             <svg width="44" height="44" viewBox="0 0 24 24" fill="none"><path d="M12 8v5" stroke="currentColor" stroke-width="3" stroke-linecap="round"/><circle cx="12" cy="17" r="1.6" fill="currentColor"/><path d="M10.3 3.9L2.6 17.5A2 2 0 004.3 20.5h15.4a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z" stroke="currentColor" stroke-width="2"/></svg>
         </div>
         <h2 id="fail-title" tabindex="-1">Le paiement n'est pas passé</h2>
+        {{-- Uniquement si Paystack confirme failed/abandoned sur une transaction réellement traitée --}}
         <p class="reassure" id="fail-not-debited" hidden>Tu n'as pas été débité.</p>
         <p class="pending-note" id="fail-pending" hidden>Si tu as validé sur ton téléphone, ton achat s'activera automatiquement dès que l'opérateur confirme.</p>
         <p class="pending-note" id="fail-message" hidden></p>
 
-        <div class="causes">
+        <div class="causes" id="fail-causes">
             <h3>Causes fréquentes</h3>
             <ul>
                 <li>Demande non confirmée dans les 3 minutes</li>
                 <li>Solde insuffisant sur ton compte Mobile Money</li>
-                <li>Code secret ou code SMS erroné</li>
+                <li>Code secret ou code de paiement erroné</li>
             </ul>
         </div>
 
@@ -375,6 +402,7 @@
     const PARAMS      = @json((object) $payable->params);
     const WINDOW      = {{ (int) $window }};
     const POLL_MS     = 4000;
+    const OTP_POLL_MS = 6000;
     const RING        = 364.4;
 
     const $ = (id) => document.getElementById(id);
@@ -384,15 +412,16 @@
         const el = document.activeElement;
         if (e.persisted && el && el.matches('input, select, textarea')) el.blur();
     });
-    const screens = ['screen-pay', 'screen-wait', 'screen-success', 'screen-fail'];
+    const screens = ['screen-pay', 'screen-otp', 'screen-wait', 'screen-success', 'screen-fail'];
 
     let operator = null, operatorLabel = '', reference = null;
     let pollTimer = null, countdownTimer = null, deadline = 0, lateChecks = 0;
 
     function show(id, focusId) {
         screens.forEach(s => { $(s).hidden = s !== id; });
-        document.body.classList.toggle('is-dark', id === 'screen-wait');
+        document.body.classList.toggle('is-dark', id === 'screen-wait' || id === 'screen-otp');
         window.scrollTo(0, 0);
+        // Focus sur un titre (jamais sur un champ : pas de clavier automatique)
         if (focusId) $(focusId).focus();
     }
 
@@ -400,6 +429,11 @@
 
     function formatPhone(digits) {
         return digits.replace(/(\d{2})(?=\d)/g, '$1 ').trim();
+    }
+
+    function setText(id, text) {
+        $(id).textContent = text || '';
+        $(id).hidden = !text;
     }
 
     // ── Écran 1 ──────────────────────────────────────────────
@@ -453,7 +487,7 @@
             if (res.status === 429) { $('pay-error').textContent = 'Trop de tentatives. Patiente une minute puis réessaie.'; return; }
             if (!res.ok) { $('pay-error').textContent = 'Le paiement n\'a pas pu démarrer. Réessaie dans un instant.'; return; }
 
-            handle(data, true);
+            handle(data);
         } catch (err) {
             $('pay-error').textContent = 'Problème de connexion. Vérifie ton réseau et réessaie.';
         } finally {
@@ -467,14 +501,37 @@
     }
 
     // ── États renvoyés par le serveur ────────────────────────
-    function handle(d, fromPay) {
+    function handle(d) {
         reference = d.reference;
 
         if (d.status === 'success') return showSuccess(d);
         if (d.status === 'failed' || d.status === 'expired') return showFail(d);
+        if (d.status === 'send_otp') return showOtp(d);
+        showWait(d);
+    }
 
-        // En attente de validation (pending / send_otp)
-        if (fromPay || $('screen-wait').hidden) {
+    function showOtp(d) {
+        if ($('screen-otp').hidden) {
+            stopTimers();
+            $('otp-title').textContent = 'Saisis ton code de paiement ' + d.operator_label;
+            $('otp-help').textContent = d.otp_help;
+            $('otp').value = '';
+            show('screen-otp', 'otp-title');
+            announce('Saisis ton code de paiement ' + d.operator_label + '.');
+        }
+        setText('otp-error', d.message);
+        setText('otp-raw', d.display_text_raw);
+
+        // Pas de compte à rebours ici ; vérification discrète au cas où le paiement passe autrement
+        clearTimeout(pollTimer);
+        pollTimer = setTimeout(async () => {
+            const s = await fetchStatus();
+            if (s && !$('screen-otp').hidden) handle(s);
+        }, OTP_POLL_MS);
+    }
+
+    function showWait(d) {
+        if ($('screen-wait').hidden) {
             show('screen-wait', 'wait-title');
             startCountdown(d.seconds_left);
             startPolling();
@@ -484,22 +541,14 @@
             + d.operator_label + ' ' + formatPhone(d.phone) + '.';
         $('step-2').textContent = 'Ouvre la notification ou l\'application ' + d.operator_label + '.';
 
-        const hasInfo = !!(d.display_text || d.action_url || d.qr_code);
-        $('instructions').hidden = !hasInfo;
-        $('display-text').textContent = d.display_text || '';
+        // Texte traduit si connu, sinon l'original en petit ; lien et image seulement s'ils sont valides
+        setText('display-text', d.display_text);
+        setText('display-raw', d.display_text_raw);
         $('action-url').hidden = !d.action_url;
         if (d.action_url) { $('action-url').href = d.action_url; $('action-url').textContent = 'Ouvrir ' + d.operator_label; }
-        // QR : seulement une image (URL ou data:image) ; un contenu brut n'est pas envoyé à un service tiers
-        const qrIsImage = !!d.qr_code && /^(https?:|data:image)/.test(d.qr_code);
-        $('qr').hidden = !qrIsImage;
-        if (qrIsImage) $('qr').src = d.qr_code;
-        else if (d.qr_code && !d.display_text) $('display-text').textContent = d.qr_code;
-
-        const otpWasHidden = $('otp-form').hidden;
-        $('otp-form').hidden = !d.needs_otp;
-        // Pas de focus automatique sur le champ : le clavier ne s'ouvre que si l'utilisateur le touche
-        if (d.needs_otp && otpWasHidden) announce('Saisis le code reçu par SMS dans le champ ci-dessous.');
-        if (d.needs_otp && d.message) $('otp-error').textContent = d.message;
+        $('qr').hidden = !d.qr_code;
+        if (d.qr_code) $('qr').src = d.qr_code; else $('qr').removeAttribute('src');
+        $('instructions').hidden = !(d.display_text || d.display_text_raw || d.action_url || d.qr_code);
     }
 
     function showSuccess(d) {
@@ -508,20 +557,21 @@
         $('success-op').textContent = d.operator_label;
         $('success-btn').href = d.success_url;
         $('success-btn').textContent = d.success_label;
-        $('success-note').hidden = !d.note;
-        $('success-note').textContent = d.note || '';
+        setText('success-note', d.note);
         show('screen-success', 'success-title');
         announce('Paiement confirmé.');
     }
 
     function showFail(d) {
         stopTimers();
-        $('fail-not-debited').hidden = !d.not_debited;
-        $('fail-pending').hidden = d.not_debited;
-        $('fail-message').hidden = !d.message;
-        $('fail-message').textContent = d.message || '';
+        // Erreur API : le paiement n'a jamais démarré, on n'affirme rien sur le débit
+        $('fail-title').textContent = d.start_failed ? 'Le paiement n\'a pas pu démarrer' : 'Le paiement n\'est pas passé';
+        $('fail-not-debited').hidden = d.start_failed || !d.not_debited;
+        $('fail-pending').hidden = d.start_failed || d.not_debited;
+        $('fail-causes').hidden = !!d.start_failed;
+        setText('fail-message', d.message);
         show('screen-fail', 'fail-title');
-        announce('Le paiement n\'est pas passé.');
+        announce(d.start_failed ? 'Le paiement n\'a pas pu démarrer.' : 'Le paiement n\'est pas passé.');
 
         // Expiré sans confirmation de Paystack : on continue de vérifier discrètement
         // (une validation tardive sur le téléphone fera passer l'écran en succès)
@@ -548,7 +598,7 @@
         clearTimeout(pollTimer);
         const tick = async () => {
             const d = await fetchStatus();
-            if (d) handle(d, false);
+            if (d) handle(d);
             if (!$('screen-wait').hidden) pollTimer = setTimeout(tick, POLL_MS);
         };
         pollTimer = setTimeout(tick, POLL_MS);
@@ -563,7 +613,7 @@
             $('timer-ring').setAttribute('stroke-dashoffset', String(RING * (1 - left / WINDOW)));
             if (left === 0) {
                 clearInterval(countdownTimer);
-                fetchStatus().then(d => { if (d) handle(d, false); });
+                fetchStatus().then(d => { if (d) handle(d); });
             }
         };
         render();
@@ -575,12 +625,16 @@
         clearInterval(countdownTimer);
     }
 
-    // ── OTP ──────────────────────────────────────────────────
+    // ── Code de paiement (send_otp) ──────────────────────────
+    $('otp').addEventListener('input', (e) => { e.target.value = e.target.value.replace(/\D/g, '').slice(0, 8); });
+
     $('otp-form').addEventListener('submit', async (e) => {
         e.preventDefault();
         const otp = $('otp').value.replace(/\D/g, '');
-        if (otp.length < 3) { $('otp-error').textContent = 'Saisis le code reçu par SMS.'; return; }
-        $('otp-error').textContent = '';
+        if (otp.length < 3) { setText('otp-error', 'Saisis le code de paiement généré sur ton téléphone.'); return; }
+        setText('otp-error', '');
+        $('otp-btn').disabled = true;
+        $('otp-btn').textContent = 'Validation…';
         try {
             const res = await fetch(OTP_URL.replace('__REF__', encodeURIComponent(reference)), {
                 method: 'POST',
@@ -588,10 +642,14 @@
                 body: JSON.stringify({ otp }),
             });
             const data = await res.json().catch(() => ({}));
-            if (res.status === 422) { $('otp-error').textContent = ((data.errors || {}).otp || ['Code invalide.'])[0]; return; }
-            if (res.ok) { $('otp').value = ''; handle(data, false); }
+            if (res.status === 422) { setText('otp-error', ((data.errors || {}).otp || ['Code invalide.'])[0]); return; }
+            if (res.status === 429) { setText('otp-error', 'Trop de tentatives. Patiente une minute.'); return; }
+            if (res.ok) handle(data);
         } catch (err) {
-            $('otp-error').textContent = 'Problème de connexion. Réessaie.';
+            setText('otp-error', 'Problème de connexion. Réessaie.');
+        } finally {
+            $('otp-btn').disabled = false;
+            $('otp-btn').textContent = 'Valider le paiement';
         }
     });
 
@@ -600,7 +658,7 @@
         stopTimers();
         show('screen-pay', 'pay-title');
     }
-    $('change-btn').addEventListener('click', backToForm);
+    document.querySelectorAll('[data-change]').forEach(b => b.addEventListener('click', backToForm));
     $('retry-btn').addEventListener('click', backToForm);
 })();
 </script>

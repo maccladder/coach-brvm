@@ -40,6 +40,7 @@ class MobileMoneyCheckoutController extends Controller
             'whatsapp'    => $this->whatsappUrl($payable),
             'phonePrefix' => config('checkout.phone_prefix', '+225'),
             'window'      => $this->checkout->windowSeconds(),
+            'simulating'  => $this->checkout->simulating(),
             'backUrl'     => url()->previous() !== url()->current() ? url()->previous() : url('/'),
         ]);
     }
@@ -133,6 +134,9 @@ class MobileMoneyCheckoutController extends Controller
         if ($provider->requiresAuth() && !$request->user()) {
             return [$provider, redirect()->guest(route('login'))];
         }
+
+        // CHECKOUT_MM_ALLOWED_EMAILS rempli : réservé à ces comptes
+        abort_unless($this->checkout->isAllowed($request->user()), 404);
 
         return [$provider, null];
     }

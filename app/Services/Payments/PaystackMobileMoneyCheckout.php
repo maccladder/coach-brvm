@@ -8,6 +8,7 @@ use App\Models\MobileMoneyCheckout;
 use App\Models\User;
 use App\Services\PaystackService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 
@@ -15,16 +16,53 @@ use Illuminate\Support\Facades\Log;
  * Checkout Mobile Money personnalisé (Paystack /charge), commun à tous les types de paiement.
  *
  * Cycle : start() crée l'enregistrement métier en attente (via le PayableProvider du type)
- * puis le charge Paystack ; l'utilisateur valide sur son téléphone ; le webhook
- * charge.success valide le paiement en base ; refresh() (polling) lit la base et, en
- * secours, interroge Paystack (GET /charge après 10 s, transaction/verify après 180 s).
+ * puis le charge Paystack ; l'utilisateur valide sur son téléphone (ou saisit un code de
+ * paiement, send_otp) ; le webhook charge.success valide le paiement en base ; refresh()
+ * (polling) lit la base et, en secours, interroge Paystack (GET /charge après 10 s,
+ * transaction/verify après 180 s).
  */
 class PaystackMobileMoneyCheckout
 {
     public const FIRST_CHECK_AFTER = 10;  // s avant le premier GET /charge
     public const CHECK_EVERY       = 8;   // s entre deux appels Paystack pendant le polling
 
-    public function __construct(private PaystackService $paystack) {}
+    /**
+     * Explication affichée sur l'écran "send_otp" (code de paiement à générer), par opérateur.
+     * Texte libre, à adapter si les opérateurs changent leur parcours.
+     */
+    public const OTP_HELP = [
+        'orange'  => "Ouvre l'application Orange Money (ou compose le #144# depuis ton téléphone), "
+                   . "génère un code de paiement temporaire, puis saisis-le ici pour valider le paiement.",
+        'default' => "Génère un code de paiement temporaire depuis l'application ou le menu Mobile Money "
+                   . "de ton téléphone, puis saisis-le ici pour valider le paiement.",
+    ];
+
+    /** Textes Paystack (anglais) connus → français. Les inconnus sont affichés tels quels, en petit. */
+    public const DISPLAY_TEXTS = [
+        'please complete authorization process on your mobile application' => "Termine l'autorisation du paiement dans ton application Mobile Money.",
+        'please complete authorization on your mobile phone'               => 'Valide le paiement sur ton téléphone.',
+        'please complete authorization on your phone'                      => 'Valide le paiement sur ton téléphone.',
+        'please complete authorization process on your mobile phone'       => 'Valide le paiement sur ton téléphone.',
+        'please confirm the payment on your phone'                         => 'Confirme le paiement sur ton téléphone.',
+        'please enter otp'                                                 => 'Saisis le code reçu.',
+        'please enter the otp sent to your phone'                          => 'Saisis le code reçu sur ton téléphone.',
+        'insufficient funds'                                               => 'Solde insuffisant.',
+        'invalid otp'                                                      => 'Code de paiement invalide.',
+        'declined'                                                         => 'Paiement refusé par l’opérateur.',
+        'transaction declined'                                             => 'Paiement refusé par l’opérateur.',
+        'timeout'                                                          => 'Délai de validation dépassé.',
+    ];
+
+    public const WAVE_UNAVAILABLE = 'Wave est momentanément indisponible, choisis Orange Money ou MTN MoMo.';
+    public const START_FAILED     = "Le paiement n'a pas pu démarrer. Réessaie ou choisis un autre opérateur.";
+    public const OTP_REJECTED     = 'Code refusé. Vérifie-le ou génère un nouveau code de paiement.';
+
+    private bool $warnedSimulation = false;
+
+    public function __construct(
+        private PaystackService $paystack,
+        private MobileMoneySimulator $simulator,
+    ) {}
 
     // ─── Configuration / activation ────────────────────────────────────────
 
@@ -38,10 +76,34 @@ class PaystackMobileMoneyCheckout
         return $this->exists($type) && (bool) config("checkout.types.{$type}.enabled");
     }
 
+    /**
+     * Test en prod réservé : si CHECKOUT_MM_ALLOWED_EMAILS est rempli, seuls ces comptes
+     * connectés utilisent le checkout ; tous les autres gardent l'ancien flux.
+     */
+    public function isAllowed(?User $user): bool
+    {
+        $allowed = $this->allowedEmails();
+
+        return $allowed === [] || ($user && in_array(strtolower((string) $user->email), $allowed, true));
+    }
+
+    public function allowedEmails(): array
+    {
+        $raw = config('checkout.allowed_emails', []);
+        $raw = is_array($raw) ? $raw : explode(',', (string) $raw);
+
+        return array_values(array_filter(array_map(fn ($e) => strtolower(trim((string) $e)), $raw)));
+    }
+
+    public function isEnabledFor(string $type, ?User $user): bool
+    {
+        return $this->isEnabled($type) && $this->isAllowed($user);
+    }
+
     /** L'ancien flux doit-il rediriger vers le checkout ? (?classic=1 force l'ancien flux) */
     public function shouldIntercept(string $type, Request $request): bool
     {
-        return $this->isEnabled($type) && !$request->boolean('classic');
+        return $this->isEnabledFor($type, $request->user()) && !$request->boolean('classic');
     }
 
     public function entryUrl(string $type, array $params = []): string
@@ -54,14 +116,45 @@ class PaystackMobileMoneyCheckout
         return app(config("checkout.types.{$type}.provider"));
     }
 
+    /** Opérateurs proposés (Wave masqué tant que CHECKOUT_MM_WAVE_ENABLED=false) */
     public function operators(): array
     {
-        return config('checkout.operators', []);
+        $operators = config('checkout.operators', []);
+
+        if (!config('checkout.wave_enabled')) {
+            unset($operators['wave']);
+        }
+
+        return $operators;
     }
 
     public function windowSeconds(): int
     {
         return (int) config('checkout.window_seconds', 180);
+    }
+
+    /** Simulation locale (aucun appel Paystack) — jamais en production. */
+    public function simulating(): bool
+    {
+        if (!config('checkout.simulate')) {
+            return false;
+        }
+
+        if (app()->environment('production')) {
+            if (!$this->warnedSimulation) {
+                Log::error('CHECKOUT_MM_SIMULATE ignoré : interdit en production');
+                $this->warnedSimulation = true;
+            }
+            return false;
+        }
+
+        return true;
+    }
+
+    /** @return PaystackService|MobileMoneySimulator */
+    private function gateway(): object
+    {
+        return $this->simulating() ? $this->simulator : $this->paystack;
     }
 
     // ─── Paiement ──────────────────────────────────────────────────────────
@@ -92,10 +185,13 @@ class PaystackMobileMoneyCheckout
             'operator'  => $operator,
             'phone'     => $phone,
             'status'    => 'pending',
-            'meta'      => array_merge($payable->snapshot(), ['email' => $payable->email]),
+            'meta'      => array_merge($payable->snapshot(), [
+                'email'     => $payable->email,
+                'simulated' => $this->simulating(),
+            ]),
         ]);
 
-        $res = $this->paystack->charge([
+        $res = $this->gateway()->charge([
             'email'        => $payable->email,
             'amount'       => $payable->amount,
             'reference'    => $reference,
@@ -108,37 +204,54 @@ class PaystackMobileMoneyCheckout
 
         $this->logRawOnce($operator, $reference, $res);
 
-        // Échec de création du charge (numéro refusé, opérateur indisponible…) : rien n'a été débité
-        if (!$res['ok'] && empty($res['body']['data']['status'])) {
+        // Erreur API (HTTP ≠ 2xx ou status=false), même avec data.status="failed" : le charge
+        // n'a pas été traité par l'opérateur → "n'a pas pu démarrer", sans affirmer quoi que
+        // ce soit sur le débit.
+        if (!$res['ok']) {
+            $code = (string) ($res['body']['code'] ?? '');
+
             $attempt->update([
                 'status'          => 'failed',
-                'paystack_status' => 'charge_error',
-                'not_debited'     => $res['http'] >= 400 && $res['http'] < 500,
-                'message'         => (string) ($res['body']['message'] ?? 'Paystack indisponible'),
+                'paystack_status' => 'api_error',
+                'not_debited'     => false,
+                'message'         => $operator === 'wave' && $code === 'unprocessed_transaction'
+                    ? self::WAVE_UNAVAILABLE
+                    : self::START_FAILED,
+                'meta'            => array_merge((array) $attempt->meta, ['paystack_error' => [
+                    'http' => $res['http'],
+                    'code' => $code ?: null,
+                    'type' => $res['body']['type'] ?? null,
+                ]]),
             ]);
 
-            return $attempt;
+            return $attempt->fresh();
         }
 
-        $this->applyChargeData($provider, $attempt, (array) ($res['body']['data'] ?? []), (string) ($res['body']['message'] ?? ''));
+        $this->applyChargeData($provider, $attempt, (array) ($res['body']['data'] ?? []));
 
         return $attempt->fresh();
     }
 
     public function submitOtp(MobileMoneyCheckout $attempt, string $otp): MobileMoneyCheckout
     {
-        $res = $this->paystack->submitOtp($otp, $attempt->reference);
+        $res = $this->gateway()->submitOtp($otp, $attempt->reference);
         $this->logRawOnce($attempt->operator . '_otp', $attempt->reference, $res);
 
         $data = (array) ($res['body']['data'] ?? []);
 
         if (!$res['ok'] && empty($data['status'])) {
-            // Code erroné : on reste sur la saisie OTP
-            $attempt->update(['message' => (string) ($res['body']['message'] ?? 'Code invalide, réessaie.')]);
+            // Code refusé par l'API : on reste sur la saisie du code
+            $attempt->update(['message' => self::OTP_REJECTED]);
             return $attempt->fresh();
         }
 
-        $this->applyChargeData($this->provider($attempt->type), $attempt, $data, (string) ($res['body']['message'] ?? ''));
+        // Le délai de validation repart de la saisie du code
+        $attempt->update([
+            'message' => null,
+            'meta'    => array_merge((array) $attempt->meta, ['window_started_at' => now()->toIso8601String()]),
+        ]);
+
+        $this->applyChargeData($this->provider($attempt->type), $attempt->fresh(), $data);
 
         return $attempt->fresh();
     }
@@ -158,11 +271,12 @@ class PaystackMobileMoneyCheckout
             return $this->markSuccess($attempt);
         }
 
-        if ($attempt->status === 'failed') {
+        // Échec définitif, ou code de paiement pas encore saisi (pas de délai qui court)
+        if (in_array($attempt->status, ['failed', 'send_otp'], true)) {
             return $attempt;
         }
 
-        $age = $attempt->ageInSeconds();
+        $age = $this->windowAge($attempt);
 
         $dueForCheck = $age >= self::FIRST_CHECK_AFTER
             && (!$attempt->last_checked_at || $attempt->last_checked_at->lte(now()->subSeconds(self::CHECK_EVERY)));
@@ -171,17 +285,17 @@ class PaystackMobileMoneyCheckout
             $attempt->update(['last_checked_at' => now()]);
 
             if ($age < $this->windowSeconds()) {
-                $res  = $this->paystack->checkCharge($attempt->reference);
+                $res  = $this->gateway()->checkCharge($attempt->reference);
                 $data = (array) ($res['body']['data'] ?? []);
             } else {
-                $res  = $this->paystack->fetchTransaction($attempt->reference);
+                $res  = $this->gateway()->fetchTransaction($attempt->reference);
                 $data = (array) ($res['data'] ?? []);
             }
 
             $status = (string) ($data['status'] ?? '');
 
             if ($status === 'success') {
-                $provider->validate($data);
+                $provider->validate(array_merge($data, ['reference' => $attempt->reference]));
                 if ($provider->isPaid($attempt->reference)) {
                     return $this->markSuccess($attempt);
                 }
@@ -191,12 +305,13 @@ class PaystackMobileMoneyCheckout
                 return $attempt->fresh();
             }
 
+            // Transaction réellement traitée et confirmée en échec par Paystack
             if (in_array($status, ['failed', 'abandoned', 'reversed'], true)) {
                 $attempt->update([
                     'status'          => 'failed',
                     'paystack_status' => $status,
                     'not_debited'     => true,
-                    'message'         => (string) ($data['gateway_response'] ?? $data['message'] ?? ''),
+                    'message'         => $this->failureReason($data),
                 ]);
                 return $attempt->fresh();
             }
@@ -208,40 +323,44 @@ class PaystackMobileMoneyCheckout
 
         // Fenêtre écoulée sans confirmation : expiré (on continue de vérifier si on nous rappelle,
         // un paiement validé en retard passera quand même en succès via le webhook)
-        if ($attempt->isWaiting() && $age >= $this->windowSeconds()) {
+        if ($attempt->status === 'pending' && $age >= $this->windowSeconds()) {
             $attempt->update(['status' => 'expired']);
         }
 
         return $attempt->fresh();
     }
 
-    /** Données publiques d'une tentative pour le front (écrans attente / succès / échec). */
+    /** Données publiques d'une tentative pour le front (écrans code / attente / succès / échec). */
     public function present(MobileMoneyCheckout $attempt): array
     {
-        $operators = $this->operators();
+        $operators = config('checkout.operators', []);
         $meta      = (array) $attempt->meta;
+        [$displayText, $displayRaw] = $this->translate($attempt->display_text);
 
         return [
-            'reference'      => $attempt->reference,
-            'status'         => $attempt->status,
-            'operator'       => $attempt->operator,
-            'operator_label' => $operators[$attempt->operator]['label'] ?? $attempt->operator,
-            'phone'          => $attempt->phone,
-            'amount'         => $attempt->amount,
-            'display_text'   => $attempt->display_text,
-            'action_url'     => $attempt->action_url,
-            'qr_code'        => $attempt->qr_code,
-            'needs_otp'      => $attempt->status === 'send_otp',
-            'message'        => $attempt->message,
-            'not_debited'    => (bool) $attempt->not_debited,
-            'seconds_left'   => max(0, $this->windowSeconds() - $attempt->ageInSeconds()),
-            'title'          => $meta['title'] ?? '',
-            'image'          => $meta['image'] ?? null,
-            'icon'           => $meta['icon'] ?? '🛒',
-            'success_url'    => $meta['success_url'] ?? url('/'),
-            'success_label'  => $meta['success_label'] ?? 'Continuer',
-            'success_title'  => $meta['success_title'] ?? "C'est payé !",
-            'note'           => $meta['note'] ?? null,
+            'reference'        => $attempt->reference,
+            'status'           => $attempt->status,
+            'operator'         => $attempt->operator,
+            'operator_label'   => $operators[$attempt->operator]['label'] ?? $attempt->operator,
+            'phone'            => $attempt->phone,
+            'amount'           => $attempt->amount,
+            'display_text'     => $displayText,
+            'display_text_raw' => $displayRaw,
+            'action_url'       => $this->validUrl($attempt->action_url),
+            'qr_code'          => $this->validImage($attempt->qr_code),
+            'needs_otp'        => $attempt->status === 'send_otp',
+            'otp_help'         => self::OTP_HELP[$attempt->operator] ?? self::OTP_HELP['default'],
+            'message'          => $attempt->message,
+            'start_failed'     => $attempt->paystack_status === 'api_error',
+            'not_debited'      => (bool) $attempt->not_debited,
+            'seconds_left'     => max(0, $this->windowSeconds() - $this->windowAge($attempt)),
+            'title'            => $meta['title'] ?? '',
+            'image'            => $meta['image'] ?? null,
+            'icon'             => $meta['icon'] ?? '🛒',
+            'success_url'      => $meta['success_url'] ?? url('/'),
+            'success_label'    => $meta['success_label'] ?? 'Continuer',
+            'success_title'    => $meta['success_title'] ?? "C'est payé !",
+            'note'             => $meta['note'] ?? null,
             'offer_activation' => (bool) ($meta['offer_activation'] ?? true),
         ];
     }
@@ -264,17 +383,26 @@ class PaystackMobileMoneyCheckout
         return $query->first();
     }
 
-    private function applyChargeData(PayableProvider $provider, MobileMoneyCheckout $attempt, array $data, string $message): void
+    /** Secondes écoulées depuis le début du délai de validation (création, ou saisie du code). */
+    private function windowAge(MobileMoneyCheckout $attempt): int
+    {
+        $start = data_get($attempt->meta, 'window_started_at');
+        $from  = $start ? Carbon::parse($start) : $attempt->created_at;
+
+        return (int) $from->diffInSeconds(now(), true);
+    }
+
+    private function applyChargeData(PayableProvider $provider, MobileMoneyCheckout $attempt, array $data): void
     {
         $status = (string) ($data['status'] ?? '');
 
+        // Jamais le "message" de premier niveau ("Charge attempted") : seulement data.*
         $fields = [
             'paystack_status' => $status ?: null,
             'display_text'    => $data['display_text'] ?? $attempt->display_text,
             // Wave peut renvoyer un lien ou un QR à afficher
             'action_url'      => $data['url'] ?? $data['redirect_url'] ?? $data['authorization_url'] ?? $attempt->action_url,
             'qr_code'         => $data['qr_code'] ?? $data['qr'] ?? $attempt->qr_code,
-            'message'         => $message ?: $attempt->message,
         ];
 
         switch ($status) {
@@ -287,21 +415,65 @@ class PaystackMobileMoneyCheckout
                 return;
 
             case 'failed':
+                // Charge accepté par l'API puis refusé par l'opérateur : rien n'a été débité
                 $attempt->update(array_merge($fields, [
                     'status'      => 'failed',
                     'not_debited' => true,
-                    'message'     => (string) ($data['gateway_response'] ?? $data['message'] ?? $message),
+                    'message'     => $this->failureReason($data),
                 ]));
                 return;
 
             case 'send_otp':
-                $attempt->update($fields + ['status' => 'send_otp']);
+                $attempt->update(array_merge($fields, ['status' => 'send_otp']));
                 return;
 
             default:
                 // pay_offline, pending, open_url… : validation sur le téléphone
-                $attempt->update($fields + ['status' => 'pending']);
+                $attempt->update(array_merge($fields, ['status' => 'pending']));
         }
+    }
+
+    private function failureReason(array $data): ?string
+    {
+        $reason = (string) ($data['gateway_response'] ?? '');
+        if ($reason === '') {
+            return null;
+        }
+
+        [$fr, $raw] = $this->translate($reason);
+
+        return $fr ?? $raw;
+    }
+
+    /** @return array{0: ?string, 1: ?string} [texte français connu, texte original si inconnu] */
+    private function translate(?string $text): array
+    {
+        $text = trim((string) $text);
+        if ($text === '') {
+            return [null, null];
+        }
+
+        $key = strtolower(rtrim($text, " .!"));
+
+        return isset(self::DISPLAY_TEXTS[$key]) ? [self::DISPLAY_TEXTS[$key], null] : [null, $text];
+    }
+
+    private function validUrl(?string $url): ?string
+    {
+        $url = trim((string) $url);
+
+        return $url !== '' && filter_var($url, FILTER_VALIDATE_URL) && preg_match('#^https?://#i', $url) ? $url : null;
+    }
+
+    private function validImage(?string $src): ?string
+    {
+        $src = trim((string) $src);
+
+        if (preg_match('#^data:image/(png|jpe?g|gif|webp|svg\+xml);base64,[A-Za-z0-9+/=\s]+$#', $src)) {
+            return $src;
+        }
+
+        return $this->validUrl($src);
     }
 
     private function markSuccess(MobileMoneyCheckout $attempt): MobileMoneyCheckout
@@ -318,6 +490,10 @@ class PaystackMobileMoneyCheckout
     /** Réponse brute loguée la 1re fois pour chaque opérateur (formats Wave/Orange/MTN à observer). */
     private function logRawOnce(string $key, string $reference, array $res): void
     {
+        if ($this->simulating()) {
+            return;
+        }
+
         if (Cache::add('mm_checkout_raw_logged:' . $key, true, now()->addYear())) {
             Log::info('MobileMoneyCheckout: réponse Paystack brute (' . $key . ')', [
                 'reference' => $reference,

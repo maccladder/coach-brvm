@@ -93,7 +93,7 @@ class MobileMoneyCheckoutTest extends TestCase
     {
         return ['status' => true, 'message' => 'Charge attempted', 'data' => array_merge([
             'status'       => $status,
-            'display_text' => 'Valide le paiement de 1000 XOF sur ton téléphone',
+            'display_text' => 'Please complete authorization on your mobile phone',
         ], $extra)];
     }
 
@@ -164,7 +164,7 @@ class MobileMoneyCheckoutTest extends TestCase
             ->assertSee('1 000 F CFA')
             ->assertSee('Accès à vie')
             ->assertSee('Téléphone et ordi')
-            ->assertSee('Wave')
+            ->assertSee('Orange Money')->assertSee('MTN MoMo')->assertDontSee('data-operator="wave"', false)
             ->assertSee('Autre moyen de paiement');
     }
 
@@ -187,12 +187,12 @@ class MobileMoneyCheckoutTest extends TestCase
         $user    = User::factory()->create(['email' => 'acheteur@example.com']);
         $product = $this->game();
 
-        $res = $this->actingAs($user)->pay('marketplace', ['product' => $product->id], 'wave', '07 07 12 34 56');
+        $res = $this->actingAs($user)->pay('marketplace', ['product' => $product->id], 'mtn', '05 05 12 34 56');
 
         $res->assertOk()
             ->assertJsonPath('status', 'pending')
-            ->assertJsonPath('operator_label', 'Wave')
-            ->assertJsonPath('display_text', 'Valide le paiement de 1000 XOF sur ton téléphone');
+            ->assertJsonPath('operator_label', 'MTN MoMo')
+            ->assertJsonPath('display_text', 'Valide le paiement sur ton téléphone.')->assertJsonPath('message', null);
 
         $reference = $res->json('reference');
         $this->assertStringStartsWith('MP-', $reference);
@@ -201,7 +201,7 @@ class MobileMoneyCheckoutTest extends TestCase
         $this->assertSame(100000, $charge['amount']);
         $this->assertSame('XOF', $charge['currency']);
         $this->assertSame('acheteur@example.com', $charge['email']);
-        $this->assertSame(['phone' => '+2250707123456', 'provider' => 'wave'], $charge['mobile_money']);
+        $this->assertSame(['phone' => '+2250505123456', 'provider' => 'mtn'], $charge['mobile_money']);
         $this->assertSame($product->id, $charge['metadata']['product_id']);
         $this->assertSame($user->id, $charge['metadata']['user_id']);
 
