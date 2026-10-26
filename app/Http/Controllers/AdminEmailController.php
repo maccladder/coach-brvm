@@ -30,22 +30,31 @@ class AdminEmailController extends Controller
 
     public function send(Request $request)
     {
+        $fullHtml = $request->boolean('full_html');
+
         $request->validate([
             'mode' => ['required', 'in:all,selected'],
             'user_ids' => ['array'],
             'user_ids.*' => ['integer', 'exists:users,id'],
             'free_emails' => ['nullable', 'string', 'max:5000'],
             'subject' => ['required', 'string', 'max:200'],
-            'message' => ['required', 'string', 'max:10000'],
+            'message' => ['required', 'string', $fullHtml ? 'max:200000' : 'max:10000'],
+            'full_html' => ['nullable', 'boolean'],
+        ], [
+            'message.max' => $fullHtml
+                ? 'Le template dépasse 200 000 caractères.'
+                : 'Message trop long (max 10 000 caractères). Pour un template HTML complet, coche « HTML complet ».',
         ]);
 
         $subject = $request->subject;
-        $safeHtml = $this->sanitizeHtml($request->message);
+        $safeHtml = $fullHtml
+            ? $this->stripDangerousHtml($request->message)
+            : $this->sanitizeHtml($request->message);
 
         $freeEmails = $this->parseFreeEmails((string) $request->input('free_emails', ''));
 
         if (count($freeEmails) > 50) {
-            return back()->with('error', 'Maximum 50 adresses libres par envoi (' . count($freeEmails) . ' fournies).');
+            return back()->withInput()->with('error', 'Maximum 50 adresses libres par envoi (' . count($freeEmails) . ' fournies).');
         }
 
         $invalid = array_filter($freeEmails, function ($addr) {
@@ -53,7 +62,7 @@ class AdminEmailController extends Controller
         });
 
         if (count($invalid) > 0) {
-            return back()->with('error', 'Adresse(s) invalide(s) : ' . implode(', ', $invalid));
+            return back()->withInput()->with('error', 'Adresse(s) invalide(s) : ' . implode(', ', $invalid));
         }
 
         $query = User::query();
@@ -61,7 +70,7 @@ class AdminEmailController extends Controller
         if ($request->mode === 'selected') {
             $ids = $request->user_ids ?? [];
             if (count($ids) === 0 && count($freeEmails) === 0) {
-                return back()->with('error', 'Sélectionne au moins un utilisateur ou une adresse libre.');
+                return back()->withInput()->with('error', 'Sélectionne au moins un utilisateur ou une adresse libre.');
             }
             $query->whereIn('id', $ids);
         }
@@ -81,17 +90,30 @@ class AdminEmailController extends Controller
         }
 
         if (count($recipients) === 0) {
-            return back()->with('error', 'Aucun destinataire.');
+            return back()->withInput()->with('error', 'Aucun destinataire.');
         }
+
+        // Office 365 limite à 30 mails/minute : au-delà de 10 destinataires,
+        // on passe par la queue avec un envoi étalé (1 mail / 3 s ≈ 20/min).
+        $queue = count($recipients) > 10;
 
         $sent = 0;
         $failed = 0;
+        $i = 0;
 
         foreach ($recipients as $r) {
             try {
-                Mail::to($r['email'], $r['name'])
-                    ->send(new AdminBroadcastMail($subject, $safeHtml, $r['name'] ?? $r['email']));
+                $mail = new AdminBroadcastMail($subject, $safeHtml, $r['name'] ?? $r['email'], $fullHtml);
+                $pending = Mail::to($r['email'], $r['name']);
+
+                if ($queue) {
+                    $pending->later(now()->addSeconds($i * 3), $mail);
+                } else {
+                    $pending->send($mail);
+                }
+
                 $sent++;
+                $i++;
             } catch (\Throwable $e) {
                 $failed++;
                 Log::error('Admin email failed', [
@@ -99,6 +121,19 @@ class AdminEmailController extends Controller
                     'error' => $e->getMessage(),
                 ]);
             }
+        }
+
+        Log::info('Admin email broadcast', [
+            'subject' => $subject,
+            'full_html' => $fullHtml,
+            'queued' => $queue,
+            'sent' => $sent,
+            'failed' => $failed,
+        ]);
+
+        if ($queue) {
+            $minutes = max(1, (int) ceil($sent * 3 / 60));
+            return back()->with('success', "Emails programmés : {$sent} (envoi étalé sur ~{$minutes} min). Échecs : {$failed}.");
         }
 
         return back()->with('success', "Emails envoyés: {$sent}. Échecs: {$failed}.");
@@ -145,6 +180,30 @@ class AdminEmailController extends Controller
         // Bloque les URLs javascript: dans href et src
         $html = preg_replace('/\b(href|src)\s*=\s*"javascript:[^"]*"/i', '$1="#"', $html);
         $html = preg_replace('/\b(href|src)\s*=\s*\'javascript:[^\']*\'/i', "$1='#'", $html);
+
+        return $this->stripDangerousHtml($html);
+    }
+
+    /**
+     * Mode "HTML complet" : conserve le template tel quel (<html>, <head>,
+     * <style>, tables, attributs style) et retire uniquement ce qui est
+     * dangereux : script/iframe/object/embed/form, attributs on*, URLs javascript:.
+     */
+    private function stripDangerousHtml(string $html): string
+    {
+        $tags = 'script|iframe|object|embed|form';
+
+        // Balise + contenu, puis balises orphelines (ouvrantes/fermantes/auto-fermantes)
+        $html = preg_replace('#<(' . $tags . ')\b[^>]*>.*?</\1\s*>#is', '', $html);
+        $html = preg_replace('#</?(' . $tags . ')\b[^>]*>#i', '', $html);
+
+        // Attributs on* (guillemets doubles, simples ou sans guillemets)
+        $html = preg_replace('/\s+on[a-z]+\s*=\s*("[^"]*"|\'[^\']*\'|[^\s>]+)/i', '', $html);
+
+        // URLs javascript: dans href et src (espaces éventuels avant "javascript:")
+        $html = preg_replace('/\b(href|src)\s*=\s*"\s*javascript:[^"]*"/i', '$1="#"', $html);
+        $html = preg_replace('/\b(href|src)\s*=\s*\'\s*javascript:[^\']*\'/i', "$1='#'", $html);
+        $html = preg_replace('/\b(href|src)\s*=\s*javascript:[^\s>]*/i', '$1="#"', $html);
 
         return $html;
     }

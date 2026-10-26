@@ -17,6 +17,15 @@
         </form>
     </div>
 
+    @if($errors->any())
+        <div class="alert alert-danger">
+            <ul class="mb-0">
+                @foreach($errors->all() as $err)
+                    <li>{{ $err }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
     @if(session('success'))
         <div class="alert alert-success">{{ session('success') }}</div>
     @endif
@@ -94,7 +103,7 @@
                     <div class="card-header fw-semibold">✉️ Adresses libres (hors base)</div>
                     <div class="card-body">
                         <textarea name="free_emails" class="form-control" rows="4"
-                                  placeholder="une@adresse.com&#10;autre@adresse.com, encore@adresse.com"></textarea>
+                                  placeholder="une@adresse.com&#10;autre@adresse.com, encore@adresse.com">{{ old('free_emails') }}</textarea>
                         <small class="text-muted d-block mt-2">
                             Une adresse par ligne, ou séparées par virgule/point-virgule. Max 50 adresses.
                             Elles s'ajoutent aux destinataires ci-dessus (dédoublonnage automatique).
@@ -110,13 +119,20 @@
                         <div class="mb-3">
                             <label class="form-label">Sujet</label>
                             <input name="subject" class="form-control" required maxlength="200"
-                                   placeholder="Ex: Nouveautés Boursiv">
+                                   value="{{ old('subject') }}" placeholder="Ex: Nouveautés Boursiv">
                         </div>
 
                         <div class="mb-3">
                             <label class="form-label">Message</label>
-                            <textarea name="message" class="form-control" rows="9" required maxlength="10000"
-                                      placeholder="Ton message ici..."></textarea>
+                            <textarea name="message" class="form-control" rows="9" required maxlength="200000"
+                                      placeholder="Ton message ici...">{{ old('message') }}</textarea>
+                            <div class="form-check mt-2">
+                                <input class="form-check-input" type="checkbox" name="full_html" id="fullHtml" value="1"
+                                       @checked(old('full_html'))>
+                                <label class="form-check-label" for="fullHtml">
+                                    HTML complet (template newsletter collé tel quel)
+                                </label>
+                            </div>
                         </div>
 
                         <button class="btn btn-success w-100 fw-semibold">
