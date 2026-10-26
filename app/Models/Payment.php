@@ -9,7 +9,8 @@ class Payment extends Model
 {
     protected $fillable = [
         'user_id','transaction_id','amount_paid','amount_virtual',
-        'purpose','status','credited_at','notified_at','abandoned_notified_at','meta'
+        'purpose','status','credited_at','notified_at','abandoned_notified_at','meta',
+        'affiliate_code','affiliate_base_amount',
     ];
 
     protected $casts = [

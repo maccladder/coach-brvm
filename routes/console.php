@@ -9,7 +9,7 @@ Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote');
 
-Schedule::command('payments:notify-abandoned')->everyFiveMinutes();
+Schedule::command('payments:notify-abandoned')->everyFiveMinutes()->withoutOverlapping();
 
 // Relevé des cours brvm.org (bandeau, accueil) : toutes les 10 min pendant la
 // séance (jours ouvrés BRVM, heure d'Abidjan), plus un passage après la clôture.

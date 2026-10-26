@@ -2,13 +2,16 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\CaurisAchat;
+use App\Jobs\ForwardAdomCiWebhook;
 use App\Models\LettreCIAccess;
+use App\Models\Payment;
 use App\Services\CaurisService;
+use App\Services\Payments\PaystackCourseService;
+use App\Services\Payments\PaystackGamePremiumService;
+use App\Services\Payments\PaystackMarketplaceService;
 use App\Services\Payments\PaystackPackService;
 use App\Services\Payments\PaystackWalletTopupService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class PaystackWebhookController extends Controller
@@ -17,7 +20,7 @@ class PaystackWebhookController extends Controller
     {
         $signature = $request->header('x-paystack-signature');
         $payload   = $request->getContent();
-        $secret    = env('PAYSTACK_SECRET_KEY');
+        $secret    = config('services.paystack.secret') ?: env('PAYSTACK_SECRET_KEY');
 
         if (!$signature || !$secret) {
             Log::warning('Paystack webhook missing signature or secret');
@@ -31,96 +34,133 @@ class PaystackWebhookController extends Controller
             return response()->json(['status' => 'unauthorized'], 401);
         }
 
-        $event = (string) $request->input('event');
-        $data  = (array) $request->input('data', []);
+        $event     = (string) $request->input('event');
+        $data      = (array) $request->input('data', []);
+        $reference = (string) ($data['reference'] ?? '');
 
         Log::info('Paystack webhook received', [
             'event' => $event,
-            'reference' => $data['reference'] ?? null,
+            'reference' => $reference ?: null,
         ]);
 
-        if ($event === 'charge.success') {
-            $reference = (string) ($data['reference'] ?? '');
-
-            // ✅ Cauris (achat de monnaie de jeu)
-            if (str_starts_with($reference, 'CAURIS-')) {
-                $amountPaid = (int) round(((int) ($data['amount'] ?? 0)) / 100);
-
-                DB::transaction(function () use ($reference, $amountPaid, $data) {
-                    $achat = CaurisAchat::where('reference', $reference)
-                        ->lockForUpdate()
-                        ->first();
-
-                    if (!$achat) {
-                        Log::warning('Paystack webhook CAURIS: achat non trouvé', [
-                            'reference' => $reference,
-                        ]);
-                        return;
-                    }
-
-                    if ($achat->credited_at !== null) {
-                        Log::info('Paystack webhook CAURIS: déjà crédité, skip', [
-                            'reference' => $reference,
-                        ]);
-                        return;
-                    }
-
-                    // Anti-fraude : le montant payé doit correspondre exactement au pack
-                    if ($achat->prix !== $amountPaid) {
-                        Log::error('Paystack webhook CAURIS: montant incorrect', [
-                            'reference'  => $reference,
-                            'db_prix'    => $achat->prix,
-                            'paid'       => $amountPaid,
-                        ]);
-                        $achat->update(['status' => 'REFUSED']);
-                        return;
-                    }
-
-                    $achat->update([
-                        'status' => 'ACCEPTED',
-                        'meta'   => ['paystack' => [
-                            'event'   => 'charge.success',
-                            'channel' => $data['channel'] ?? null,
-                            'paid_at' => $data['paid_at'] ?? null,
-                        ]],
-                    ]);
-
-                    Log::info('Paystack webhook CAURIS: achat accepté', [
-                        'reference' => $reference,
-                        'user_id'   => $achat->user_id,
-                        'cauris'    => $achat->cauris,
-                    ]);
-                });
-
-                // Crédit des cauris (idempotent — sa propre transaction avec lockForUpdate)
-                app(CaurisService::class)->crediterCauris($reference);
-
-                return response()->json(['status' => 'ok'], 200);
+        // Signature valide : on répond toujours 200, même si le traitement échoue
+        // (la commande payments:reconcile-paystack rattrape les cas manqués).
+        try {
+            // ✅ ADOM CI (autre application, même compte Paystack) : tous les événements
+            if (str_starts_with($reference, 'ADOM-CI-')) {
+                $this->forwardToAdomCi($payload, (string) $signature, $reference, $event);
+            } elseif ($event === 'charge.success') {
+                $this->handleChargeSuccess($reference, $data, $walletTopup, $packService);
             }
-
-            // ✅ Pack BRVM
-            if (str_starts_with($reference, 'PACK-BRVM-')) {
-                $packService->handleChargeSuccess($data);
-                return response()->json(['status' => 'ok'], 200);
-            }
-
-            // ✅ LettreCI
-            if (str_starts_with($reference, 'LETTRECI_')) {
-                $access = LettreCIAccess::where('payment_ref', $reference)->first();
-                if ($access && $access->status === 'pending') {
-                    $access->update([
-                        'status'  => 'active',
-                        'paid_at' => now(),
-                    ]);
-                    Log::info('LettreCI access activated via webhook', ['reference' => $reference]);
-                }
-                return response()->json(['status' => 'ok'], 200);
-            }
-
-            // ✅ Délégation wallet
-            $walletTopup->handleChargeSuccess($data);
+        } catch (\Throwable $e) {
+            Log::error('Paystack webhook: erreur de traitement', [
+                'event'     => $event,
+                'reference' => $reference,
+                'error'     => $e->getMessage(),
+            ]);
         }
 
         return response()->json(['status' => 'ok'], 200);
+    }
+
+    private function handleChargeSuccess(
+        string $reference,
+        array $data,
+        PaystackWalletTopupService $walletTopup,
+        PaystackPackService $packService
+    ): void {
+        // ✅ Cauris (achat de monnaie de jeu)
+        if (str_starts_with($reference, 'CAURIS-')) {
+            app(CaurisService::class)->validerPaiementPaystack($data);
+            return;
+        }
+
+        // ✅ Pack BRVM
+        if (str_starts_with($reference, 'PACK-BRVM-')) {
+            $packService->handleChargeSuccess($data);
+            return;
+        }
+
+        // ✅ Marketplace (jeux, logiciels…)
+        if (str_starts_with($reference, 'MP-')) {
+            $outcome = app(PaystackMarketplaceService::class)->handleChargeSuccess($data);
+            Log::info('Paystack webhook MP', ['reference' => $reference, 'outcome' => $outcome]);
+            return;
+        }
+
+        // ✅ Formations
+        if (str_starts_with($reference, 'COURSE-')) {
+            $outcome = app(PaystackCourseService::class)->handleChargeSuccess($data);
+            Log::info('Paystack webhook COURSE', ['reference' => $reference, 'outcome' => $outcome]);
+            return;
+        }
+
+        // ✅ Ancien déblocage premium Abidjan Run
+        if (str_starts_with($reference, 'ABRUN_PREM_')) {
+            $outcome = app(PaystackGamePremiumService::class)->handleLegacyAbidjanRun($data);
+            Log::info('Paystack webhook ABRUN_PREM', ['reference' => $reference, 'outcome' => $outcome]);
+            return;
+        }
+
+        // ✅ LettreCI
+        if (str_starts_with($reference, 'LETTRECI_')) {
+            $access = LettreCIAccess::where('payment_ref', $reference)->first();
+            if ($access && $access->status === 'pending') {
+                $access->update([
+                    'status'  => 'active',
+                    'paid_at' => now(),
+                ]);
+                Log::info('LettreCI access activated via webhook', ['reference' => $reference]);
+            }
+            return;
+        }
+
+        // ✅ Dons : confirmés par le callback /faire-un-don/callback, rien à faire ici
+        if (str_starts_with($reference, 'DON-')) {
+            Log::info('Paystack webhook DON: confirmé par le callback, non traité ici', $this->summary($data));
+            return;
+        }
+
+        // ✅ Délégation wallet (WALLET_… et tout paiement existant de la table payments)
+        if (str_starts_with($reference, 'WALLET_')
+            || ($reference !== '' && Payment::where('transaction_id', $reference)->exists())) {
+            $walletTopup->handleChargeSuccess($data);
+            return;
+        }
+
+        // Références inconnues (UUID, autres applications…)
+        Log::warning('Paystack webhook: référence non gérée', $this->summary($data));
+    }
+
+    private function forwardToAdomCi(string $payload, string $signature, string $reference, string $event): void
+    {
+        $url = (string) config('services.adom_ci.webhook_url');
+
+        if ($url === '') {
+            Log::info('Paystack webhook ADOM-CI: aucune URL de transfert (ADOM_CI_WEBHOOK_URL), ignoré', [
+                'reference' => $reference,
+                'event'     => $event,
+            ]);
+            return;
+        }
+
+        ForwardAdomCiWebhook::dispatch($url, $payload, $signature, $reference);
+
+        Log::info('Paystack webhook ADOM-CI: transfert programmé', [
+            'reference' => $reference,
+            'event'     => $event,
+        ]);
+    }
+
+    private function summary(array $data): array
+    {
+        return [
+            'reference' => $data['reference'] ?? null,
+            'email'     => data_get($data, 'customer.email'),
+            'amount'    => isset($data['amount']) ? (int) round(((int) $data['amount']) / 100) : null,
+            'currency'  => $data['currency'] ?? null,
+            'paid_at'   => $data['paid_at'] ?? ($data['created_at'] ?? null),
+            'channel'   => $data['channel'] ?? null,
+        ];
     }
 }

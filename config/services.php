@@ -113,6 +113,12 @@ return [
         ],
     ],
 
+    // Autre application (ADOM CI) sur le même compte Paystack : ses webhooks arrivent ici
+    // et sont retransmis tels quels (corps brut + x-paystack-signature).
+    'adom_ci' => [
+        'webhook_url' => env('ADOM_CI_WEBHOOK_URL'),
+    ],
+
     'whatsapp' => [
         'support_number' => env('WHATSAPP_SUPPORT_NUMBER'),
     ],

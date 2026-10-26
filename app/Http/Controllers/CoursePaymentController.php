@@ -8,6 +8,7 @@ use App\Models\Payment;
 use App\Services\Affiliate\AffiliateCommissionService;
 use App\Services\CinetpayService;
 use App\Services\PaystackService;
+use App\Services\Payments\PaystackCourseService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -273,7 +274,7 @@ class CoursePaymentController extends Controller
         return redirect()->away($authUrl);
     }
 
-    public function paystackCallback(Request $request, PaystackService $paystack, AffiliateCommissionService $affiliateService)
+    public function paystackCallback(Request $request, PaystackService $paystack, PaystackCourseService $courseService)
     {
         $reference = (string) ($request->query('reference') ?: $request->query('trxref'));
 
@@ -297,80 +298,19 @@ class CoursePaymentController extends Controller
             return redirect()->route('courses.index')->with('error', 'Paiement non validé : ' . ($data['status'] ?? 'unknown'));
         }
 
-        $payment = Payment::where('transaction_id', $reference)->first();
+        $outcome = $courseService->handleChargeSuccess($data);
 
-        if (!$payment) {
-            Log::error('[COURSE][PAYSTACK_CALLBACK] payment not found', ['reference' => $reference]);
+        if (in_array($outcome, [PaystackCourseService::NOT_FOUND, PaystackCourseService::IGNORED], true)) {
             return redirect()->route('courses.index')->with('error', 'Paiement introuvable en base.');
         }
 
-        $paid = (int) (($data['amount'] ?? 0) / 100);
-        if ($paid <= 0 || $paid !== (int) $payment->amount_paid) {
-            Log::error('[COURSE][PAYSTACK_CALLBACK] amount mismatch', [
-                'reference' => $reference,
-                'db_amount' => (int) $payment->amount_paid,
-                'paid'      => $paid,
-            ]);
+        if ($outcome === PaystackCourseService::MISMATCH) {
             return redirect()->route('courses.index')->with('error', 'Montant Paystack invalide.');
         }
 
-        // ✅ FIX : on récupère courseId AVANT la transaction pour qu'il soit dans le bon scope
+        $payment     = Payment::where('transaction_id', $reference)->first();
         $courseId    = (int) data_get($payment->meta, 'course_id');
         $courseTitle = optional(Course::find($courseId))->title ?? '';
-
-        DB::transaction(function () use ($payment, $reference, $data) {
-
-            $paymentLocked = Payment::where('id', $payment->id)->lockForUpdate()->first();
-
-            if ($paymentLocked->status === 'ACCEPTED' && $paymentLocked->credited_at) {
-                return;
-            }
-
-            $paymentLocked->status      = 'ACCEPTED';
-            $paymentLocked->credited_at = $paymentLocked->credited_at ?? now();
-            $paymentLocked->meta        = array_merge((array) ($paymentLocked->meta ?? []), [
-                'paystack' => [
-                    'reference' => $reference,
-                    'channel'   => $data['channel'] ?? null,
-                    'paid_at'   => $data['paid_at'] ?? null,
-                ],
-            ]);
-            $paymentLocked->save();
-
-            $meta       = (array) ($paymentLocked->meta ?? []);
-            $purchaseId = $meta['purchase_id'] ?? null;
-            $courseId   = $meta['course_id'] ?? null;
-
-            $purchase = null;
-            if ($purchaseId) {
-                $purchase = CoursePurchase::where('id', $purchaseId)->lockForUpdate()->first();
-            }
-            if (!$purchase && $courseId) {
-                $purchase = CoursePurchase::where('user_id', $paymentLocked->user_id)
-                    ->where('course_id', $courseId)
-                    ->lockForUpdate()
-                    ->first();
-            }
-            if ($purchase && !$purchase->paid_at) {
-                $purchase->paid_at     = now();
-                $purchase->payment_ref = $reference;
-                $purchase->save();
-            }
-        });
-
-        // Commission affiliation — hors transaction, idempotente (UNIQUE payment_id)
-        try {
-            $payment->refresh(); // relit l'état post-transaction
-            if ($payment->credited_at) {
-                $affiliateService->tryCreateCommission($payment);
-            }
-        } catch (\Throwable $e) {
-            Log::error('[COURSE][PAYSTACK_CALLBACK] affiliateCommission error', [
-                'reference'  => $reference,
-                'payment_id' => $payment->id,
-                'error'      => $e->getMessage(),
-            ]);
-        }
 
         // ✅ fb_purchase unifié (même clé que marketplace → même lecture dans les blades)
         return redirect()->route('courses.my')

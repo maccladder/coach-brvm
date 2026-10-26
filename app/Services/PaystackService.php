@@ -113,6 +113,45 @@ class PaystackService
         }
     }
 
+    /**
+     * Comme verify(), sans exception ni log : distingue une transaction inconnue de
+     * Paystack (found=false) d'une erreur réseau/API (error). Utilisé par la réconciliation.
+     *
+     * @return array{found: bool, data: ?array, error: ?string}
+     */
+    public function fetchTransaction(string $reference): array
+    {
+        if (!$this->secretKey) {
+            return ['found' => false, 'data' => null, 'error' => 'missing secret key'];
+        }
+
+        try {
+            $res = $this->http->get('/transaction/verify/' . urlencode($reference), [
+                'headers' => [
+                    'Authorization' => 'Bearer ' . $this->secretKey,
+                    'Accept'        => 'application/json',
+                ],
+                'http_errors' => false,
+            ]);
+
+            $code = $res->getStatusCode();
+            $body = json_decode((string) $res->getBody(), true);
+
+            if ($code === 200 && !empty($body['status']) && $body['status'] === true) {
+                return ['found' => true, 'data' => $body['data'] ?? null, 'error' => null];
+            }
+
+            if (in_array($code, [400, 404], true)) {
+                return ['found' => false, 'data' => null, 'error' => null];
+            }
+
+            return ['found' => false, 'data' => null, 'error' => 'HTTP ' . $code . ' ' . ($body['message'] ?? '')];
+
+        } catch (\Throwable $e) {
+            return ['found' => false, 'data' => null, 'error' => $e->getMessage()];
+        }
+    }
+
     private function safePayloadForLogs(array $payload): array
     {
         $p = $payload;

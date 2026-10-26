@@ -10,6 +10,7 @@ use App\Notifications\VendorPaymentReceivedNotification;
 use App\Services\Affiliate\AffiliateCommissionService;
 use App\Services\CinetpayService;
 use App\Services\PaystackService;
+use App\Services\Payments\PaystackMarketplaceService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -25,67 +26,15 @@ class MarketplacePaymentController extends Controller
 {
     public function __construct(private CinetpayService $cinetpay) {}
 
+    // Logique partagée avec le webhook Paystack : voir PaystackMarketplaceService
     private function notifyVendorPayment(string $transactionId): void
     {
-        try {
-            $payment = \App\Models\Payment::where('transaction_id', $transactionId)
-                ->with('user')
-                ->first();
-
-            if (!$payment) return;
-
-            $productId = (int) data_get($payment->meta, 'product_id');
-            if (!$productId) return;
-
-            $product = \App\Models\MarketplaceProduct::with('vendor')->find($productId);
-            if (!$product) return;
-
-            $vendor = $product->vendor ?: (!empty($product->user_id) ? \App\Models\User::find($product->user_id) : null);
-            if (!$vendor) return;
-
-            // ✅ anti-doublon: si déjà envoyé pour cette transaction, on stop
-            $alreadySent = $vendor->notifications()
-                ->where('type', \App\Notifications\VendorPaymentReceivedNotification::class)
-                ->where('data->transaction_id', $transactionId)
-                ->exists();
-
-            if ($alreadySent) return;
-
-            $buyerName = $payment->user?->name ?? 'Un client';
-            $amount    = (int) $payment->amount_paid;
-
-            $vendor->notify(new \App\Notifications\VendorPaymentReceivedNotification(
-                transactionId: $transactionId,
-                productId: $product->id,
-                productTitle: $product->title,
-                amount: $amount,
-                buyerName: $buyerName,
-                url: route('vendor.dashboard')
-            ));
-
-        } catch (\Throwable $e) {
-            \Illuminate\Support\Facades\Log::error('notifyVendorPayment error', [
-                'transaction_id' => $transactionId,
-                'error' => $e->getMessage(),
-            ]);
-        }
+        app(PaystackMarketplaceService::class)->notifyVendorPayment($transactionId);
     }
 
     private function notifyAdminPayment(string $transactionId): void
     {
-        if (!class_exists(AdminNotification::class)) return;
-
-        $payment = Payment::where('transaction_id', $transactionId)->first();
-        $title = data_get($payment?->meta, 'product_title', 'Marketplace');
-        $amount = (int) ($payment?->amount_paid ?? 0);
-
-        AdminNotification::create([
-            'type'    => 'payment_marketplace',
-            'title'   => 'Nouveau paiement marketplace',
-            'message' => $title . ' — ' . number_format($amount, 0, ',', ' ') . ' FCFA',
-            'url'     => route('admin.dashboard'),
-            'read_at' => null,
-        ]);
+        app(PaystackMarketplaceService::class)->notifyAdminPayment($transactionId);
     }
 
     public function buy(Request $request, MarketplaceProduct $product)
@@ -430,7 +379,7 @@ class MarketplacePaymentController extends Controller
         return redirect()->away($authUrl);
     }
 
-    public function paystackCallback(Request $request, PaystackService $paystack, AffiliateCommissionService $affiliateService)
+    public function paystackCallback(Request $request, PaystackService $paystack, PaystackMarketplaceService $marketplaceService)
     {
         $reference = (string) ($request->query('reference') ?: $request->query('trxref'));
 
@@ -448,22 +397,18 @@ class MarketplacePaymentController extends Controller
             return redirect()->route('marketplace.index')->with('error', 'Paiement non validé : ' . ($data['status'] ?? 'unknown'));
         }
 
-        $payment = Payment::where('transaction_id', $reference)->first();
-        if (!$payment) {
+        $outcome = $marketplaceService->handleChargeSuccess($data);
+
+        if (in_array($outcome, [PaystackMarketplaceService::NOT_FOUND, PaystackMarketplaceService::IGNORED], true)) {
             Log::error('PAYSTACK_MP_PAYMENT_NOT_FOUND', ['reference' => $reference, 'data' => $data]);
             return redirect()->route('marketplace.index')->with('error', 'Paiement introuvable en base.');
         }
 
-        $paid = (int) (($data['amount'] ?? 0) / 100);
-        if ($paid <= 0 || $paid !== (int) $payment->amount_paid) {
-            Log::error('PAYSTACK_MP_AMOUNT_MISMATCH', [
-                'reference' => $reference,
-                'db_amount' => (int) $payment->amount_paid,
-                'paid' => $paid,
-                'raw_amount' => $data['amount'] ?? null,
-            ]);
+        if ($outcome === PaystackMarketplaceService::MISMATCH) {
             return redirect()->route('marketplace.index')->with('error', 'Montant Paystack invalide.');
         }
+
+        $payment = Payment::where('transaction_id', $reference)->first();
 
         $productSlug = data_get($payment->meta, 'product_slug');
         $productId   = (int) data_get($payment->meta, 'product_id');
@@ -482,97 +427,9 @@ class MarketplacePaymentController extends Controller
             'order_id'         => (string) $reference,
         ];
 
-        DB::transaction(function () use ($reference, $payment, $data) {
-
-            $paymentLocked = Payment::where('id', $payment->id)->lockForUpdate()->first();
-            if ($paymentLocked->status === 'paid') return;
-
-            DB::table('marketplace_purchases')
-                ->where('provider_ref', $reference)
-                ->update([
-                    'status'     => 'paid',
-                    'paid_at'    => now(),
-                    'updated_at' => now(),
-                ]);
-
-            $paymentLocked->status = 'paid';
-            $paymentLocked->credited_at = $paymentLocked->credited_at ?? now();
-            $paymentLocked->meta = array_merge((array) ($paymentLocked->meta ?? []), [
-                'paystack' => [
-                    'reference' => $reference,
-                    'channel'   => $data['channel'] ?? null,
-                    'paid_at'   => $data['paid_at'] ?? null,
-                ],
-            ]);
-            $paymentLocked->save();
-
-            if (!$paymentLocked->notified_at) {
-                try {
-                    $paymentLocked->loadMissing('user');
-
-                    Mail::to([
-                        'maccladder@gmail.com',
-                        'ghislainkouadiodjaha@gmail.com',
-                    ])->send(new PaymentReceivedMail($paymentLocked));
-
-                    $paymentLocked->notified_at = now();
-                    $paymentLocked->save();
-                } catch (\Throwable $e) {
-                    Log::error('Marketplace paystackCallback: mail error', [
-                        'reference' => $reference,
-                        'error' => $e->getMessage(),
-                    ]);
-                }
-            }
-        });
-
-        // ✅ notif vendeur + notif admin
-        $this->notifyVendorPayment($reference);
-        $this->notifyAdminPayment($reference);
-
-        // Commission affiliation — hors transaction, idempotente (UNIQUE payment_id)
-        try {
-            $payment->refresh(); // relit l'état post-transaction
-            if ($payment->credited_at) {
-                $affiliateService->tryCreateCommission($payment);
-            }
-        } catch (\Throwable $e) {
-            Log::error('Marketplace paystackCallback: affiliateCommission error', [
-                'reference'  => $reference,
-                'payment_id' => $payment->id,
-                'error'      => $e->getMessage(),
-            ]);
-        }
-
         // ✅ SPECIAL FLOW (PAYSTACK ONLY): software du vendeur particulier (ID=59)
-        $specialVendorId = 59;
-        if ($product && $product->type === 'software' && (int) $product->user_id === $specialVendorId) {
-
-            // anti-doublon mail via meta
-            $meta = (array) ($payment->meta ?? []);
-            $alreadySent = (bool) data_get($meta, 'software_activation_mail_sent', false);
-
-            if (!$alreadySent) {
-                try {
-                    $payment->loadMissing('user');
-
-                    if (!empty($payment->user?->email)) {
-                        Mail::to($payment->user->email)->send(new SoftwareActivationMail($product));
-                    }
-
-                    $meta['software_activation_mail_sent'] = true;
-                    $payment->meta = $meta;
-                    $payment->save();
-
-                } catch (\Throwable $e) {
-                    Log::error('SoftwareActivationMail error', [
-                        'reference' => $reference,
-                        'product_id' => $product->id ?? null,
-                        'error' => $e->getMessage(),
-                    ]);
-                }
-            }
-
+        // (le mail d'activation est envoyé par PaystackMarketplaceService)
+        if (PaystackMarketplaceService::isSoftwareActivationProduct($product)) {
             return redirect()
                 ->route('marketplace.activation', $product->id)
                 ->with('success', "✅ Paiement confirmé. Finalisez l'activation en demandant votre licence.")

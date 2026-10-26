@@ -38,12 +38,30 @@
                     {{-- Corps --}}
                     <tr>
                         <td style="padding:28px 40px 0; color:#333333; font-size:15px; line-height:1.7;">
-                            <p style="margin:0 0 16px;">
-                                Nous avons constaté que votre tentative d'achat sur Boursiv n'a pas abouti.
-                            </p>
-                            <p style="margin:0 0 32px;">
-                                Besoin d'aide pour finaliser votre commande&nbsp;? Notre équipe est disponible sur WhatsApp pour vous accompagner.
-                            </p>
+                            @if($isMarketplace)
+                                <p style="margin:0 0 16px;">
+                                    Bonjour {{ $payment->user?->name }},
+                                </p>
+                                <p style="margin:0 0 16px;">
+                                    Ton paiement pour <strong>{{ $productTitle }}</strong> n'a pas abouti.
+                                    Pas de panique, ça arrive.
+                                </p>
+                                <p style="margin:0 0 16px;">
+                                    Tu peux réessayer directement depuis
+                                    <a href="{{ $productUrl }}" style="color:#0d6efd;">la page {{ $isGame ? 'du jeu' : 'du produit' }}</a>.
+                                    Le paiement se fait par Mobile Money.
+                                </p>
+                                <p style="margin:0 0 32px;">
+                                    Toujours bloqué&nbsp;? Écris-nous sur WhatsApp&nbsp;: on t'active {{ $isGame ? 'le jeu' : 'ton achat' }} tout de suite, tu paies après.
+                                </p>
+                            @else
+                                <p style="margin:0 0 16px;">
+                                    Nous avons constaté que votre tentative d'achat sur Boursiv n'a pas abouti.
+                                </p>
+                                <p style="margin:0 0 32px;">
+                                    Besoin d'aide pour finaliser votre commande&nbsp;? Notre équipe est disponible sur WhatsApp pour vous accompagner.
+                                </p>
+                            @endif
                         </td>
                     </tr>
 
@@ -67,7 +85,11 @@
                                                   background-color:#25D366;
                                                   mso-padding-alt:14px 28px;">
                                             <!--[if mso]><i style="letter-spacing:28px;mso-font-width:-100%;mso-text-raise:30pt">&nbsp;</i><![endif]-->
-                                            Contacter le support sur WhatsApp
+                                            @if($isMarketplace)
+                                                Un souci pour payer&nbsp;? On t'active {{ $isGame ? 'le jeu' : 'ton achat' }}, tu paies après
+                                            @else
+                                                Contacter le support sur WhatsApp
+                                            @endif
                                             <!--[if mso]><i style="letter-spacing:28px;mso-font-width:-100%">&nbsp;</i><![endif]-->
                                         </a>
                                     </td>
@@ -79,7 +101,7 @@
                     {{-- Signature --}}
                     <tr>
                         <td style="padding:0 40px 36px; color:#555555; font-size:14px; line-height:1.6;">
-                            <p style="margin:0;">L'équipe Boursiv.</p>
+                            <p style="margin:0;">L'équipe Boursiv</p>
                         </td>
                     </tr>
 
