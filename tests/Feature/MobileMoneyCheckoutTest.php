@@ -165,7 +165,9 @@ class MobileMoneyCheckoutTest extends TestCase
             ->assertSee('Accès à vie')
             ->assertSee('Téléphone et ordi')
             ->assertSee('Orange Money')->assertSee('MTN MoMo')->assertSee('data-classic="1"', false)
-            ->assertSee('Autre moyen de paiement');
+            ->assertDontSee('Autre moyen de paiement')
+            ->assertSee('class="btn-wa-pill" href="https://wa.me/2250767123451?text=', false)
+            ->assertSee("Besoin d'aide ? Écris-nous sur WhatsApp", false);
     }
 
     public function test_article_gratuit_garde_son_flux_claim(): void

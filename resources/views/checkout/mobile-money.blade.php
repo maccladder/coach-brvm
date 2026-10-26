@@ -141,6 +141,25 @@
         .secure { display: inline-flex; align-items: center; gap: 6px; font-weight: 600; color: var(--ink); }
         .wa-link { display: inline-flex; align-items: center; min-height: 44px; font-weight: 600; color: var(--wa); }
 
+        /* Bouton WhatsApp (écran paiement + écran d'échec) */
+        .btn-wa-pill {
+            display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+            min-height: 48px; padding: 12px 24px; border-radius: 999px;
+            background: #25D366; color: #fff; font: 700 15px/1.25 'Inter', sans-serif;
+            text-decoration: none; text-align: center;
+            box-shadow: 0 4px 14px rgba(37,211,102,.35);
+            transition: background .15s ease, box-shadow .15s ease, transform .1s ease;
+        }
+        .btn-wa-pill:hover,
+        .btn-wa-pill:focus-visible { background: #1ebe5a; color: #fff; box-shadow: 0 6px 18px rgba(30,190,90,.4); }
+        .btn-wa-pill:active { background: #1ebe5a; transform: translateY(1px); box-shadow: 0 2px 8px rgba(30,190,90,.35); }
+        .btn-wa-pill svg { flex: 0 0 auto; }
+        .btn-wa-pill--spaced { margin-top: 12px; }
+        .footer-links .btn-wa-pill { margin-top: 6px; }
+        @media (max-width: 575.98px) {
+            .btn-wa-pill { display: flex; width: 100%; }
+        }
+
         /* Écran attente (fond navy) */
         .dark { color: #fff; text-align: center; }
         .dark h2 { font-size: 21px; margin: 18px 0 6px; }
@@ -291,14 +310,12 @@
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="5" y="10" width="14" height="10" rx="2" stroke="currentColor" stroke-width="2"/><path d="M8 10V7a4 4 0 118 0v3" stroke="currentColor" stroke-width="2"/></svg>
                 Paiement sécurisé par Paystack
             </p>
-            <p><a class="wa-link" href="{{ $whatsapp }}" target="_blank" rel="noopener">Besoin d'aide ? Écris-nous sur WhatsApp</a></p>
-            <form method="POST" action="{{ $classic['action'] }}">
-                @csrf
-                @foreach($classic['fields'] as $name => $value)
-                    <input type="hidden" name="{{ $name }}" value="{{ $value }}">
-                @endforeach
-                <button type="submit" class="linklike">Autre moyen de paiement</button>
-            </form>
+            <p>
+                <a class="btn-wa-pill" href="{{ $whatsapp }}" target="_blank" rel="noopener">
+                    @include('checkout.partials.whatsapp-icon')
+                    Besoin d'aide ? Écris-nous sur WhatsApp
+                </a>
+            </p>
         </div>
     </section>
 
@@ -400,7 +417,8 @@
         </div>
 
         <button type="button" class="btn btn-gold" id="retry-btn">Réessayer</button>
-        <a class="btn btn-wa" href="{{ $whatsapp }}" target="_blank" rel="noopener">
+        <a class="btn-wa-pill btn-wa-pill--spaced" href="{{ $whatsapp }}" target="_blank" rel="noopener">
+            @include('checkout.partials.whatsapp-icon')
             {{ $payable->offerActivation ? "On t'active l'accès, tu paies après" : 'Un souci ? Écris-nous sur WhatsApp' }}
         </a>
     </section>
