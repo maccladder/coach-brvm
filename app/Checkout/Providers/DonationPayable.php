@@ -4,17 +4,20 @@ namespace App\Checkout\Providers;
 
 use App\Checkout\CheckoutRedirect;
 use App\Checkout\Payable;
+use App\Checkout\StartsClassicFlow;
+use App\Http\Controllers\DonationController;
 use App\Models\Donation;
 use App\Models\User;
 use App\Services\Payments\PaystackDonationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Symfony\Component\HttpFoundation\Response;
 
 /**
  * Dons : ouverts aux visiteurs non connectés. Le nom, l'email et le montant saisis sur
  * /faire-un-don sont gardés en session (pas dans l'URL) par DonationController::initiate.
  */
-class DonationPayable extends BasePayable
+class DonationPayable extends BasePayable implements StartsClassicFlow
 {
     public const SESSION_KEY = 'checkout_mm_don';
 
@@ -97,5 +100,20 @@ class DonationPayable extends BasePayable
                 'amount'      => $payable->amount,
             ],
         ];
+    }
+
+    /** Ancien flux Paystack (page hébergée), ex. Wave tant que son Charge API n'est pas activé */
+    public function startClassic(Request $request, ?User $user): Response
+    {
+        $payable = $this->resolve($request, $user);
+
+        $request->merge([
+            'classic'     => 1,
+            'donor_name'  => $payable->context['donor_name'],
+            'donor_email' => $payable->context['donor_email'],
+            'amount'      => $payable->amount,
+        ]);
+
+        return app()->call([app(DonationController::class), 'initiate']);
     }
 }

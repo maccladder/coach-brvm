@@ -31,8 +31,8 @@ class PaystackMobileMoneyCheckout
      * Texte libre, à adapter si les opérateurs changent leur parcours.
      */
     public const OTP_HELP = [
-        'orange'  => "Ouvre l'application Orange Money (ou compose le #144# depuis ton téléphone), "
-                   . "génère un code de paiement temporaire, puis saisis-le ici pour valider le paiement.",
+        'orange'  => "Compose #144*82# sur ton téléphone Orange (ou passe par l'application Orange Money) "
+                   . "pour générer ton code de paiement, puis saisis-le ici.",
         'default' => "Génère un code de paiement temporaire depuis l'application ou le menu Mobile Money "
                    . "de ton téléphone, puis saisis-le ici pour valider le paiement.",
     ];
@@ -116,16 +116,26 @@ class PaystackMobileMoneyCheckout
         return app(config("checkout.types.{$type}.provider"));
     }
 
-    /** Opérateurs proposés (Wave masqué tant que CHECKOUT_MM_WAVE_ENABLED=false) */
+    /**
+     * Opérateurs affichés. Tant que CHECKOUT_MM_WAVE_ENABLED=false (Charge API Wave pas encore
+     * activé chez Paystack), Wave reste proposé mais passe par la page Paystack classique
+     * limitée au Mobile Money ('classic' => true).
+     */
     public function operators(): array
     {
         $operators = config('checkout.operators', []);
 
-        if (!config('checkout.wave_enabled')) {
-            unset($operators['wave']);
+        foreach ($operators as $key => $op) {
+            $operators[$key]['classic'] = $key === 'wave' && !config('checkout.wave_enabled');
         }
 
         return $operators;
+    }
+
+    /** Opérateurs payables via le Charge API (/charge) */
+    public function chargeOperators(): array
+    {
+        return array_filter($this->operators(), fn ($op) => !$op['classic']);
     }
 
     public function windowSeconds(): int

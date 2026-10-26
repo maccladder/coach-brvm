@@ -164,7 +164,7 @@ class MobileMoneyCheckoutTest extends TestCase
             ->assertSee('1 000 F CFA')
             ->assertSee('Accès à vie')
             ->assertSee('Téléphone et ordi')
-            ->assertSee('Orange Money')->assertSee('MTN MoMo')->assertDontSee('data-operator="wave"', false)
+            ->assertSee('Orange Money')->assertSee('MTN MoMo')->assertSee('data-classic="1"', false)
             ->assertSee('Autre moyen de paiement');
     }
 

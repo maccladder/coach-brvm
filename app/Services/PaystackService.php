@@ -44,6 +44,13 @@ class PaystackService
                 'metadata'     => $data['metadata'] ?? [],
             ];
 
+            // Canaux proposés sur la page Paystack (ex. ['mobile_money'] pour Wave via le flux
+            // classique, posé pour la requête en cours par la route checkout.mm.classic)
+            $channels = $data['channels'] ?? config('services.paystack.channels');
+            if (!empty($channels)) {
+                $payload['channels'] = array_values((array) $channels);
+            }
+
             $res = $this->http->post('/transaction/initialize', [
                 'headers' => [
                     'Authorization' => 'Bearer ' . $this->secretKey,

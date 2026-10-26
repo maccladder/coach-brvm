@@ -4,6 +4,8 @@ namespace App\Checkout\Providers;
 
 use App\Checkout\CheckoutRedirect;
 use App\Checkout\Payable;
+use App\Checkout\StartsClassicFlow;
+use App\Http\Controllers\MarketplacePaymentController;
 use App\Models\MarketplaceProduct;
 use App\Models\Payment;
 use App\Models\User;
@@ -12,8 +14,9 @@ use App\Services\Payments\PaystackMarketplaceService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Symfony\Component\HttpFoundation\Response;
 
-class MarketplacePayable extends BasePayable
+class MarketplacePayable extends BasePayable implements StartsClassicFlow
 {
     public function __construct(
         private AffiliateCommissionService $affiliateService,
@@ -149,5 +152,14 @@ class MarketplacePayable extends BasePayable
                 'affiliate_code' => $payable->params['affiliate_code'] ?? null,
             ]),
         ];
+    }
+
+    /** Ancien flux Paystack (page hébergée), ex. Wave tant que son Charge API n'est pas activé */
+    public function startClassic(Request $request, ?User $user): Response
+    {
+        $product = MarketplaceProduct::findOrFail((int) $request->input('product'));
+        $request->merge(['classic' => 1]);
+
+        return app()->call([app(MarketplacePaymentController::class), 'buyPaystack'], ['product' => $product]);
     }
 }

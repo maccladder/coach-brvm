@@ -3,6 +3,7 @@
 namespace App\Checkout\Providers;
 
 use App\Checkout\Payable;
+use App\Checkout\StartsClassicFlow;
 use App\Http\Controllers\PackController;
 use App\Models\Course;
 use App\Models\Payment;
@@ -11,8 +12,9 @@ use App\Services\Affiliate\AffiliateCommissionService;
 use App\Services\Payments\PaystackPackService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Symfony\Component\HttpFoundation\Response;
 
-class PackPayable extends BasePayable
+class PackPayable extends BasePayable implements StartsClassicFlow
 {
     public function __construct(
         private AffiliateCommissionService $affiliateService,
@@ -94,5 +96,13 @@ class PackPayable extends BasePayable
                 'affiliate_code' => $payable->params['affiliate_code'] ?? null,
             ]),
         ];
+    }
+
+    /** Ancien flux Paystack (page hébergée), ex. Wave tant que son Charge API n'est pas activé */
+    public function startClassic(Request $request, ?User $user): Response
+    {
+        $request->merge(['classic' => 1]);
+
+        return app()->call([app(PackController::class), 'buyPaystack']);
     }
 }

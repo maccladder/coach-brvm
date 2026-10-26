@@ -4,6 +4,8 @@ namespace App\Checkout\Providers;
 
 use App\Checkout\CheckoutRedirect;
 use App\Checkout\Payable;
+use App\Checkout\StartsClassicFlow;
+use App\Http\Controllers\CoursePaymentController;
 use App\Models\Course;
 use App\Models\CoursePurchase;
 use App\Models\Payment;
@@ -12,8 +14,9 @@ use App\Services\Affiliate\AffiliateCommissionService;
 use App\Services\Payments\PaystackCourseService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Symfony\Component\HttpFoundation\Response;
 
-class CoursePayable extends BasePayable
+class CoursePayable extends BasePayable implements StartsClassicFlow
 {
     public function __construct(
         private AffiliateCommissionService $affiliateService,
@@ -116,5 +119,14 @@ class CoursePayable extends BasePayable
                 'affiliate_code' => $payable->params['affiliate_code'] ?? null,
             ]),
         ];
+    }
+
+    /** Ancien flux Paystack (page hébergée), ex. Wave tant que son Charge API n'est pas activé */
+    public function startClassic(Request $request, ?User $user): Response
+    {
+        $course = Course::findOrFail((int) $request->input('course'));
+        $request->merge(['classic' => 1]);
+
+        return app()->call([app(CoursePaymentController::class), 'buyPaystack'], ['course' => $course]);
     }
 }

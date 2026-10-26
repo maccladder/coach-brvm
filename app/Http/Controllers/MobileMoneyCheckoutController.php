@@ -54,7 +54,7 @@ class MobileMoneyCheckoutController extends Controller
         $request->merge(['phone' => preg_replace('/\D+/', '', (string) $request->input('phone'))]);
 
         $validated = $request->validate([
-            'operator' => ['required', 'string', 'in:' . implode(',', array_keys($this->checkout->operators()))],
+            'operator' => ['required', 'string', 'in:' . implode(',', array_keys($this->checkout->chargeOperators()))],
             'phone'    => ['required', 'digits:10'],
         ], [
             'operator.required' => 'Choisis ton opérateur.',
@@ -102,10 +102,19 @@ class MobileMoneyCheckoutController extends Controller
         return response()->json($this->checkout->present($attempt));
     }
 
-    /** "Autre moyen de paiement" pour les types dont l'ancien flux n'est pas un simple formulaire */
+    /**
+     * Flux Paystack classique lancé depuis le checkout : "Autre moyen de paiement" (types dont
+     * l'ancien flux n'est pas un simple formulaire) et Wave tant que son Charge API n'est pas
+     * activé (operator=wave → page Paystack limitée au Mobile Money). Le retour Paystack passe
+     * par le callback habituel du type (produit débloqué, mes cours…).
+     */
     public function classic(Request $request, string $type)
     {
         abort_unless($this->checkout->exists($type), 404);
+
+        if ($request->input('operator') === 'wave') {
+            config(['services.paystack.channels' => ['mobile_money']]);
+        }
 
         $provider = $this->checkout->provider($type);
         abort_unless($provider instanceof StartsClassicFlow, 404);

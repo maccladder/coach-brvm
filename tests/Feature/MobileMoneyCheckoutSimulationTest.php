@@ -29,8 +29,14 @@ class MobileMoneyCheckoutSimulationTest extends TestCase
     /** Appels HTTP réels vers "Paystack" (doit rester vide en simulation) */
     private array $calls = [];
 
+    /** Corps JSON envoyés, par "METHOD /chemin" (dernier appel) */
+    private array $bodies = [];
+
     /** Réponse renvoyée par le faux Paystack à POST /charge : [http, body] */
     private array $chargeReply = [200, ['status' => true, 'data' => ['status' => 'pay_offline']]];
+
+    /** Réponse de GET /transaction/verify (callback de l'ancien flux) */
+    private ?array $verifyData = null;
 
     protected function setUp(): void
     {
@@ -47,6 +53,11 @@ class MobileMoneyCheckoutSimulationTest extends TestCase
 
         $handler = function (RequestInterface $request) {
             $this->calls[] = $request->getMethod() . ' ' . $request->getUri()->getPath();
+            $this->bodies[$request->getMethod() . ' ' . $request->getUri()->getPath()] = json_decode((string) $request->getBody(), true);
+
+            if ($this->verifyData && str_starts_with($request->getUri()->getPath(), '/transaction/verify/')) {
+                return Create::promiseFor(new Response(200, [], json_encode(['status' => true, 'data' => $this->verifyData])));
+            }
 
             if ($request->getMethod() === 'POST' && $request->getUri()->getPath() === '/charge') {
                 [$http, $body] = $this->chargeReply;
@@ -297,16 +308,87 @@ class MobileMoneyCheckoutSimulationTest extends TestCase
         $this->assertStringNotContainsString('Charge attempted', $res->getContent());
     }
 
-    public function test_wave_masque_par_defaut(): void
+    // ─── Wave ───────────────────────────────────────────────────────────────
+
+    public function test_wave_desactive_affiche_en_premier_avec_mention_page_paystack(): void
     {
+        $product = $this->game();
+        $this->actingAs(User::factory()->create());
+
+        $html = $this->get(route('checkout.mm.show', ['type' => 'marketplace', 'product' => $product->id]))
+            ->assertOk()
+            ->assertSee('data-classic="1"', false)
+            ->assertSee('Tu vas être redirigé vers la page sécurisée Paystack pour payer avec Wave')
+            ->assertSee('action="' . route('checkout.mm.classic', 'marketplace') . '"', false)
+            ->getContent();
+
+        // Wave en premier
+        $this->assertLessThan(strpos($html, 'data-operator="orange"'), strpos($html, 'data-operator="wave"'));
+
+        // Pas de Charge API pour Wave tant qu'il n'est pas activé
+        $this->pay($product, '0707123456', 'wave')->assertStatus(422)->assertJsonValidationErrors('operator');
+        $this->assertNotContains('POST /charge', $this->calls);
+    }
+
+    public function test_wave_desactive_flux_classique_limite_au_mobile_money_puis_retour_produit_debloque(): void
+    {
+        $product = $this->game();
+        $this->actingAs(User::factory()->create());
+
+        $this->post(route('checkout.mm.classic', 'marketplace'), ['product' => $product->id, 'operator' => 'wave'])
+            ->assertRedirect('https://checkout.paystack.com/old');
+
+        $init = $this->bodies['POST /transaction/initialize'];
+        $this->assertSame(['mobile_money'], $init['channels']);
+        $this->assertSame(100000, $init['amount']);
+        $this->assertStringStartsWith('MP-', $init['reference']);
+        $this->assertSame('pending', Payment::where('transaction_id', $init['reference'])->value('status'));
+
+        // Retour Paystack (callback habituel) : page du produit débloqué
+        $this->verifyData = ['reference' => $init['reference'], 'status' => 'success', 'amount' => 100000, 'currency' => 'XOF'];
+        $this->get(route('paystack.marketplace.callback', ['reference' => $init['reference']]))
+            ->assertRedirect(route('marketplace.show', $product->slug))
+            ->assertSessionHas('success');
+
+        $this->assertSame('paid', DB::table('marketplace_purchases')->where('provider_ref', $init['reference'])->value('status'));
+    }
+
+    public function test_autre_moyen_de_paiement_sans_restriction_de_canal(): void
+    {
+        $product = $this->game();
+        $this->actingAs(User::factory()->create());
+
+        $this->post(route('paystack.marketplace.buy', $product), ['classic' => 1])
+            ->assertRedirect('https://checkout.paystack.com/old');
+
+        $this->assertArrayNotHasKey('channels', $this->bodies['POST /transaction/initialize']);
+    }
+
+    public function test_wave_active_passe_par_le_charge_api(): void
+    {
+        config(['checkout.wave_enabled' => true]);
         $product = $this->game();
         $this->actingAs(User::factory()->create());
 
         $this->get(route('checkout.mm.show', ['type' => 'marketplace', 'product' => $product->id]))
             ->assertOk()
-            ->assertDontSee('data-operator="wave"', false);
+            ->assertSee('data-operator="wave"', false)
+            ->assertDontSee('data-classic="1"', false);
 
-        $this->pay($product, '0707123456', 'wave')->assertStatus(422)->assertJsonValidationErrors('operator');
+        $this->pay($product, '0707123456', 'wave')->assertOk()->assertJsonPath('status', 'pending');
+
+        $this->assertSame('wave', $this->bodies['POST /charge']['mobile_money']['provider']);
+        $this->assertNotContains('POST /transaction/initialize', $this->calls);
+    }
+
+    public function test_aide_code_orange_mentionne_144_82(): void
+    {
+        $this->simulate();
+
+        $help = $this->actingAs(User::factory()->create())->pay($this->game(), '0707000002')->json('otp_help');
+
+        $this->assertStringContainsString('#144*82#', $help);
+        $this->assertStringNotContainsString('#144#', $help);
     }
 
     public function test_pas_de_bouton_ni_image_vides(): void

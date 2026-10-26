@@ -178,6 +178,7 @@
         .raw { font-size: 12px; color: #9fb0cc; margin: 8px 0 0; font-style: italic; }
         .otp-icon { font-size: 44px; margin-top: 18px; }
         .otp-box input { min-height: 60px; font-size: 26px; }
+        .classic-note { margin: 10px 2px 0; font-size: 14px; color: var(--navy); background: #e8f8fd; border: 1px solid #b6e9f8; border-radius: 12px; padding: 10px 12px; }
         .sim-banner { background: #fff3cd; color: #664d03; border: 1px solid #ffe69c; border-radius: 10px; padding: 8px 12px; font-size: 13px; font-weight: 600; margin-bottom: 12px; text-align: center; }
 
         /* Succès / échec */
@@ -249,6 +250,7 @@
             <div class="operators" role="group" aria-labelledby="op-title">
                 @foreach($operators as $key => $op)
                     <button type="button" class="op" data-operator="{{ $key }}" data-label="{{ $op['label'] }}"
+                            @if($op['classic']) data-classic="1" aria-describedby="classic-note" @endif
                             aria-pressed="false"
                             style="background: {{ $op['color'] }}; color: {{ $op['text'] }};">
                         <span class="dot" aria-hidden="true"></span>
@@ -257,7 +259,9 @@
                 @endforeach
             </div>
             <p class="error" id="op-error" role="alert"></p>
+            <p class="classic-note" id="classic-note" hidden>Tu vas être redirigé vers la page sécurisée Paystack pour payer avec Wave.</p>
 
+            <div id="phone-block">
             <h2 class="step-title"><label for="phone" id="phone-label">2. Ton numéro Mobile Money</label></h2>
             <div class="phone-row">
                 <span class="prefix" aria-hidden="true">{{ $phonePrefix }}</span>
@@ -266,11 +270,20 @@
             </div>
             <p class="hint" id="phone-hint">Garde ton téléphone à portée : tu vas recevoir une demande de validation.</p>
             <p class="error" id="phone-error" role="alert"></p>
+            </div>
 
             <button type="submit" class="btn btn-gold" id="pay-btn">
                 <span id="pay-btn-text">Payer {{ $amountLabel }} F →</span>
             </button>
             <p class="error" id="pay-error" role="alert"></p>
+        </form>
+
+        <form method="POST" action="{{ route('checkout.mm.classic', $type) }}" id="classic-op-form" hidden>
+            @csrf
+            @foreach($payable->params as $name => $value)
+                <input type="hidden" name="{{ $name }}" value="{{ $value }}">
+            @endforeach
+            <input type="hidden" name="operator" id="classic-op" value="">
         </form>
 
         <div class="footer-links">
@@ -441,15 +454,24 @@
         btn.addEventListener('click', () => selectOperator(btn.dataset.operator));
     });
 
+    let operatorClassic = false;
+
     function selectOperator(key) {
         document.querySelectorAll('.op').forEach(b => {
             const on = b.dataset.operator === key;
             b.setAttribute('aria-pressed', on ? 'true' : 'false');
-            if (on) operatorLabel = b.dataset.label;
+            if (on) { operatorLabel = b.dataset.label; operatorClassic = b.dataset.classic === '1'; }
         });
         operator = key;
         $('phone-label').textContent = '2. Ton numéro ' + operatorLabel;
         $('op-error').textContent = '';
+
+        // Opérateur via la page Paystack classique : pas de numéro à saisir ici
+        $('classic-note').hidden = !operatorClassic;
+        $('phone-block').hidden = operatorClassic;
+        $('pay-btn-text').textContent = operatorClassic
+            ? 'Continuer avec ' + operatorLabel + ' →'
+            : @json('Payer ' . $amountLabel . ' F →');
     }
 
     $('phone').addEventListener('input', (e) => {
@@ -460,6 +482,14 @@
 
     $('pay-form').addEventListener('submit', async (e) => {
         e.preventDefault();
+
+        if (operatorClassic) {
+            $('classic-op').value = operator;
+            setPaying(true);
+            $('classic-op-form').submit();
+            return;
+        }
+
         const phone = $('phone').value.replace(/\D/g, '');
         let ok = true;
         if (!operator) { $('op-error').textContent = 'Choisis ton opérateur.'; ok = false; }
