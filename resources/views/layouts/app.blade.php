@@ -166,8 +166,20 @@
             50% { opacity: .2; }
         }
 
+        /* Onglet Marketplace mis en avant (fond or, texte navy) */
+        .cb-navbar .nav-link.cb-nav-market {
+            display: inline-flex; align-items: center; gap: 6px;
+            background: #f5c518; color: #0c1b33 !important; font-weight: 800;
+            border-radius: 999px; padding: 7px 14px !important; margin: auto 6px;
+            box-shadow: 0 2px 8px rgba(245,197,24,.35); transition: background .2s, box-shadow .2s;
+        }
+        .cb-navbar .nav-link.cb-nav-market:hover,
+        .cb-navbar .nav-link.cb-nav-market:focus-visible { background: #ffd43b; color: #0c1b33 !important; box-shadow: 0 4px 14px rgba(245,197,24,.5); }
+        .cb-navbar .nav-link.cb-nav-market::after { display: none; }
+        .cb-nav-market-icon { font-size: 13px; line-height: 1; }
+
         /* Menu desktop sur une seule ligne : aucun libellé ne passe à la ligne
-           (Diaspora / Financement avec pastille, Se connecter), espacements
+           (Diaspora avec pastille, Marketplace, Se connecter), espacements
            resserrés tant que la largeur est limitée */
         @media (min-width: 992px) {
             .cb-navbar .nav-link,
@@ -202,6 +214,52 @@
                 border-left: none;
                 margin-left: 0;
             }
+
+            /* Menu déplié : il défile dans la hauteur visible de l'écran (la hauteur
+               exacte sous le header est recalculée en JS, barre d'adresse iOS comprise) */
+            .cb-navbar .navbar-collapse {
+                max-height: calc(100vh - 60px);
+                max-height: calc(100dvh - 60px);
+                overflow-y: auto;
+                -webkit-overflow-scrolling: touch;
+                overscroll-behavior: contain;
+                padding-bottom: env(safe-area-inset-bottom);
+            }
+
+            /* Zones cliquables ≥ 44 px */
+            .cb-navbar .nav-link { min-height: 44px; display: flex; align-items: center; }
+            .cb-navbar .dropdown-item { min-height: 44px; display: flex; align-items: center; padding: 10px 14px; }
+            .cb-navbar .navbar-toggler { min-width: 44px; min-height: 44px; }
+            .cb-bell-btn { width: 44px; height: 44px; }
+            .cb-user-btn,
+            .cb-btn-login,
+            .cb-btn-register { min-height: 44px; display: inline-flex; align-items: center; }
+
+            /* Marketplace : pastille dans la liste, pas sur toute la largeur */
+            .cb-navbar .nav-link.cb-nav-market { align-self: flex-start; margin: 6px 16px; padding: 10px 18px !important; }
+
+            /* Cloche + compte : boutons sur une ligne, leurs menus s'ouvrent EN LIGNE
+               dessous, pleine largeur (pas de menu flottant coupé par le défilement) */
+            .cb-nav-actions { flex-wrap: wrap; align-items: flex-start !important; }
+            .cb-nav-actions > .dropdown { display: contents; }
+            .cb-navbar .cb-nav-actions .dropdown-menu {
+                position: static !important;
+                transform: none !important;
+                inset: auto !important;
+                float: none;
+                order: 1;
+                flex: 0 0 100%;
+                width: 100% !important;
+                max-width: 100% !important;
+                margin: 8px 0 0 !important;
+                box-shadow: none;
+            }
+
+            /* Menu ouvert : la page derrière ne défile plus et le bouton WhatsApp
+               flottant ne recouvre pas les options */
+            html.cb-nav-open,
+            html.cb-nav-open body { overflow: hidden; }
+            html.cb-nav-open .cb-wa-float { display: none; }
         }
         @media (max-width:576px) {
             .cb-notif-menu { width:calc(100vw - 24px) !important; max-width:calc(100vw - 24px) !important; }
@@ -270,13 +328,19 @@
 <nav class="navbar navbar-expand-lg cb-navbar">
     <div class="container" style="max-width:1100px;">
         <a class="cb-brand" href="{{ route('landing') }}">Boursiv</a>
-        <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar">
+        <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar"
+                aria-controls="mainNavbar" aria-expanded="false" aria-label="Ouvrir le menu">
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="mainNavbar">
             <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                 <li class="nav-item">
                     <a class="nav-link" href="{{ route('landing') }}">Accueil</a>
+                </li>
+                <li class="nav-item d-lg-flex align-items-lg-center">
+                    <a class="nav-link cb-nav-market" href="{{ route('marketplace.index') }}">
+                        <span class="cb-nav-market-icon" aria-hidden="true">🎮</span>Marketplace
+                    </a>
                 </li>
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">Marché</a>
@@ -339,11 +403,6 @@
                         <span class="cb-diaspora-blink"></span>Diaspora
                     </a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link cb-nav-diaspora" href="{{ route('financement') }}">
-                        <span class="cb-diaspora-blink"></span>Financement
-                    </a>
-                </li>
                 @auth
                 <li class="nav-item">
                     <a class="nav-link" href="{{ route('donation.show') }}" style="color:var(--cb-gold) !important;opacity:.85;">🤝 Soutenir</a>
@@ -351,7 +410,7 @@
                 @endauth
             </ul>
 
-            <div class="d-flex align-items-center gap-2 py-2 py-lg-0">
+            <div class="d-flex align-items-center gap-2 py-2 py-lg-0 cb-nav-actions">
                 @auth
                     @php
                         $unreadCount  = auth()->user()->unreadNotifications()->count();
@@ -504,6 +563,56 @@
 @endguest
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+// Menu mobile : hauteur = espace visible sous le header (barre d'adresse iOS / Android
+// comprise), page derrière bloquée tant que le menu est ouvert.
+(() => {
+    const nav = document.getElementById('mainNavbar');
+    if (!nav) return;
+    const mobile = window.matchMedia('(max-width: 991.98px)');
+    const root = document.documentElement;
+
+    function fit() {
+        if (!mobile.matches) { nav.style.maxHeight = ''; return; }
+        const viewport = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+        const top = nav.getBoundingClientRect().top;
+        nav.style.maxHeight = Math.max(200, Math.floor(viewport - top)) + 'px';
+    }
+
+    // iOS ignore overflow:hidden sur le body : on bloque les gestes hors du menu
+    function blockTouch(e) {
+        if (!nav.contains(e.target)) e.preventDefault();
+    }
+
+    nav.addEventListener('show.bs.collapse', (e) => {
+        if (e.target !== nav || !mobile.matches) return;
+        root.classList.add('cb-nav-open');
+        document.addEventListener('touchmove', blockTouch, { passive: false });
+        // le menu vient d'être affiché (display:none jusque-là) : position mesurable à la frame suivante
+        requestAnimationFrame(fit);
+    });
+    nav.addEventListener('shown.bs.collapse', (e) => { if (e.target === nav) fit(); });
+    nav.addEventListener('hidden.bs.collapse', (e) => {
+        if (e.target !== nav) return;
+        root.classList.remove('cb-nav-open');
+        document.removeEventListener('touchmove', blockTouch);
+        nav.style.maxHeight = '';
+    });
+
+    const refit = () => { if (nav.classList.contains('show')) fit(); };
+    window.addEventListener('resize', refit);
+    if (window.visualViewport) window.visualViewport.addEventListener('resize', refit);
+
+    // Retour en desktop menu ouvert : on libère la page
+    mobile.addEventListener('change', () => {
+        if (!mobile.matches) {
+            root.classList.remove('cb-nav-open');
+            document.removeEventListener('touchmove', blockTouch);
+            nav.style.maxHeight = '';
+        }
+    });
+})();
+</script>
 @stack('scripts')
 
 {{-- Floating WhatsApp Diaspora --}}

@@ -587,7 +587,9 @@ Route::view('/conditions', 'sections.conditions')->name('conditions');
 Route::view('/confidentialite', 'sections.confidentialite')->name('confidentialite');
 Route::view('/notre-histoire', 'sections.notre-histoire')->name('notre.histoire');
 Route::view('/diaspora', 'sections.diaspora')->name('diaspora');
-Route::view('/financement', 'sections.financement')->name('financement');
+// Financement retiré du menu : redirection temporaire vers l'accueil.
+// Pour réactiver : Route::view('/financement', 'sections.financement')->name('financement');
+Route::get('/financement', fn () => redirect()->route('landing', [], 302))->name('financement');
 Route::view('/formation-presentielle', 'sections.formation-presentielle')->name('formation.presentielle');
 
 // ──────────────────────────────────────────────────
