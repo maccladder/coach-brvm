@@ -28,6 +28,7 @@ class PaystackPackService
     {
         $reference  = (string) ($data['reference'] ?? '');
         $amountPaid = (int) round(((int) ($data['amount'] ?? 0)) / 100);
+        $currency   = strtoupper((string) ($data['currency'] ?? ''));
         $email      = (string) data_get($data, 'customer.email');
 
         if ($reference === '') {
@@ -39,7 +40,7 @@ class PaystackPackService
         $user      = null;
         $courseIds = [];
 
-        DB::transaction(function () use ($reference, $amountPaid, $email, $data, &$token, &$user, &$courseIds) {
+        DB::transaction(function () use ($reference, $amountPaid, $currency, $email, $data, &$token, &$user, &$courseIds) {
 
             $payment = Payment::where('transaction_id', $reference)
                 ->lockForUpdate()
@@ -67,12 +68,13 @@ class PaystackPackService
                 return;
             }
 
-            // Vérification montant
-            if ((int) $payment->amount_paid !== $amountPaid) {
+            // Vérification montant + devise
+            if ((int) $payment->amount_paid !== $amountPaid || $currency !== 'XOF') {
                 Log::error('PaystackPackService: amount mismatch', [
                     'reference' => $reference,
                     'db_amount' => $payment->amount_paid,
                     'paid'      => $amountPaid,
+                    'currency'  => $currency,
                 ]);
                 $payment->status = 'REFUSED';
                 $payment->save();

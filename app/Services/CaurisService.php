@@ -79,8 +79,9 @@ class CaurisService
     {
         $reference  = (string) ($data['reference'] ?? '');
         $amountPaid = (int) round(((int) ($data['amount'] ?? 0)) / 100);
+        $currency   = strtoupper((string) ($data['currency'] ?? ''));
 
-        DB::transaction(function () use ($reference, $amountPaid, $data) {
+        DB::transaction(function () use ($reference, $amountPaid, $currency, $data) {
             $achat = CaurisAchat::where('reference', $reference)
                 ->lockForUpdate()
                 ->first();
@@ -99,12 +100,13 @@ class CaurisService
                 return;
             }
 
-            // Anti-fraude : le montant payé doit correspondre exactement au pack
-            if ($achat->prix !== $amountPaid) {
+            // Anti-fraude : le montant payé doit correspondre exactement au pack, en XOF
+            if ($achat->prix !== $amountPaid || $currency !== 'XOF') {
                 Log::error('Paystack webhook CAURIS: montant incorrect', [
                     'reference'  => $reference,
                     'db_prix'    => $achat->prix,
                     'paid'       => $amountPaid,
+                    'currency'   => $currency,
                 ]);
                 $achat->update(['status' => 'REFUSED']);
                 return;

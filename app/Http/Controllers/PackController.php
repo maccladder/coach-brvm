@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\Payments\PaystackMobileMoneyCheckout;
 use App\Mail\PackBrvmConfirmationMail;
 use App\Models\Course;
 use App\Models\CoursePurchase;
@@ -66,6 +67,12 @@ class PackController extends Controller
         if ($checkout['warning']) {
             // Code saisi manuellement mais produit non éligible → informer et stopper
             return back()->withInput()->with('warning', $checkout['warning']);
+        }
+
+        // Checkout Mobile Money personnalisé si activé pour ce type (config/checkout.php) ; ?classic=1 = ancien flux
+        $mm = app(PaystackMobileMoneyCheckout::class);
+        if ($mm->shouldIntercept('pack', $request)) {
+            return redirect()->to($mm->entryUrl('pack', ['affiliate_code' => $request->input('affiliate_code')]));
         }
 
         $amountToPay   = $checkout['amount'];

@@ -152,6 +152,79 @@ class PaystackService
         }
     }
 
+    /**
+     * POST /charge (Mobile Money). $data['amount'] en XOF, converti en sous-unité ici.
+     *
+     * @return array{ok: bool, http: int, body: ?array, error: ?string}
+     */
+    public function charge(array $data): array
+    {
+        $payload = [
+            'email'        => (string) ($data['email'] ?? ''),
+            'amount'       => (int) ($data['amount'] ?? 0) * 100,
+            'currency'     => 'XOF',
+            'reference'    => (string) ($data['reference'] ?? ''),
+            'metadata'     => $data['metadata'] ?? [],
+            'mobile_money' => [
+                'phone'    => (string) data_get($data, 'mobile_money.phone', ''),
+                'provider' => (string) data_get($data, 'mobile_money.provider', ''),
+            ],
+        ];
+
+        return $this->call('POST', '/charge', $payload);
+    }
+
+    /** POST /charge/submit_otp */
+    public function submitOtp(string $otp, string $reference): array
+    {
+        return $this->call('POST', '/charge/submit_otp', ['otp' => $otp, 'reference' => $reference]);
+    }
+
+    /** GET /charge/{reference} : état d'un charge en cours */
+    public function checkCharge(string $reference): array
+    {
+        return $this->call('GET', '/charge/' . urlencode($reference));
+    }
+
+    /**
+     * Appel API sans exception : le checkout doit toujours pouvoir répondre à l'utilisateur.
+     *
+     * @return array{ok: bool, http: int, body: ?array, error: ?string}
+     */
+    private function call(string $method, string $uri, ?array $json = null): array
+    {
+        if (!$this->secretKey) {
+            return ['ok' => false, 'http' => 0, 'body' => null, 'error' => 'missing secret key'];
+        }
+
+        try {
+            $options = [
+                'headers' => [
+                    'Authorization' => 'Bearer ' . $this->secretKey,
+                    'Accept'        => 'application/json',
+                ],
+                'http_errors' => false,
+            ];
+            if ($json !== null) {
+                $options['json'] = $json;
+            }
+
+            $res  = $this->http->request($method, $uri, $options);
+            $code = $res->getStatusCode();
+            $body = json_decode((string) $res->getBody(), true);
+
+            return [
+                'ok'    => $code >= 200 && $code < 300 && !empty($body['status']),
+                'http'  => $code,
+                'body'  => is_array($body) ? $body : null,
+                'error' => is_array($body) ? null : 'réponse illisible',
+            ];
+        } catch (\Throwable $e) {
+            Log::error('Paystack ' . $method . ' ' . $uri . ' exception: ' . $e->getMessage());
+            return ['ok' => false, 'http' => 0, 'body' => null, 'error' => $e->getMessage()];
+        }
+    }
+
     private function safePayloadForLogs(array $payload): array
     {
         $p = $payload;

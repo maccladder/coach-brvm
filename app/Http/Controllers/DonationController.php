@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\Payments\PaystackMobileMoneyCheckout;
+use App\Services\Payments\PaystackDonationService;
 use App\Models\Donation;
 use App\Services\PaystackService;
 use Illuminate\Http\Request;
@@ -36,6 +38,14 @@ class DonationController extends Controller
             'amount.required'      => 'Veuillez choisir ou saisir un montant.',
             'amount.min'           => 'Le montant minimum est de 500 FCFA.',
         ]);
+
+        // Checkout Mobile Money personnalisé si activé pour ce type (config/checkout.php) ; ?classic=1 = ancien flux
+        $mm = app(PaystackMobileMoneyCheckout::class);
+        if ($mm->shouldIntercept('don', $request)) {
+            // Nom / email gardés en session plutôt que dans l'URL
+            $request->session()->put(\App\Checkout\Providers\DonationPayable::SESSION_KEY, $validated);
+            return redirect()->to($mm->entryUrl('don'));
+        }
 
         $reference = 'DON-' . strtoupper(Str::random(12));
 
@@ -105,29 +115,11 @@ class DonationController extends Controller
                 ->with('error', 'Le paiement n\'a pas été validé ou a été annulé.');
         }
 
-        $paid = (int) (($data['amount'] ?? 0) / 100);
+        $outcome = app(PaystackDonationService::class)->handleChargeSuccess($data);
 
-        if ($paid <= 0 || $paid !== (int) $donation->amount) {
-            Log::error('[DONATION][CALLBACK] amount mismatch', [
-                'reference' => $reference,
-                'expected'  => $donation->amount,
-                'received'  => $paid,
-            ]);
-            $donation->update(['status' => 'FAILED']);
+        if ($outcome === PaystackDonationService::MISMATCH) {
             return redirect()->route('donation.show')->with('error', 'Montant reçu invalide.');
         }
-
-        $donation->update([
-            'status'       => 'ACCEPTED',
-            'confirmed_at' => now(),
-            'meta'         => array_merge((array) ($donation->meta ?? []), [
-                'paystack' => [
-                    'reference' => $reference,
-                    'channel'   => $data['channel'] ?? null,
-                    'paid_at'   => $data['paid_at'] ?? null,
-                ],
-            ]),
-        ]);
 
         return redirect()->route('donation.merci', ['ref' => $reference]);
     }

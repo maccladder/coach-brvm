@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\Payments\PaystackMobileMoneyCheckout;
 use App\Models\CaurisAchat;
 use App\Services\CaurisService;
 use App\Services\PaystackService;
@@ -39,6 +40,12 @@ class CaurisController extends Controller
 
         $user = $request->user();
         $pack = $request->input('pack');
+
+        // Checkout Mobile Money personnalisé si activé pour ce type (config/checkout.php) ; ?classic=1 = ancien flux
+        $mm = app(PaystackMobileMoneyCheckout::class);
+        if ($mm->shouldIntercept('cauris', $request)) {
+            return response()->json(['authorization_url' => $mm->entryUrl('cauris', ['pack' => $pack])]);
+        }
 
         $achat = $caurisService->creerAchatEnAttente($user->id, $pack);
 

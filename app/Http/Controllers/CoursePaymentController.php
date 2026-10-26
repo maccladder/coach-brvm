@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\Payments\PaystackMobileMoneyCheckout;
 use App\Models\Course;
 use App\Models\CoursePurchase;
 use App\Models\Payment;
@@ -219,6 +220,15 @@ class CoursePaymentController extends Controller
 
         if ($checkout['warning']) {
             return back()->withInput()->with('warning', $checkout['warning']);
+        }
+
+        // Checkout Mobile Money personnalisé si activé pour ce type (config/checkout.php) ; ?classic=1 = ancien flux
+        $mm = app(PaystackMobileMoneyCheckout::class);
+        if ($mm->shouldIntercept('course', $request)) {
+            return redirect()->to($mm->entryUrl('course', [
+                'course'         => $course->id,
+                'affiliate_code' => $request->input('affiliate_code'),
+            ]));
         }
 
         $amountToPay   = $checkout['amount'];

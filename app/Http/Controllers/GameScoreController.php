@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\Payments\PaystackMobileMoneyCheckout;
 use App\Models\GamePremiumUnlock;
 use App\Models\GameScore;
 use App\Models\MarketplaceProduct;
@@ -13,7 +14,8 @@ class GameScoreController extends Controller
 {
     // Prix (en XOF) autorisés par feature déverrouillable, par produit — le client ne choisit
     // jamais le prix, seulement quelle feature il veut acheter. Évite qu'un joueur falsifie le montant.
-    private const FEATURE_PRICES = [
+    // Public : relu par le checkout Mobile Money et PaystackGamePremiumService.
+    public const FEATURE_PRICES = [
         'abidjan-run-le-jeu-run-a-livoirienne' => [
             'premium_chars' => 1000,
         ],
@@ -35,6 +37,11 @@ class GameScoreController extends Controller
     private function resolveFeaturePrice(MarketplaceProduct $product, string $feature): ?int
     {
         return self::FEATURE_PRICES[$product->slug][$feature] ?? null;
+    }
+
+    public static function featurePrice(string $productSlug, string $feature): ?int
+    {
+        return self::FEATURE_PRICES[$productSlug][$feature] ?? null;
     }
 
     /**
@@ -225,6 +232,12 @@ class GameScoreController extends Controller
 
         if ($existing) {
             return response()->json(['already_unlocked' => true]);
+        }
+
+        // Checkout Mobile Money personnalisé si activé pour ce type (config/checkout.php) ; ?classic=1 = ancien flux
+        $mm = app(PaystackMobileMoneyCheckout::class);
+        if ($mm->shouldIntercept('game_premium', $request)) {
+            return response()->json(['url' => $mm->entryUrl('game_premium', ['product' => $product->id, 'feature' => $feature])]);
         }
 
         $ref = 'GAME' . $product->id . '_' . strtoupper($feature) . '_' . round(microtime(true) * 1000);

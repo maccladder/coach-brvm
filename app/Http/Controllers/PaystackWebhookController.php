@@ -7,6 +7,7 @@ use App\Models\LettreCIAccess;
 use App\Models\Payment;
 use App\Services\CaurisService;
 use App\Services\Payments\PaystackCourseService;
+use App\Services\Payments\PaystackDonationService;
 use App\Services\Payments\PaystackGamePremiumService;
 use App\Services\Payments\PaystackMarketplaceService;
 use App\Services\Payments\PaystackPackService;
@@ -115,9 +116,17 @@ class PaystackWebhookController extends Controller
             return;
         }
 
-        // ✅ Dons : confirmés par le callback /faire-un-don/callback, rien à faire ici
+        // ✅ Dons
         if (str_starts_with($reference, 'DON-')) {
-            Log::info('Paystack webhook DON: confirmé par le callback, non traité ici', $this->summary($data));
+            $outcome = app(PaystackDonationService::class)->handleChargeSuccess($data);
+            Log::info('Paystack webhook DON', ['reference' => $reference, 'outcome' => $outcome]);
+            return;
+        }
+
+        // ✅ Premium de jeu (GAME{productId}_{FEATURE}_…)
+        if (preg_match('/^GAME\d+_/', $reference)) {
+            $outcome = app(PaystackGamePremiumService::class)->handleGamePremium($data);
+            Log::info('Paystack webhook GAME premium', ['reference' => $reference, 'outcome' => $outcome]);
             return;
         }
 

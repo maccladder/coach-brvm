@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\Payments\PaystackMobileMoneyCheckout;
 use App\Models\Payment;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
@@ -479,6 +480,12 @@ public function topupPayPaystack(Request $request, PaystackService $paystack)
     // ✅ déjà crédité → stop
     if ($payment->credited_at !== null) {
         return redirect()->route('wallet.index')->with('success', 'Paiement déjà validé ✅');
+    }
+
+    // Checkout Mobile Money personnalisé si activé pour ce type (config/checkout.php) ; ?classic=1 = ancien flux
+    $mm = app(PaystackMobileMoneyCheckout::class);
+    if ($mm->shouldIntercept('wallet', $request)) {
+        return redirect()->to($mm->entryUrl('wallet', ['amount' => (int) $payment->amount_paid]));
     }
 
     // ✅ référence Paystack = transaction_id (important pour webhook)

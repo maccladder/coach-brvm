@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\Payments\PaystackMobileMoneyCheckout;
 use App\Models\AdminNotification;
 use App\Models\MarketplaceProduct;
 use App\Models\Payment;
@@ -310,6 +311,15 @@ class MarketplacePaymentController extends Controller
 
         if ($checkout['warning']) {
             return back()->withInput()->with('warning', $checkout['warning']);
+        }
+
+        // Checkout Mobile Money personnalisé si activé pour ce type (config/checkout.php) ; ?classic=1 = ancien flux
+        $mm = app(PaystackMobileMoneyCheckout::class);
+        if ($mm->shouldIntercept('marketplace', $request)) {
+            return redirect()->to($mm->entryUrl('marketplace', [
+                'product'        => $product->id,
+                'affiliate_code' => $request->input('affiliate_code'),
+            ]));
         }
 
         $amountToPay   = $checkout['amount'];

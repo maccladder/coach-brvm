@@ -877,6 +877,25 @@ Route::get('/paystack/callback', [PaystackTestController::class, 'callback'])->n
 Route::post('/paystack/webhook', [PaystackWebhookController::class, 'handle'])
     ->name('paystack.webhook');
 
+// ✅ Checkout Mobile Money personnalisé (Paystack /charge), activé type par type
+//    dans config/checkout.php. Auth vérifiée dans le contrôleur : les dons sont ouverts aux invités.
+Route::prefix('paiement-mobile')->name('checkout.mm.')->group(function () {
+    $types = 'marketplace|course|pack|wallet|cauris|don|game_premium';
+
+    Route::get('/suivi/{reference}', [\App\Http\Controllers\MobileMoneyCheckoutController::class, 'status'])
+        ->name('status');
+    Route::post('/suivi/{reference}/otp', [\App\Http\Controllers\MobileMoneyCheckoutController::class, 'otp'])
+        ->middleware('throttle:10,1,mm-checkout-otp')
+        ->name('otp');
+
+    Route::get('/{type}', [\App\Http\Controllers\MobileMoneyCheckoutController::class, 'show'])
+        ->where('type', $types)->name('show');
+    Route::post('/{type}', [\App\Http\Controllers\MobileMoneyCheckoutController::class, 'pay'])
+        ->where('type', $types)->middleware('throttle:5,1,mm-checkout-pay')->name('pay');
+    Route::post('/{type}/autre-moyen', [\App\Http\Controllers\MobileMoneyCheckoutController::class, 'classic'])
+        ->where('type', $types)->name('classic');
+});
+
 
 
 Route::post('/wallet/topup/paystack', [VirtualWalletController::class, 'topupPayPaystack'])

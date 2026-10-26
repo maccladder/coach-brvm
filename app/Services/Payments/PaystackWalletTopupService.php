@@ -27,9 +27,10 @@ class PaystackWalletTopupService
         // Paystack envoie amount en "plus petite unité" (kobo-like).
         // Dans tes logs tu fais /100 => on garde pareil.
         $amountPaid = (int) round(((int) ($data['amount'] ?? 0)) / 100); // FCFA
+        $currency   = strtoupper((string) ($data['currency'] ?? ''));
         $email      = (string) data_get($data, 'customer.email');
 
-        DB::transaction(function () use ($reference, $amountPaid, $email, $data) {
+        DB::transaction(function () use ($reference, $amountPaid, $currency, $email, $data) {
 
             /** @var Payment|null $payment */
             $payment = Payment::where('transaction_id', $reference)
@@ -63,11 +64,12 @@ class PaystackWalletTopupService
             }
 
             // ✅ Sécurité montant (optionnel mais recommandé)
-            if ((int) $payment->amount_paid !== $amountPaid) {
+            if ((int) $payment->amount_paid !== $amountPaid || $currency !== 'XOF') {
                 Log::error('PaystackWalletTopupService: amount mismatch', [
                     'reference' => $reference,
                     'db_amount_paid' => $payment->amount_paid,
                     'paystack_amount_paid' => $amountPaid,
+                    'currency' => $currency,
                 ]);
 
                 // On peut marquer REFUSED ou laisser PENDING pour enquête
