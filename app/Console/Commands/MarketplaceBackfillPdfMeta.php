@@ -60,13 +60,16 @@ class MarketplaceBackfillPdfMeta extends Command
                 continue;
             }
 
-            if (!Storage::disk($disk)->exists($fileAsset->path)) {
+            // PDF sur son disque (privé après marketplace:move-files-private), aperçus sur 'public'
+            $pdfDisk = $fileAsset->disk ?: 'public';
+
+            if (!Storage::disk($pdfDisk)->exists($fileAsset->path)) {
                 $this->warn("⚠️ #{$product->id} {$product->title} — fichier introuvable: {$fileAsset->path}");
                 $failed++;
                 continue;
             }
 
-            $absolutePdf = Storage::disk($disk)->path($fileAsset->path);
+            $absolutePdf = Storage::disk($pdfDisk)->path($fileAsset->path);
 
             try {
                 // 1) pages_count
