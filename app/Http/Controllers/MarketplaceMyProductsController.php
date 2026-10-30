@@ -15,7 +15,7 @@ class MarketplaceMyProductsController extends Controller
         $user = $request->user();
 
         $query = $user->purchasedProducts()
-            ->with('category')
+            ->with(['category', 'files'])
             ->wherePivot('status', 'paid');
 
         if (request()->filled('type')) {
@@ -25,7 +25,7 @@ class MarketplaceMyProductsController extends Controller
         $purchased = $query->latest('marketplace_purchases.created_at')->get();
 
         // Produits offerts via AdminGrant (actifs, non déjà dans les achats)
-        $grantedQuery = MarketplaceProduct::with('category')
+        $grantedQuery = MarketplaceProduct::with(['category', 'files'])
             ->whereIn('id',
                 AdminGrant::where('user_id', $user->id)
                     ->where('grantable_type', MarketplaceProduct::class)
@@ -62,6 +62,12 @@ class MarketplaceMyProductsController extends Controller
             abort(403, "Téléchargement indisponible : ce produit est une vidéo.");
         }
 
+        // Fichiers multiples : l'ancienne URL mène au premier fichier du produit
+        $firstFile = $product->files()->first();
+        if ($firstFile) {
+            return redirect()->route('marketplace.files.download', [$product, $firstFile]);
+        }
+
         $asset = $product->assets()
             ->where('kind', 'file')
             ->where('is_downloadable', true)
@@ -72,7 +78,7 @@ class MarketplaceMyProductsController extends Controller
             abort(404, "Fichier introuvable pour ce produit.");
         }
 
-        $disk = 'public';
+        $disk = $asset->disk ?: 'public';
 
         if (!Storage::disk($disk)->exists($asset->path)) {
             abort(404, "Fichier introuvable (storage).");

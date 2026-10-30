@@ -219,6 +219,15 @@
 
             </div>
         </div>
+
+        @if(in_array($product->type, \App\Services\Marketplace\ProductFileService::DOWNLOADABLE_TYPES, true))
+            @include('marketplace.partials.files-manager', [
+                'product'     => $product,
+                'routePrefix' => 'vendor.products.files',
+                'canNotify'   => false,
+                'locked'      => $product->status === 'pending',
+            ])
+        @endif
     </div>
 </div>
 @endsection
@@ -242,7 +251,7 @@ document.addEventListener('DOMContentLoaded', () => {
         fieldUdemy.style.display    = t === 'video'   ? '' : 'none';
 
         if (t === 'book')     { fileInput.accept = 'application/pdf'; fileHelp.innerHTML = 'Type PDF : fichier <strong style="color:var(--cb-ink);">.pdf</strong>'; }
-        else if (t === 'software') { fileInput.accept = '.zip,.rar,application/zip,application/x-rar-compressed'; fileHelp.innerHTML = 'Type ZIP : <strong style="color:var(--cb-ink);">.zip</strong> / <strong style="color:var(--cb-ink);">.rar</strong>'; }
+        else if (t === 'software') { fileInput.accept = '{{ collect(config('marketplace.files_extensions'))->map(fn ($e) => '.'.$e)->implode(',') }}'; fileHelp.innerHTML = 'Fichier principal : archive ou installeur · max {{ (int) config('marketplace.files_max_mb', 500) }} Mo. Les autres versions (Windows, macOS…) : section <strong style="color:var(--cb-ink);">Fichiers téléchargeables</strong> ci-dessous.'; }
         else if (t === 'video')   { fileInput.accept = 'video/mp4,video/quicktime,video/x-m4v,video/x-msvideo'; fileHelp.innerHTML = 'Type Vidéo : <strong style="color:var(--cb-ink);">.mp4 / .mov / .m4v / .avi</strong>'; }
         else { fileInput.accept = ''; }
     }

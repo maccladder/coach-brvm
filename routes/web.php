@@ -404,6 +404,13 @@ Route::post('/{product}/publish', [MarketplaceProductAdminController::class, 'pu
     Route::get('/assets/{asset}/download', [MarketplaceProductAdminController::class, 'downloadAsset'])
         ->name('assets.download');
 
+    // ✅ Fichiers téléchargeables (0..N par produit)
+    Route::post('/{product}/files', [\App\Http\Controllers\MarketplaceProductFileController::class, 'store'])->name('files.store');
+    Route::patch('/{product}/files/{file}', [\App\Http\Controllers\MarketplaceProductFileController::class, 'update'])->name('files.update');
+    Route::post('/{product}/files/{file}/move', [\App\Http\Controllers\MarketplaceProductFileController::class, 'move'])->name('files.move');
+    Route::delete('/{product}/files/{file}', [\App\Http\Controllers\MarketplaceProductFileController::class, 'destroy'])->name('files.destroy');
+    Route::get('/{product}/files/{file}/download', [\App\Http\Controllers\MarketplaceProductFileController::class, 'download'])->name('files.download');
+
     Route::get('/{product}/edit', [MarketplaceProductAdminController::class, 'edit'])->name('edit');
     Route::put('/{product}', [MarketplaceProductAdminController::class, 'update'])->name('update');
     Route::delete('/{product}', [MarketplaceProductAdminController::class, 'destroy'])->name('destroy');
@@ -754,6 +761,10 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/mon-espace/mes-produits/{product}/download', [MarketplaceMyProductsController::class, 'download'])
         ->name('my.products.download');
 
+    // Un fichier précis d'un produit (accès vérifié au niveau du produit)
+    Route::get('/marketplace/{product}/fichiers/{file}/telecharger', \App\Http\Controllers\MarketplaceFileDownloadController::class)
+        ->name('marketplace.files.download');
+
     Route::get('/mon-espace/mes-produits/{product}/watch', [MarketplaceMyProductsController::class, 'watch'])
         ->name('my.products.watch');
 
@@ -1011,6 +1022,13 @@ Route::middleware(['auth','vendor.mode'])->prefix('vendor')->name('vendor.')->gr
     Route::put('/products/{product}', [VendorProductController::class, 'update'])->name('products.update');
 
     Route::post('/products/{product}/submit', [VendorProductController::class, 'submit'])->name('products.submit');
+
+    // Fichiers téléchargeables (policy manageFiles : ses propres produits uniquement)
+    Route::post('/products/{product}/files', [\App\Http\Controllers\MarketplaceProductFileController::class, 'store'])->name('products.files.store');
+    Route::patch('/products/{product}/files/{file}', [\App\Http\Controllers\MarketplaceProductFileController::class, 'update'])->name('products.files.update');
+    Route::post('/products/{product}/files/{file}/move', [\App\Http\Controllers\MarketplaceProductFileController::class, 'move'])->name('products.files.move');
+    Route::delete('/products/{product}/files/{file}', [\App\Http\Controllers\MarketplaceProductFileController::class, 'destroy'])->name('products.files.destroy');
+    Route::get('/products/{product}/files/{file}/download', [\App\Http\Controllers\MarketplaceProductFileController::class, 'download'])->name('products.files.download');
 });
 
 

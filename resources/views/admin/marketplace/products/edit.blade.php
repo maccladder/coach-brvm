@@ -191,8 +191,7 @@
                             </div>
                             <div class="d-flex gap-2">
                                 <a class="btn btn-outline-primary btn-sm"
-                                   href="{{ asset('storage/'.$fileAsset->path) }}"
-                                   target="_blank">
+                                   href="{{ route('admin.marketplace.assets.download', $fileAsset) }}">
                                     Télécharger
                                 </a>
                             </div>
@@ -205,7 +204,7 @@
 
                     <input type="file" name="file" class="form-control" id="fileInput">
                     <div class="form-text" id="fileHelp">
-                        Livre → PDF, Logiciel → ZIP/RAR.
+                        Livre → PDF, Logiciel → archive ou installeur.
                     </div>
                 </div>
             </div>
@@ -282,6 +281,15 @@
         </div>
     </form>
 
+    @if(in_array($product->type, \App\Services\Marketplace\ProductFileService::DOWNLOADABLE_TYPES, true))
+        @include('marketplace.partials.files-manager', [
+            'product'     => $product,
+            'routePrefix' => 'admin.marketplace.files',
+            'canNotify'   => (bool) session('is_admin'),
+            'locked'      => false,
+        ])
+    @endif
+
 </div>
 
 <script>
@@ -322,9 +330,9 @@
             fileHelp.textContent  = 'Si tu upload ici, ça remplace le PDF. (max 50MB)';
             fileInput.setAttribute('accept', 'application/pdf,.pdf');
         } else if (t === 'software') {
-            fileLabel.textContent = 'Fichier logiciel (ZIP/RAR)';
-            fileHelp.textContent  = 'Si tu upload ici, ça remplace l’archive. (max 400MB)';
-            fileInput.setAttribute('accept', '.zip,.rar,application/zip,application/x-zip-compressed,application/x-rar-compressed');
+            fileLabel.textContent = 'Fichier principal du logiciel';
+            fileHelp.textContent  = 'Si tu upload ici, ça remplace le fichier principal. (max {{ (int) config('marketplace.files_max_mb', 500) }} Mo) Pour plusieurs versions (Windows, macOS…), utilise « Fichiers téléchargeables » plus bas.';
+            fileInput.setAttribute('accept', '{{ collect(config('marketplace.files_extensions'))->map(fn ($e) => '.'.$e)->implode(',') }}');
         } else {
             fileLabel.textContent = 'Fichier produit';
             fileHelp.textContent  = 'Upload fichier.';

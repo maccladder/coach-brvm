@@ -212,6 +212,13 @@
                                            class="cb-btn-green">
                                             ▶ Visualiser
                                         </a>
+                                    @elseif($p->files->count() > 1)
+                                        {{-- Plusieurs versions : la liste ci-dessous --}}
+                                    @elseif($p->files->count() === 1)
+                                        <a href="{{ route('marketplace.files.download', [$p, $p->files->first()]) }}"
+                                           class="cb-btn-gold">
+                                            <i class="bi bi-download"></i> Télécharger
+                                        </a>
                                     @else
                                         <a href="{{ route('my.products.download', $p) }}"
                                            class="cb-btn-gold">
@@ -224,6 +231,12 @@
                                         Voir la fiche
                                     </a>
                                 </div>
+
+                                @if(in_array($p->type, \App\Services\Marketplace\ProductFileService::DOWNLOADABLE_TYPES, true) && $p->files->count() > 1)
+                                    <div style="margin-top:10px;">
+                                        @include('marketplace.partials.product-files', ['product' => $p, 'isOwned' => true, 'compact' => true])
+                                    </div>
+                                @endif
 
                                 @if($p->type === 'game')
                                     <div style="font-size:11px;color:#6B7590;margin-top:8px;font-family:'Syne',sans-serif;letter-spacing:.06em;">

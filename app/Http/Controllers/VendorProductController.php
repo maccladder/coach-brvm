@@ -4,9 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Mail\NewProductPendingMail;
 use App\Models\AdminNotification;
+use App\Models\MarketplaceAsset;
 use App\Models\MarketplaceCategory;
 use App\Models\MarketplaceProduct;
+use App\Services\Marketplace\ProductFileService;
 use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 
@@ -15,8 +18,55 @@ class VendorProductController extends Controller
     // tailles (KB)
     private const MAX_COVER_KB = 4096;     // 4MB
     private const MAX_PDF_KB   = 51200;    // 50MB
-    private const MAX_ZIP_KB   = 409600;   // 400MB
     private const MAX_VIDEO_KB = 512000;   // 500MB (ajuste si tu veux)
+
+    /** Extensions et taille max (config/marketplace.php) du fichier unique d'un logiciel. */
+    private function softwareFileRules(): array
+    {
+        return [
+            'extensions:' . implode(',', config('marketplace.files_extensions')),
+            'max:' . ((int) config('marketplace.files_max_mb', 500) * 1024),
+        ];
+    }
+
+    /**
+     * Fichier unique du formulaire : livre/logiciel sur le disque privé + synchro de
+     * marketplace_product_files ; vidéo inchangée (mp4 source Cloudflare, disque public).
+     */
+    private function storeSingleFile(MarketplaceProduct $product, UploadedFile $upload): MarketplaceAsset
+    {
+        $files   = app(ProductFileService::class);
+        $isVideo = $product->type === 'video';
+
+        [$disk, $path] = $isVideo
+            ? ['public', $upload->store('marketplace/files', 'public')]
+            : $files->storeUpload($product, $upload);
+
+        $asset = $product->assets()->where('kind', 'file')->first();
+        $old   = $asset && !$isVideo ? [$asset->disk ?: 'public', $asset->path] : null;
+
+        $attributes = [
+            'disk'            => $disk,
+            'path'            => $path,
+            'url'             => null,
+            'label'           => $this->typeLabel($product->type),
+            'is_downloadable' => !$isVideo,
+        ];
+
+        if ($asset) {
+            $asset->update($attributes);
+        } else {
+            $asset = $product->assets()->create(['kind' => 'file'] + $attributes);
+        }
+
+        $files->syncFromLegacyAsset($asset, $upload->getClientOriginalName());
+
+        if ($old) {
+            $files->deletePhysicalIfUnreferenced(...$old);
+        }
+
+        return $asset;
+    }
 
     private function isPlatformOwner(Request $request): bool
     {
@@ -144,8 +194,8 @@ class VendorProductController extends Controller
                 ], [], ['file' => 'fichier PDF']);
             } elseif ($data['type'] === 'software') {
                 $request->validate([
-                    'file' => ['file','mimes:zip,rar','max:' . self::MAX_ZIP_KB],
-                ], [], ['file' => 'archive ZIP/RAR']);
+                    'file' => ['file', ...$this->softwareFileRules()],
+                ], [], ['file' => 'fichier du logiciel']);
             } elseif ($data['type'] === 'video') {
                 $request->validate([
                     'file' => ['file','mimes:mp4,mov,m4v,avi','max:' . self::MAX_VIDEO_KB],
@@ -199,15 +249,7 @@ class VendorProductController extends Controller
 
         // asset si fichier uploadé (book / software / video)
         if ($request->hasFile('file')) {
-            $uploadedPath = $request->file('file')->store('marketplace/files', 'public');
-
-            $product->assets()->create([
-                'kind'            => 'file',
-                'path'            => $uploadedPath,
-                'url'             => null,
-                'label'           => $this->typeLabel($product->type),
-                'is_downloadable' => $product->type !== 'video',
-            ]);
+            $this->storeSingleFile($product, $request->file('file'));
         }
 
         return redirect()->route('vendor.products.edit', $product)
@@ -218,7 +260,7 @@ class VendorProductController extends Controller
     {
         abort_unless($this->ownsProduct($request, $product), 403);
 
-        $product->load('assets');
+        $product->load(['assets', 'files']);
         $categories = MarketplaceCategory::orderBy('name')->get();
 
         $types = [
@@ -266,8 +308,8 @@ class VendorProductController extends Controller
                 ], [], ['file' => 'fichier PDF']);
             } elseif ($data['type'] === 'software') {
                 $request->validate([
-                    'file' => ['file','mimes:zip,rar','max:' . self::MAX_ZIP_KB],
-                ], [], ['file' => 'archive ZIP/RAR']);
+                    'file' => ['file', ...$this->softwareFileRules()],
+                ], [], ['file' => 'fichier du logiciel']);
             } elseif ($data['type'] === 'video') {
                 $request->validate([
                     'file' => ['file','mimes:mp4,mov,m4v,avi','max:' . self::MAX_VIDEO_KB],
@@ -303,26 +345,7 @@ class VendorProductController extends Controller
 
         // remplacer/créer asset fichier (book / software / video)
         if ($request->hasFile('file')) {
-            $uploadedPath = $request->file('file')->store('marketplace/files', 'public');
-
-            $asset = $product->assets()->where('kind', 'file')->first();
-
-            if ($asset) {
-                $asset->update([
-                    'path'            => $uploadedPath,
-                    'url'             => null,
-                    'label'           => $this->typeLabel($product->type),
-                    'is_downloadable' => $product->type !== 'video',
-                ]);
-            } else {
-                $product->assets()->create([
-                    'kind'            => 'file',
-                    'path'            => $uploadedPath,
-                    'url'             => null,
-                    'label'           => $this->typeLabel($product->type),
-                    'is_downloadable' => $product->type !== 'video',
-                ]);
-            }
+            $this->storeSingleFile($product, $request->file('file'));
         } elseif ($data['type'] !== 'game') {
             // si type a changé, maj label/is_downloadable de l'asset existant
             $asset = $product->assets()->where('kind', 'file')->first();
@@ -331,6 +354,7 @@ class VendorProductController extends Controller
                     'label'           => $this->typeLabel($product->type),
                     'is_downloadable' => $product->type !== 'video',
                 ]);
+                app(ProductFileService::class)->syncFromLegacyAsset($asset);
             }
         }
 
@@ -362,7 +386,8 @@ class VendorProductController extends Controller
             }
         } else {
             $fileAsset = $product->assets->firstWhere('kind', 'file');
-            if (!$fileAsset) {
+            $hasFiles  = in_array($product->type, ProductFileService::DOWNLOADABLE_TYPES, true) && $product->files()->exists();
+            if (!$fileAsset && !$hasFiles) {
                 return back()->with('warning', 'Ajoute le fichier (PDF/ZIP/VIDÉO) avant de soumettre.');
             }
         }

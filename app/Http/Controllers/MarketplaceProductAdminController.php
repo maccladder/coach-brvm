@@ -9,7 +9,9 @@ use App\Models\MarketplaceProduct;
 use App\Models\User;
 use App\Notifications\UserNewMarketplaceContentNotification;
 use App\Notifications\VendorProductReviewedNotification;
+use App\Services\Marketplace\ProductFileService;
 use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -18,7 +20,6 @@ use Imagick;
 class MarketplaceProductAdminController extends Controller
 {
     private const MAX_COVER_KB = 4096;     // 4 MB
-    private const MAX_FILE_KB  = 409600;   // 400 MB
     private const MAX_BOOK_KB  = 51200;    // 50 MB
 
     private function cleanWhatsapp(?string $value): ?string
@@ -45,6 +46,47 @@ class MarketplaceProductAdminController extends Controller
             '', $html
         );
         return $html;
+    }
+
+    private function productFiles(): ProductFileService
+    {
+        return app(ProductFileService::class);
+    }
+
+    /** Extensions et taille max (config/marketplace.php) du fichier unique d'un logiciel. */
+    private function softwareFileRules(): array
+    {
+        return [
+            'extensions:' . implode(',', config('marketplace.files_extensions')),
+            'max:' . ((int) config('marketplace.files_max_mb', 500) * 1024),
+        ];
+    }
+
+    /**
+     * Stocke le fichier unique d'un livre/logiciel sur le disque privé, crée ou remplace
+     * son asset et répercute le changement sur marketplace_product_files.
+     */
+    private function storeSingleFile(MarketplaceProduct $product, UploadedFile $upload, string $label): MarketplaceAsset
+    {
+        [$disk, $path] = $this->productFiles()->storeUpload($product, $upload);
+
+        $asset = $product->assets()->where('kind', 'file')->first();
+        $old   = $asset ? [$asset->disk ?: 'public', $asset->path] : null;
+
+        $attributes = ['disk' => $disk, 'path' => $path, 'url' => null, 'label' => $label, 'is_downloadable' => true];
+        if ($asset) {
+            $asset->update($attributes);
+        } else {
+            $asset = $product->assets()->create(['kind' => 'file'] + $attributes);
+        }
+
+        $this->productFiles()->syncFromLegacyAsset($asset, $upload->getClientOriginalName());
+
+        if ($old) {
+            $this->productFiles()->deletePhysicalIfUnreferenced(...$old);
+        }
+
+        return $asset;
     }
 
     private function getVendor(MarketplaceProduct $product): ?User
@@ -101,7 +143,7 @@ class MarketplaceProductAdminController extends Controller
 
     public function downloadAsset(MarketplaceAsset $asset)
     {
-        $disk = 'public';
+        $disk = $asset->disk ?: 'public';
         abort_unless($asset->path && Storage::disk($disk)->exists($asset->path), 404);
 
         $filename = $asset->label
@@ -130,7 +172,7 @@ class MarketplaceProductAdminController extends Controller
             'support_whatsapp' => ['nullable', 'string', 'max:32'],
             'udemy_url'   => ['nullable', 'url', 'max:500'],
             'cover'       => ['nullable', 'image', 'max:' . self::MAX_COVER_KB],
-            'file'        => ['nullable', 'file', 'max:' . self::MAX_FILE_KB],
+            'file'        => ['nullable', 'file'],
             'cloudflare_video_id' => ['nullable', 'string', 'max:255'],
             'game_html_file' => ['nullable', 'file', 'mimes:html', 'max:10240'],
         ], [], [
@@ -149,8 +191,8 @@ class MarketplaceProductAdminController extends Controller
 
         if ($data['type'] === 'software') {
             $request->validate([
-                'file' => ['required', 'file', 'mimes:zip,rar', 'max:' . self::MAX_FILE_KB],
-            ], [], ['file' => 'archive du logiciel']);
+                'file' => ['required', 'file', ...$this->softwareFileRules()],
+            ], [], ['file' => 'fichier du logiciel']);
         }
 
         if ($data['type'] === 'video') {
@@ -216,21 +258,13 @@ class MarketplaceProductAdminController extends Controller
 
         // book/software => fichier obligatoire
         if ($request->hasFile('file')) {
-            $uploadedPath = $request->file('file')->store('marketplace/files', 'public');
-
             $label = match ($product->type) {
                 'book'     => 'PDF',
                 'software' => 'Logiciel',
                 default    => 'Fichier',
             };
 
-            $fileAsset = $product->assets()->create([
-                'kind'            => 'file',
-                'path'            => $uploadedPath,
-                'url'             => null,
-                'label'           => $label,
-                'is_downloadable' => true,
-            ]);
+            $fileAsset = $this->storeSingleFile($product, $request->file('file'), $label);
 
             // ✅ pages_count + previews p1..p5 (UNIQUEMENT book)
             if ($product->type === 'book') {
@@ -244,7 +278,7 @@ class MarketplaceProductAdminController extends Controller
     public function edit(MarketplaceProduct $product)
     {
         $categories = MarketplaceCategory::orderBy('name')->get();
-        $product->load('assets');
+        $product->load(['assets', 'files']);
         return view('admin.marketplace.products.edit', compact('product', 'categories'));
     }
 
@@ -263,7 +297,7 @@ class MarketplaceProductAdminController extends Controller
             'support_whatsapp' => ['nullable', 'string', 'max:32'],
             'udemy_url'   => ['nullable', 'url', 'max:500'],
             'cover'       => ['nullable', 'image', 'max:' . self::MAX_COVER_KB],
-            'file'        => ['nullable', 'file', 'max:' . self::MAX_FILE_KB],
+            'file'        => ['nullable', 'file'],
             'cloudflare_video_id' => ['nullable', 'string', 'max:255'],
             'game_html_file' => ['nullable', 'file', 'mimes:html', 'max:10240'],
         ], [], [
@@ -272,7 +306,7 @@ class MarketplaceProductAdminController extends Controller
 
         $data['support_whatsapp'] = $this->cleanWhatsapp($data['support_whatsapp'] ?? null);
 
-        $hasFileAsset = $product->assets->firstWhere('kind', 'file') !== null;
+        $hasFileAsset = $product->assets->firstWhere('kind', 'file') !== null || $product->files()->exists();
         $requiresFile = in_array($data['type'], ['book', 'software'], true);
 
         if ($requiresFile && !$hasFileAsset && !$request->hasFile('file')) {
@@ -289,8 +323,8 @@ class MarketplaceProductAdminController extends Controller
             }
             if ($data['type'] === 'software') {
                 $request->validate([
-                    'file' => ['file', 'mimes:zip,rar', 'max:' . self::MAX_FILE_KB],
-                ], [], ['file' => 'archive du logiciel']);
+                    'file' => ['file', ...$this->softwareFileRules()],
+                ], [], ['file' => 'fichier du logiciel']);
             }
         }
 
@@ -354,25 +388,13 @@ class MarketplaceProductAdminController extends Controller
 
         // ✅ si on remplace le fichier PDF/ZIP
         if ($request->hasFile('file')) {
-            $uploadedPath = $request->file('file')->store('marketplace/files', 'public');
-
             $label = match ($product->type) {
                 'book'     => 'PDF',
                 'software' => 'Logiciel',
                 default    => 'Fichier',
             };
 
-            $asset = $product->assets()->where('kind', 'file')->first();
-            if ($asset) {
-                $asset->update([
-                    'path' => $uploadedPath, 'url' => null, 'label' => $label, 'is_downloadable' => true,
-                ]);
-                $fileAsset = $asset;
-            } else {
-                $fileAsset = $product->assets()->create([
-                    'kind' => 'file', 'path' => $uploadedPath, 'url' => null, 'label' => $label, 'is_downloadable' => true,
-                ]);
-            }
+            $fileAsset = $this->storeSingleFile($product, $request->file('file'), $label);
 
             if ($product->type === 'book') {
                 $this->generatePdfMetaAndPreviews($product, $fileAsset, true);
@@ -390,8 +412,9 @@ class MarketplaceProductAdminController extends Controller
     {
         if (!$fileAsset->path) return;
 
+        // Le PDF peut être sur le disque privé ; les aperçus, eux, restent publics.
         $disk    = 'public';
-        $pdfPath = Storage::disk($disk)->path($fileAsset->path);
+        $pdfPath = Storage::disk($fileAsset->disk ?: 'public')->path($fileAsset->path);
 
         if (!file_exists($pdfPath)) return;
 
@@ -508,8 +531,8 @@ class MarketplaceProductAdminController extends Controller
             return back()->with('warning', "Impossible d'approuver: aucun fichier HTML de jeu attaché.");
         }
     } else {
-        // PDF/ZIP/Vidéo : on exige un fichier asset
-        if (!$product->assets->firstWhere('kind', 'file')) {
+        // PDF/ZIP : on exige un fichier asset ou au moins un fichier téléchargeable
+        if (!$product->assets->firstWhere('kind', 'file') && !$product->files()->exists()) {
             return back()->with('warning', "Impossible d'approuver: aucun fichier attaché (PDF/ZIP).");
         }
     }

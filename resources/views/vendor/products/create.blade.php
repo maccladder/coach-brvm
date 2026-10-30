@@ -115,7 +115,7 @@
                             <input name="file" type="file" class="vd-file-input form-control" id="fileInput">
                             @error('file')<div class="vd-error">{{ $message }}</div>@enderror
                             <div class="vd-help" id="fileHelp">
-                                PDF → .pdf | ZIP → .zip/.rar | Vidéo → .mp4/.mov/.m4v/.avi<br>
+                                PDF → .pdf | Logiciel → archive ou installeur (.zip, .rar, .7z, .exe, .dmg…) | Vidéo → .mp4/.mov/.m4v/.avi<br>
                                 Obligatoire au moment de "Soumettre".
                             </div>
                         </div>
@@ -171,7 +171,7 @@ document.addEventListener('DOMContentLoaded', () => {
         fieldUdemy.style.display    = t === 'video'   ? '' : 'none';
 
         if (t === 'book')     { fileInput.accept = 'application/pdf'; fileHelp.innerHTML = 'Type PDF : fichier <strong>.pdf</strong> · Obligatoire à la soumission.'; }
-        else if (t === 'software') { fileInput.accept = '.zip,.rar,application/zip,application/x-rar-compressed'; fileHelp.innerHTML = 'Type ZIP : <strong>.zip</strong> ou <strong>.rar</strong> · Obligatoire à la soumission.'; }
+        else if (t === 'software') { fileInput.accept = '{{ collect(config('marketplace.files_extensions'))->map(fn ($e) => '.'.$e)->implode(',') }}'; fileHelp.innerHTML = 'Logiciel : archive ou installeur · max {{ (int) config('marketplace.files_max_mb', 500) }} Mo · Obligatoire à la soumission. Les autres versions s’ajoutent ensuite sur la page d’édition.'; }
         else if (t === 'video')   { fileInput.accept = 'video/mp4,video/quicktime,video/x-m4v,video/x-msvideo'; fileHelp.innerHTML = 'Type Vidéo : <strong>.mp4/.mov/.m4v/.avi</strong> · Tu pourras ensuite le mettre sur Cloudflare.'; }
         else { fileInput.accept = ''; }
     }

@@ -68,6 +68,31 @@ return Application::configure(basePath: dirname(__DIR__))
         // $middleware->append(\App\Http\Middleware\TestMiddleware::class);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
+        /**
+         * Upload au-delà de post_max_size (PHP) : retour au formulaire avec un message
+         * clair plutôt qu'une page 413 brute. La session n'est pas encore démarrée à ce
+         * stade, d'où le paramètre d'URL lu par le gestionnaire de fichiers.
+         */
+        $exceptions->render(function (\Illuminate\Http\Exceptions\PostTooLargeException $e, \Illuminate\Http\Request $request) {
+            $message = "Envoi trop volumineux : il dépasse la limite du serveur (" . ini_get('post_max_size')
+                . "). Envoie les gros fichiers un par un.";
+
+            if ($request->expectsJson()) {
+                return response()->json(['message' => $message], 413);
+            }
+
+            $referer = (string) $request->headers->get('referer');
+            if ($referer !== '' && parse_url($referer, PHP_URL_HOST) === $request->getHost()) {
+                $url = strtok($referer, '#');
+                return redirect()->to($url . (str_contains($url, '?') ? '&' : '?') . 'upload_trop_gros=1#fichiers');
+            }
+
+            return response(
+                '<!doctype html><meta charset="utf-8"><title>Envoi trop volumineux</title>'
+                . '<p style="font-family:sans-serif;max-width:560px;margin:40px auto;line-height:1.6">'
+                . e($message) . '<br><a href="javascript:history.back()">← Revenir au formulaire</a></p>',
+                413
+            );
+        });
     })
     ->create();

@@ -130,7 +130,7 @@
                     <label class="form-label" id="fileLabel">Fichier produit</label>
                     <input type="file" name="file" class="form-control" id="fileInput">
                     <div class="form-text" id="fileHelp">
-                        Upload obligatoire : PDF pour Livre, ZIP/RAR pour Logiciel.
+                        Upload obligatoire : PDF pour Livre, archive ou installeur pour Logiciel.
                     </div>
                 </div>
             </div>
@@ -226,9 +226,9 @@
             fileHelp.textContent  = 'Upload obligatoire : PDF (max 50MB).';
             fileInput.setAttribute('accept', 'application/pdf,.pdf');
         } else if (t === 'software') {
-            fileLabel.textContent = 'Fichier logiciel (ZIP/RAR) *';
-            fileHelp.textContent  = 'Upload obligatoire : ZIP ou RAR (max 400MB).';
-            fileInput.setAttribute('accept', '.zip,.rar,application/zip,application/x-zip-compressed,application/x-rar-compressed');
+            fileLabel.textContent = 'Fichier principal du logiciel *';
+            fileHelp.textContent  = 'Upload obligatoire : archive ou installeur (max {{ (int) config('marketplace.files_max_mb', 500) }} Mo). Les autres versions (Windows, macOS…) s’ajoutent ensuite dans « Fichiers téléchargeables » sur la page d’édition.';
+            fileInput.setAttribute('accept', '{{ collect(config('marketplace.files_extensions'))->map(fn ($e) => '.'.$e)->implode(',') }}');
         } else {
             fileLabel.textContent = 'Fichier produit';
             fileHelp.textContent  = 'Upload fichier.';

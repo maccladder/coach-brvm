@@ -300,6 +300,8 @@
         $assetsToShow = $product->type === 'video'
             ? $product->assets->filter(fn($a) => $a->kind === 'stream')->values()
             : ($product->type === 'game' ? collect() : $product->assets);
+        $hasProductFiles = in_array($product->type, \App\Services\Marketplace\ProductFileService::DOWNLOADABLE_TYPES, true)
+            && $product->files->isNotEmpty();
         $previewUrls = $previewUrls ?? [];
         $hasPreview  = $product->type === 'book' && empty($isOwned) && !empty($previewUrls);
     @endphp
@@ -369,6 +371,12 @@
                     <div class="mp-price-sub">Paiement Mobile Money sécurisé</div>
                 @endif
 
+                @if(empty($isOwned) && $hasProductFiles && $product->availablePlatformsLabel())
+                    <div class="mp-price-sub" style="margin-top:4px;">
+                        <i class="bi bi-pc-display"></i> Disponible pour {{ $product->availablePlatformsLabel() }}
+                    </div>
+                @endif
+
                 {{-- CTA principal --}}
                 @auth
                     @if(!empty($isOwned))
@@ -379,6 +387,14 @@
                         @elseif($product->type === 'video')
                             <a href="{{ route('my.products.watch', $product) }}" class="cb-btn-success" style="width:100%;justify-content:center;">
                                 <i class="bi bi-play-circle"></i> Visualiser maintenant
+                            </a>
+                        @elseif($hasProductFiles && $product->files->count() > 1)
+                            <a href="#mp-files" class="cb-btn-success" style="width:100%;justify-content:center;">
+                                <i class="bi bi-download"></i> Télécharger ({{ $product->files->count() }} fichiers)
+                            </a>
+                        @elseif($hasProductFiles)
+                            <a href="{{ route('marketplace.files.download', [$product, $product->files->first()]) }}" class="cb-btn-success" style="width:100%;justify-content:center;">
+                                <i class="bi bi-download"></i> Télécharger
                             </a>
                         @else
                             <a href="{{ route('my.products.download', $product) }}" class="cb-btn-success" style="width:100%;justify-content:center;">
@@ -511,9 +527,11 @@
 
                     {{-- Assets --}}
                     @if($product->type !== 'game')
-                    <div class="mp-section-title" style="margin-top:24px;">Ce que tu reçois</div>
+                    <div class="mp-section-title" id="mp-files" style="margin-top:24px;">Ce que tu reçois</div>
 
-                    @if($assetsToShow->isEmpty())
+                    @if($hasProductFiles)
+                        @include('marketplace.partials.product-files', ['product' => $product, 'isOwned' => !empty($isOwned)])
+                    @elseif($assetsToShow->isEmpty())
                         <div style="font-size:13px;color:var(--cb-muted);padding:16px;background:var(--cb-paper);border-radius:3px;border:1px solid var(--cb-border);">
                             @if($product->type === 'video')
                                 La vidéo sera disponible en lecture après validation.
