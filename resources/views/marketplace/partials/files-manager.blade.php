@@ -11,6 +11,8 @@
     $pfErrors     = $errors->getBag('productFiles');
     $locked       = $locked ?? false;
     $canNotify    = $canNotify ?? false;
+    $canReview    = $canReview ?? false;
+    $pfPending    = $pfFiles->filter->isPending()->count();
 @endphp
 
 @once
@@ -30,6 +32,14 @@
     .pf-meta { font-size:12px; color:var(--cb-muted,#6b7590); margin-top:2px; overflow-wrap:anywhere; }
     .pf-tag { display:inline-block; font-size:10px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; padding:2px 7px; border-radius:100px; border:1px solid currentColor; margin-left:4px; }
     .pf-tag-warn { color:#b26a00; }
+    .pf-tag-bad { color:#c0392b; }
+    .pf-status { font-size:12px; margin-top:4px; line-height:1.5; }
+    .pf-status-warn { color:#8a6414; }
+    .pf-status-bad { color:#c0392b; }
+    .pf-review { flex:1 1 100%; display:flex; flex-wrap:wrap; gap:8px 16px; padding:10px; margin-top:4px; border-radius:3px; background:rgba(176,134,46,.06); border:1px solid rgba(176,134,46,.2); }
+    .pf-review-form { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin:0; flex:1 1 260px; }
+    .pf-btn-ok { color:var(--cb-forest,#0f5c43) !important; border-color:rgba(15,92,67,.35); }
+    .pf-btn-ok:hover:not(:disabled) { background:rgba(15,92,67,.06); color:var(--cb-forest,#0f5c43) !important; border-color:var(--cb-forest,#0f5c43); }
     .pf-actions { display:flex; flex-wrap:wrap; gap:6px; align-items:center; }
     .pf-actions form { margin:0; }
     .pf-btn { display:inline-flex; align-items:center; gap:5px; font-size:12px; font-weight:600; padding:6px 10px; border-radius:3px; border:1px solid var(--cb-border,#d5d9de); background:transparent; color:var(--cb-ink,#1d2433) !important; text-decoration:none; cursor:pointer; line-height:1.2; }
@@ -66,11 +76,18 @@
     <div class="pf-body">
         <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
             <h3 class="pf-title">📦 Fichiers téléchargeables</h3>
-            <span class="pf-meta">{{ $pfFiles->count() }} fichier(s)</span>
+            <span class="pf-meta">
+                {{ $pfFiles->count() }} fichier(s)
+                @if($pfPending) · <strong style="color:#8a6414;">{{ $pfPending }} en attente de validation</strong> @endif
+            </span>
         </div>
         <p class="pf-intro">
-            Tous les acheteurs de ce produit ont accès à <strong>tous</strong> ces fichiers,
+            Tous les acheteurs de ce produit ont accès à <strong>tous</strong> ces fichiers approuvés,
             y compris ceux ajoutés après leur achat. Exemple : « Windows — Installeur », « Windows — Portable », « macOS ».
+            @if(!$canReview && $product->status === 'published')
+                <br>🔎 Produit publié : les fichiers exécutables ({{ implode(', ', config('marketplace.review_extensions')) }})
+                que tu ajoutes ou remplaces sont vérifiés par l'admin avant d'être visibles. Les PDF/epub sont publiés tout de suite.
+            @endif
         </p>
 
         @if(session('pf_success'))
@@ -111,7 +128,24 @@
                             @if($f->disk === 'public')
                                 <span class="pf-tag pf-tag-warn" title="Fichier encore sur le disque public : lancer marketplace:move-files-private">public</span>
                             @endif
+                            @if($f->isPending())
+                                <span class="pf-tag pf-tag-warn">En attente de validation</span>
+                            @elseif($f->isRejected())
+                                <span class="pf-tag pf-tag-bad">Refusé</span>
+                            @endif
                         </div>
+                        @if($f->isPending())
+                            <div class="pf-status pf-status-warn">
+                                ⏳ Invisible pour les acheteurs jusqu'à validation admin.
+                                @if($f->replaces)
+                                    Remplacera « {{ $f->replaces->label }} » ({{ $f->replaces->original_name }}), qui reste servi d'ici là.
+                                @endif
+                            </div>
+                        @elseif($f->isRejected())
+                            <div class="pf-status pf-status-bad">
+                                🚫 Refusé{{ $f->review_note ? ' : ' . $f->review_note : '.' }} Invisible pour les acheteurs.
+                            </div>
+                        @endif
                         <div class="pf-meta">
                             {{ $f->platform_label ?? 'Plateforme non précisée' }}
                             · {{ $f->original_name }}
@@ -159,6 +193,24 @@
                         </select>
                         <button type="submit" class="pf-btn">Enregistrer</button>
                     </form>
+
+                    @if($canReview && $f->isPending())
+                        <div class="pf-review">
+                            <form method="POST" action="{{ route($routePrefix.'.approve', [$product, $f]) }}" class="pf-review-form">
+                                @csrf
+                                <button type="submit" class="pf-btn pf-btn-ok"><i class="bi bi-check2-circle"></i> Approuver</button>
+                                <label class="pf-meta" style="display:inline-flex;gap:6px;align-items:center;">
+                                    <input type="checkbox" name="notify" value="1"> Prévenir les acheteurs par email
+                                </label>
+                            </form>
+                            <form method="POST" action="{{ route($routePrefix.'.reject', [$product, $f]) }}" class="pf-review-form"
+                                  onsubmit="return confirm('Refuser ce fichier ? Il restera invisible pour les acheteurs.')">
+                                @csrf
+                                <input type="text" name="review_note" class="pf-input" maxlength="500" placeholder="Motif du refus (visible par le vendeur)" aria-label="Motif du refus">
+                                <button type="submit" class="pf-btn pf-btn-danger"><i class="bi bi-x-circle"></i> Refuser</button>
+                            </form>
+                        </div>
+                    @endif
                 </div>
             @empty
                 <div class="pf-empty">Aucun fichier téléchargeable pour l'instant.</div>

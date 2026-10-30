@@ -212,10 +212,10 @@
                                            class="cb-btn-green">
                                             ▶ Visualiser
                                         </a>
-                                    @elseif($p->files->count() > 1)
+                                    @elseif($p->approvedFiles->count() > 1)
                                         {{-- Plusieurs versions : la liste ci-dessous --}}
-                                    @elseif($p->files->count() === 1)
-                                        <a href="{{ route('marketplace.files.download', [$p, $p->files->first()]) }}"
+                                    @elseif($p->approvedFiles->count() === 1)
+                                        <a href="{{ route('marketplace.files.download', [$p, $p->approvedFiles->first()]) }}"
                                            class="cb-btn-gold">
                                             <i class="bi bi-download"></i> Télécharger
                                         </a>
@@ -232,7 +232,7 @@
                                     </a>
                                 </div>
 
-                                @if(in_array($p->type, \App\Services\Marketplace\ProductFileService::DOWNLOADABLE_TYPES, true) && $p->files->count() > 1)
+                                @if(in_array($p->type, \App\Services\Marketplace\ProductFileService::DOWNLOADABLE_TYPES, true) && $p->approvedFiles->count() > 1)
                                     <div style="margin-top:10px;">
                                         @include('marketplace.partials.product-files', ['product' => $p, 'isOwned' => true, 'compact' => true])
                                     </div>

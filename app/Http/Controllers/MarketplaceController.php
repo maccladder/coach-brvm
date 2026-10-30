@@ -63,7 +63,7 @@ public function index(Request $request)
 public function show(string $slug)
 {
     $product = MarketplaceProduct::query()
-        ->with(['category', 'assets', 'files'])
+        ->with(['category', 'assets', 'approvedFiles'])
         ->where('status', 'published')
         ->where('slug', $slug)
         ->firstOrFail();

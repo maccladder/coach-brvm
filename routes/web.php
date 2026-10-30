@@ -410,6 +410,8 @@ Route::post('/{product}/publish', [MarketplaceProductAdminController::class, 'pu
     Route::post('/{product}/files/{file}/move', [\App\Http\Controllers\MarketplaceProductFileController::class, 'move'])->name('files.move');
     Route::delete('/{product}/files/{file}', [\App\Http\Controllers\MarketplaceProductFileController::class, 'destroy'])->name('files.destroy');
     Route::get('/{product}/files/{file}/download', [\App\Http\Controllers\MarketplaceProductFileController::class, 'download'])->name('files.download');
+    Route::post('/{product}/files/{file}/approve', [\App\Http\Controllers\MarketplaceProductFileController::class, 'approve'])->name('files.approve');
+    Route::post('/{product}/files/{file}/reject', [\App\Http\Controllers\MarketplaceProductFileController::class, 'reject'])->name('files.reject');
 
     Route::get('/{product}/edit', [MarketplaceProductAdminController::class, 'edit'])->name('edit');
     Route::put('/{product}', [MarketplaceProductAdminController::class, 'update'])->name('update');

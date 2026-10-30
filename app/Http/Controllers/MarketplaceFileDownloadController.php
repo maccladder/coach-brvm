@@ -16,7 +16,8 @@ class MarketplaceFileDownloadController extends Controller
      */
     public function __invoke(Request $request, MarketplaceProduct $product, ProductFile $file)
     {
-        abort_unless((int) $file->product_id === (int) $product->id, 404);
+        // Fichier d'un autre produit, ou en attente / refusé à la validation admin
+        abort_unless((int) $file->product_id === (int) $product->id && $file->isApproved(), 404);
         abort_unless($product->isAccessibleBy($request->user()), 403, 'Accès refusé : produit non acheté.');
 
         $disk = Storage::disk($file->disk);

@@ -301,7 +301,7 @@
             ? $product->assets->filter(fn($a) => $a->kind === 'stream')->values()
             : ($product->type === 'game' ? collect() : $product->assets);
         $hasProductFiles = in_array($product->type, \App\Services\Marketplace\ProductFileService::DOWNLOADABLE_TYPES, true)
-            && $product->files->isNotEmpty();
+            && $product->approvedFiles->isNotEmpty();
         $previewUrls = $previewUrls ?? [];
         $hasPreview  = $product->type === 'book' && empty($isOwned) && !empty($previewUrls);
     @endphp
@@ -388,12 +388,12 @@
                             <a href="{{ route('my.products.watch', $product) }}" class="cb-btn-success" style="width:100%;justify-content:center;">
                                 <i class="bi bi-play-circle"></i> Visualiser maintenant
                             </a>
-                        @elseif($hasProductFiles && $product->files->count() > 1)
+                        @elseif($hasProductFiles && $product->approvedFiles->count() > 1)
                             <a href="#mp-files" class="cb-btn-success" style="width:100%;justify-content:center;">
-                                <i class="bi bi-download"></i> Télécharger ({{ $product->files->count() }} fichiers)
+                                <i class="bi bi-download"></i> Télécharger ({{ $product->approvedFiles->count() }} fichiers)
                             </a>
                         @elseif($hasProductFiles)
-                            <a href="{{ route('marketplace.files.download', [$product, $product->files->first()]) }}" class="cb-btn-success" style="width:100%;justify-content:center;">
+                            <a href="{{ route('marketplace.files.download', [$product, $product->approvedFiles->first()]) }}" class="cb-btn-success" style="width:100%;justify-content:center;">
                                 <i class="bi bi-download"></i> Télécharger
                             </a>
                         @else

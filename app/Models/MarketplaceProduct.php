@@ -35,7 +35,7 @@ class MarketplaceProduct extends Model
         return $this->hasMany(MarketplaceAsset::class, 'product_id');
     }
 
-    /** Fichiers téléchargeables (0..N), dans l'ordre d'affichage. */
+    /** Tous les fichiers téléchargeables (0..N), y compris en attente de validation. */
     public function files()
     {
         return $this->hasMany(ProductFile::class, 'product_id')
@@ -43,10 +43,16 @@ class MarketplaceProduct extends Model
             ->orderBy('id');
     }
 
+    /** Fichiers visibles par les acheteurs : uniquement ceux approuvés. */
+    public function approvedFiles()
+    {
+        return $this->files()->where('status', 'approved');
+    }
+
     /** "Windows et macOS" d'après les plateformes des fichiers (null si aucune renseignée). */
     public function availablePlatformsLabel(): ?string
     {
-        $families = $this->files->pluck('platform_family')->filter()->unique()->values();
+        $families = $this->approvedFiles->pluck('platform_family')->filter()->unique()->values();
 
         if ($families->isEmpty()) return null;
         if ($families->count() === 1) return $families->first();

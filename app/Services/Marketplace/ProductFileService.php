@@ -2,8 +2,10 @@
 
 namespace App\Services\Marketplace;
 
+use App\Mail\ProductFilePendingMail;
 use App\Mail\ProductFilesAddedMail;
 use App\Models\AdminGrant;
+use App\Models\AdminNotification;
 use App\Models\MarketplaceAsset;
 use App\Models\MarketplaceProduct;
 use App\Models\MarketplacePurchase;
@@ -43,11 +45,9 @@ class ProductFileService
         return [$disk, $path];
     }
 
-    public function addFile(MarketplaceProduct $product, UploadedFile $upload, ?string $label, ?string $platform): ProductFile
+    public function addFile(MarketplaceProduct $product, UploadedFile $upload, ?string $label, ?string $platform, string $status = 'approved'): ProductFile
     {
         [$disk, $path] = $this->storeUpload($product, $upload);
-
-        $nextOrder = (int) $product->files()->max('sort_order') + ($product->files()->exists() ? 1 : 0);
 
         return $product->files()->create([
             'label'         => $this->cleanLabel($label) ?? $this->defaultLabel($upload->getClientOriginalName(), $platform),
@@ -57,8 +57,126 @@ class ProductFileService
             'path'          => $path,
             'size'          => $upload->getSize(),
             'mime'          => $upload->getClientMimeType() ?: $upload->getMimeType(),
-            'sort_order'    => $nextOrder,
+            'sort_order'    => $this->nextSortOrder($product),
+            'status'        => $status,
         ]);
+    }
+
+    private function nextSortOrder(MarketplaceProduct $product): int
+    {
+        return $product->files()->exists() ? (int) $product->files()->max('sort_order') + 1 : 0;
+    }
+
+    /**
+     * Vrai si un fichier ajouté/remplacé par un vendeur doit attendre la validation admin :
+     * produit publié + extension exécutable (config marketplace.review_extensions).
+     */
+    public function requiresReview(MarketplaceProduct $product, string $filename): bool
+    {
+        $ext = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+
+        return $product->status === 'published'
+            && in_array($ext, config('marketplace.review_extensions', []), true);
+    }
+
+    /**
+     * Remplacement soumis par un vendeur : nouveau fichier en attente, l'ancien reste servi
+     * aux acheteurs jusqu'à l'approbation. Un remplacement encore en attente du même fichier
+     * est annulé (seul le dernier envoi compte).
+     */
+    public function stagePendingReplacement(MarketplaceProduct $product, UploadedFile $upload, ?ProductFile $replaced, ?string $label = null): ProductFile
+    {
+        if ($replaced) {
+            $product->files()->where('status', 'pending')->where('replaces_file_id', $replaced->id)->get()
+                ->each(fn (ProductFile $old) => $this->deleteFile($old));
+        }
+
+        [$disk, $path] = $this->storeUpload($product, $upload);
+
+        return $product->files()->create([
+            'label'            => $replaced?->label ?? ($this->cleanLabel($label) ?? $this->defaultLabel($upload->getClientOriginalName(), null)),
+            'platform'         => $replaced?->platform ?? $this->guessPlatform($upload->getClientOriginalName()),
+            'original_name'    => $this->cleanOriginalName($upload->getClientOriginalName()),
+            'disk'             => $disk,
+            'path'             => $path,
+            'size'             => $upload->getSize(),
+            'mime'             => $upload->getClientMimeType() ?: $upload->getMimeType(),
+            'sort_order'       => $replaced?->sort_order ?? $this->nextSortOrder($product),
+            'status'           => 'pending',
+            'replaces_file_id' => $replaced?->id,
+        ]);
+    }
+
+    /**
+     * Approuve un fichier en attente. Pour un remplacement, le contenu passe sur la ligne
+     * remplacée (même id, même libellé, même lien vers l'asset), l'ancien fichier physique
+     * est effacé et la ligne en attente disparaît. Retourne la ligne visible des acheteurs.
+     */
+    public function approve(ProductFile $file): ProductFile
+    {
+        $replaced = $file->replaces_file_id ? ProductFile::find($file->replaces_file_id) : null;
+
+        if (!$replaced) {
+            $file->update(['status' => 'approved', 'replaces_file_id' => null, 'reviewed_at' => now(), 'review_note' => null]);
+            return $file;
+        }
+
+        $old = [$replaced->disk, $replaced->path];
+
+        DB::transaction(function () use ($file, $replaced) {
+            $replaced->update([
+                'disk'          => $file->disk,
+                'path'          => $file->path,
+                'size'          => $file->size,
+                'mime'          => $file->mime,
+                'original_name' => $file->original_name,
+                'reviewed_at'   => now(),
+            ]);
+
+            if ($replaced->legacy_asset_id) {
+                MarketplaceAsset::whereKey($replaced->legacy_asset_id)->update([
+                    'disk' => $file->disk, 'path' => $file->path,
+                ]);
+            }
+
+            $file->delete();
+        });
+
+        $this->deletePhysicalIfUnreferenced(...$old);
+
+        return $replaced->fresh();
+    }
+
+    public function reject(ProductFile $file, ?string $note): void
+    {
+        $note = trim((string) $note);
+
+        $file->update([
+            'status'      => 'rejected',
+            'reviewed_at' => now(),
+            'review_note' => $note === '' ? null : Str::limit($note, 500, ''),
+        ]);
+    }
+
+    /** Notification admin (centre de notifications + email) pour un fichier vendeur à valider. */
+    public function notifyAdminsOfPending(ProductFile $file): void
+    {
+        $file->loadMissing('product');
+        $product = $file->product;
+        $what    = $file->replaces_file_id ? 'Remplacement de fichier à valider' : 'Nouveau fichier à valider';
+
+        AdminNotification::create([
+            'type'    => 'product_file_pending',
+            'title'   => "🕒 {$what}",
+            'message' => "{$product->title} — {$file->original_name}",
+            'url'     => route('admin.marketplace.edit', $product) . '#fichiers',
+            'read_at' => null,
+        ]);
+
+        $admins = config('marketplace.admin_emails', []);
+        if (!empty($admins)) {
+            Mail::to($admins)->queue(new ProductFilePendingMail($file));
+        }
     }
 
     /**

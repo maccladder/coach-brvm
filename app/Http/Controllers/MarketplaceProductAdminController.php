@@ -278,7 +278,7 @@ class MarketplaceProductAdminController extends Controller
     public function edit(MarketplaceProduct $product)
     {
         $categories = MarketplaceCategory::orderBy('name')->get();
-        $product->load(['assets', 'files']);
+        $product->load(['assets', 'files.replaces']);
         return view('admin.marketplace.products.edit', compact('product', 'categories'));
     }
 

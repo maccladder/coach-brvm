@@ -286,6 +286,7 @@
             'product'     => $product,
             'routePrefix' => 'admin.marketplace.files',
             'canNotify'   => (bool) session('is_admin'),
+            'canReview'   => (bool) session('is_admin'),
             'locked'      => false,
         ])
     @endif

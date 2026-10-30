@@ -429,8 +429,9 @@ class MarketplaceProductFilesTest extends TestCase
         $this->actingAs($vendor)->withSession(['view_mode' => 'vendor'])
             ->post(route('vendor.products.files.store', $product), ['files' => [UploadedFile::fake()->create('a.exe', 1)], 'notify' => 1]);
 
-        $this->assertSame(1, $product->files()->count());
-        Mail::assertNothingQueued();
+        $this->assertSame('pending', $product->files()->sole()->status);
+        // Le vendeur ne prévient jamais les acheteurs (seul l'admin est notifié)
+        Mail::assertNotQueued(ProductFilesAddedMail::class);
     }
 
     // ── Notification ─────────────────────────────────────────────

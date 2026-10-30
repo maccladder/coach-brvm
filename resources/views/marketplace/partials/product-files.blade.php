@@ -5,7 +5,7 @@
 @php
     $compact   = $compact ?? false;
     $pfOs      = \App\Models\ProductFile::osFromUserAgent(request()->userAgent());
-    $pfFiles   = $product->files;
+    $pfFiles   = $product->approvedFiles;
     // Version de l'OS détecté mise en tête (installeur Windows préféré au portable), sans masquer les autres
     $pfBest    = $pfFiles->first(fn ($f) => $f->matchesOs($pfOs) && $f->platform !== 'windows_portable')
               ?? $pfFiles->first(fn ($f) => $f->matchesOs($pfOs));

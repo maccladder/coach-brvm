@@ -20,17 +20,44 @@ class ProductFile extends Model
     protected $fillable = [
         'product_id', 'legacy_asset_id', 'label', 'platform', 'original_name',
         'disk', 'path', 'size', 'mime', 'sort_order', 'download_count',
+        'status', 'replaces_file_id', 'reviewed_at', 'review_note',
     ];
 
     protected $casts = [
         'size'           => 'integer',
         'sort_order'     => 'integer',
         'download_count' => 'integer',
+        'reviewed_at'    => 'datetime',
+    ];
+
+    protected $attributes = [
+        'status' => 'approved',
     ];
 
     public function product()
     {
         return $this->belongsTo(MarketplaceProduct::class, 'product_id');
+    }
+
+    /** Fichier existant que celui-ci remplacera une fois approuvé. */
+    public function replaces()
+    {
+        return $this->belongsTo(self::class, 'replaces_file_id');
+    }
+
+    public function isApproved(): bool
+    {
+        return $this->status === 'approved';
+    }
+
+    public function isPending(): bool
+    {
+        return $this->status === 'pending';
+    }
+
+    public function isRejected(): bool
+    {
+        return $this->status === 'rejected';
     }
 
     public function getPlatformLabelAttribute(): ?string

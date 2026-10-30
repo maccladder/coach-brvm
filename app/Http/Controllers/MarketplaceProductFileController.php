@@ -94,12 +94,25 @@ class MarketplaceProductFileController extends Controller
                 ? ($request->input("platforms.$i") ?: null)
                 : $this->files->guessPlatform($upload->getClientOriginalName());
 
-            $added[] = $this->files->addFile($product, $upload, $request->input("labels.$i"), $platform);
+            // Vendeur + produit publié + exécutable : invisible des acheteurs jusqu'à validation admin
+            $status = !$this->isAdminRoute($request) && $this->files->requiresReview($product, $upload->getClientOriginalName())
+                ? 'pending'
+                : 'approved';
+
+            $added[] = $this->files->addFile($product, $upload, $request->input("labels.$i"), $platform, $status);
+        }
+
+        $pending = array_values(array_filter($added, fn ($f) => $f->isPending()));
+        foreach ($pending as $file) {
+            $this->files->notifyAdminsOfPending($file);
         }
 
         $message = count($added) === 1
             ? '✅ Fichier ajouté : ' . $added[0]->label . '.'
             : '✅ ' . count($added) . ' fichiers ajoutés.';
+        if ($pending) {
+            $message .= ' ⏳ ' . count($pending) . ' fichier(s) en attente de validation admin : invisibles pour les acheteurs d’ici là.';
+        }
 
         // Notification réservée à l'admin (pas aux stagiaires ni aux vendeurs)
         if ($this->isAdminRoute($request) && session('is_admin') && $request->boolean('notify')) {
@@ -153,6 +166,49 @@ class MarketplaceProductFileController extends Controller
         $this->files->deleteFile($file);
 
         return $this->backToEdit($request, $product)->with('pf_success', "🗑️ Fichier supprimé : {$label}.");
+    }
+
+    /** Admin uniquement (pas les stagiaires) : rend visible un fichier vendeur en attente. */
+    public function approve(Request $request, MarketplaceProduct $product, ProductFile $file)
+    {
+        $this->authorizeManage($request, $product, $file);
+        abort_unless($this->isAdminRoute($request) && session('is_admin'), 403, 'Action réservée aux administrateurs.');
+
+        if (!$file->isPending() && !$file->isRejected()) {
+            return $this->backToEdit($request, $product)->with('pf_warning', 'Ce fichier est déjà approuvé.');
+        }
+
+        $isReplacement = (bool) $file->replaces_file_id;
+        $visible = $this->files->approve($file);
+
+        $message = $isReplacement
+            ? "✅ Remplacement approuvé : « {$visible->label} » est désormais servi aux acheteurs."
+            : "✅ Fichier approuvé : « {$visible->label} » est visible des acheteurs.";
+
+        if ($request->boolean('notify')) {
+            $count = $this->files->notifyBuyers($product, [$visible->label]);
+            $message .= $count > 0 ? " 📧 {$count} acheteur(s) prévenu(s) par email." : '';
+        }
+
+        return $this->backToEdit($request, $product)->with('pf_success', $message);
+    }
+
+    public function reject(Request $request, MarketplaceProduct $product, ProductFile $file)
+    {
+        $this->authorizeManage($request, $product, $file);
+        abort_unless($this->isAdminRoute($request) && session('is_admin'), 403, 'Action réservée aux administrateurs.');
+
+        if (!$file->isPending()) {
+            return $this->backToEdit($request, $product)->with('pf_warning', 'Seul un fichier en attente peut être refusé.');
+        }
+
+        $data = $request->validateWithBag('productFiles', [
+            'review_note' => ['nullable', 'string', 'max:500'],
+        ], ['review_note.max' => 'Le motif ne doit pas dépasser 500 caractères.']);
+
+        $this->files->reject($file, $data['review_note'] ?? null);
+
+        return $this->backToEdit($request, $product)->with('pf_success', "🚫 Fichier refusé : « {$file->label} ». Il reste invisible pour les acheteurs.");
     }
 
     /** Aperçu du fichier par l'admin ou son vendeur (pas de compteur de téléchargements). */

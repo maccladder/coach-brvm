@@ -4,9 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Mail\NewProductPendingMail;
 use App\Models\AdminNotification;
-use App\Models\MarketplaceAsset;
 use App\Models\MarketplaceCategory;
 use App\Models\MarketplaceProduct;
+use App\Models\ProductFile;
 use App\Services\Marketplace\ProductFileService;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
@@ -32,11 +32,22 @@ class VendorProductController extends Controller
     /**
      * Fichier unique du formulaire : livre/logiciel sur le disque privé + synchro de
      * marketplace_product_files ; vidéo inchangée (mp4 source Cloudflare, disque public).
+     * Exécutable sur un produit publié : remplacement mis en attente de validation admin,
+     * l'ancien fichier reste servi aux acheteurs (retourne alors la ligne en attente).
      */
-    private function storeSingleFile(MarketplaceProduct $product, UploadedFile $upload): MarketplaceAsset
+    private function storeSingleFile(MarketplaceProduct $product, UploadedFile $upload): ?ProductFile
     {
         $files   = app(ProductFileService::class);
         $isVideo = $product->type === 'video';
+
+        if (!$isVideo && $files->requiresReview($product, $upload->getClientOriginalName())) {
+            $asset    = $product->assets()->where('kind', 'file')->first();
+            $replaced = $asset ? ProductFile::where('legacy_asset_id', $asset->id)->first() : null;
+            $pending  = $files->stagePendingReplacement($product, $upload, $replaced, $this->typeLabel($product->type));
+            $files->notifyAdminsOfPending($pending);
+
+            return $pending;
+        }
 
         [$disk, $path] = $isVideo
             ? ['public', $upload->store('marketplace/files', 'public')]
@@ -65,7 +76,7 @@ class VendorProductController extends Controller
             $files->deletePhysicalIfUnreferenced(...$old);
         }
 
-        return $asset;
+        return null;
     }
 
     private function isPlatformOwner(Request $request): bool
@@ -260,7 +271,7 @@ class VendorProductController extends Controller
     {
         abort_unless($this->ownsProduct($request, $product), 403);
 
-        $product->load(['assets', 'files']);
+        $product->load(['assets', 'files.replaces']);
         $categories = MarketplaceCategory::orderBy('name')->get();
 
         $types = [
@@ -345,7 +356,9 @@ class VendorProductController extends Controller
 
         // remplacer/créer asset fichier (book / software / video)
         if ($request->hasFile('file')) {
-            $this->storeSingleFile($product, $request->file('file'));
+            if ($this->storeSingleFile($product, $request->file('file'))) {
+                return back()->with('success', '✅ Produit mis à jour. ⏳ Le nouveau fichier attend la validation admin : les acheteurs gardent l’ancien d’ici là.');
+            }
         } elseif ($data['type'] !== 'game') {
             // si type a changé, maj label/is_downloadable de l'asset existant
             $asset = $product->assets()->where('kind', 'file')->first();

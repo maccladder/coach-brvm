@@ -15,7 +15,7 @@ class MarketplaceMyProductsController extends Controller
         $user = $request->user();
 
         $query = $user->purchasedProducts()
-            ->with(['category', 'files'])
+            ->with(['category', 'approvedFiles'])
             ->wherePivot('status', 'paid');
 
         if (request()->filled('type')) {
@@ -25,7 +25,7 @@ class MarketplaceMyProductsController extends Controller
         $purchased = $query->latest('marketplace_purchases.created_at')->get();
 
         // Produits offerts via AdminGrant (actifs, non déjà dans les achats)
-        $grantedQuery = MarketplaceProduct::with(['category', 'files'])
+        $grantedQuery = MarketplaceProduct::with(['category', 'approvedFiles'])
             ->whereIn('id',
                 AdminGrant::where('user_id', $user->id)
                     ->where('grantable_type', MarketplaceProduct::class)
@@ -62,11 +62,14 @@ class MarketplaceMyProductsController extends Controller
             abort(403, "Téléchargement indisponible : ce produit est une vidéo.");
         }
 
-        // Fichiers multiples : l'ancienne URL mène au premier fichier du produit
-        $firstFile = $product->files()->first();
+        // Fichiers multiples : l'ancienne URL mène au premier fichier approuvé du produit
+        $firstFile = $product->approvedFiles()->first();
         if ($firstFile) {
             return redirect()->route('marketplace.files.download', [$product, $firstFile]);
         }
+
+        // Fichiers tous en attente de validation : ne jamais retomber sur l'asset
+        abort_if($product->files()->exists(), 404, "Fichier pas encore disponible.");
 
         $asset = $product->assets()
             ->where('kind', 'file')
