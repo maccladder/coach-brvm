@@ -35,9 +35,40 @@ class MarketplaceProduct extends Model
         return $this->hasMany(MarketplaceAsset::class, 'product_id');
     }
 
+    /** Fichiers téléchargeables (0..N), dans l'ordre d'affichage. */
+    public function files()
+    {
+        return $this->hasMany(ProductFile::class, 'product_id')
+            ->orderBy('sort_order')
+            ->orderBy('id');
+    }
+
+    /** "Windows et macOS" d'après les plateformes des fichiers (null si aucune renseignée). */
+    public function availablePlatformsLabel(): ?string
+    {
+        $families = $this->files->pluck('platform_family')->filter()->unique()->values();
+
+        if ($families->isEmpty()) return null;
+        if ($families->count() === 1) return $families->first();
+
+        return $families->slice(0, -1)->implode(', ') . ' et ' . $families->last();
+    }
+
     public function vendor()
     {
         return $this->belongsTo(\App\Models\User::class, 'user_id');
+    }
+
+    /** Accès au produit : achat payé OU attribution admin active. Vaut pour tous ses fichiers. */
+    public function isAccessibleBy(?User $user): bool
+    {
+        if (!$user) return false;
+
+        return $user->purchasedProducts()
+                ->where('marketplace_products.id', $this->id)
+                ->wherePivot('status', 'paid')
+                ->exists()
+            || $this->isGrantedTo($user);
     }
 
     public function scopePublished($q)
