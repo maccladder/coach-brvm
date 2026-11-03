@@ -344,7 +344,7 @@ Route::post('/api/bet/coupons/{coupon}/resultat', [BetCouponController::class, '
 Route::prefix('admin')->name('admin.')->group(function () {
 
     Route::get('/login', [AdminController::class, 'showLoginForm'])->name('login.form');
-    Route::post('/login', [AdminController::class, 'login'])->name('login');
+    Route::post('/login', [AdminController::class, 'login'])->middleware('throttle:5,1')->name('login');
 
     Route::middleware(['admin.code', 'stagiaire.log'])->group(function () {
 
@@ -520,7 +520,7 @@ Route::prefix('topups')->name('topups.')->group(function () {
 */
 Route::prefix('stagiaire')->name('stagiaire.')->group(function () {
     Route::get('/login',  [StagiaireController::class, 'showLoginForm'])->name('login.form');
-    Route::post('/login', [StagiaireController::class, 'login'])->name('login');
+    Route::post('/login', [StagiaireController::class, 'login'])->middleware('throttle:5,1')->name('login');
     Route::post('/logout', [StagiaireController::class, 'logout'])
         ->middleware('stagiaire.code')
         ->name('logout');

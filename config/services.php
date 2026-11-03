@@ -31,6 +31,13 @@ return [
         'api_key' => env('N8N_API_KEY'),
     ],
 
+    // Codes d'accès au panel admin et au panel stagiaire : uniquement dans .env, jamais dans le
+    // dépôt (public). Vide = connexion refusée.
+    'admin_panel' => [
+        'admin_code'     => env('ADMIN_ACCESS_CODE'),
+        'stagiaire_code' => env('STAGIAIRE_CODE'),
+    ],
+
     'comparateur' => [
         'cle' => env('COMPARATEUR_N8N_CLE'),
     ],

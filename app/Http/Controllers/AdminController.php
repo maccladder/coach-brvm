@@ -100,12 +100,21 @@ class AdminController extends Controller
             'code' => ['required', 'string'],
         ]);
 
-        if ($request->code !== 'Coach-brvm2025') {
+        // Code dans .env (ADMIN_ACCESS_CODE), comparé à temps constant ; vide = accès fermé
+        $expected = (string) config('services.admin_panel.admin_code');
+
+        if ($expected === '') {
+            return back()->with('error', "Accès admin non configuré (ADMIN_ACCESS_CODE manquant dans .env).");
+        }
+
+        if (!hash_equals($expected, (string) $request->code)) {
             return back()
                 ->withInput()
                 ->with('error', 'Code incorrect.');
         }
 
+        // Nouvel identifiant de session : une session fixée avant la connexion ne devient pas admin
+        $request->session()->regenerate();
         session(['is_admin' => true]);
 
         return redirect()->route('admin.dashboard');
