@@ -387,24 +387,28 @@ class AdminAkwabaController extends Controller
             ];
         };
 
-        // Invités : sessions anonymes (akwaba_events), sans lien avec les comptes
-        $guestEvents = DB::table('akwaba_events')->selectRaw('type, COUNT(*) as n')->groupBy('type')->pluck('n', 'type');
-        $guestStart  = (int) ($guestEvents['play_start'] ?? 0);
-        $guestLock   = (int) ($guestEvents['lock_reached'] ?? 0);
-
         $unlocksPaid = $paidUserIds->unique()->count();
-        $totalLock   = $guestLock + $lockUserIds->count();
+
+        // Sessions anonymes (akwaba_events, invités et connectés) : total, 24 h, 7 jours
+        $sessions = [
+            'all' => $this->sessionFunnel(null, $paidUnlocks, $packs),
+            '24h' => $this->sessionFunnel(now()->subDay(), $paidUnlocks, $packs),
+            '7d'  => $this->sessionFunnel(now()->subDays(7), $paidUnlocks, $packs),
+        ];
+        $sessionLock = collect($sessions['all']['steps'])->firstWhere('key', 'lock')['count'];
 
         return [
             'players'           => GameProgress::where('product_id', $pid)->count(),
             'funnel'            => $funnel,
-            'guests'            => ['play_start' => $guestStart, 'lock_reached' => $guestLock],
+            'sessions'          => $sessions,
+            'sessions_since'    => DB::table('akwaba_events')->where('type', 'page_open')->min('created_at'),
             'fins'              => ['oubli' => (int) ($finsCounts['oubli'] ?? 0), 'gardien' => (int) ($finsCounts['gardien'] ?? 0)],
             'lock'              => $lockUserIds->count(),
             'unlocks_paid'      => $unlocksPaid,
             'unlocks_grant'     => $grantUserIds->diff($paidUserIds)->unique()->count(),
             'conversion'        => $lockUserIds->count() > 0 ? round($unlocksPaid * 100 / $lockUserIds->count(), 1) : null,
-            'conversion_global' => $totalLock > 0 ? round($unlocksPaid * 100 / $totalLock, 1) : null,
+            // Déblocages payés ÷ sessions arrivées au cadenas (invités et connectés)
+            'conversion_global' => $sessionLock > 0 ? round($unlocksPaid * 100 / $sessionLock, 1) : null,
             'packs_sold'        => $packs()->count(),
             'unlock_revenue'    => (int) $paidUnlocks()->sum('amount'),
             'packs_revenue'     => (int) $packs()->sum('amount'),
@@ -413,6 +417,57 @@ class AdminAkwabaController extends Controller
             'hints_used'        => GameCreditLedger::where('game_slug', AkwabaService::SLUG)->where('reason', 'use')->count(),
             'last7'             => $period(7),
             'last30'            => $period(30),
+        ];
+    }
+
+    /**
+     * Étapes de l'entonnoir des sessions : nombre de sessions distinctes ayant au moins un des
+     * événements de l'étape (depuis $since), % par rapport à l'étape précédente.
+     * « Payé » = déblocages payés + packs d'indices vendus sur la période (paiements, pas sessions).
+     */
+    private function sessionFunnel(?Carbon $since, \Closure $paidUnlocks, \Closure $packs): array
+    {
+        $stepsDef = [
+            ['page',    'Page ouverte',                  ['page_open']],
+            ['loaded',  'Jeu chargé',                    ['page_loaded', 'play_start']], // play_start : ancien nom
+            ['start',   'Nouvelle partie (ou Continuer)', ['new_game', 'continue']],
+            ['ch1',     'Chapitre 1',                    ['ch1_reached']],
+            ['ch2',     'Chapitre 2',                    ['ch2_reached']],
+            ['lock',    '🔒 Cadenas affiché',            ['paywall_open', 'lock_reached']],
+            ['buy',     'Clic « acheter »',              ['buy_click_full', 'buy_click_hints5']],
+        ];
+
+        $sessions = fn (array $types) => DB::table('akwaba_events')
+            ->whereIn('type', $types)
+            ->when($since, fn ($q) => $q->where('created_at', '>=', $since))
+            ->distinct()
+            ->count('session_hash');
+
+        $steps = [];
+        foreach ($stepsDef as [$key, $label, $types]) {
+            $steps[] = ['key' => $key, 'label' => $label, 'count' => $sessions($types)];
+        }
+        $steps[] = [
+            'key'   => 'paid',
+            'label' => 'Payé (déblocages + packs)',
+            'count' => $paidUnlocks()->when($since, fn ($q) => $q->where('paid_at', '>=', $since))->count()
+                + $packs()->when($since, fn ($q) => $q->where('created_at', '>=', $since))->count(),
+        ];
+
+        foreach ($steps as $i => $step) {
+            $previous = $i > 0 ? $steps[$i - 1]['count'] : null;
+            $steps[$i]['pct'] = $previous ? round($step['count'] * 100 / $previous, 1) : null;
+        }
+
+        return [
+            'steps'   => $steps,
+            'details' => [
+                'free_hint'        => $sessions(['free_hint']),
+                'shop_open'        => $sessions(['shop_open']),
+                'buy_click_full'   => $sessions(['buy_click_full']),
+                'buy_click_hints5' => $sessions(['buy_click_hints5']),
+                'continue'         => $sessions(['continue']),
+            ],
         ];
     }
 }

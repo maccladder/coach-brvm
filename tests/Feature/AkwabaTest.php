@@ -312,34 +312,89 @@ class AkwabaTest extends TestCase
         $this->assertSame(2, DB::table('akwaba_events')->where('type', 'play_start')->count());
     }
 
-    public function test_evenements_ignores_pour_un_joueur_connecte_et_type_valide(): void
+    public function test_evenements_enregistres_aussi_pour_un_joueur_connecte(): void
     {
         $this->actingAs($this->player)->postJson(route('akwaba.event'), ['type' => 'lock_reached'])->assertNoContent();
-        $this->assertSame(0, DB::table('akwaba_events')->count());
 
-        $this->postJson(route('akwaba.event'), ['type' => 'achat'])->assertStatus(422);
-        $this->postJson(route('akwaba.event'), [])->assertStatus(422);
+        // Toujours anonyme : aucune colonne ne relie la ligne au compte
+        $this->assertSame(1, DB::table('akwaba_events')->where('type', 'lock_reached')->count());
+        $this->assertSame(['id', 'type', 'session_hash', 'created_at'], array_keys((array) DB::table('akwaba_events')->first()));
+    }
+
+    public function test_evenements_liste_blanche_stricte(): void
+    {
+        $allowed = [
+            'page_open', 'page_loaded', 'play_start', 'new_game', 'continue', 'ch1_reached', 'ch2_reached',
+            'lock_reached', 'free_hint', 'shop_open', 'paywall_open', 'buy_click_full', 'buy_click_hints5',
+        ];
+        $this->assertSame($allowed, AkwabaService::EVENTS);
+
+        $sessionId = str_repeat('w', 40);
+        foreach ($allowed as $type) {
+            $this->guestBrowser($sessionId)->postJson(route('akwaba.event'), ['type' => $type])->assertNoContent();
+        }
+        $this->assertSame(count($allowed), DB::table('akwaba_events')->count());
+
+        foreach (['achat', 'buy_click_vip', 'PAGE_OPEN', "page_open'--", 'page_open;', str_repeat('x', 300)] as $bad) {
+            $this->guestBrowser($sessionId)->postJson(route('akwaba.event'), ['type' => $bad])->assertStatus(422);
+        }
+        // Espaces autour : retirés par TrimStrings, donc le même événement, déjà compté
+        $this->guestBrowser($sessionId)->postJson(route('akwaba.event'), ['type' => ' page_open '])->assertNoContent();
+        $this->guestBrowser($sessionId)->postJson(route('akwaba.event'), [])->assertStatus(422);
+        $this->guestBrowser($sessionId)->postJson(route('akwaba.event'), ['type' => ['page_open']])->assertStatus(422);
+
+        $this->assertSame(count($allowed), DB::table('akwaba_events')->count());
     }
 
     public function test_evenements_limites_par_session(): void
     {
         $sessionId = str_repeat('c', 40);
-        for ($i = 0; $i < 10; $i++) {
-            $this->guestBrowser($sessionId)->postJson(route('akwaba.event'), ['type' => 'play_start'])->assertNoContent();
+        for ($i = 0; $i < 30; $i++) {
+            $this->guestBrowser($sessionId)->postJson(route('akwaba.event'), ['type' => 'page_open'])->assertNoContent();
         }
 
-        $this->guestBrowser($sessionId)->postJson(route('akwaba.event'), ['type' => 'play_start'])->assertStatus(429);
+        $this->guestBrowser($sessionId)->postJson(route('akwaba.event'), ['type' => 'page_open'])->assertStatus(429);
         // Une autre session sur la même IP n'est pas bloquée (CGNAT des réseaux mobiles)
-        $this->guestBrowser(str_repeat('d', 40))->postJson(route('akwaba.event'), ['type' => 'play_start'])->assertNoContent();
+        $this->guestBrowser(str_repeat('d', 40))->postJson(route('akwaba.event'), ['type' => 'page_open'])->assertNoContent();
     }
 
-    public function test_la_page_hote_envoie_les_evenements_invites(): void
+    public function test_la_page_hote_relaie_les_evenements_de_l_entonnoir(): void
     {
         $html = $this->get(route('akwaba.show'))->getContent();
 
         $this->assertStringContainsString(json_encode(route('akwaba.event', [], false)), $html);
-        $this->assertStringContainsString("guestEvent('play_start')", $html);
-        $this->assertStringContainsString("if (data.save === '3') guestEvent('lock_reached')", $html);
+        // Même liste blanche que le serveur pour les événements du jeu
+        $this->assertStringContainsString(
+            "const GAME_EVENTS = ['new_game', 'continue', 'free_hint', 'shop_open', 'paywall_open', 'buy_click_full', 'buy_click_hints5'];",
+            $html
+        );
+        $this->assertStringContainsString("const SAVE_EVENTS = { '1': 'ch1_reached', '2': 'ch2_reached', '3': 'lock_reached' };", $html);
+        $this->assertStringContainsString("case 'event':", $html);
+        $this->assertStringContainsString('if (GAME_EVENTS.includes(data.name)) trackEvent(data.name);', $html);
+        // page_open dès l'ouverture, page_loaded au ready (avec le retrait de l'écran de chargement)
+        $this->assertStringContainsString("trackEvent('page_open');", $html);
+        $this->assertStringContainsString("hideLoading();\n                    trackEvent('page_loaded');", $html);
+        // Plus de restriction aux invités
+        $this->assertStringNotContainsString('state.logged) return;\n            try {', $html);
+    }
+
+    public function test_ecran_de_chargement_par_dessus_le_jeu(): void
+    {
+        $html = $this->get(route('akwaba.show'))->getContent();
+
+        $this->assertStringContainsString('id="ak-loading"', $html);
+        $this->assertStringContainsString('background: #0b0d0a', $html);
+        $this->assertStringContainsString('AKWABA', $html);
+        $this->assertStringContainsString('le mystère de la lagune Ébrié', $html);
+        $this->assertStringContainsString('Chargement du jeu…', $html);
+        $this->assertStringContainsString('(le premier chargement peut prendre quelques secondes)', $html);
+        $this->assertStringContainsString('class="ak-load-bar"', $html);
+        // L'écran suit l'iframe dans le HTML : il est affiché au-dessus dès le premier rendu
+        $this->assertGreaterThan(strpos($html, 'id="game-frame"'), strpos($html, 'id="ak-loading"'));
+        // Secours si le jeu n'envoie jamais ready
+        $this->assertStringContainsString("frame.addEventListener('load', armLoadingFallback);", $html);
+        $this->assertStringContainsString("doc.readyState === 'complete' && doc.URL !== 'about:blank'", $html);
+        $this->assertStringContainsString('setTimeout(hideLoading, 60000);', $html);
     }
 
     // ─── Marketplace : pas d'achat ni de téléchargement standard ────────────

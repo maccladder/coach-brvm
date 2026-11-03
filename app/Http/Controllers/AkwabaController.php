@@ -154,18 +154,16 @@ class AkwabaController extends Controller
     }
 
     /**
-     * POST /jeux/akwaba/event  {type: 'play_start'|'lock_reached'}
-     * Compteur anonyme des invités (les joueurs connectés sont suivis par game_progress).
+     * POST /jeux/akwaba/event  {type: un nom de AkwabaService::EVENTS}
+     * Compteur anonyme de l'entonnoir, invités et connectés (une ligne par session et par type).
      */
     public function event(Request $request)
     {
         $data = $request->validate([
-            'type' => ['required', 'string', 'in:' . implode(',', AkwabaService::GUEST_EVENTS)],
+            'type' => ['required', 'string', 'in:' . implode(',', AkwabaService::EVENTS)],
         ]);
 
-        if (!$request->user()) {
-            $this->akwaba->recordGuestEvent($data['type'], $request->session()->getId());
-        }
+        $this->akwaba->recordEvent($data['type'], $request->session()->getId());
 
         return response()->noContent();
     }

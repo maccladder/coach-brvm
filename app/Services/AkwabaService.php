@@ -284,15 +284,27 @@ class AkwabaService
         });
     }
 
-    public const GUEST_EVENTS = ['play_start', 'lock_reached'];
+    /**
+     * Événements anonymes de l'entonnoir (liste blanche stricte), invités et connectés :
+     *  - page hôte : page_open (ouverture), page_loaded (jeu chargé, message ready),
+     *    ch1_reached / ch2_reached / lock_reached (progress save 1 / 2 / 3) ;
+     *  - jeu (message event) : new_game, continue, free_hint, shop_open, paywall_open,
+     *    buy_click_full, buy_click_hints5.
+     * play_start : ancien nom de page_loaded (avant le 03/11/2026), compté avec lui.
+     */
+    public const EVENTS = [
+        'page_open', 'page_loaded', 'play_start',
+        'new_game', 'continue', 'ch1_reached', 'ch2_reached', 'lock_reached',
+        'free_hint', 'shop_open', 'paywall_open', 'buy_click_full', 'buy_click_hints5',
+    ];
 
     /**
-     * Compteur anonyme d'invités : au plus une ligne par session et par type (index unique).
-     * L'id de session n'est jamais stocké, seulement son HMAC avec la clé de l'application.
+     * Compteur anonyme : au plus une ligne par session et par type (index unique). L'id de
+     * session n'est jamais stocké, seulement son HMAC avec la clé de l'application ; ni IP ni compte.
      */
-    public function recordGuestEvent(string $type, string $sessionId): void
+    public function recordEvent(string $type, string $sessionId): void
     {
-        if (!in_array($type, self::GUEST_EVENTS, true) || $sessionId === '') {
+        if (!in_array($type, self::EVENTS, true) || $sessionId === '') {
             return;
         }
 

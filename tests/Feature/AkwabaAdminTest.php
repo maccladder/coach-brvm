@@ -389,29 +389,97 @@ class AkwabaAdminTest extends TestCase
         $this->assertSame(['paystack' => 1500, 'manual' => 500, 'total' => 2000], $stats['revenue']);
     }
 
-    // ─── Entonnoir des invités ──────────────────────────────────────────────
+    // ─── Entonnoir des visiteurs (sessions anonymes) ────────────────────────
 
-    public function test_l_entonnoir_invites_et_la_conversion_globale(): void
+    /** Une session (lettre répétée) passe par ces événements, à cette date. */
+    private function visit(string $letter, array $types, $at = null): void
     {
-        foreach (['a', 'b', 'c'] as $session) {
-            foreach (['play_start', 'lock_reached'] as $type) {
-                DB::table('akwaba_events')->insert(['type' => $type, 'session_hash' => str_repeat($session, 64), 'created_at' => now()]);
-            }
+        foreach ($types as $type) {
+            DB::table('akwaba_events')->insert([
+                'type' => $type, 'session_hash' => str_repeat($letter, 64), 'created_at' => $at ?? now(),
+            ]);
         }
-        DB::table('akwaba_events')->insert(['type' => 'play_start', 'session_hash' => str_repeat('d', 64), 'created_at' => now()]);
+    }
 
-        // 1 connecté au-delà du cadenas, qui a payé
-        $payer = User::factory()->create();
-        $this->progress($payer, '4');
-        $this->paidPurchase($payer);
+    private function steps(array $stats, string $period): array
+    {
+        return collect($stats['sessions'][$period]['steps'])->mapWithKeys(fn ($s) => [$s['key'] => [$s['count'], $s['pct']]])->all();
+    }
 
-        $stats = $this->asAdmin()->get(route('admin.akwaba.index'))->assertOk()
-            ->assertSee('Entonnoir des invités')
-            ->viewData('stats');
+    public function test_l_entonnoir_complet_des_visiteurs_avec_les_pourcentages(): void
+    {
+        // 10 pages ouvertes, 8 jeux chargés, 6 parties, 5 au chapitre 1, 4 au chapitre 2,
+        // 2 au cadenas (paywall_open ou lock_reached), 1 clic acheter, 1 paiement
+        foreach (range('a', 'j') as $i => $l) {
+            $types = ['page_open'];
+            if ($i < 8) $types[] = 'page_loaded';
+            if ($i < 5) $types[] = 'new_game';
+            if ($i === 5) $types[] = 'continue';      // reprise : compte comme « partie »
+            if ($i < 5) $types[] = 'ch1_reached';
+            if ($i < 4) $types[] = 'ch2_reached';
+            if ($i === 0) $types = array_merge($types, ['paywall_open', 'lock_reached', 'buy_click_full']);
+            if ($i === 1) $types[] = 'paywall_open';
+            $this->visit($l, $types);
+        }
+        $this->visit('z', ['play_start']);          // ancien nom de « jeu chargé »
+        $this->paidPurchase(User::factory()->create());
 
-        $this->assertSame(['play_start' => 4, 'lock_reached' => 3], $stats['guests']);
-        $this->assertSame(100.0, $stats['conversion']);        // 1 payé ÷ 1 cadenas connecté
-        $this->assertSame(25.0, $stats['conversion_global']);  // 1 ÷ (3 invités + 1 connecté)
+        $response = $this->asAdmin()->get(route('admin.akwaba.index'))->assertOk()
+            ->assertSee('Entonnoir des visiteurs')
+            ->assertSee('Page ouverte')
+            ->assertSee('Jeu chargé')
+            ->assertSee('Cadenas affiché')
+            ->assertSee('Clic « acheter »')
+            ->assertSee('24 h')
+            ->assertSee('7 jours');
+        $stats = $response->viewData('stats');
+
+        $this->assertSame([
+            'page'   => [10, null],
+            'loaded' => [9, 90.0],     // 8 + 1 ancien play_start
+            'start'  => [6, 66.7],     // new_game ou continue
+            'ch1'    => [5, 83.3],
+            'ch2'    => [4, 80.0],
+            'lock'   => [2, 50.0],     // une session avec les deux événements ne compte qu'une fois
+            'buy'    => [1, 50.0],
+            'paid'   => [1, 100.0],
+        ], $this->steps($stats, 'all'));
+
+        $this->assertSame(1, $stats['sessions']['all']['details']['buy_click_full']);
+        $this->assertSame(0, $stats['sessions']['all']['details']['buy_click_hints5']);
+        $this->assertSame(1, $stats['sessions']['all']['details']['continue']);
+        $this->assertSame(50.0, $stats['conversion_global']);   // 1 déblocage ÷ 2 sessions au cadenas
+    }
+
+    public function test_l_entonnoir_des_visiteurs_sur_24_heures_et_7_jours(): void
+    {
+        $this->visit('a', ['page_open', 'page_loaded'], now()->subHours(2));
+        $this->visit('b', ['page_open', 'page_loaded', 'new_game'], now()->subDays(3));
+        $this->visit('c', ['page_open'], now()->subDays(10));
+        $this->paidPurchase(User::factory()->create(), 1000, now()->subDays(3));
+
+        $stats = $this->asAdmin()->get(route('admin.akwaba.index'))->viewData('stats');
+
+        $this->assertSame([1, null], $this->steps($stats, '24h')['page']);
+        $this->assertSame([1, 100.0], $this->steps($stats, '24h')['loaded']);
+        $this->assertSame([0, 0.0], $this->steps($stats, '24h')['start']);
+        $this->assertSame([0, null], $this->steps($stats, '24h')['paid']);   // étape précédente à 0 : pas de %
+
+        $this->assertSame([2, null], $this->steps($stats, '7d')['page']);
+        $this->assertSame([1, 50.0], $this->steps($stats, '7d')['start']);
+        $this->assertSame(1, $this->steps($stats, '7d')['paid'][0]);
+
+        $this->assertSame(3, $this->steps($stats, 'all')['page'][0]);
+    }
+
+    public function test_l_entonnoir_des_visiteurs_vide_sans_erreur(): void
+    {
+        $stats = $this->asAdmin()->get(route('admin.akwaba.index'))->assertOk()->viewData('stats');
+
+        foreach (['all', '24h', '7d'] as $period) {
+            $this->assertSame(0, array_sum(array_column($this->steps($stats, $period), 0)));
+        }
+        $this->assertNull($stats['conversion_global']);
     }
 
     // ─── Rattrapage d'un pack ───────────────────────────────────────────────

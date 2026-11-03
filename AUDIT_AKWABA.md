@@ -152,6 +152,26 @@ Après le déploiement :
 - **/admin/akwaba** : colonne « Indice gratuit utilisé » (oui / non, date au survol).
 - **Limite** : l'information vient du jeu, donc du client. Un joueur qui vide les données de son navigateur sans être connecté retrouve un indice gratuit. Une fois connecté, le serveur fait foi.
 
+## 5quater. Entonnoir complet et écran de chargement
+
+- **Version du jeu** `e2b78a3` : nouveau message `{akwaba:1, type:'event', name}`. Le jeu forme `buy_click_` + le produit.
+- **Événements** (table `akwaba_events`, une ligne par session et par type, HMAC de la session, ni IP ni compte), **invités et connectés** :
+  - page hôte : `page_open` (dès l'ouverture, avant le chargement du jeu), `page_loaded` (au `ready`), `ch1_reached` / `ch2_reached` / `lock_reached` (`progress` avec `save` à 1 / 2 / 3) ;
+  - jeu : `new_game`, `continue`, `free_hint`, `shop_open`, `paywall_open`, `buy_click_full`, `buy_click_hints5`.
+
+  La liste blanche est stricte des deux côtés (serveur + page hôte). Limite : 30 envois par minute par session, 300 par IP.
+- **`play_start`** (ancien nom, avant le 03/11/2026) est compté comme « jeu chargé ».
+- **Écran de chargement** par-dessus le jeu (`#0b0d0a`, « AKWABA », sous-titre, barre animée, texte), retiré au `ready`. Secours : 6 s après le chargement de l'iframe (même si elle était déjà chargée avant le script), et dans tous les cas au bout de 60 s.
+- **/admin/akwaba → « Entonnoir des visiteurs »** :
+  - étapes : page ouverte → jeu chargé → nouvelle partie (ou Continuer) → chapitre 1 → chapitre 2 → cadenas affiché (`paywall_open` ou `lock_reached`) → clic acheter → payé ;
+  - en sessions distinctes, sur le total, 24 h et 7 jours, avec le % par rapport à l'étape précédente (en rouge sous 50 %) ;
+  - « Payé » compte des paiements (déblocages + packs), pas des sessions.
+
+  La conversion globale = déblocages payés ÷ sessions au cadenas.
+- **Limites** :
+  - un joueur qui se connecte change de session : il peut compter deux fois sur certaines étapes ;
+  - les données d'avant le 03/11 n'ont que « jeu chargé » et « cadenas » (invités) : sur le total, les premiers % peuvent dépasser 100 %. **Regarde plutôt les colonnes 24 h et 7 jours.**
+
 ## 6. Proposition v2 (non codée) : chapitres servis par le serveur
 Découper le jeu : le fichier public contient le moteur, le prologue et les chapitres 1-2. Les chapitres 3 à 7 et les fins (textes, énigmes, images) deviennent des paquets servis par `GET /jeux/akwaba/contenu/{chapitre}`, réservés aux joueurs qui ont débloqué l'histoire (`Cache-Control: private`). Le jeu les charge à la réception de `state.unlocked = true`. Les réponses des énigmes et le texte des indices sont vérifiés ou servis par le serveur (`POST /jeux/akwaba/indice` renvoie l'indice après décrément) : ils ne sont plus dans le client. Cela demande de modifier le jeu.
 

@@ -11,8 +11,9 @@
         'admin'    => ['bg-warning text-dark', '🛠️ Admin'],
     ];
     $funnelTop = max(1, collect($stats['funnel'])->max('count'));
-    $guestTop  = max(1, $stats['guests']['play_start'], $stats['guests']['lock_reached']);
     $pct = fn ($v) => $v === null ? '—' : $v . ' %';
+    $sessionPeriods = ['all' => 'Total', '24h' => '24 h', '7d' => '7 jours'];
+    $sessionTop = max(1, collect($stats['sessions']['all']['steps'])->max('count'));
     // Gestes manuels réservés au code admin ; le code stagiaire consulte seulement
     $canAct = (bool) session('is_admin');
 @endphp
@@ -106,27 +107,60 @@
         @endforeach
     </div>
 
+    {{-- Entonnoir des sessions (invités et connectés) --}}
+    <div class="card border-0 shadow-sm mb-4" id="entonnoir-sessions">
+        <div class="card-header fw-bold">👻 Entonnoir des visiteurs (sessions anonymes, invités et connectés)</div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-sm align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Étape</th>
+                            @foreach($sessionPeriods as $label)
+                                <th class="text-end">{{ $label }}</th>
+                                <th class="text-end text-muted fw-normal small">% étape préc.</th>
+                            @endforeach
+                            <th style="width:22%;"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($stats['sessions']['all']['steps'] as $i => $step)
+                            <tr>
+                                <td class="{{ in_array($step['key'], ['lock', 'paid'], true) ? 'fw-bold' : '' }}">{{ $step['label'] }}</td>
+                                @foreach(array_keys($sessionPeriods) as $period)
+                                    @php $s = $stats['sessions'][$period]['steps'][$i]; @endphp
+                                    <td class="text-end fw-semibold">{{ $s['count'] }}</td>
+                                    <td class="text-end small {{ $s['pct'] !== null && $s['pct'] < 50 ? 'text-danger' : 'text-muted' }}">{{ $pct($s['pct']) }}</td>
+                                @endforeach
+                                <td>
+                                    <div class="progress" style="height:8px;">
+                                        <div class="progress-bar" style="width:{{ round($step['count'] * 100 / $sessionTop) }}%;background:{{ $step['key'] === 'lock' ? '#6f42c1' : ($step['key'] === 'paid' ? '#198754' : '#0dcaf0') }};"></div>
+                                    </div>
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="card-footer bg-white small text-muted">
+            @php $d = $stats['sessions']['all']['details']; @endphp
+            Détail (total) : « Continuer » {{ $d['continue'] }} · indice gratuit {{ $d['free_hint'] }} · boutique d'indices ouverte {{ $d['shop_open'] }} ·
+            clic « histoire complète » {{ $d['buy_click_full'] }} · clic « 5 indices » {{ $d['buy_click_hints5'] }}.<br>
+            Une session = un navigateur (au plus un événement par type ; un joueur qui se connecte change de session). Aucune IP ni donnée personnelle stockée.
+            « Payé » compte des paiements (déblocages + packs), pas des sessions.
+            @if($stats['sessions_since'])
+                Étapes détaillées mesurées depuis le {{ \Illuminate\Support\Carbon::parse($stats['sessions_since'])->format('d/m/Y H:i') }} :
+                avant, seuls « Jeu chargé » et « Cadenas » existaient (invités uniquement), d'où des % au-dessus de 100 % sur le total.
+            @endif
+            <br>Conversion connectés : <strong>{{ $pct($stats['conversion']) }}</strong> ·
+            globale (déblocages payés ÷ sessions au cadenas) : <strong>{{ $pct($stats['conversion_global']) }}</strong>
+        </div>
+    </div>
+
     <div class="row g-4 mb-4">
         {{-- Entonnoir --}}
         <div class="col-lg-5">
-            <div class="card border-0 shadow-sm mb-4">
-                <div class="card-header fw-bold">👻 Entonnoir des invités (sessions anonymes)</div>
-                <div class="card-body">
-                    @foreach([['Ont lancé le jeu', $stats['guests']['play_start'], '#0dcaf0'], ['🔒 Arrivés au cadenas', $stats['guests']['lock_reached'], '#6f42c1']] as [$label, $count, $color])
-                        <div class="mb-2">
-                            <div class="d-flex justify-content-between small mb-1"><span>{{ $label }}</span><strong>{{ $count }}</strong></div>
-                            <div class="progress" style="height:8px;">
-                                <div class="progress-bar" style="width:{{ round($count * 100 / $guestTop) }}%;background:{{ $color }};"></div>
-                            </div>
-                        </div>
-                    @endforeach
-                    <div class="small text-muted mt-2">
-                        Une session = un navigateur non connecté (au plus un événement par type). Aucune IP ni donnée personnelle stockée.<br>
-                        Conversion connectés : <strong>{{ $pct($stats['conversion']) }}</strong> ·
-                        globale (payés ÷ cadenas invités + connectés) : <strong>{{ $pct($stats['conversion_global']) }}</strong>
-                    </div>
-                </div>
-            </div>
             <div class="card border-0 shadow-sm">
                 <div class="card-header fw-bold">📊 Entonnoir des joueurs connectés : chapitre le plus loin atteint</div>
                 <div class="card-body">

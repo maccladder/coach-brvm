@@ -135,6 +135,27 @@
         body.pseudo-fs #game-bar, body.pseudo-fs #bar-toggle { display: none !important; }
         body.pseudo-fs #game-frame { position: fixed; inset: 0; width: 100vw; height: 100vh; height: 100dvh; border: 0; z-index: 1000; }
 
+        /* ── Écran de chargement (le jeu pèse ~6 Mo) : retiré au message ready du jeu ──
+           Au-dessus du jeu, sous les messages de paiement (#ak-notice). */
+        #ak-loading {
+            position: fixed; inset: 0; z-index: 1001;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            gap: 14px; padding: 24px; text-align: center;
+            background: #0b0d0a; color: var(--ak-ink);
+            transition: opacity .45s ease, visibility .45s;
+        }
+        #ak-loading.done { opacity: 0; visibility: hidden; pointer-events: none; }
+        .ak-load-title { font-family: Georgia, 'Times New Roman', serif; font-size: clamp(38px, 11vw, 64px); letter-spacing: .18em; color: var(--ak-gold); line-height: 1; padding-left: .18em; }
+        .ak-load-sub { font-family: Georgia, 'Times New Roman', serif; font-style: italic; font-size: clamp(15px, 4.2vw, 20px); color: #e9dcc0; }
+        .ak-load-bar { position: relative; width: min(240px, 70vw); height: 4px; margin-top: 18px; border-radius: 4px; overflow: hidden; background: rgba(201,168,76,.18); }
+        .ak-load-bar span { position: absolute; top: 0; left: -40%; width: 40%; height: 100%; border-radius: 4px; background: var(--ak-gold); animation: ak-load 1.4s ease-in-out infinite; }
+        .ak-load-text { font-size: 14px; color: var(--ak-ink); margin-top: 4px; }
+        .ak-load-text small { display: block; margin-top: 4px; font-size: 12px; color: var(--ak-muted); }
+        @keyframes ak-load { 0% { left: -40%; } 100% { left: 100%; } }
+        @media (prefers-reduced-motion: reduce) {
+            .ak-load-bar span { animation: none; left: 0; width: 100%; opacity: .55; }
+        }
+
         #fs-exit {
             display: none; position: fixed; z-index: 1001;
             top: max(6px, env(safe-area-inset-top, 0px)); left: 50%; transform: translateX(-50%);
@@ -186,6 +207,17 @@
         src="{{ route('akwaba.file', ['v' => $version], false) }}"
         title="Jeu : Akwaba, le mystère de la lagune Ébrié"
     ></iframe>
+
+    {{-- Écran de chargement : retiré au message ready du jeu (ou en secours après son chargement) --}}
+    <div id="ak-loading" role="status" aria-live="polite">
+        <div class="ak-load-title" aria-hidden="true">AKWABA</div>
+        <div class="ak-load-sub">le mystère de la lagune Ébrié</div>
+        <div class="ak-load-bar" aria-hidden="true"><span></span></div>
+        <p class="ak-load-text">
+            Chargement du jeu…
+            <small>(le premier chargement peut prendre quelques secondes)</small>
+        </p>
+    </div>
 
     <div id="ak-notice" role="status" aria-live="polite">
         <span id="ak-notice-text"></span>
@@ -339,16 +371,39 @@
             }, 1000);
         }
 
-        // Compteur anonyme des invités (play_start, lock_reached) : une fois par onglet, le
-        // serveur dédoublonne aussi par session. Les joueurs connectés sont suivis par /progress.
-        function guestEvent(type) {
-            if (!state || state.logged) return;
+        // Entonnoir anonyme (invités et connectés) : chaque événement une fois par onglet, le
+        // serveur dédoublonne aussi par session. Noms autorisés : même liste que le serveur.
+        const GAME_EVENTS = ['new_game', 'continue', 'free_hint', 'shop_open', 'paywall_open', 'buy_click_full', 'buy_click_hints5'];
+        const SAVE_EVENTS = { '1': 'ch1_reached', '2': 'ch2_reached', '3': 'lock_reached' };
+
+        function trackEvent(type) {
             try {
                 if (sessionStorage.getItem('akwaba_event_' + type)) return;
                 sessionStorage.setItem('akwaba_event_' + type, '1');
             } catch (e) {}
             api(URLS.event, { type: type }).catch(() => {});
         }
+
+        // Dès l'ouverture, avant le chargement du jeu : comparé à page_loaded, combien partent
+        // pendant le chargement
+        trackEvent('page_open');
+
+        // ── Écran de chargement ─────────────────────────────────
+        const loading = document.getElementById('ak-loading');
+        function hideLoading() {
+            loading.classList.add('done');
+            loading.setAttribute('aria-hidden', 'true');
+        }
+        // Secours si le jeu ne dit jamais « ready » : on découvre la page 6 s après son chargement
+        // (même s'il était déjà chargé avant ce script, ex. depuis le cache), et dans tous les cas
+        // au bout de 60 s
+        const armLoadingFallback = () => setTimeout(hideLoading, 6000);
+        frame.addEventListener('load', armLoadingFallback);
+        try {
+            const doc = frame.contentDocument;
+            if (doc && doc.readyState === 'complete' && doc.URL !== 'about:blank') armLoadingFallback();
+        } catch (e) {}
+        setTimeout(hideLoading, 60000);
 
         // Indice gratuit (un seul par joueur, pour toujours) : enregistré sur le compte si le
         // joueur est connecté ; un invité le garde seulement sur son téléphone (le jeu s'en charge)
@@ -471,13 +526,13 @@
             switch (data.type) {
                 case 'ready':
                     gameReady = true;
-                    firstState.then(() => {
-                        pushState();
-                        guestEvent('play_start');
-                    });
+                    hideLoading();
+                    trackEvent('page_loaded');
+                    firstState.then(pushState);
                     break;
                 case 'progress':
-                    if (data.save === '3') guestEvent('lock_reached'); // arrivée au cadenas
+                    // Chapitre 1, chapitre 2, arrivée au cadenas (save = 3)
+                    if (SAVE_EVENTS[data.save]) trackEvent(SAVE_EVENTS[data.save]);
                     queueProgress(
                         typeof data.save === 'string' ? data.save : null,
                         Array.isArray(data.fins) ? data.fins.filter(f => typeof f === 'string') : []
@@ -491,6 +546,9 @@
                     break;
                 case 'freeHintUsed':
                     freeHintUsed();
+                    break;
+                case 'event':
+                    if (GAME_EVENTS.includes(data.name)) trackEvent(data.name);
                     break;
             }
         });
