@@ -140,6 +140,18 @@ Après le déploiement :
 - **`config/checkout.php`** : `marketplace` est désormais à `false` par défaut, comme les autres types. Un oubli dans le `.env` n'active plus jamais un checkout.
 - **Tests** : `tests/Feature/AkwabaMobileMoneyCheckoutTest.php` (19 cas).
 
+## 5ter. Indice gratuit : un seul par joueur, pour toujours
+
+- **Version du jeu** `919d3d8`. Avant, l'indice gratuit revenait à chaque partie.
+- **Ajouts au contrat postMessage** :
+  - `state.freeUsed` (Boursiv → jeu) : `false` pour un invité ;
+  - `{akwaba:1, type:'freeHintUsed'}` (jeu → Boursiv) : envoyé quand le joueur utilise son indice gratuit, ou quand le téléphone le sait déjà utilisé alors que le serveur dit `false`.
+- **Stockage** : colonne `game_progress.free_hint_used_at` (migration `2026_11_03_000008`), la date de première utilisation. Posée par un `UPDATE … WHERE free_hint_used_at IS NULL` : idempotent et atomique, la première date est conservée. Une sauvegarde de progression ne la modifie pas.
+- **`POST /jeux/akwaba/hint/free`** : connexion obligatoire, CSRF, 10 par minute.
+- **Page hôte** : relaie `freeHintUsed` pour un joueur connecté, une fois par page (après chargement de l'état). Pour un invité, rien n'est envoyé : le jeu le garde sur le téléphone, et l'enverra à la réception de `state` après connexion.
+- **/admin/akwaba** : colonne « Indice gratuit utilisé » (oui / non, date au survol).
+- **Limite** : l'information vient du jeu, donc du client. Un joueur qui vide les données de son navigateur sans être connecté retrouve un indice gratuit. Une fois connecté, le serveur fait foi.
+
 ## 6. Proposition v2 (non codée) : chapitres servis par le serveur
 Découper le jeu : le fichier public contient le moteur, le prologue et les chapitres 1-2. Les chapitres 3 à 7 et les fins (textes, énigmes, images) deviennent des paquets servis par `GET /jeux/akwaba/contenu/{chapitre}`, réservés aux joueurs qui ont débloqué l'histoire (`Cache-Control: private`). Le jeu les charge à la réception de `state.unlocked = true`. Les réponses des énigmes et le texte des indices sont vérifiés ou servis par le serveur (`POST /jeux/akwaba/indice` renvoie l'indice après décrément) : ils ne sont plus dans le client. Cela demande de modifier le jeu.
 

@@ -124,6 +124,23 @@ class AkwabaAdminTest extends TestCase
 
     // ─── Page : joueurs, statistiques, historique ───────────────────────────
 
+    public function test_la_liste_indique_si_l_indice_gratuit_est_utilise(): void
+    {
+        $this->progress($this->player, '2');
+        $other = User::factory()->create(['name' => 'Koffi Autre']);
+        $this->progress($other, '1');
+        app(AkwabaService::class)->markFreeHintUsed($other, $this->product);
+
+        $players = $this->asAdmin()->get(route('admin.akwaba.index'))
+            ->assertOk()
+            ->assertSee('Indice gratuit utilisé')
+            ->viewData('players');
+
+        $byName = collect($players->items())->keyBy('name');
+        $this->assertNotNull($byName['Koffi Autre']->free_hint_at);
+        $this->assertNull($byName["Aya N'Guessan"]->free_hint_at);
+    }
+
     public function test_la_page_liste_les_joueurs_avec_leur_etat(): void
     {
         $payer = User::factory()->create(['name' => 'Kouamé Payeur']);

@@ -260,6 +260,7 @@ class AdminAkwabaController extends Controller
             ->select('users.id', 'users.name', 'users.email')
             ->selectSub($progress()->select('data')->limit(1), 'ak_progress')
             ->selectSub($progress()->select('updated_at')->limit(1), 'ak_progress_at')
+            ->selectSub($progress()->select('free_hint_used_at')->limit(1), 'ak_free_hint_at')
             ->selectSub($credits()->where('kind', AkwabaService::KIND_HINTS)->select('balance')->limit(1), 'ak_hints')
             ->selectSub($ledger()->selectRaw('MAX(created_at)'), 'ak_ledger_at')
             ->selectSub($purchase()->where('status', 'paid')->select('paid_at')->limit(1), 'ak_paid_at')
@@ -287,6 +288,7 @@ class AdminAkwabaController extends Controller
 
             $row->unlocked_via  = $row->ak_paid_at ? 'purchase' : ($row->ak_granted_at ? 'grant' : null);
             $row->hints         = (int) $row->ak_hints;
+            $row->free_hint_at  = $row->ak_free_hint_at ? Carbon::parse($row->ak_free_hint_at) : null;
             $row->max           = $data['max'] ?? null;
             $row->fins          = array_values($data['fins'] ?? []);
             $row->last_activity = $dates ? Carbon::parse(max($dates)) : null;

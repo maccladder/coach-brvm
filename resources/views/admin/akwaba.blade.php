@@ -346,6 +346,7 @@
                             <th>Joueur</th>
                             <th>Débloqué</th>
                             <th class="text-end">Indices</th>
+                            <th>Indice gratuit utilisé</th>
                             <th>Chapitre max</th>
                             <th>Fins</th>
                             <th>Dernière activité</th>
@@ -369,6 +370,13 @@
                                     @endif
                                 </td>
                                 <td class="text-end fw-semibold">{{ $p->hints }}</td>
+                                <td class="small">
+                                    @if($p->free_hint_at)
+                                        <span class="badge bg-secondary" title="{{ $p->free_hint_at->format('d/m/Y H:i') }}">Oui</span>
+                                    @else
+                                        <span class="badge bg-light text-dark border">Non</span>
+                                    @endif
+                                </td>
                                 <td>{{ $chapter($p->max) }}</td>
                                 <td class="small">{{ collect($p->fins)->map(fn ($f) => $finLabels[$f] ?? $f)->join(', ') ?: '—' }}</td>
                                 <td class="small text-muted">{{ $p->last_activity?->format('d/m/Y H:i') ?? '—' }}</td>
@@ -377,7 +385,7 @@
                                 </td>
                             </tr>
                         @empty
-                            <tr><td colspan="7" class="text-muted p-4">Aucun joueur.</td></tr>
+                            <tr><td colspan="8" class="text-muted p-4">Aucun joueur.</td></tr>
                         @endforelse
                     </tbody>
                 </table>

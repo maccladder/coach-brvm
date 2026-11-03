@@ -116,6 +116,7 @@ class AkwabaService
                 'logged'   => false,
                 'unlocked' => false,
                 'hints'    => 0,
+                'freeUsed' => false,
                 'progress' => ['save' => null, 'fins' => []],
             ];
         }
@@ -126,8 +127,48 @@ class AkwabaService
             'logged'   => true,
             'unlocked' => $this->isUnlocked($user, $product),
             'hints'    => $this->hints($user),
+            'freeUsed' => $this->freeHintUsed($user, $product),
             'progress' => $this->progress($user, $product),
         ];
+    }
+
+    /** Indice gratuit déjà utilisé ? (un seul par joueur, pour toujours) */
+    public function freeHintUsed(User $user, ?MarketplaceProduct $product = null): bool
+    {
+        $product ??= $this->product();
+
+        return $product !== null && GameProgress::where('user_id', $user->id)
+            ->where('product_id', $product->id)
+            ->whereNotNull('free_hint_used_at')
+            ->exists();
+    }
+
+    /**
+     * Marque l'indice gratuit comme utilisé. Idempotent : seule la première date est gardée
+     * (UPDATE conditionnel, sans risque même avec deux appels simultanés).
+     *
+     * @return bool true si l'indice vient d'être marqué, false s'il l'était déjà
+     */
+    public function markFreeHintUsed(User $user, MarketplaceProduct $product): bool
+    {
+        $this->ensureProgressRow($user, $product);
+
+        return GameProgress::where('user_id', $user->id)
+            ->where('product_id', $product->id)
+            ->whereNull('free_hint_used_at')
+            ->update(['free_hint_used_at' => now(), 'updated_at' => now()]) === 1;
+    }
+
+    private function ensureProgressRow(User $user, MarketplaceProduct $product): void
+    {
+        try {
+            GameProgress::firstOrCreate(
+                ['user_id' => $user->id, 'product_id' => $product->id],
+                ['data' => ['save' => null, 'fins' => [], 'max' => null]]
+            );
+        } catch (UniqueConstraintViolationException) {
+            // Créée en même temps par une autre requête du joueur : la ligne existe, on continue
+        }
     }
 
     /**
@@ -137,14 +178,7 @@ class AkwabaService
      */
     public function saveProgress(User $user, MarketplaceProduct $product, ?string $save, array $fins): array
     {
-        try {
-            GameProgress::firstOrCreate(
-                ['user_id' => $user->id, 'product_id' => $product->id],
-                ['data' => ['save' => null, 'fins' => [], 'max' => null]]
-            );
-        } catch (UniqueConstraintViolationException) {
-            // Première sauvegarde envoyée deux fois en même temps : la ligne existe, on continue
-        }
+        $this->ensureProgressRow($user, $product);
 
         return DB::transaction(function () use ($user, $product, $save, $fins) {
             $progress = GameProgress::where('user_id', $user->id)

@@ -405,6 +405,7 @@ class AkwabaTest extends TestCase
             'logged'   => false,
             'unlocked' => false,
             'hints'    => 0,
+            'freeUsed' => false,
             'progress' => ['save' => null, 'fins' => []],
         ]);
     }
@@ -415,6 +416,7 @@ class AkwabaTest extends TestCase
             'logged'   => true,
             'unlocked' => false,
             'hints'    => 0,
+            'freeUsed' => false,
             'progress' => ['save' => null, 'fins' => []],
         ]);
     }
@@ -433,8 +435,83 @@ class AkwabaTest extends TestCase
             'logged'   => true,
             'unlocked' => true,
             'hints'    => 4,
+            'freeUsed' => false,
             'progress' => ['save' => '5', 'fins' => ['oubli']],
         ]);
+    }
+
+    // ─── Indice gratuit (un seul par joueur, pour toujours) ──────────────────
+
+    public function test_indice_gratuit_marque_une_seule_fois_et_renvoye_dans_state(): void
+    {
+        $this->state($this->player)->assertJsonPath('freeUsed', false);
+
+        $this->actingAs($this->player)->postJson(route('akwaba.hint.free'))->assertOk()->assertExactJson(['freeUsed' => true]);
+        $first = GameProgress::where('user_id', $this->player->id)->value('free_hint_used_at');
+        $this->assertNotNull($first);
+
+        // Deuxième appel (autre téléphone, invité connecté ensuite…) : rien ne change
+        $this->travel(5)->minutes();
+        $this->actingAs($this->player)->postJson(route('akwaba.hint.free'))->assertOk()->assertExactJson(['freeUsed' => true]);
+
+        $this->assertEquals($first, GameProgress::where('user_id', $this->player->id)->value('free_hint_used_at'));
+        $this->assertSame(1, GameProgress::where('user_id', $this->player->id)->count());
+        $this->state($this->player)->assertJsonPath('freeUsed', true);
+    }
+
+    public function test_indice_gratuit_ne_touche_ni_la_progression_ni_le_solde(): void
+    {
+        $this->purchase();
+        $this->giveHints(3);
+        $this->actingAs($this->player)->postJson(route('akwaba.progress'), ['save' => '4', 'fins' => ['oubli']])->assertOk();
+
+        $this->actingAs($this->player)->postJson(route('akwaba.hint.free'))->assertOk();
+        // Une sauvegarde de progression ensuite ne remet pas l'indice gratuit à zéro
+        $this->actingAs($this->player)->postJson(route('akwaba.progress'), ['save' => '5', 'fins' => []])->assertOk();
+
+        $this->state($this->player)
+            ->assertJsonPath('freeUsed', true)
+            ->assertJsonPath('hints', 3)
+            ->assertJsonPath('progress', ['save' => '5', 'fins' => ['oubli']]);
+        $this->assertSame(0, GameCreditLedger::where('reason', 'use')->count());
+    }
+
+    public function test_indice_gratuit_refuse_a_un_invite(): void
+    {
+        $this->postJson(route('akwaba.hint.free'))->assertUnauthorized();
+
+        $this->assertSame(0, GameProgress::count());
+        $this->state()->assertJsonPath('freeUsed', false);
+    }
+
+    public function test_indice_gratuit_isole_entre_joueurs(): void
+    {
+        $other = User::factory()->create();
+
+        $this->actingAs($other)->postJson(route('akwaba.hint.free'))->assertOk();
+
+        $this->state($other)->assertJsonPath('freeUsed', true);
+        $this->state($this->player)->assertJsonPath('freeUsed', false);
+    }
+
+    public function test_indice_gratuit_limite(): void
+    {
+        for ($i = 0; $i < 10; $i++) {
+            $this->actingAs($this->player)->postJson(route('akwaba.hint.free'))->assertOk();
+        }
+
+        $this->actingAs($this->player)->postJson(route('akwaba.hint.free'))->assertStatus(429);
+    }
+
+    public function test_la_page_hote_relaie_l_indice_gratuit(): void
+    {
+        $html = $this->get(route('akwaba.show'))->getContent();
+
+        $this->assertStringContainsString(json_encode(route('akwaba.hint.free', [], false)), $html);
+        $this->assertStringContainsString("case 'freeHintUsed':", $html);
+        $this->assertStringContainsString('freeUsed: !!state.freeUsed', $html);
+        // Invité : rien n'est envoyé (le jeu le garde sur le téléphone)
+        $this->assertStringContainsString('if (!state || !state.logged || state.freeUsed || freeHintSent) return;', $html);
     }
 
     public function test_state_achat_en_attente_ne_debloque_pas(): void

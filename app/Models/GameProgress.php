@@ -15,7 +15,8 @@ class GameProgress extends Model
     ];
 
     protected $casts = [
-        'data' => 'array',
+        'data'              => 'array',
+        'free_hint_used_at' => 'datetime',
     ];
 
     public function user()

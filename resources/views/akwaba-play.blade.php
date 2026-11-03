@@ -207,6 +207,7 @@
             state:    @json(route('akwaba.state', [], false)),
             progress: @json(route('akwaba.progress', [], false)),
             hint:     @json(route('akwaba.hint.use', [], false)),
+            freeHint: @json(route('akwaba.hint.free', [], false)),
             buy:      @json(route('akwaba.buy', [], false)),
             login:    @json(route('akwaba.login', [], false)),
             event:    @json(route('akwaba.event', [], false)),
@@ -303,6 +304,7 @@
                 logged: !!state.logged,
                 unlocked: !!state.unlocked,
                 hints: Number.isInteger(state.hints) ? state.hints : 0,
+                freeUsed: !!state.freeUsed,
                 progress: state.progress || { save: null, fins: [] },
             });
         }
@@ -346,6 +348,20 @@
                 sessionStorage.setItem('akwaba_event_' + type, '1');
             } catch (e) {}
             api(URLS.event, { type: type }).catch(() => {});
+        }
+
+        // Indice gratuit (un seul par joueur, pour toujours) : enregistré sur le compte si le
+        // joueur est connecté ; un invité le garde seulement sur son téléphone (le jeu s'en charge)
+        let freeHintSent = false;
+        function freeHintUsed() {
+            firstState.then(() => {
+                if (!state || !state.logged || state.freeUsed || freeHintSent) return;
+                freeHintSent = true;
+                api(URLS.freeHint, {}).then(res => {
+                    if (res.ok) state.freeUsed = true;
+                    else freeHintSent = false;
+                }).catch(() => { freeHintSent = false; });
+            });
         }
 
         function useHint(id) {
@@ -472,6 +488,9 @@
                     break;
                 case 'useHint':
                     if (typeof data.id === 'string' && data.id.length <= 64) useHint(data.id);
+                    break;
+                case 'freeHintUsed':
+                    freeHintUsed();
                     break;
             }
         });

@@ -125,6 +125,7 @@ Route::prefix('jeux/akwaba')->name('akwaba.')->controller(\App\Http\Controllers\
     Route::middleware('auth')->group(function () {
         Route::post('/progress', 'progress')->middleware('throttle:30,1')->name('progress');
         Route::post('/hint/use', 'useHint')->middleware('throttle:30,1')->name('hint.use');
+        Route::post('/hint/free', 'useFreeHint')->middleware('throttle:10,1')->name('hint.free');
         Route::post('/buy', 'buy')->middleware('throttle:6,1')->name('buy');
     });
 });

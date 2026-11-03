@@ -171,6 +171,21 @@ class AkwabaController extends Controller
     }
 
     /**
+     * POST /jeux/akwaba/hint/free
+     * L'indice gratuit (un seul par joueur, pour toujours) vient d'être utilisé dans le jeu, ou le
+     * téléphone savait qu'il l'était déjà (invité qui s'est connecté ensuite). Idempotent.
+     */
+    public function useFreeHint(Request $request)
+    {
+        $product = $this->akwaba->product();
+        abort_unless($product, 404);
+
+        $this->akwaba->markFreeHintUsed($request->user(), $product);
+
+        return response()->json(['freeUsed' => true]);
+    }
+
+    /**
      * POST /jeux/akwaba/hint/use  {id}
      */
     public function useHint(Request $request)
