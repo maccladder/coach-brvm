@@ -54,13 +54,15 @@ class PaystackGamePremiumService
         }
 
         $expected = GameScoreController::featurePrice($product->slug, $feature);
+        $status   = (string) ($data['status'] ?? '');
 
-        if ($expected === null || $amountPaid !== $expected || $currency !== 'XOF') {
-            Log::error('Paystack GAME premium: montant/devise incorrect', [
+        if ($expected === null || $amountPaid !== $expected || $currency !== 'XOF' || $status !== 'success') {
+            Log::error('Paystack GAME premium: montant/devise/statut incorrect', [
                 'reference' => $reference,
                 'expected'  => $expected,
                 'paid'      => $amountPaid,
                 'currency'  => $currency,
+                'status'    => $status,
             ]);
             return self::MISMATCH;
         }

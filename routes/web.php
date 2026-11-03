@@ -330,11 +330,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/login', [AdminController::class, 'showLoginForm'])->name('login.form');
     Route::post('/login', [AdminController::class, 'login'])->name('login');
 
-    // ✅ Utilisateurs (ADMIN)
-    Route::get('/users', [AdminUserController::class, 'index'])->name('users.index');
-    Route::get('/users/{user}', [AdminUserController::class, 'show'])->name('users.show');
-
     Route::middleware(['admin.code', 'stagiaire.log'])->group(function () {
+
+        // ✅ Utilisateurs (ADMIN)
+        Route::get('/users', [AdminUserController::class, 'index'])->name('users.index');
+        Route::get('/users/{user}', [AdminUserController::class, 'show'])->name('users.show');
 
         Route::post('/logout', [AdminController::class, 'logout'])->name('logout');
         Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
@@ -1056,7 +1056,8 @@ Route::middleware('admin.code')->prefix('admin')->name('admin.')->group(function
 
 
 
-Route::middleware(['auth']) // + ton middleware admin
+// auth : le contrôleur enregistre l'utilisateur connecté comme valideur
+Route::middleware(['auth', 'admin.code'])
     ->prefix('admin')
     ->name('admin.')
     ->group(function () {
