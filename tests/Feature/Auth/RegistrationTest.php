@@ -35,6 +35,40 @@ class RegistrationTest extends TestCase
         $response->assertRedirect(route('dashboard', absolute: false));
     }
 
+    private function register(): \Illuminate\Testing\TestResponse
+    {
+        Http::fake([
+            'hcaptcha.com/*' => Http::response(['success' => true]),
+        ]);
+
+        return $this->post('/register', [
+            'name' => "N'Guessan Test",
+            'email' => 'joueur@example.com',
+            'password' => 'password',
+            'password_confirmation' => 'password',
+            'h-captcha-response' => 'fake-token',
+        ]);
+    }
+
+    public function test_registration_returns_to_the_intended_page(): void
+    {
+        // Ex. invité au cadenas d'Akwaba → connexion → « Créer un compte »
+        $this->get(route('akwaba.login'))->assertRedirect(route('login'));
+
+        $response = $this->register();
+
+        $this->assertAuthenticated();
+        $response->assertRedirect(route('akwaba.show'));
+    }
+
+    public function test_registration_without_intended_page_falls_back_to_dashboard(): void
+    {
+        $response = $this->register();
+
+        $this->assertAuthenticated();
+        $response->assertRedirect(route('dashboard', absolute: false));
+    }
+
     public function test_registration_rejects_name_with_url(): void
     {
         Http::fake([

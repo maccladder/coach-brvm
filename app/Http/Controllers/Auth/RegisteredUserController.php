@@ -54,6 +54,7 @@ class RegisteredUserController extends Controller
 
         Auth::login($user);
 
-        return redirect(route('dashboard', absolute: false));
+        // Retour à la page d'origine (ex. le cadenas d'Akwaba), sinon le tableau de bord
+        return redirect()->intended(route('dashboard', absolute: false));
     }
 }
