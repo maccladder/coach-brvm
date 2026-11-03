@@ -43,7 +43,24 @@ class AdminAkwabaController extends Controller
             'ledger'          => $this->ledger($request, $selected),
             'selected'        => $selected,
             'selectedSummary' => $selected ? $this->akwaba->playerSummary($selected) : null,
+            'duplicates'      => $this->duplicatePayments($product),
         ]);
+    }
+
+    /**
+     * Déblocages payés deux fois (deux tentatives validées) : le second paiement n'a créé aucun
+     * achat (PaystackMarketplaceService::DUPLICATE) et doit être remboursé au joueur.
+     */
+    private function duplicatePayments(MarketplaceProduct $product)
+    {
+        return \App\Models\Payment::query()
+            ->with('user:id,name,email')
+            ->where('purpose', 'marketplace')
+            ->where('meta', 'like', '%"duplicate":true%')
+            ->latest('id')
+            ->get()
+            ->filter(fn ($p) => (int) data_get($p->meta, 'product_id') === $product->id && data_get($p->meta, 'duplicate') === true)
+            ->values();
     }
 
     /**

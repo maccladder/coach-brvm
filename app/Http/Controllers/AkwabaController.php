@@ -3,16 +3,15 @@
 namespace App\Http\Controllers;
 
 use App\Models\Payment;
-use App\Services\Affiliate\AffiliateCommissionService;
 use App\Services\AkwabaService;
+use App\Services\Payments\AkwabaPurchaseService;
 use App\Services\Payments\PaystackAkwabaHintsService;
 use App\Services\Payments\PaystackMarketplaceService;
+use App\Services\Payments\PaystackMobileMoneyCheckout;
 use App\Services\PaystackService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Str;
 
 /**
  * Akwaba : API appelée par la page hôte (pont postMessage), qui relaie les messages du jeu.
@@ -184,13 +183,14 @@ class AkwabaController extends Controller
     }
 
     /**
-     * POST /jeux/akwaba/buy  {product: 'full'|'hints5'}
-     * Renvoie l'URL de la page Paystack hébergée (Mobile Money uniquement).
+     * POST /jeux/akwaba/buy  {product: 'full'|'hints5', classic?: 1}
+     * Renvoie l'URL de paiement : checkout Mobile Money personnalisé si CHECKOUT_MM_AKWABA est
+     * activé, sinon (ou avec classic=1, secours) la page Paystack hébergée, Mobile Money seulement.
      */
-    public function buy(Request $request, PaystackService $paystack, AffiliateCommissionService $affiliateService)
+    public function buy(Request $request, AkwabaPurchaseService $purchases, PaystackMobileMoneyCheckout $mm)
     {
         $data = $request->validate([
-            'product' => ['required', 'string', 'in:full,hints5'],
+            'product' => ['required', 'string', 'in:' . implode(',', AkwabaPurchaseService::PRODUCTS)],
         ]);
 
         $product = $this->akwaba->product();
@@ -207,81 +207,17 @@ class AkwabaController extends Controller
                 Log::error('Akwaba buy: prix du produit invalide', ['product_id' => $product->id]);
                 return response()->json(['error' => 'Produit indisponible'], 503);
             }
-
-            // Achat marketplace classique (référence MP-) : webhook, réconciliation, e-mails,
-            // affiliation et attributions admin fonctionnent comme pour les autres jeux.
-            $checkout  = $affiliateService->resolveForCheckout($request, 'marketplace', $product->id, (int) $product->price);
-            $amount    = (int) $checkout['amount'];
-            $reference = 'MP-' . now()->format('YmdHis') . '-' . Str::upper(Str::random(6));
-
-            DB::table('marketplace_purchases')->updateOrInsert(
-                ['user_id' => $user->id, 'product_id' => $product->id],
-                [
-                    'status'       => 'pending',
-                    'amount'       => $amount,
-                    'provider'     => 'paystack',
-                    'provider_ref' => $reference,
-                    'paid_at'      => null,
-                    'updated_at'   => now(),
-                    'created_at'   => now(),
-                ]
-            );
-
-            Payment::create([
-                'transaction_id'        => $reference,
-                'user_id'               => $user->id,
-                'amount_paid'           => $amount,
-                'amount_virtual'        => 0,
-                'purpose'               => 'marketplace',
-                'status'                => 'pending',
-                'affiliate_code'        => $checkout['code'],
-                'affiliate_base_amount' => $checkout['code'] ? (int) $product->price : null,
-                'meta'                  => [
-                    'product_id'    => $product->id,
-                    'product_slug'  => $product->slug,
-                    'product_title' => $product->title,
-                    'provider'      => 'paystack',
-                    'source'        => 'akwaba',
-                ],
-            ]);
-
-            $metadata = ['purpose' => 'marketplace', 'product_id' => $product->id];
-        } else {
-            $amount    = AkwabaService::HINTS_PACK_PRICE;
-            $reference = PaystackAkwabaHintsService::newReference($user);
-            $metadata  = [];
         }
 
-        $url = $paystack->initialize([
-            'email'        => $user->email,
-            'amount'       => $amount, // XOF, PaystackService multiplie par 100
-            'currency'     => 'XOF',
-            'reference'    => $reference,
-            'callback_url' => route('akwaba.payment.return'),
-            'channels'     => ['mobile_money'],
-            'metadata'     => $metadata + [
-                'user_id' => $user->id,
-                'game'    => AkwabaService::SLUG,
-                'product' => $data['product'],
-            ],
-        ]);
+        if ($mm->shouldIntercept('akwaba', $request)) {
+            return response()->json(['url' => $mm->entryUrl('akwaba', ['product' => $data['product']])]);
+        }
+
+        $url = $purchases->startHosted($data['product'], $user, $product, $request);
 
         if (!$url) {
-            if ($data['product'] === 'full') {
-                DB::table('marketplace_purchases')->where('provider_ref', $reference)
-                    ->update(['status' => 'failed', 'updated_at' => now()]);
-                Payment::where('transaction_id', $reference)->update(['status' => 'failed']);
-            }
-
-            Log::error('Akwaba buy: initialisation Paystack échouée', ['user_id' => $user->id, 'reference' => $reference]);
             return response()->json(['error' => "Impossible d'initialiser le paiement."], 502);
         }
-
-        Log::info('Akwaba buy: paiement initialisé', [
-            'user_id'   => $user->id,
-            'product'   => $data['product'],
-            'reference' => $reference,
-        ]);
 
         return response()->json(['url' => $url]);
     }

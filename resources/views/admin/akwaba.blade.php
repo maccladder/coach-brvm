@@ -45,6 +45,46 @@
         </div>
     @endif
 
+    {{-- Paiements en double à rembourser --}}
+    @if($duplicates->isNotEmpty())
+        <div class="card border-0 shadow-sm mb-4" style="border-left:4px solid #dc3545 !important;">
+            <div class="card-header fw-bold text-danger">
+                💸 Paiements en double à rembourser ({{ $duplicates->count() }} · {{ $fcfa($duplicates->sum('amount_paid')) }})
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-sm align-middle mb-0">
+                        <thead class="table-light">
+                            <tr><th>Date</th><th>Joueur</th><th>Référence Paystack</th><th class="text-end">Montant</th><th>Canal</th></tr>
+                        </thead>
+                        <tbody>
+                            @foreach($duplicates as $d)
+                                <tr>
+                                    <td class="small text-muted text-nowrap">{{ $d->credited_at?->format('d/m/Y H:i') ?? $d->updated_at?->format('d/m/Y H:i') }}</td>
+                                    <td class="small">
+                                        @if($d->user)
+                                            <a href="{{ route('admin.akwaba.index', ['user' => $d->user_id]) }}">{{ $d->user->name }}</a>
+                                            <div class="text-muted">{{ $d->user->email }}</div>
+                                        @else
+                                            #{{ $d->user_id }}
+                                        @endif
+                                    </td>
+                                    <td class="font-monospace small">{{ $d->transaction_id }}</td>
+                                    <td class="text-end fw-semibold">{{ $fcfa($d->amount_paid) }}</td>
+                                    <td class="small text-muted">{{ data_get($d->meta, 'channel', '—') }}</td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="card-footer bg-white small text-muted">
+                Le joueur a payé deux fois l'histoire complète (deux tentatives validées). Le second paiement n'a créé aucun achat :
+                rembourse-le depuis le tableau de bord Paystack (référence ci-dessus). Il n'est compté dans aucun chiffre d'affaires.
+            </div>
+        </div>
+    @endif
+
     {{-- KPIs --}}
     <div class="row g-3 mb-4">
         @foreach([

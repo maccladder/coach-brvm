@@ -417,6 +417,10 @@
         </div>
 
         <button type="button" class="btn btn-gold" id="retry-btn">Réessayer</button>
+        @if($payable->failUrl)
+            {{-- Ex. Akwaba : retour au jeu, qui propose Réessayer et la page Paystack en secours --}}
+            <a class="btn btn-ghost" id="fail-return-btn" href="{{ $payable->failUrl }}">{{ $payable->failLabel ?? 'Retour' }}</a>
+        @endif
         <a class="btn-wa-pill btn-wa-pill--spaced" href="{{ $whatsapp }}" target="_blank" rel="noopener">
             @include('checkout.partials.whatsapp-icon')
             {{ $payable->offerActivation ? "On t'active l'accès, tu paies après" : 'Un souci ? Écris-nous sur WhatsApp' }}
@@ -605,9 +609,16 @@
         $('success-op').textContent = d.operator_label;
         $('success-btn').href = d.success_url;
         $('success-btn').textContent = d.success_label;
-        setText('success-note', d.note);
+        setText('success-note', d.auto_return > 0
+            ? [d.note, 'Retour automatique dans ' + d.auto_return + ' s…'].filter(Boolean).join(' ')
+            : d.note);
         show('screen-success', 'success-title');
         announce('Paiement confirmé.');
+
+        // Ex. Akwaba : retour au jeu, qui relit l'état et reprend l'histoire tout seul
+        if (d.auto_return > 0 && d.success_url) {
+            setTimeout(() => { window.location.href = d.success_url; }, d.auto_return * 1000);
+        }
     }
 
     function showFail(d) {

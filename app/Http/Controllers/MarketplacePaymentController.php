@@ -293,6 +293,11 @@ class MarketplacePaymentController extends Controller
 
     public function buyPaystack(Request $request, MarketplaceProduct $product, PaystackService $paystack, AffiliateCommissionService $affiliateService)
     {
+        // Akwaba s'achète depuis le jeu (/jeux/akwaba : métadonnées et retour propres au jeu)
+        if ($product->slug === \App\Services\AkwabaService::SLUG) {
+            return redirect()->route('akwaba.show');
+        }
+
         $user = $request->user();
 
         $alreadyPaid = $user->purchasedProducts()

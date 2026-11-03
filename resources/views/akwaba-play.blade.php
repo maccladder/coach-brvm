@@ -99,6 +99,12 @@
         #ak-notice.ok    { border-color: rgba(31,181,166,.6); }
         #ak-notice.error { border-color: rgba(226,103,90,.6); }
         #ak-notice a { color: var(--ak-gold); }
+        #ak-notice strong { display: block; margin-bottom: 2px; }
+        .ak-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+        .ak-btn { flex: 1 1 auto; min-height: 40px; padding: 8px 12px; border-radius: 6px; cursor: pointer;
+                  font-family: inherit; font-size: 12px; font-weight: 700; line-height: 1.2; letter-spacing: .03em; color: var(--ak-ink);
+                  background: transparent; border: 1px solid rgba(255,255,255,.3); }
+        .ak-btn-gold { background: var(--ak-gold); color: var(--ak-navy); border-color: var(--ak-gold); }
         #ak-notice .spinner { display: inline-block; width: 12px; height: 12px; margin-right: 8px; vertical-align: -1px; border: 2px solid rgba(201,168,76,.3); border-top-color: var(--ak-gold); border-radius: 50%; animation: ak-spin .8s linear infinite; }
         #ak-notice-close { position: absolute; top: 8px; right: 10px; background: none; border: 0; color: var(--ak-muted); font-size: 16px; cursor: pointer; }
         @keyframes ak-spin { to { transform: rotate(360deg); } }
@@ -354,7 +360,8 @@
         }
 
         let buying = false;
-        function buy(product) {
+        // classic : page Paystack hébergée (secours), même avec le checkout Mobile Money activé
+        function buy(product, classic) {
             if (product !== 'full' && product !== 'hints5') return;
 
             if (!state || !state.logged) {
@@ -365,7 +372,8 @@
             buying = true;
             showNotice('<span class="spinner"></span>Ouverture du paiement Mobile Money…');
 
-            api(URLS.buy, { product: product }).then(res => {
+            const body = classic ? { product: product, classic: 1 } : { product: product };
+            api(URLS.buy, body).then(res => {
                 if (res.ok && res.data && res.data.url) {
                     // Pour savoir au retour si le paiement attendu est arrivé
                     try {
@@ -473,7 +481,59 @@
             if (document.visibilityState === 'visible' && gameReady) refreshState();
         });
 
-        if (PAID) watchPayment();
+        // ── Retour du checkout Mobile Money sans paiement validé (?paiement=echec|annule) ──
+        const PRODUCT_LABELS = { full: 'Akwaba · Histoire complète', hints5: 'Akwaba · 5 indices' };
+
+        function showRetry(product, kind) {
+            clearTimeout(noticeTimer);
+            noticeText.textContent = '';
+
+            const title = document.createElement('strong');
+            title.textContent = kind === 'echec' ? "Le paiement n'est pas passé." : 'Paiement interrompu.';
+            const detail = document.createElement('div');
+            detail.textContent = PRODUCT_LABELS[product] + (kind === 'echec'
+                ? " : si tu as validé sur ton téléphone, l'achat s'activera tout seul dans quelques minutes."
+                : ' : tu peux réessayer quand tu veux.');
+
+            const actions = document.createElement('div');
+            actions.className = 'ak-actions';
+            [['Réessayer', 'ak-btn ak-btn-gold', false], ['Payer par la page Paystack', 'ak-btn', true]].forEach(([label, cls, classic]) => {
+                const b = document.createElement('button');
+                b.type = 'button';
+                b.className = cls;
+                b.textContent = label;
+                b.addEventListener('click', () => buy(product, classic));
+                actions.appendChild(b);
+            });
+
+            noticeText.append(title, detail, actions);
+            notice.className = 'show error';
+        }
+
+        function watchFailedPayment(product, kind) {
+            const intent = readIntent();
+            history.replaceState(null, '', window.location.pathname);
+
+            // Validé entre-temps (webhook en retard, ancienne tentative) : on le dit plutôt
+            firstState.then(s => {
+                const done = s && (product === 'full' ? !!s.unlocked : (intent && s.hints > intent.hints));
+                if (done) {
+                    showNotice(product === 'hints5' ? '✅ Paiement validé : 5 indices ajoutés.' : "✅ Paiement validé : la suite de l'histoire est débloquée.", 'ok', 5000);
+                } else if (s && s.logged) {
+                    showRetry(product, kind);
+                }
+            });
+        }
+
+        const query = new URLSearchParams(window.location.search);
+        const failKind = query.get('paiement');
+        const failProduct = query.get('produit');
+
+        if (PAID) {
+            watchPayment();
+        } else if ((failKind === 'echec' || failKind === 'annule') && (failProduct === 'full' || failProduct === 'hints5')) {
+            watchFailedPayment(failProduct, failKind);
+        }
     })();
     </script>
 </body>

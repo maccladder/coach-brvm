@@ -5,7 +5,6 @@ namespace App\Services\Payments;
 use App\Models\AdminNotification;
 use App\Models\User;
 use App\Services\AkwabaService;
-use App\Services\PaystackService;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
@@ -25,10 +24,7 @@ class PaystackAkwabaHintsService
     public const NOT_FOUND = 'not_found';
     public const MISMATCH  = 'mismatch';
 
-    public function __construct(
-        private PaystackService $paystack,
-        private AkwabaService $akwaba,
-    ) {}
+    public function __construct(private AkwabaService $akwaba) {}
 
     public static function newReference(User $user): string
     {
@@ -44,7 +40,8 @@ class PaystackAkwabaHintsService
             return self::NOT_FOUND;
         }
 
-        $data = $this->paystack->verify($reference);
+        // Paystack (ou le simulateur en local, jamais en production) : jamais les données reçues
+        $data = app(PaystackMobileMoneyCheckout::class)->verify($reference);
 
         if (!$data) {
             Log::warning('Akwaba hints: transaction introuvable chez Paystack', ['reference' => $reference]);

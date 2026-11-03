@@ -16,6 +16,10 @@ final class Payable
      * @param array       $params        paramètres de requête qui reconstruisent ce payable
      * @param bool        $offerActivation  WhatsApp "On t'active l'accès, tu paies après" en cas d'échec
      * @param array       $context       données internes au type (code apporteur, ids…)
+     * @param string|null $cancelUrl     flèche « Retour » (abandon) ; null = page précédente
+     * @param string|null $failUrl       bouton supplémentaire de l'écran d'échec (ex. retour au jeu)
+     * @param int         $autoReturnSeconds  après un succès, retour automatique vers successUrl
+     *                                   (0 = seulement le bouton)
      */
     public function __construct(
         public string $type,
@@ -33,6 +37,10 @@ final class Payable
         public string $icon = '🛒',
         public array $context = [],
         public string $successTitle = "C'est payé !",
+        public ?string $cancelUrl = null,
+        public ?string $failUrl = null,
+        public ?string $failLabel = null,
+        public int $autoReturnSeconds = 0,
     ) {}
 
     /** Données figées sur la tentative (affichage des écrans attente / succès / échec). */
@@ -48,6 +56,10 @@ final class Payable
             'note'             => $this->note,
             'offer_activation' => $this->offerActivation,
             'params'           => $this->params,
+            'cancel_url'       => $this->cancelUrl,
+            'fail_url'         => $this->failUrl,
+            'fail_label'       => $this->failLabel,
+            'auto_return'      => $this->autoReturnSeconds,
         ];
     }
 }

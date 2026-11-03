@@ -26,6 +26,7 @@ class PaystackMarketplaceService
     public const NOT_FOUND = 'not_found';
     public const MISMATCH  = 'mismatch';
     public const IGNORED   = 'ignored';
+    public const DUPLICATE = 'duplicate';
 
     // Vendeur particulier dont les logiciels nécessitent une activation manuelle
     public const SOFTWARE_ACTIVATION_VENDOR_ID = 59;
@@ -68,14 +69,43 @@ class PaystackMarketplaceService
             return self::MISMATCH;
         }
 
-        $granted = false;
+        $granted   = false;
+        $duplicate = false;
 
-        DB::transaction(function () use ($payment, $reference, $data, &$granted) {
+        DB::transaction(function () use ($payment, $reference, $data, &$granted, &$duplicate) {
 
             $paymentLocked = Payment::where('id', $payment->id)->lockForUpdate()->first();
             if (strtolower((string) $paymentLocked->status) === 'paid') return;
 
             $productId = (int) data_get($paymentLocked->meta, 'product_id');
+
+            // Produit déjà payé par une AUTRE référence (deux tentatives validées : changement de
+            // numéro dans le checkout, deux onglets…) : l'argent est reçu mais aucun second achat
+            // n'est créé ; le paiement est marqué « en double, à rembourser »
+            $alreadyPaid = $productId && DB::table('marketplace_purchases')
+                ->where('user_id', $paymentLocked->user_id)
+                ->where('product_id', $productId)
+                ->where('status', 'paid')
+                ->where('provider_ref', '!=', $reference)
+                ->exists();
+
+            if ($alreadyPaid) {
+                $paymentLocked->status      = 'paid';
+                $paymentLocked->credited_at = $paymentLocked->credited_at ?? now();
+                $paymentLocked->meta        = array_merge((array) ($paymentLocked->meta ?? []), [
+                    'duplicate'     => true,
+                    'refund_status' => 'to_refund',
+                    'paystack'      => [
+                        'reference' => $reference,
+                        'channel'   => $data['channel'] ?? null,
+                        'paid_at'   => $data['paid_at'] ?? null,
+                    ],
+                ]);
+                $paymentLocked->save();
+
+                $duplicate = true;
+                return;
+            }
 
             // L'achat est unique par (user, produit) et son provider_ref suit la DERNIÈRE
             // tentative : on le retrouve par le couple, pas par la référence, pour qu'un
@@ -124,6 +154,11 @@ class PaystackMarketplaceService
 
             $granted = true;
         });
+
+        if ($duplicate) {
+            $this->reportDuplicate($payment->fresh());
+            return self::DUPLICATE;
+        }
 
         if (!$granted) {
             Log::info('PaystackMarketplaceService: already paid, skip', ['reference' => $reference]);
@@ -176,6 +211,31 @@ class PaystackMarketplaceService
         ]);
 
         return self::GRANTED;
+    }
+
+    /** Paiement en double : journal + notification admin, sans e-mail de vente ni commission. */
+    private function reportDuplicate(Payment $payment): void
+    {
+        $title = data_get($payment->meta, 'product_title', 'Marketplace');
+
+        Log::warning('PAYSTACK_MP_DUPLICATE: produit déjà payé, paiement à rembourser', [
+            'reference'  => $payment->transaction_id,
+            'user_id'    => $payment->user_id,
+            'product_id' => data_get($payment->meta, 'product_id'),
+            'amount'     => (int) $payment->amount_paid,
+        ]);
+
+        try {
+            AdminNotification::create([
+                'type'    => 'payment_duplicate',
+                'title'   => 'Paiement en double à rembourser',
+                'message' => $title . ' — ' . number_format((int) $payment->amount_paid, 0, ',', ' ') . ' FCFA · ' . $payment->transaction_id,
+                'url'     => data_get($payment->meta, 'product_slug') === 'akwaba' ? route('admin.akwaba.index') : route('admin.dashboard'),
+                'read_at' => null,
+            ]);
+        } catch (\Throwable $e) {
+            Log::error('PAYSTACK_MP_DUPLICATE: notification admin', ['reference' => $payment->transaction_id, 'error' => $e->getMessage()]);
+        }
     }
 
     public static function isSoftwareActivationProduct(?MarketplaceProduct $product): bool

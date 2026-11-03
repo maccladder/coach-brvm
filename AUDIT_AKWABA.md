@@ -122,6 +122,24 @@ Après le déploiement :
 - reconnecte-toi à l'admin avec le nouveau code : les sessions admin ouvertes avec l'ancien code restent valides jusqu'à leur expiration. Pour les couper tout de suite, vide la table `sessions` (tout le monde est déconnecté) ;
 - publie le produit `akwaba` depuis l'admin marketplace quand tu es prêt (il est encore en brouillon).
 
+## 5bis. Checkout Mobile Money personnalisé pour Akwaba (`CHECKOUT_MM_AKWABA`)
+
+- **Drapeau à `false`** (défaut) : page Paystack hébergée, Mobile Money seulement, rien ne change.
+- **Drapeau à `true`** : `/jeux/akwaba/buy` renvoie l'URL du checkout Boursiv (`/paiement-mobile/akwaba?product=full|hints5`), ouvert dans la page parente. Wave passe toujours par la page Paystack, tant que `CHECKOUT_MM_WAVE_ENABLED=false`. Le secours `classic=1` mène aussi à la page Paystack.
+- **Écran** : « Akwaba · Histoire complète » (1 000 F) ou « Akwaba · 5 indices » (500 F), avec la couverture.
+- **Succès** : écran « C'est payé », retour automatique au jeu au bout de 2 s (`/jeux/akwaba?paid=1`) + bouton « Retour au jeu ».
+- **Échec ou abandon** : la flèche « Retour » mène à `?paiement=annule`, et le bouton « Retour au jeu » de l'écran d'échec à `?paiement=echec`. Le jeu propose alors **Réessayer** et **Payer par la page Paystack**, et affiche le succès si le paiement a été validé entre-temps. Le bouton WhatsApp « On t'active l'accès, tu paies après » est conservé.
+- **Sécurité inchangée** : un seul service (`AkwabaPurchaseService`) fixe les montants, les références (`MP-` / `AKW-H-`) et les métadonnées (`user_id`, `game`, `product`), pour la page hébergée comme pour le checkout. Validation :
+  - histoire complète : `PaystackMarketplaceService`, comme le webhook ;
+  - indices : `PaystackAkwabaHintsService`, qui **relit toujours la transaction**.
+
+  L'idempotence par référence couvre le webhook, le retour, le suivi du checkout et le rattrapage admin.
+- **Simulation locale** (`CHECKOUT_MM_SIMULATE=true`) : la relecture des packs passe par le simulateur (jamais en production).
+- **Paiement en double de l'histoire complète** (deux tentatives validées, par exemple après un changement de numéro) : aucun second achat n'est créé. Le paiement est marqué `duplicate` / `to_refund`, journalisé (`PAYSTACK_MP_DUPLICATE`) et notifié à l'admin. Il apparaît dans **/admin/akwaba → « Paiements en double à rembourser »**, hors chiffre d'affaires. Cette règle s'applique à **tous** les produits marketplace. Pour les indices, deux packs payés donnent deux packs crédités.
+- **L'achat marketplace standard d'Akwaba** (`/marketplace/{akwaba}/buy/paystack`, type de checkout `marketplace`) renvoie vers `/jeux/akwaba` : une seule porte d'entrée.
+- **`config/checkout.php`** : `marketplace` est désormais à `false` par défaut, comme les autres types. Un oubli dans le `.env` n'active plus jamais un checkout.
+- **Tests** : `tests/Feature/AkwabaMobileMoneyCheckoutTest.php` (19 cas).
+
 ## 6. Proposition v2 (non codée) : chapitres servis par le serveur
 Découper le jeu : le fichier public contient le moteur, le prologue et les chapitres 1-2. Les chapitres 3 à 7 et les fins (textes, énigmes, images) deviennent des paquets servis par `GET /jeux/akwaba/contenu/{chapitre}`, réservés aux joueurs qui ont débloqué l'histoire (`Cache-Control: private`). Le jeu les charge à la réception de `state.unlocked = true`. Les réponses des énigmes et le texte des indices sont vérifiés ou servis par le serveur (`POST /jeux/akwaba/indice` renvoie l'indice après décrément) : ils ne sont plus dans le client. Cela demande de modifier le jeu.
 

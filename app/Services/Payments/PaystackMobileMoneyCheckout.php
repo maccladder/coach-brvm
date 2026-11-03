@@ -161,6 +161,18 @@ class PaystackMobileMoneyCheckout
         return true;
     }
 
+    /**
+     * Relecture d'une transaction (transaction/verify) par la passerelle en cours : Paystack,
+     * ou le simulateur en local. Pour les validations qui ne font jamais confiance aux données
+     * reçues (packs d'indices Akwaba) et doivent pourtant fonctionner en simulation.
+     */
+    public function verify(string $reference): ?array
+    {
+        return $this->simulating()
+            ? ($this->simulator->fetchTransaction($reference)['data'] ?? null)
+            : $this->paystack->verify($reference);
+    }
+
     /** @return PaystackService|MobileMoneySimulator */
     private function gateway(): object
     {
@@ -372,6 +384,10 @@ class PaystackMobileMoneyCheckout
             'success_title'    => $meta['success_title'] ?? "C'est payé !",
             'note'             => $meta['note'] ?? null,
             'offer_activation' => (bool) ($meta['offer_activation'] ?? true),
+            'cancel_url'       => $meta['cancel_url'] ?? null,
+            'fail_url'         => $meta['fail_url'] ?? null,
+            'fail_label'       => $meta['fail_label'] ?? null,
+            'auto_return'      => (int) ($meta['auto_return'] ?? 0),
         ];
     }
 

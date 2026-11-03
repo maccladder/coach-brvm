@@ -41,7 +41,8 @@ class MobileMoneyCheckoutController extends Controller
             'phonePrefix' => config('checkout.phone_prefix', '+225'),
             'window'      => $this->checkout->windowSeconds(),
             'simulating'  => $this->checkout->simulating(),
-            'backUrl'     => url()->previous() !== url()->current() ? url()->previous() : url('/'),
+            'backUrl'     => $payable->cancelUrl
+                ?? (url()->previous() !== url()->current() ? url()->previous() : url('/')),
         ]);
     }
 

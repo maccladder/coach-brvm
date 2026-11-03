@@ -12,7 +12,8 @@ return [
 
     'types' => [
         'marketplace'  => [
-            'enabled'  => env('CHECKOUT_MM_MARKETPLACE', true),
+            // false par défaut comme les autres : un oubli dans .env ne doit jamais activer un checkout
+            'enabled'  => env('CHECKOUT_MM_MARKETPLACE', false),
             'provider' => App\Checkout\Providers\MarketplacePayable::class,
         ],
         'course'       => [
@@ -38,6 +39,11 @@ return [
         'game_premium' => [
             'enabled'  => env('CHECKOUT_MM_GAME_PREMIUM', false),
             'provider' => App\Checkout\Providers\GamePremiumPayable::class,
+        ],
+        // Akwaba : histoire complète (achat marketplace MP-) et packs de 5 indices (AKW-H-)
+        'akwaba'       => [
+            'enabled'  => env('CHECKOUT_MM_AKWABA', false),
+            'provider' => App\Checkout\Providers\AkwabaPayable::class,
         ],
     ],
 

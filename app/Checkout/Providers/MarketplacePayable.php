@@ -10,6 +10,7 @@ use App\Models\MarketplaceProduct;
 use App\Models\Payment;
 use App\Models\User;
 use App\Services\Affiliate\AffiliateCommissionService;
+use App\Services\AkwabaService;
 use App\Services\Payments\PaystackMarketplaceService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -29,6 +30,11 @@ class MarketplacePayable extends BasePayable implements StartsClassicFlow
 
         if (!$product) {
             throw CheckoutRedirect::to(route('marketplace.index'), 'error', 'Produit introuvable.');
+        }
+
+        // Akwaba s'achète depuis le jeu (type de checkout « akwaba », retour sur /jeux/akwaba)
+        if ($product->slug === AkwabaService::SLUG) {
+            throw CheckoutRedirect::to(route('akwaba.show'));
         }
 
         // Les articles gratuits gardent leur flux "claim gratuit"

@@ -911,7 +911,7 @@ Route::post('/paystack/webhook', [PaystackWebhookController::class, 'handle'])
 // ✅ Checkout Mobile Money personnalisé (Paystack /charge), activé type par type
 //    dans config/checkout.php. Auth vérifiée dans le contrôleur : les dons sont ouverts aux invités.
 Route::prefix('paiement-mobile')->name('checkout.mm.')->group(function () {
-    $types = 'marketplace|course|pack|wallet|cauris|don|game_premium';
+    $types = 'marketplace|course|pack|wallet|cauris|don|game_premium|akwaba';
 
     Route::get('/suivi/{reference}', [\App\Http\Controllers\MobileMoneyCheckoutController::class, 'status'])
         ->name('status');
