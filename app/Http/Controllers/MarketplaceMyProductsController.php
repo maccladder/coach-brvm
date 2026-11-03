@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\AdminGrant;
 use App\Models\GamePremiumUnlock;
 use App\Models\MarketplaceProduct;
+use App\Services\AkwabaService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -62,6 +63,11 @@ class MarketplaceMyProductsController extends Controller
             abort(403, "Téléchargement indisponible : ce produit est une vidéo.");
         }
 
+        // Akwaba se joue en ligne uniquement, jamais en téléchargement
+        if ($product->slug === AkwabaService::SLUG) {
+            return redirect()->route('akwaba.show');
+        }
+
         // Fichiers multiples : l'ancienne URL mène au premier fichier approuvé du produit
         $firstFile = $product->approvedFiles()->first();
         if ($firstFile) {
@@ -110,7 +116,8 @@ class MarketplaceMyProductsController extends Controller
             abort(403);
         }
 
-        if ($product->type !== 'game' || empty($product->game_html)) {
+        // Akwaba est servi par /jeux/akwaba/fichier, jamais depuis game_html
+        if ($product->type !== 'game' || empty($product->game_html) || $product->slug === AkwabaService::SLUG) {
             abort(404);
         }
 
@@ -162,6 +169,11 @@ class MarketplaceMyProductsController extends Controller
         // Garba Master : jeu Phaser autonome à /jeu, pas de game_html
         if ($product->slug === 'garba-master') {
             return redirect()->route('jeu');
+        }
+
+        // Akwaba : page hôte publique dédiée (le produit ne sert qu'à enregistrer l'achat)
+        if ($product->slug === AkwabaService::SLUG) {
+            return redirect()->route('akwaba.show');
         }
 
         if (empty($product->game_html)) {

@@ -122,16 +122,125 @@ class AkwabaTest extends TestCase
 
     // ─── Fichier du jeu ─────────────────────────────────────────────────────
 
+    /** Version du fichier telle que la page hôte la met dans l'URL de l'iframe. */
+    private function iframeSrc(): string
+    {
+        preg_match('/<iframe[^>]+src="([^"]+)"/', $this->get(route('akwaba.show'))->getContent(), $m);
+
+        return html_entity_decode($m[1] ?? '');
+    }
+
     public function test_le_fichier_du_jeu_est_servi_tel_quel(): void
     {
-        $response = $this->get(route('akwaba.file'));
+        $response = $this->get($this->iframeSrc());
 
         $response->assertOk()
             ->assertHeader('X-Frame-Options', 'SAMEORIGIN')
             ->assertHeader('X-Content-Type-Options', 'nosniff');
         $this->assertStringStartsWith('text/html', $response->headers->get('Content-Type'));
-        $this->assertStringContainsString('max-age=31536000', $response->headers->get('Cache-Control'));
         $this->assertSame(filesize(resource_path('games/akwaba.html')), $response->baseResponse->getFile()->getSize());
+    }
+
+    public function test_le_fichier_n_est_mis_en_cache_longtemps_que_sous_sa_version(): void
+    {
+        $src = $this->iframeSrc();
+        $this->assertMatchesRegularExpression('#^/jeux/akwaba/fichier\?v=[0-9a-f]{16}$#', $src);
+
+        $cache = fn (string $url) => $this->get($url)->headers->get('Cache-Control');
+
+        $this->assertStringContainsString('immutable', $cache($src));
+        $this->assertStringContainsString('max-age=31536000', $cache($src));
+        // Sans version ou avec une ancienne : revalidation à chaque fois
+        $this->assertStringContainsString('no-cache', $cache(route('akwaba.file')));
+        $this->assertStringContainsString('no-cache', $cache(route('akwaba.file', ['v' => '0000000000000000'])));
+        $this->assertStringNotContainsString('immutable', $cache(route('akwaba.file')));
+    }
+
+    // ─── Page hôte ──────────────────────────────────────────────────────────
+
+    public function test_la_page_hote_est_publique_et_sans_sandbox(): void
+    {
+        $html = $this->get(route('akwaba.show'))->assertOk()->getContent();
+
+        $this->assertStringContainsString('id="game-frame"', $html);
+        $this->assertStringContainsString('allow="autoplay; fullscreen"', $html);
+        $this->assertStringNotContainsString('sandbox=', $html);
+        $this->assertStringContainsString('name="csrf-token"', $html);
+        $this->assertStringContainsString(json_encode(route('akwaba.login', [], false)), $html);
+        // Appels API relatifs : la session suit, que l'on arrive par boursiv.com ou www.
+        $this->assertStringContainsString(json_encode(route('akwaba.state', [], false)), $html);
+        $this->assertStringNotContainsString(json_encode(route('akwaba.state')), $html);
+        // Produit encore en brouillon : pas d'indexation
+        $this->assertStringContainsString('name="robots" content="noindex"', $html);
+    }
+
+    public function test_la_page_hote_publiee_est_indexable(): void
+    {
+        $this->product->update(['status' => 'published']);
+
+        $this->assertStringNotContainsString('noindex', $this->get(route('akwaba.show'))->getContent());
+    }
+
+    public function test_connexion_depuis_le_cadenas_ramene_au_jeu(): void
+    {
+        $this->get(route('akwaba.login'))
+            ->assertRedirect(route('login'))
+            ->assertSessionHas('url.intended', route('akwaba.show'));
+
+        $this->actingAs($this->player)->get(route('akwaba.login'))->assertRedirect(route('akwaba.show'));
+    }
+
+    // ─── Marketplace : pas d'achat ni de téléchargement standard ────────────
+
+    public function test_la_fiche_brouillon_reste_invisible(): void
+    {
+        $this->get(route('marketplace.show', 'akwaba'))->assertNotFound();
+    }
+
+    public function test_la_fiche_propose_jouer_gratuitement_au_lieu_d_acheter(): void
+    {
+        $this->product->update(['status' => 'published']);
+
+        foreach ([null, $this->player] as $viewer) {
+            $response = $viewer ? $this->actingAs($viewer)->get(route('marketplace.show', 'akwaba')) : $this->get(route('marketplace.show', 'akwaba'));
+
+            $response->assertOk()
+                ->assertSee('Jouer gratuitement')
+                ->assertSee('Gratuit pour commencer')
+                ->assertSee('Histoire complète 1 000 FCFA')
+                ->assertSee(route('akwaba.show'), false)
+                ->assertDontSee(route('paystack.marketplace.buy', $this->product), false)
+                ->assertDontSee('Se connecter pour acheter')
+                ->assertDontSee('Payer maintenant')
+                ->assertDontSee(route('my.products.download', $this->product), false);
+        }
+    }
+
+    public function test_la_carte_marketplace_et_jeux_renvoie_vers_le_jeu(): void
+    {
+        $this->product->update(['status' => 'published']);
+
+        $this->get(route('marketplace.index', ['type' => 'game']))
+            ->assertOk()
+            ->assertSee('Gratuit pour commencer')
+            ->assertSee('Histoire complète 1 000 FCFA')
+            ->assertSee(route('akwaba.show'), false);
+    }
+
+    public function test_les_routes_marketplace_standard_ne_servent_jamais_le_jeu(): void
+    {
+        $this->purchase();
+        $this->actingAs($this->player);
+
+        $this->get(route('my.products.play', $this->product))->assertRedirect(route('akwaba.show'));
+        $this->get(route('my.products.download', $this->product))->assertRedirect(route('akwaba.show'));
+        $this->get(route('my.products.game-html', $this->product))->assertNotFound();
+
+        // Même si un game_html était téléversé par erreur depuis l'admin
+        $this->product->update(['game_html' => '<html>copie</html>']);
+        $this->get(route('my.products.game-html', $this->product))->assertNotFound();
+
+        $this->get(route('my.products'))->assertOk()->assertSee(route('akwaba.show'), false);
     }
 
     // ─── State ──────────────────────────────────────────────────────────────

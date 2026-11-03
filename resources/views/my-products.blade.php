@@ -202,6 +202,10 @@
                                             <a href="{{ route('jeu') }}" class="cb-btn-purple">
                                                 🎮 Jouer
                                             </a>
+                                        @elseif($p->slug === 'akwaba')
+                                            <a href="{{ route('akwaba.show') }}" class="cb-btn-purple">
+                                                🎮 Jouer
+                                            </a>
                                         @else
                                             <a href="{{ route('my.products.play', $p) }}" class="cb-btn-purple">
                                                 🎮 Jouer

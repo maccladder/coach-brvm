@@ -359,6 +359,23 @@
             </div>
 
             <div class="mp-cover-footer">
+                @if($product->slug === 'akwaba')
+                {{-- Akwaba : jeu gratuit jusqu'au chapitre 2, la suite s'achète dans le jeu
+                     (pont postMessage de /jeux/akwaba). Pas d'achat ni de téléchargement ici. --}}
+                    @if(!empty($isOwned))
+                        <div class="mp-price-big free" style="font-size:22px;">✓ Histoire complète</div>
+                        <div class="mp-price-sub">Accès débloqué</div>
+                    @else
+                        <div class="mp-price-big free" style="font-size:22px;">Gratuit pour commencer</div>
+                        <div class="mp-price-sub">Histoire complète 1 000 FCFA</div>
+                    @endif
+                    <a href="{{ route('akwaba.show') }}" class="cb-btn-success" style="width:100%;justify-content:center;">
+                        🎮 {{ !empty($isOwned) ? 'Jouer' : 'Jouer gratuitement' }}
+                    </a>
+                    <div style="font-size:11px;color:var(--cb-muted);text-align:center;margin-top:6px;">
+                        Sans compte jusqu'au chapitre 2 · paiement Mobile Money dans le jeu
+                    </div>
+                @else
                 {{-- Prix --}}
                 @if(!empty($isOwned))
                     <div class="mp-price-big free" style="font-size:22px;">✓ Payé</div>
@@ -443,6 +460,7 @@
                         <i class="bi bi-box-arrow-in-right"></i> Se connecter pour acheter
                     </a>
                 @endguest
+                @endif {{-- /akwaba --}}
 
                 @if($product->type === 'software' && !empty($wa))
                     <a class="cb-btn-outline mt-2" style="width:100%;justify-content:center;"

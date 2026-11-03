@@ -115,6 +115,8 @@ Route::get('/games', function () {
 
 // ✅ Akwaba : gratuit jusqu'au chapitre 2, API relayée par la page hôte (pont postMessage)
 Route::prefix('jeux/akwaba')->name('akwaba.')->controller(\App\Http\Controllers\AkwabaController::class)->group(function () {
+    Route::get('/', 'show')->name('show');
+    Route::get('/connexion', 'login')->name('login');
     Route::get('/fichier', 'file')->name('file');
     Route::get('/state', 'state')->middleware('throttle:60,1')->name('state');
     Route::get('/paiement/retour', 'paymentReturn')->name('payment.return');

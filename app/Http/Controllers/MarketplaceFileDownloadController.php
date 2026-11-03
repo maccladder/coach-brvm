@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\MarketplaceProduct;
 use App\Models\ProductFile;
+use App\Services\AkwabaService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -18,6 +19,8 @@ class MarketplaceFileDownloadController extends Controller
     {
         // Fichier d'un autre produit, ou en attente / refusé à la validation admin
         abort_unless((int) $file->product_id === (int) $product->id && $file->isApproved(), 404);
+        // Akwaba se joue en ligne uniquement, jamais en téléchargement
+        abort_if($product->slug === AkwabaService::SLUG, 404);
         abort_unless($product->isAccessibleBy($request->user()), 403, 'Accès refusé : produit non acheté.');
 
         $disk = Storage::disk($file->disk);

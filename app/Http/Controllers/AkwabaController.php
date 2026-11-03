@@ -9,6 +9,7 @@ use App\Services\Payments\PaystackAkwabaHintsService;
 use App\Services\Payments\PaystackMarketplaceService;
 use App\Services\PaystackService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
@@ -22,21 +23,73 @@ class AkwabaController extends Controller
     public function __construct(private AkwabaService $akwaba) {}
 
     /**
-     * GET /jeux/akwaba/fichier
-     * Le jeu tel quel (un seul fichier autonome), sans passer par le pipeline d'upload.
-     * La page hôte ajoute ?v={filemtime} pour invalider le cache à chaque nouvelle version.
+     * GET /jeux/akwaba
+     * Page hôte publique : tout le monde joue au prologue et aux chapitres 1-2 sans compte.
      */
-    public function file()
+    public function show(Request $request)
     {
-        $path = resource_path('games/akwaba.html');
+        abort_unless(is_file($this->gamePath()), 404);
+
+        return view('akwaba-play', [
+            'product'  => $this->akwaba->product(),
+            'version'  => $this->fileVersion(),
+            'paid'     => $request->boolean('paid'),
+            'whatsapp' => (string) config('checkout.whatsapp'),
+        ]);
+    }
+
+    /**
+     * GET /jeux/akwaba/connexion
+     * Connexion demandée au cadenas : retour sur le jeu après login (formulaire ou Google).
+     */
+    public function login(Request $request)
+    {
+        if ($request->user()) {
+            return redirect()->route('akwaba.show');
+        }
+
+        redirect()->setIntendedUrl(route('akwaba.show'));
+
+        return redirect()->route('login');
+    }
+
+    /**
+     * GET /jeux/akwaba/fichier?v={hash}
+     * Le jeu tel quel (un seul fichier autonome), sans passer par le pipeline d'upload.
+     * Cache long seulement sous l'URL versionnée par le hash du contenu : une nouvelle version
+     * du jeu change l'URL. Sans version (ou avec une ancienne), le navigateur revalide toujours.
+     */
+    public function file(Request $request)
+    {
+        $path = $this->gamePath();
         abort_unless(is_file($path), 404);
+
+        $cache = $request->query('v') === $this->fileVersion()
+            ? 'public, max-age=31536000, immutable'
+            : 'no-cache';
 
         return response()->file($path, [
             'Content-Type'           => 'text/html; charset=UTF-8',
-            'Cache-Control'          => 'public, max-age=31536000',
+            'Cache-Control'          => $cache,
             'X-Frame-Options'        => 'SAMEORIGIN',
             'X-Content-Type-Options' => 'nosniff',
         ]);
+    }
+
+    private function gamePath(): string
+    {
+        return resource_path('games/akwaba.html');
+    }
+
+    /** Hash du contenu, recalculé seulement quand le fichier change (date ou taille). */
+    private function fileVersion(): string
+    {
+        $path = $this->gamePath();
+
+        return Cache::rememberForever(
+            'akwaba.file.version.' . filemtime($path) . '.' . filesize($path),
+            fn () => substr(hash_file('sha256', $path), 0, 16)
+        );
     }
 
     /**
@@ -212,6 +265,6 @@ class AkwabaController extends Controller
             }
         }
 
-        return redirect('/jeux/akwaba?paid=1');
+        return redirect()->route('akwaba.show', ['paid' => 1]);
     }
 }

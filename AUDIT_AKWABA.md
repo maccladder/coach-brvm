@@ -8,8 +8,9 @@ Audit du 03/11/2026, mis à jour au fil des étapes.
 |---|---|
 | 0. Audit | ✅ validé |
 | Sécurité S1 à S4 | ✅ commit `2ded392`, déployé |
-| 1+2. Back-end | ✅ codé et testé, **en attente de validation** |
-| 3. Page hôte | à faire |
+| 1+2. Back-end | ✅ validé (`977b03e`) |
+| Nouvelle version du jeu | ✅ `a79ed85` (aucun déblocage gratuit hors Boursiv) |
+| 3. Page hôte | ✅ codée et testée, **en attente de validation sur téléphone** |
 | 4. Admin | à faire |
 | 5+6. Sécurité + tests | à faire (tests back-end déjà en place) |
 | 7. Déploiement | à faire |
@@ -35,7 +36,21 @@ Audit du 03/11/2026, mis à jour au fil des étapes.
 - Les packs d'indices ne passent pas par la table `payments`, donc la commande `payments:reconcile-paystack` ne les rattrape pas. Ils sont validés par le webhook **et** par le retour navigateur. Si les deux échouent, l'admin crédite à la main (étape 4).
 - `full` est un paiement marketplace normal : un achat abandonné déclenche la même relance par e-mail que les autres produits.
 - Deux envois de progression simultanés du même joueur : le dernier écrit gagne. Le pont envoie après 1 s sans nouveau message, donc c'est sans effet en pratique.
-- `GET /jeux/akwaba` (la page) n'existe pas encore : le retour de paiement y redirige déjà (`/jeux/akwaba?paid=1`). Elle arrive à l'étape 3.
+### Étape 3 : ce qui a été fait
+- **`GET /jeux/akwaba`** (publique, sans compte) : vue `resources/views/akwaba-play.blade.php`, iframe plein écran **sans sandbox** (`allow="autoplay; fullscreen"`), barre Boursiv, plein écran (API Fullscreen, ou pseudo plein écran CSS sur iPhone). `noindex` tant que le produit est en brouillon.
+- **Pont postMessage** conforme au contrat : `ready` → `state` ; `progress` envoyé 1 s après le dernier changement (si connecté) ; `buy` : invité → `/jeux/akwaba/connexion` (retour au jeu après connexion, formulaire ou Google), connecté → `/buy` puis redirection **de la page parente** vers Paystack ; `useHint` → `hintResult` avec le même `id`. Chaque message est vérifié : `event.source`, `event.origin`, `akwaba === 1`.
+- **Retour `?paid=1`** : « Paiement en cours de validation… », `/state` interrogé toutes les 2 s pendant 30 s, `state` renvoyé au jeu à chaque changement. Le produit attendu est mémorisé (sessionStorage) avant le départ vers Paystack, pour savoir quand c'est validé. Au bout de 30 s, un message rassurant + lien WhatsApp.
+- **URLs relatives** pour l'API : la session suit, que l'on arrive par `boursiv.com` ou `www.boursiv.com`.
+- **`/jeux/akwaba/fichier?v={hash}`** : hash SHA-256 du contenu (16 caractères), recalculé seulement quand la date ou la taille du fichier change. Cache long `immutable` uniquement sous la bonne version ; sans version ou avec une ancienne, `no-cache`. Un nouveau fichier = une nouvelle URL.
+- **Marketplace** : fiche Akwaba = « Gratuit pour commencer · Histoire complète 1 000 FCFA » + « Jouer gratuitement » → `/jeux/akwaba`, sans formulaire d'achat ni bouton de connexion pour acheter. Carte de `/jeux` et de la marketplace : même mention + bouton « Jouer ». « Mes produits » → `/jeux/akwaba`.
+- **Aucun téléchargement** : `my.products.play` et `my.products.download` redirigent vers `/jeux/akwaba` ; `game-html` et le téléchargement des fichiers produit renvoient 404 pour Akwaba, même si un fichier était ajouté par erreur depuis l'admin.
+- **Produit toujours en brouillon** : la fiche et la carte restent invisibles. La page `/jeux/akwaba` est accessible pour ton test sur téléphone.
+- **Vérifié dans Chrome** (390 × 844, sans interface) : le jeu s'affiche, l'iframe charge la version hachée, `/state` répond en invité, aucune erreur JavaScript.
+- **Tests** : `AkwabaTest` passe à 41 cas (page, cache, connexion, fiche, carte, routes bloquées). Suite complète : 313 passent ; toujours les 9 échecs Breeze qui existaient avant.
+
+### Limites et points ouverts (étape 3)
+- **Inscription** : la connexion (formulaire et Google) ramène au jeu, mais **la création de compte ramène au tableau de bord** (`RegisteredUserController` ne lit pas l'URL de retour). Un nouveau joueur doit donc revenir sur `/jeux/akwaba` à la main. Correctif proposé (1 ligne, effet global) : `redirect()->intended(route('dashboard'))` à l'inscription.
+- Après connexion, la progression locale (par ex. chapitre 2) n'est envoyée au serveur qu'au prochain changement de chapitre. Sans effet pratique : le joueur est au cadenas, il change de chapitre juste après l'achat.
 
 ---
 
