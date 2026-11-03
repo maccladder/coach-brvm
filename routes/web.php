@@ -113,6 +113,19 @@ Route::get('/games', function () {
     return redirect('/jeux' . ($qs ? '?' . $qs : ''), 301);
 })->name('games.alias');
 
+// ✅ Akwaba : gratuit jusqu'au chapitre 2, API relayée par la page hôte (pont postMessage)
+Route::prefix('jeux/akwaba')->name('akwaba.')->controller(\App\Http\Controllers\AkwabaController::class)->group(function () {
+    Route::get('/fichier', 'file')->name('file');
+    Route::get('/state', 'state')->middleware('throttle:60,1')->name('state');
+    Route::get('/paiement/retour', 'paymentReturn')->name('payment.return');
+
+    Route::middleware('auth')->group(function () {
+        Route::post('/progress', 'progress')->middleware('throttle:30,1')->name('progress');
+        Route::post('/hint/use', 'useHint')->middleware('throttle:30,1')->name('hint.use');
+        Route::post('/buy', 'buy')->middleware('throttle:6,1')->name('buy');
+    });
+});
+
 // ✅ URN Studio — générateur d'affiche d'adhésion (PUBLIC, sans auth)
 Route::get('/urn', function () {
     return view('urn.index');

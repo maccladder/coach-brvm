@@ -6,6 +6,7 @@ use App\Jobs\ForwardAdomCiWebhook;
 use App\Models\LettreCIAccess;
 use App\Models\Payment;
 use App\Services\CaurisService;
+use App\Services\Payments\PaystackAkwabaHintsService;
 use App\Services\Payments\PaystackCourseService;
 use App\Services\Payments\PaystackDonationService;
 use App\Services\Payments\PaystackGamePremiumService;
@@ -79,6 +80,13 @@ class PaystackWebhookController extends Controller
         // ✅ Pack BRVM
         if (str_starts_with($reference, 'PACK-BRVM-')) {
             $packService->handleChargeSuccess($data);
+            return;
+        }
+
+        // ✅ Akwaba : pack d'indices (le déblocage de l'histoire passe par MP- ci-dessous)
+        if (str_starts_with($reference, PaystackAkwabaHintsService::PREFIX)) {
+            $outcome = app(PaystackAkwabaHintsService::class)->handle($reference);
+            Log::info('Paystack webhook AKW-H', ['reference' => $reference, 'outcome' => $outcome]);
             return;
         }
 
