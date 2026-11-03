@@ -82,6 +82,42 @@
         </div>
     </div>
 
+    {{-- Akwaba --}}
+    @if($akwaba)
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-white fw-bold py-3 d-flex justify-content-between align-items-center">
+            <span>🌙 Akwaba</span>
+            <a href="{{ route('admin.akwaba.index', ['user' => $user->id]) }}" class="btn btn-sm btn-outline-primary">Gérer dans Akwaba →</a>
+        </div>
+        <div class="card-body">
+            <div class="row g-3 small">
+                <div class="col-6 col-md-3">
+                    <div class="text-muted">Histoire complète</div>
+                    @if($akwaba['via'] === 'purchase')
+                        <span class="badge bg-success">✅ Achetée</span>
+                    @elseif($akwaba['via'] === 'grant')
+                        <span class="badge bg-info">🎁 Offerte</span>
+                    @else
+                        <span class="badge bg-secondary">🔒 Non</span>
+                    @endif
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="text-muted">Solde d'indices</div>
+                    <strong>{{ $akwaba['hints'] }}</strong>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="text-muted">Chapitre max atteint</div>
+                    <strong>{{ $akwaba['max'] === null ? '—' : ($akwaba['max'] === 'P' ? 'Prologue' : 'Chapitre ' . $akwaba['max']) }}</strong>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="text-muted">Fins découvertes</div>
+                    <strong>{{ count($akwaba['fins']) }}/2</strong>
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
+
     {{-- Achats Marketplace --}}
     <div class="card border-0 shadow-sm mb-4">
         <div class="card-header bg-white fw-bold py-3">

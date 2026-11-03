@@ -76,6 +76,37 @@ class AkwabaService
         ];
     }
 
+    /**
+     * Vue admin d'un joueur : origine du déblocage, solde, chapitres, fins.
+     *
+     * @return array{unlocked: bool, via: ?string, hints: int, save: ?string, max: ?string, fins: array, updated_at: mixed}
+     */
+    public function playerSummary(User $user): array
+    {
+        $product = $this->product();
+
+        $paid = $product && $user->purchasedProducts()
+            ->where('marketplace_products.id', $product->id)
+            ->wherePivot('status', 'paid')
+            ->exists();
+        $granted = $product && $product->isGrantedTo($user);
+
+        $progress = $product
+            ? GameProgress::where('user_id', $user->id)->where('product_id', $product->id)->first()
+            : null;
+        $data = (array) ($progress?->data ?? []);
+
+        return [
+            'unlocked'   => $paid || $granted,
+            'via'        => $paid ? 'purchase' : ($granted ? 'grant' : null),
+            'hints'      => $this->hints($user),
+            'save'       => $data['save'] ?? null,
+            'max'        => $data['max'] ?? null,
+            'fins'       => array_values($data['fins'] ?? []),
+            'updated_at' => $progress?->updated_at,
+        ];
+    }
+
     /** Message « state » du contrat postMessage. */
     public function state(?User $user): array
     {
@@ -173,10 +204,12 @@ class AkwabaService
     /**
      * Ajoute des indices (achat ou geste admin). Une référence de paiement déjà enregistrée
      * lève UniqueConstraintViolationException et la transaction n'ajoute rien.
+     *
+     * @param array{admin_user_id?: ?int, admin_label?: ?string} $admin auteur d'un mouvement manuel
      */
-    public function addHints(User $user, int $count, string $reason, ?string $paymentReference = null, ?int $amount = null, ?string $note = null): int
+    public function addHints(User $user, int $count, string $reason, ?string $paymentReference = null, ?int $amount = null, ?string $note = null, array $admin = []): int
     {
-        return DB::transaction(function () use ($user, $count, $reason, $paymentReference, $amount, $note) {
+        return DB::transaction(function () use ($user, $count, $reason, $paymentReference, $amount, $note, $admin) {
             GameCreditLedger::create([
                 'user_id'           => $user->id,
                 'game_slug'         => self::SLUG,
@@ -186,6 +219,8 @@ class AkwabaService
                 'payment_reference' => $paymentReference,
                 'amount'            => $amount,
                 'note'              => $note,
+                'admin_user_id'     => $admin['admin_user_id'] ?? null,
+                'admin_label'       => $admin['admin_label'] ?? null,
             ]);
 
             DB::table('game_credits')->insertOrIgnore([

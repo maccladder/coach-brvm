@@ -10,8 +10,9 @@ Audit du 03/11/2026, mis à jour au fil des étapes.
 | Sécurité S1 à S4 | ✅ commit `2ded392`, déployé |
 | 1+2. Back-end | ✅ validé (`977b03e`) |
 | Nouvelle version du jeu | ✅ `a79ed85` (aucun déblocage gratuit hors Boursiv) |
-| 3. Page hôte | ✅ codée et testée, **en attente de validation sur téléphone** |
-| 4. Admin | à faire |
+| 3. Page hôte | ✅ validée sur téléphone, déployée (`0db535f`) |
+| Inscription → retour au jeu | ✅ `6339489`, déployé |
+| 4. Admin | ✅ codé et testé, **en attente de validation** (non poussé) |
 | 5+6. Sécurité + tests | à faire (tests back-end déjà en place) |
 | 7. Déploiement | à faire |
 
@@ -47,6 +48,25 @@ Audit du 03/11/2026, mis à jour au fil des étapes.
 - **Produit toujours en brouillon** : la fiche et la carte restent invisibles. La page `/jeux/akwaba` est accessible pour ton test sur téléphone.
 - **Vérifié dans Chrome** (390 × 844, sans interface) : le jeu s'affiche, l'iframe charge la version hachée, `/state` répond en invité, aucune erreur JavaScript.
 - **Tests** : `AkwabaTest` passe à 41 cas (page, cache, connexion, fiche, carte, routes bloquées). Suite complète : 313 passent ; toujours les 9 échecs Breeze qui existaient avant.
+
+### Étape 4 : ce qui a été fait
+- **`/admin/akwaba`** (`admin.code` + `stagiaire.log`), lien « 🌙 Akwaba » dans le menu admin.
+  - Joueurs : nom, e-mail, débloqué (payé / offert / non), solde d'indices, chapitre max, fins, dernière activité. Recherche par nom ou e-mail, 25 par page, tri par dernière activité.
+  - Statistiques : entonnoir Prologue → 1 → 2 → 🔒 Cadenas → 3 … 7, déblocages payés et offerts, conversion au cadenas (payés ÷ arrivés au cadenas), packs vendus, CA (montants réellement encaissés : déblocages + packs), ventes à 7 et 30 jours, fins découvertes, indices ajoutés à la main et utilisés.
+  - Historique des indices complet : 30 par page, filtrable par joueur (`?user=`), par nom, e-mail ou référence, et par type (achat / utilisé / admin).
+- **Gestes manuels** (« Gérer » sur un joueur), chacun avec une confirmation et un motif obligatoire :
+  - débloquer = attribution marketplace (`admin_grants`, même e-mail de notification que la page Attributions) ; retirer = révocation de l'attribution. Un achat Paystack payé ne se retire pas ;
+  - ajouter de 1 à 100 indices (5 par défaut), ligne `admin` dans l'historique ;
+  - rattrapage d'un pack : référence `AKW-H-…` revérifiée chez Paystack (même contrôle que le webhook), +5 au joueur qui a payé, une seule fois. Si la référence est déjà dans l'historique, rien n'est fait.
+- **Auteur enregistré** : le code admin est partagé, donc on enregistre le compte connecté s'il y en a un (« Nom (#id, code admin) »), sinon « Code admin (sans compte connecté) » ou « Code stagiaire… ». Nouvelles colonnes `admin_user_id` et `admin_label` dans `game_credit_ledger` (migration `2026_11_03_000004`). Pour les attributions : `granted_by` / `revoked_by` = compte connecté, et le libellé est ajouté au motif.
+- **Fiche utilisateur admin** : encadré Akwaba (histoire achetée / offerte / non, solde, chapitre max, fins) + lien vers `/admin/akwaba?user=…`.
+- **Tests** : `AkwabaAdminTest`, 17 cas (accès refusé sans code admin, liste, recherche, chiffres de l'entonnoir et du CA, historique filtré, motif obligatoire, attribution et retrait, achat Paystack non retirable, auteur enregistré, rattrapage valide, idempotent ou refusé). Suite complète : 332 passent, toujours les 9 échecs Breeze anciens.
+- **Non vérifié visuellement** : la page admin n'a pas été ouverte dans un navigateur (il faut le code admin). Son rendu est couvert par les tests.
+
+### Limites et points ouverts (étape 4)
+- Les **stagiaires** (`admin.code` les laisse passer) peuvent eux aussi débloquer et ajouter des indices. C'est tracé (« code stagiaire » + journal `stagiaire.log`), mais tu peux préférer réserver ces gestes à `is_admin`.
+- Les paiements WhatsApp n'entrent pas dans le CA : seul le motif est noté. Un champ « montant encaissé » pourrait être ajouté si tu veux les compter.
+- Les invités ne sont pas dans l'entonnoir (aucune sauvegarde serveur). Le cadenas ne compte que les joueurs connectés qui ont cliqué « Continuer l'aventure », ceux qui ont l'accès, et ceux qui ont dépassé le chapitre 2.
 
 ### Limites et points ouverts (étape 3)
 - **Inscription** : la connexion (formulaire et Google) ramène au jeu, mais **la création de compte ramène au tableau de bord** (`RegisteredUserController` ne lit pas l'URL de retour). Un nouveau joueur doit donc revenir sur `/jeux/akwaba` à la main. Correctif proposé (1 ligne, effet global) : `redirect()->intended(route('dashboard'))` à l'inscription.

@@ -1060,6 +1060,16 @@ Route::middleware('auth')->group(function () {
         ->name('notifications.readAll');
 });
 
+// 🎮 Akwaba — joueurs, ventes, indices et gestes manuels
+Route::middleware(['admin.code', 'stagiaire.log'])->prefix('admin/akwaba')->name('admin.akwaba.')
+    ->controller(\App\Http\Controllers\Admin\AdminAkwabaController::class)->group(function () {
+        Route::get('/', 'index')->name('index');
+        Route::post('/users/{user}/unlock', 'unlock')->name('unlock');
+        Route::post('/users/{user}/lock', 'lock')->name('lock');
+        Route::post('/users/{user}/hints', 'addHints')->name('hints');
+        Route::post('/recover', 'recover')->name('recover');
+    });
+
 Route::middleware('admin.code')->prefix('admin')->name('admin.')->group(function () {
     // 🎮 Garba Master — statistiques jeu
     Route::get('/garba-master', [\App\Http\Controllers\Admin\AdminGarbaMasterController::class, 'index'])->name('garba-master.index');

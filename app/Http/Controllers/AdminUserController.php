@@ -6,6 +6,7 @@ use App\Models\AdminGrant;
 use App\Models\User;
 use App\Models\VirtualWallet;
 use App\Models\VirtualWalletTransaction;
+use App\Services\AkwabaService;
 use Illuminate\Http\Request;
 
 class AdminUserController extends Controller
@@ -106,9 +107,12 @@ class AdminUserController extends Controller
                                ->orderByDesc('created_at')
                                ->get();
 
+        $akwabaService = app(AkwabaService::class);
+        $akwaba = $akwabaService->product() ? $akwabaService->playerSummary($user) : null;
+
         return view('admin.users.show', compact(
             'user', 'marketplaceTotal', 'courseTotal', 'grantNames',
-            'wallet', 'walletBonusTxs'
+            'wallet', 'walletBonusTxs', 'akwaba'
         ));
     }
 }

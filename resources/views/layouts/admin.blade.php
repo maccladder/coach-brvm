@@ -102,6 +102,7 @@
                         <li><a class="dropdown-item" href="{{ route('admin.books.index') }}">📚 Livres</a></li>
                         <li><a class="dropdown-item" href="{{ route('admin.grants.index') }}">🎁 Attributions</a></li>
                         <li><a class="dropdown-item" href="{{ route('admin.garba-master.index') }}">🎮 Garba Master</a></li>
+                        <li><a class="dropdown-item" href="{{ route('admin.akwaba.index') }}">🌙 Akwaba</a></li>
                         <li><a class="dropdown-item" href="{{ route('admin.wallets.index') }}">💼 Portefeuilles</a></li>
                         <li><a class="dropdown-item" href="{{ route('admin.packs.index') }}">📦 Pack Boursiv</a></li>
                         <li><a class="dropdown-item" href="{{ route('admin.donations.index') }}">🤝 Dons</a></li>

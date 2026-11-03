@@ -35,7 +35,10 @@ class PaystackAkwabaHintsService
         return self::PREFIX . $user->id . '-' . round(microtime(true) * 1000) . '-' . strtoupper(Str::random(4));
     }
 
-    public function handle(string $reference): string
+    /**
+     * @param array{admin_user_id?: ?int, admin_label?: ?string} $admin renseigné pour un rattrapage manuel
+     */
+    public function handle(string $reference, array $admin = []): string
     {
         if (!str_starts_with($reference, self::PREFIX)) {
             return self::NOT_FOUND;
@@ -85,7 +88,9 @@ class PaystackAkwabaHintsService
                 AkwabaService::HINTS_PACK_SIZE,
                 'purchase',
                 $reference,
-                $amountPaid
+                $amountPaid,
+                $admin ? 'Rattrapage manuel depuis l\'admin' : null,
+                $admin
             );
         } catch (UniqueConstraintViolationException) {
             return self::ALREADY;

@@ -17,6 +17,8 @@ class GameCreditLedger extends Model
         'payment_reference',
         'amount',
         'note',
+        'admin_user_id',
+        'admin_label',
     ];
 
     protected $casts = [
@@ -27,5 +29,10 @@ class GameCreditLedger extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function adminUser()
+    {
+        return $this->belongsTo(User::class, 'admin_user_id');
     }
 }
