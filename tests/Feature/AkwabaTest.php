@@ -190,6 +190,72 @@ class AkwabaTest extends TestCase
         $this->actingAs($this->player)->get(route('akwaba.login'))->assertRedirect(route('akwaba.show'));
     }
 
+    // ─── Compteur anonyme des invités ───────────────────────────────────────
+
+    /** Navigateur invité : renvoie toujours le même cookie de session, comme un vrai navigateur. */
+    private function guestBrowser(string $sessionId)
+    {
+        // withCredentials : sans lui, les requêtes JSON de test n'envoient aucun cookie
+        return $this->withCredentials()->withCookie(config('session.cookie'), $sessionId);
+    }
+
+    public function test_evenements_invites_une_fois_par_session_et_par_type_sans_donnee_personnelle(): void
+    {
+        $sessionId = str_repeat('a', 40);
+
+        $this->guestBrowser($sessionId)->postJson(route('akwaba.event'), ['type' => 'play_start'])->assertNoContent();
+        $this->guestBrowser($sessionId)->postJson(route('akwaba.event'), ['type' => 'play_start'])->assertNoContent();
+        $this->guestBrowser($sessionId)->postJson(route('akwaba.event'), ['type' => 'lock_reached'])->assertNoContent();
+
+        $this->assertSame(1, DB::table('akwaba_events')->where('type', 'play_start')->count());
+        $this->assertSame(1, DB::table('akwaba_events')->where('type', 'lock_reached')->count());
+
+        // Ni id de session en clair, ni IP : seulement type, HMAC de session et date
+        $row = (array) DB::table('akwaba_events')->first();
+        $this->assertSame(['id', 'type', 'session_hash', 'created_at'], array_keys($row));
+        $this->assertNotSame($sessionId, $row['session_hash']);
+        $this->assertSame(hash_hmac('sha256', $sessionId, config('app.key')), $row['session_hash']);
+        $this->assertStringNotContainsString('127.0.0.1', json_encode(DB::table('akwaba_events')->get()));
+    }
+
+    public function test_evenements_une_autre_session_compte_a_part(): void
+    {
+        $this->guestBrowser(str_repeat('a', 40))->postJson(route('akwaba.event'), ['type' => 'play_start'])->assertNoContent();
+        $this->guestBrowser(str_repeat('b', 40))->postJson(route('akwaba.event'), ['type' => 'play_start'])->assertNoContent();
+
+        $this->assertSame(2, DB::table('akwaba_events')->where('type', 'play_start')->count());
+    }
+
+    public function test_evenements_ignores_pour_un_joueur_connecte_et_type_valide(): void
+    {
+        $this->actingAs($this->player)->postJson(route('akwaba.event'), ['type' => 'lock_reached'])->assertNoContent();
+        $this->assertSame(0, DB::table('akwaba_events')->count());
+
+        $this->postJson(route('akwaba.event'), ['type' => 'achat'])->assertStatus(422);
+        $this->postJson(route('akwaba.event'), [])->assertStatus(422);
+    }
+
+    public function test_evenements_limites_par_session(): void
+    {
+        $sessionId = str_repeat('c', 40);
+        for ($i = 0; $i < 10; $i++) {
+            $this->guestBrowser($sessionId)->postJson(route('akwaba.event'), ['type' => 'play_start'])->assertNoContent();
+        }
+
+        $this->guestBrowser($sessionId)->postJson(route('akwaba.event'), ['type' => 'play_start'])->assertStatus(429);
+        // Une autre session sur la même IP n'est pas bloquée (CGNAT des réseaux mobiles)
+        $this->guestBrowser(str_repeat('d', 40))->postJson(route('akwaba.event'), ['type' => 'play_start'])->assertNoContent();
+    }
+
+    public function test_la_page_hote_envoie_les_evenements_invites(): void
+    {
+        $html = $this->get(route('akwaba.show'))->getContent();
+
+        $this->assertStringContainsString(json_encode(route('akwaba.event', [], false)), $html);
+        $this->assertStringContainsString("guestEvent('play_start')", $html);
+        $this->assertStringContainsString("if (data.save === '3') guestEvent('lock_reached')", $html);
+    }
+
     // ─── Marketplace : pas d'achat ni de téléchargement standard ────────────
 
     public function test_la_fiche_brouillon_reste_invisible(): void

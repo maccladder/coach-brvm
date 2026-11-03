@@ -188,6 +188,7 @@
             hint:     @json(route('akwaba.hint.use', [], false)),
             buy:      @json(route('akwaba.buy', [], false)),
             login:    @json(route('akwaba.login', [], false)),
+            event:    @json(route('akwaba.event', [], false)),
         };
         const CSRF_TOKEN = document.querySelector('meta[name="csrf-token"]').content;
         const ORIGIN     = window.location.origin;
@@ -315,6 +316,17 @@
             }, 1000);
         }
 
+        // Compteur anonyme des invités (play_start, lock_reached) : une fois par onglet, le
+        // serveur dédoublonne aussi par session. Les joueurs connectés sont suivis par /progress.
+        function guestEvent(type) {
+            if (!state || state.logged) return;
+            try {
+                if (sessionStorage.getItem('akwaba_event_' + type)) return;
+                sessionStorage.setItem('akwaba_event_' + type, '1');
+            } catch (e) {}
+            api(URLS.event, { type: type }).catch(() => {});
+        }
+
         function useHint(id) {
             const fail = () => send({ type: 'hintResult', id: id, ok: false, hints: state ? state.hints : 0 });
             if (!state || !state.logged) return fail();
@@ -420,9 +432,13 @@
             switch (data.type) {
                 case 'ready':
                     gameReady = true;
-                    firstState.then(pushState);
+                    firstState.then(() => {
+                        pushState();
+                        guestEvent('play_start');
+                    });
                     break;
                 case 'progress':
+                    if (data.save === '3') guestEvent('lock_reached'); // arrivée au cadenas
                     queueProgress(
                         typeof data.save === 'string' ? data.save : null,
                         Array.isArray(data.fins) ? data.fins.filter(f => typeof f === 'string') : []

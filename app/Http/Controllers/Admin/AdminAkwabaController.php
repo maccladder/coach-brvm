@@ -52,7 +52,12 @@ class AdminAkwabaController extends Controller
      */
     public function unlock(Request $request, User $user)
     {
-        $data    = $request->validate(['reason' => ['required', 'string', 'max:300']]);
+        $this->ensureFullAdmin();
+
+        $data = $request->validate([
+            'reason' => ['required', 'string', 'max:300'],
+            'amount' => ['nullable', 'integer', 'min:0', 'max:1000000'],
+        ]);
         $product = $this->product();
         $admin   = $this->adminContext($request);
 
@@ -64,8 +69,9 @@ class AdminAkwabaController extends Controller
             'user_id'        => $user->id,
             'grantable_type' => MarketplaceProduct::class,
             'grantable_id'   => $product->id,
-            'reason'         => 'Akwaba : ' . $data['reason'] . ' · par ' . $admin['admin_label'],
-            'granted_by'     => $admin['admin_user_id'],
+            'reason'          => 'Akwaba : ' . $data['reason'] . ' · par ' . $admin['admin_label'],
+            'amount_received' => (int) ($data['amount'] ?? 0) ?: null,
+            'granted_by'      => $admin['admin_user_id'],
             'granted_at'     => now(),
         ]);
 
@@ -86,6 +92,8 @@ class AdminAkwabaController extends Controller
      */
     public function lock(Request $request, User $user)
     {
+        $this->ensureFullAdmin();
+
         $data    = $request->validate(['reason' => ['required', 'string', 'max:300']]);
         $product = $this->product();
         $admin   = $this->adminContext($request);
@@ -125,13 +133,18 @@ class AdminAkwabaController extends Controller
      */
     public function addHints(Request $request, User $user)
     {
+        $this->ensureFullAdmin();
+
         $data = $request->validate([
             'count'  => ['required', 'integer', 'min:1', 'max:100'],
             'reason' => ['required', 'string', 'max:200'],
+            'amount' => ['nullable', 'integer', 'min:0', 'max:1000000'],
         ]);
         $admin = $this->adminContext($request);
 
-        $balance = $this->akwaba->addHints($user, (int) $data['count'], 'admin', null, null, $data['reason'], $admin);
+        $balance = $this->akwaba->addHints(
+            $user, (int) $data['count'], 'admin', null, (int) ($data['amount'] ?? 0) ?: null, $data['reason'], $admin
+        );
 
         Log::info('Akwaba admin: indices ajoutés', ['user_id' => $user->id, 'count' => (int) $data['count']] + $admin);
 
@@ -145,6 +158,8 @@ class AdminAkwabaController extends Controller
      */
     public function recover(Request $request, PaystackAkwabaHintsService $hints)
     {
+        $this->ensureFullAdmin();
+
         $data = $request->validate([
             'reference' => ['required', 'string', 'max:120', 'regex:/^AKW-H-[A-Za-z0-9-]+$/'],
         ], [
@@ -178,6 +193,16 @@ class AdminAkwabaController extends Controller
         abort_unless($product, 404);
 
         return $product;
+    }
+
+    /** Gestes manuels (accès, indices, argent) : code admin seul ; le code stagiaire consulte. */
+    private function ensureFullAdmin(): void
+    {
+        abort_unless(
+            session('is_admin'),
+            403,
+            "Action réservée au code admin : le code stagiaire permet seulement de consulter la page Akwaba."
+        );
     }
 
     /** Auteur d'un geste manuel : le code admin est partagé, on garde le compte connecté s'il y en a un. */
@@ -316,37 +341,59 @@ class AdminAkwabaController extends Controller
             ];
         }
 
-        $unlockRevenue = (int) DB::table('marketplace_purchases')->where('product_id', $pid)->where('status', 'paid')->sum('amount');
-        $packs = GameCreditLedger::where('game_slug', AkwabaService::SLUG)->where('reason', 'purchase');
+        // Encaissé via Paystack : achats marketplace payés + packs d'indices
+        $paidUnlocks = fn () => DB::table('marketplace_purchases')->where('product_id', $pid)->where('status', 'paid');
+        $packs       = fn () => GameCreditLedger::where('game_slug', AkwabaService::SLUG)->where('reason', 'purchase');
+        // Encaissé hors Paystack (WhatsApp…) : montant saisi sur les déblocages offerts encore
+        // actifs et sur les ajouts d'indices manuels
+        $manualUnlocks = fn () => AdminGrant::where('grantable_type', MarketplaceProduct::class)->where('grantable_id', $pid)->active();
+        $manualHints   = fn () => GameCreditLedger::where('game_slug', AkwabaService::SLUG)->where('reason', 'admin');
 
-        $period = function (int $days) use ($pid) {
+        $revenue = function (?Carbon $since = null) use ($paidUnlocks, $packs, $manualUnlocks, $manualHints) {
+            $paystack = (int) $paidUnlocks()->when($since, fn ($q) => $q->where('paid_at', '>=', $since))->sum('amount')
+                + (int) $packs()->when($since, fn ($q) => $q->where('created_at', '>=', $since))->sum('amount');
+            $manual = (int) $manualUnlocks()->when($since, fn ($q) => $q->where('granted_at', '>=', $since))->sum('amount_received')
+                + (int) $manualHints()->when($since, fn ($q) => $q->where('created_at', '>=', $since))->sum('amount');
+
+            return ['paystack' => $paystack, 'manual' => $manual, 'total' => $paystack + $manual];
+        };
+
+        $period = function (int $days) use ($paidUnlocks, $packs, $revenue) {
             $since = now()->subDays($days);
-            $unlocks = DB::table('marketplace_purchases')->where('product_id', $pid)->where('status', 'paid')->where('paid_at', '>=', $since);
-            $packs = GameCreditLedger::where('game_slug', AkwabaService::SLUG)->where('reason', 'purchase')->where('created_at', '>=', $since);
 
             return [
-                'unlocks' => (clone $unlocks)->count(),
-                'packs'   => (clone $packs)->count(),
-                'revenue' => (int) $unlocks->sum('amount') + (int) $packs->sum('amount'),
+                'unlocks' => $paidUnlocks()->where('paid_at', '>=', $since)->count(),
+                'packs'   => $packs()->where('created_at', '>=', $since)->count(),
+                'revenue' => $revenue($since),
             ];
         };
 
+        // Invités : sessions anonymes (akwaba_events), sans lien avec les comptes
+        $guestEvents = DB::table('akwaba_events')->selectRaw('type, COUNT(*) as n')->groupBy('type')->pluck('n', 'type');
+        $guestStart  = (int) ($guestEvents['play_start'] ?? 0);
+        $guestLock   = (int) ($guestEvents['lock_reached'] ?? 0);
+
+        $unlocksPaid = $paidUserIds->unique()->count();
+        $totalLock   = $guestLock + $lockUserIds->count();
+
         return [
-            'players'        => GameProgress::where('product_id', $pid)->count(),
-            'funnel'         => $funnel,
-            'fins'           => ['oubli' => (int) ($finsCounts['oubli'] ?? 0), 'gardien' => (int) ($finsCounts['gardien'] ?? 0)],
-            'lock'           => $lockUserIds->count(),
-            'unlocks_paid'   => $paidUserIds->unique()->count(),
-            'unlocks_grant'  => $grantUserIds->diff($paidUserIds)->unique()->count(),
-            'conversion'     => $lockUserIds->count() > 0 ? round($paidUserIds->unique()->count() * 100 / $lockUserIds->count(), 1) : null,
-            'packs_sold'     => (clone $packs)->count(),
-            'unlock_revenue' => $unlockRevenue,
-            'packs_revenue'  => (int) (clone $packs)->sum('amount'),
-            'revenue'        => $unlockRevenue + (int) (clone $packs)->sum('amount'),
-            'hints_admin'    => (int) GameCreditLedger::where('game_slug', AkwabaService::SLUG)->where('reason', 'admin')->sum('delta'),
-            'hints_used'     => GameCreditLedger::where('game_slug', AkwabaService::SLUG)->where('reason', 'use')->count(),
-            'last7'          => $period(7),
-            'last30'         => $period(30),
+            'players'           => GameProgress::where('product_id', $pid)->count(),
+            'funnel'            => $funnel,
+            'guests'            => ['play_start' => $guestStart, 'lock_reached' => $guestLock],
+            'fins'              => ['oubli' => (int) ($finsCounts['oubli'] ?? 0), 'gardien' => (int) ($finsCounts['gardien'] ?? 0)],
+            'lock'              => $lockUserIds->count(),
+            'unlocks_paid'      => $unlocksPaid,
+            'unlocks_grant'     => $grantUserIds->diff($paidUserIds)->unique()->count(),
+            'conversion'        => $lockUserIds->count() > 0 ? round($unlocksPaid * 100 / $lockUserIds->count(), 1) : null,
+            'conversion_global' => $totalLock > 0 ? round($unlocksPaid * 100 / $totalLock, 1) : null,
+            'packs_sold'        => $packs()->count(),
+            'unlock_revenue'    => (int) $paidUnlocks()->sum('amount'),
+            'packs_revenue'     => (int) $packs()->sum('amount'),
+            'revenue'           => $revenue(),
+            'hints_admin'       => (int) $manualHints()->sum('delta'),
+            'hints_used'        => GameCreditLedger::where('game_slug', AkwabaService::SLUG)->where('reason', 'use')->count(),
+            'last7'             => $period(7),
+            'last30'            => $period(30),
         ];
     }
 }

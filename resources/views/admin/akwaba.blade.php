@@ -11,6 +11,10 @@
         'admin'    => ['bg-warning text-dark', '🛠️ Admin'],
     ];
     $funnelTop = max(1, collect($stats['funnel'])->max('count'));
+    $guestTop  = max(1, $stats['guests']['play_start'], $stats['guests']['lock_reached']);
+    $pct = fn ($v) => $v === null ? '—' : $v . ' %';
+    // Gestes manuels réservés au code admin ; le code stagiaire consulte seulement
+    $canAct = (bool) session('is_admin');
 @endphp
 <div class="container py-4" style="max-width:1300px;">
 
@@ -47,9 +51,9 @@
             ['Joueurs connectés', $stats['players'], '#0d6efd'],
             ['Arrivés au cadenas', $stats['lock'], '#6f42c1'],
             ['Déblocages payés', $stats['unlocks_paid'] . ($stats['unlocks_grant'] ? ' + ' . $stats['unlocks_grant'] . ' offerts' : ''), '#198754'],
-            ['Conversion au cadenas', $stats['conversion'] === null ? '—' : $stats['conversion'] . ' %', '#fd7e14'],
+            ['Conversion globale au cadenas', $pct($stats['conversion_global']), '#fd7e14'],
             ['Packs d\'indices vendus', $stats['packs_sold'], '#20c997'],
-            ['Chiffre d\'affaires', $fcfa($stats['revenue']), '#dc3545'],
+            ['Chiffre d\'affaires total', $fcfa($stats['revenue']['total']), '#dc3545'],
         ] as [$label, $value, $color])
             <div class="col-6 col-md-4 col-xl-2">
                 <div class="card text-center border-0 shadow-sm h-100">
@@ -65,8 +69,26 @@
     <div class="row g-4 mb-4">
         {{-- Entonnoir --}}
         <div class="col-lg-5">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-header fw-bold">📊 Entonnoir : chapitre le plus loin atteint</div>
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header fw-bold">👻 Entonnoir des invités (sessions anonymes)</div>
+                <div class="card-body">
+                    @foreach([['Ont lancé le jeu', $stats['guests']['play_start'], '#0dcaf0'], ['🔒 Arrivés au cadenas', $stats['guests']['lock_reached'], '#6f42c1']] as [$label, $count, $color])
+                        <div class="mb-2">
+                            <div class="d-flex justify-content-between small mb-1"><span>{{ $label }}</span><strong>{{ $count }}</strong></div>
+                            <div class="progress" style="height:8px;">
+                                <div class="progress-bar" style="width:{{ round($count * 100 / $guestTop) }}%;background:{{ $color }};"></div>
+                            </div>
+                        </div>
+                    @endforeach
+                    <div class="small text-muted mt-2">
+                        Une session = un navigateur non connecté (au plus un événement par type). Aucune IP ni donnée personnelle stockée.<br>
+                        Conversion connectés : <strong>{{ $pct($stats['conversion']) }}</strong> ·
+                        globale (payés ÷ cadenas invités + connectés) : <strong>{{ $pct($stats['conversion_global']) }}</strong>
+                    </div>
+                </div>
+            </div>
+            <div class="card border-0 shadow-sm">
+                <div class="card-header fw-bold">📊 Entonnoir des joueurs connectés : chapitre le plus loin atteint</div>
                 <div class="card-body">
                     @foreach($stats['funnel'] as $step)
                         <div class="mb-2">
@@ -115,18 +137,30 @@
                                 <td class="text-end">{{ $stats['last30']['packs'] }}</td>
                                 <td class="text-end">{{ $stats['packs_sold'] }}</td>
                             </tr>
+                            <tr>
+                                <td>CA Paystack</td>
+                                <td class="text-end">{{ $fcfa($stats['last7']['revenue']['paystack']) }}</td>
+                                <td class="text-end">{{ $fcfa($stats['last30']['revenue']['paystack']) }}</td>
+                                <td class="text-end">{{ $fcfa($stats['revenue']['paystack']) }}</td>
+                            </tr>
+                            <tr>
+                                <td>CA manuel</td>
+                                <td class="text-end">{{ $fcfa($stats['last7']['revenue']['manual']) }}</td>
+                                <td class="text-end">{{ $fcfa($stats['last30']['revenue']['manual']) }}</td>
+                                <td class="text-end">{{ $fcfa($stats['revenue']['manual']) }}</td>
+                            </tr>
                             <tr class="fw-bold">
-                                <td>CA</td>
-                                <td class="text-end">{{ $fcfa($stats['last7']['revenue']) }}</td>
-                                <td class="text-end">{{ $fcfa($stats['last30']['revenue']) }}</td>
-                                <td class="text-end">{{ $fcfa($stats['revenue']) }}</td>
+                                <td>CA total</td>
+                                <td class="text-end">{{ $fcfa($stats['last7']['revenue']['total']) }}</td>
+                                <td class="text-end">{{ $fcfa($stats['last30']['revenue']['total']) }}</td>
+                                <td class="text-end">{{ $fcfa($stats['revenue']['total']) }}</td>
                             </tr>
                         </tbody>
                     </table>
                     <div class="small text-muted">
-                        Déblocages : {{ $fcfa($stats['unlock_revenue']) }} · Packs : {{ $fcfa($stats['packs_revenue']) }}<br>
-                        Montants réellement encaissés via Paystack. Les déblocages offerts et les indices ajoutés
-                        à la main (paiements WhatsApp) n'y figurent pas.<br>
+                        Paystack : déblocages {{ $fcfa($stats['unlock_revenue']) }} · packs {{ $fcfa($stats['packs_revenue']) }}.<br>
+                        Manuel : montants saisis sur les déblocages offerts (encore actifs) et les ajouts d'indices
+                        (paiements WhatsApp…).<br>
                         Indices ajoutés à la main : <strong>{{ $stats['hints_admin'] }}</strong> ·
                         indices utilisés : <strong>{{ $stats['hints_used'] }}</strong>
                     </div>
@@ -144,13 +178,17 @@
                         (<code>AKW-H-…</code>) : elle est revérifiée chez Paystack, puis +5 indices sont crédités
                         au joueur qui a payé, une seule fois.
                     </p>
-                    <form method="POST" action="{{ route('admin.akwaba.recover') }}"
-                          onsubmit="return confirm('Vérifier cette référence chez Paystack et créditer +5 indices si elle est valide ?');">
+                    @if($canAct)
+                    <form method="POST" action="{{ route('admin.akwaba.recover') }}" class="js-confirm"
+                          data-confirm="Vérifier cette référence chez Paystack et créditer +5 indices si elle est valide ?">
                         @csrf
                         <input type="text" name="reference" class="form-control form-control-sm font-monospace mb-2"
                                placeholder="AKW-H-…" value="{{ old('reference') }}" required maxlength="120">
                         <button type="submit" class="btn btn-sm btn-dark w-100">Vérifier et créditer</button>
                     </form>
+                    @else
+                        <div class="small text-muted fst-italic">Réservé au code admin.</div>
+                    @endif
                 </div>
             </div>
         </div>
@@ -183,21 +221,32 @@
                     <div class="col-6 col-md-3"><div class="text-muted">Fins</div>{{ collect($selectedSummary['fins'])->map(fn ($f) => $finLabels[$f] ?? $f)->join(', ') ?: '—' }}</div>
                 </div>
 
+                @if(!$canAct)
+                    <div class="alert alert-secondary small mb-0">
+                        Consultation seule : débloquer, retirer, ajouter des indices et rattraper un pack sont réservés au code admin.
+                    </div>
+                @else
+                {{-- Confirmation : texte dans data-confirm (échappé par Blade), jamais injecté dans du JavaScript --}}
                 <div class="row g-3">
-                    <div class="col-md-4">
+                    <div class="col-md-5">
                         <div class="border rounded p-3 h-100">
                             <div class="fw-bold mb-2">Déblocage de l'histoire</div>
                             @if(!$selectedSummary['unlocked'])
-                                <form method="POST" action="{{ route('admin.akwaba.unlock', $selected) }}"
-                                      onsubmit="return confirm('Débloquer l\'histoire complète pour {{ addslashes($selected->name) }} ?');">
+                                <form method="POST" action="{{ route('admin.akwaba.unlock', $selected) }}" class="js-confirm"
+                                      data-confirm="Débloquer l'histoire complète pour {{ $selected->name }} ?">
                                     @csrf
                                     <input type="text" name="reason" class="form-control form-control-sm mb-2" required maxlength="300"
-                                           placeholder="Motif (ex. paiement WhatsApp 1 000 F)">
+                                           placeholder="Motif (ex. paiement WhatsApp)">
+                                    <div class="input-group input-group-sm mb-2">
+                                        <span class="input-group-text">Montant encaissé</span>
+                                        <input type="number" name="amount" class="form-control" value="0" min="0" max="1000000" step="1">
+                                        <span class="input-group-text">FCFA</span>
+                                    </div>
                                     <button class="btn btn-sm btn-success w-100">🎁 Débloquer</button>
                                 </form>
                             @elseif($selectedSummary['via'] === 'grant')
-                                <form method="POST" action="{{ route('admin.akwaba.lock', $selected) }}"
-                                      onsubmit="return confirm('Retirer le déblocage offert à {{ addslashes($selected->name) }} ?');">
+                                <form method="POST" action="{{ route('admin.akwaba.lock', $selected) }}" class="js-confirm"
+                                      data-confirm="Retirer le déblocage offert à {{ $selected->name }} ?">
                                     @csrf
                                     <input type="text" name="reason" class="form-control form-control-sm mb-2" required maxlength="300"
                                            placeholder="Motif du retrait">
@@ -208,27 +257,34 @@
                             @endif
                         </div>
                     </div>
-                    <div class="col-md-8">
+                    <div class="col-md-7">
                         <div class="border rounded p-3 h-100">
                             <div class="fw-bold mb-2">Ajouter des indices</div>
-                            <form method="POST" action="{{ route('admin.akwaba.hints', $selected) }}" class="row g-2"
-                                  onsubmit="return confirm('Ajouter ' + this.count.value + ' indice(s) à {{ addslashes($selected->name) }} ?');">
+                            <form method="POST" action="{{ route('admin.akwaba.hints', $selected) }}" class="row g-2 js-confirm"
+                                  data-confirm="Ajouter ces indices à {{ $selected->name }} ?">
                                 @csrf
                                 <div class="col-sm-3">
+                                    <label class="form-label small mb-0">Indices</label>
                                     <input type="number" name="count" class="form-control form-control-sm" value="{{ old('count', 5) }}" min="1" max="100" required>
                                 </div>
-                                <div class="col-sm-6">
+                                <div class="col-sm-5">
+                                    <label class="form-label small mb-0">Motif</label>
                                     <input type="text" name="reason" class="form-control form-control-sm" required maxlength="200"
-                                           placeholder="Motif (ex. paiement WhatsApp 500 F)" value="{{ old('reason') }}">
+                                           placeholder="ex. paiement WhatsApp" value="{{ old('reason') }}">
                                 </div>
-                                <div class="col-sm-3">
+                                <div class="col-sm-4">
+                                    <label class="form-label small mb-0">Montant encaissé (FCFA)</label>
+                                    <input type="number" name="amount" class="form-control form-control-sm" value="{{ old('amount', 0) }}" min="0" max="1000000" step="1">
+                                </div>
+                                <div class="col-12">
                                     <button class="btn btn-sm btn-warning w-100">+ Ajouter</button>
                                 </div>
                             </form>
-                            <div class="small text-muted mt-2">Ton nom (compte connecté) ou ton rôle est enregistré dans l'historique.</div>
+                            <div class="small text-muted mt-2">Ton nom (compte connecté) ou ton rôle est enregistré dans l'historique. Laisse 0 si c'est un cadeau.</div>
                         </div>
                     </div>
                 </div>
+                @endif
             </div>
         </div>
     @endif
@@ -356,4 +412,12 @@
     </div>
 
 </div>
+
+<script>
+    document.querySelectorAll('form.js-confirm').forEach(function (form) {
+        form.addEventListener('submit', function (e) {
+            if (!window.confirm(form.dataset.confirm)) e.preventDefault();
+        });
+    });
+</script>
 @endsection

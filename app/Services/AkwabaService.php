@@ -245,6 +245,25 @@ class AkwabaService
         });
     }
 
+    public const GUEST_EVENTS = ['play_start', 'lock_reached'];
+
+    /**
+     * Compteur anonyme d'invités : au plus une ligne par session et par type (index unique).
+     * L'id de session n'est jamais stocké, seulement son HMAC avec la clé de l'application.
+     */
+    public function recordGuestEvent(string $type, string $sessionId): void
+    {
+        if (!in_array($type, self::GUEST_EVENTS, true) || $sessionId === '') {
+            return;
+        }
+
+        DB::table('akwaba_events')->insertOrIgnore([
+            'type'         => $type,
+            'session_hash' => hash_hmac('sha256', $sessionId, (string) config('app.key')),
+            'created_at'   => now(),
+        ]);
+    }
+
     public function rank(string $save): int
     {
         return (int) array_search($save, self::SAVES, true);

@@ -17,6 +17,7 @@ class AdminGrant extends Model
         'grantable_type',
         'grantable_id',
         'reason',
+        'amount_received',
         'granted_by',
         'granted_at',
         'expires_at',

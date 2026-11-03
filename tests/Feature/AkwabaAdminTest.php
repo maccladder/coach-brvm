@@ -191,12 +191,12 @@ class AkwabaAdminTest extends TestCase
         $this->assertSame(1, $stats['unlocks_paid']);
         $this->assertSame(50.0, $stats['conversion']);
         $this->assertSame(2, $stats['packs_sold']);
-        $this->assertSame(2000, $stats['revenue']);   // 1 000 + 2 × 500
+        $this->assertSame(['paystack' => 2000, 'manual' => 0, 'total' => 2000], $stats['revenue']);   // 1 000 + 2 × 500
         $this->assertSame(1, $stats['fins']['oubli']);
         $this->assertSame(5, $stats['hints_admin']);
 
-        $this->assertSame(['unlocks' => 0, 'packs' => 1, 'revenue' => 500], $stats['last7']);
-        $this->assertSame(['unlocks' => 1, 'packs' => 2, 'revenue' => 2000], $stats['last30']);
+        $this->assertSame(['unlocks' => 0, 'packs' => 1, 'revenue' => ['paystack' => 500, 'manual' => 0, 'total' => 500]], $stats['last7']);
+        $this->assertSame(['unlocks' => 1, 'packs' => 2, 'revenue' => ['paystack' => 2000, 'manual' => 0, 'total' => 2000]], $stats['last30']);
     }
 
     public function test_l_historique_est_filtrable_par_joueur(): void
@@ -298,12 +298,103 @@ class AkwabaAdminTest extends TestCase
         ]);
     }
 
-    public function test_un_stagiaire_est_identifie_comme_tel(): void
-    {
-        $this->withSession(['is_stagiaire' => true])
-            ->post(route('admin.akwaba.hints', $this->player), ['count' => 1, 'reason' => 'test']);
+    // ─── Code stagiaire : consultation seule ─────────────────────────────────
 
-        $this->assertSame('Code stagiaire (sans compte connecté)', GameCreditLedger::value('admin_label'));
+    public function test_le_stagiaire_consulte_mais_ne_peut_rien_modifier(): void
+    {
+        $this->paystackPack('AKW-H-STAGIAIRE');
+        $stagiaire = fn () => $this->withSession(['is_stagiaire' => true]);
+
+        $stagiaire()->get(route('admin.akwaba.index', ['user' => $this->player->id]))
+            ->assertOk()
+            ->assertSee('Consultation seule')
+            ->assertSee('Réservé au code admin.')
+            ->assertDontSee(route('admin.akwaba.unlock', $this->player), false)
+            ->assertDontSee(route('admin.akwaba.hints', $this->player), false)
+            ->assertDontSee(route('admin.akwaba.recover'), false);
+
+        $message = 'Action réservée au code admin';
+        $stagiaire()->post(route('admin.akwaba.unlock', $this->player), ['reason' => 'x'])->assertForbidden()->assertSee($message);
+        $stagiaire()->post(route('admin.akwaba.lock', $this->player), ['reason' => 'x'])->assertForbidden()->assertSee($message);
+        $stagiaire()->post(route('admin.akwaba.hints', $this->player), ['count' => 5, 'reason' => 'x'])->assertForbidden()->assertSee($message);
+        $stagiaire()->post(route('admin.akwaba.recover'), ['reference' => 'AKW-H-STAGIAIRE'])->assertForbidden()->assertSee($message);
+
+        $this->assertFalse($this->isUnlocked());
+        $this->assertSame(0, AdminGrant::count());
+        $this->assertSame(0, GameCreditLedger::count());
+    }
+
+    public function test_le_stagiaire_ne_peut_pas_retirer_un_deblocage(): void
+    {
+        $this->asAdmin()->post(route('admin.akwaba.unlock', $this->player), ['reason' => 'WhatsApp']);
+
+        $this->withSession(['is_admin' => false, 'is_stagiaire' => true])
+            ->post(route('admin.akwaba.lock', $this->player), ['reason' => 'x'])->assertForbidden();
+
+        $this->assertTrue($this->isUnlocked());
+    }
+
+    // ─── Montant encaissé hors Paystack ─────────────────────────────────────
+
+    public function test_le_montant_encaisse_est_facultatif_et_valide(): void
+    {
+        $this->asAdmin()->post(route('admin.akwaba.hints', $this->player), ['count' => 5, 'reason' => 'x', 'amount' => -1])->assertSessionHasErrors('amount');
+        $this->asAdmin()->post(route('admin.akwaba.hints', $this->player), ['count' => 5, 'reason' => 'x', 'amount' => 'abc'])->assertSessionHasErrors('amount');
+        $this->asAdmin()->post(route('admin.akwaba.unlock', $this->player), ['reason' => 'x', 'amount' => 2000000])->assertSessionHasErrors('amount');
+        $this->assertSame(0, GameCreditLedger::count());
+        $this->assertSame(0, AdminGrant::count());
+
+        // Sans montant (ou 0) : cadeau, rien dans le CA
+        $this->asAdmin()->post(route('admin.akwaba.hints', $this->player), ['count' => 2, 'reason' => 'cadeau'])->assertSessionHas('success');
+        $this->asAdmin()->post(route('admin.akwaba.hints', $this->player), ['count' => 1, 'reason' => 'cadeau', 'amount' => 0])->assertSessionHas('success');
+        $this->assertSame(0, (int) GameCreditLedger::sum('amount'));
+    }
+
+    public function test_le_chiffre_d_affaires_separe_paystack_et_manuel(): void
+    {
+        $payer = User::factory()->create();
+        $this->paidPurchase($payer);                                                // Paystack 1 000
+        app(AkwabaService::class)->addHints($payer, 5, 'purchase', 'AKW-H-P', 500); // Paystack 500
+
+        $this->asAdmin()->post(route('admin.akwaba.unlock', $this->player), ['reason' => 'WhatsApp', 'amount' => 1000]);
+        $this->asAdmin()->post(route('admin.akwaba.hints', $this->player), ['count' => 5, 'reason' => 'WhatsApp', 'amount' => 500]);
+
+        $this->assertSame(1000, (int) AdminGrant::value('amount_received'));
+        $this->assertDatabaseHas('game_credit_ledger', ['reason' => 'admin', 'delta' => 5, 'amount' => 500]);
+
+        $stats = $this->asAdmin()->get(route('admin.akwaba.index'))->assertOk()->viewData('stats');
+        $this->assertSame(['paystack' => 1500, 'manual' => 1500, 'total' => 3000], $stats['revenue']);
+        $this->assertSame(['paystack' => 1500, 'manual' => 1500, 'total' => 3000], $stats['last7']['revenue']);
+
+        // Un déblocage offert puis retiré (erreur) ne compte plus dans le CA manuel
+        $this->asAdmin()->post(route('admin.akwaba.lock', $this->player), ['reason' => 'erreur']);
+        $stats = $this->asAdmin()->get(route('admin.akwaba.index'))->viewData('stats');
+        $this->assertSame(['paystack' => 1500, 'manual' => 500, 'total' => 2000], $stats['revenue']);
+    }
+
+    // ─── Entonnoir des invités ──────────────────────────────────────────────
+
+    public function test_l_entonnoir_invites_et_la_conversion_globale(): void
+    {
+        foreach (['a', 'b', 'c'] as $session) {
+            foreach (['play_start', 'lock_reached'] as $type) {
+                DB::table('akwaba_events')->insert(['type' => $type, 'session_hash' => str_repeat($session, 64), 'created_at' => now()]);
+            }
+        }
+        DB::table('akwaba_events')->insert(['type' => 'play_start', 'session_hash' => str_repeat('d', 64), 'created_at' => now()]);
+
+        // 1 connecté au-delà du cadenas, qui a payé
+        $payer = User::factory()->create();
+        $this->progress($payer, '4');
+        $this->paidPurchase($payer);
+
+        $stats = $this->asAdmin()->get(route('admin.akwaba.index'))->assertOk()
+            ->assertSee('Entonnoir des invités')
+            ->viewData('stats');
+
+        $this->assertSame(['play_start' => 4, 'lock_reached' => 3], $stats['guests']);
+        $this->assertSame(100.0, $stats['conversion']);        // 1 payé ÷ 1 cadenas connecté
+        $this->assertSame(25.0, $stats['conversion_global']);  // 1 ÷ (3 invités + 1 connecté)
     }
 
     // ─── Rattrapage d'un pack ───────────────────────────────────────────────

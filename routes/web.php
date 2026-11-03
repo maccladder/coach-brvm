@@ -120,6 +120,7 @@ Route::prefix('jeux/akwaba')->name('akwaba.')->controller(\App\Http\Controllers\
     Route::get('/fichier', 'file')->name('file');
     Route::get('/state', 'state')->middleware('throttle:60,1')->name('state');
     Route::get('/paiement/retour', 'paymentReturn')->name('payment.return');
+    Route::post('/event', 'event')->middleware('throttle:akwaba-events')->name('event');
 
     Route::middleware('auth')->group(function () {
         Route::post('/progress', 'progress')->middleware('throttle:30,1')->name('progress');

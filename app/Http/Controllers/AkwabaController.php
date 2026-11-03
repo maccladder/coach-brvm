@@ -129,6 +129,23 @@ class AkwabaController extends Controller
     }
 
     /**
+     * POST /jeux/akwaba/event  {type: 'play_start'|'lock_reached'}
+     * Compteur anonyme des invités (les joueurs connectés sont suivis par game_progress).
+     */
+    public function event(Request $request)
+    {
+        $data = $request->validate([
+            'type' => ['required', 'string', 'in:' . implode(',', AkwabaService::GUEST_EVENTS)],
+        ]);
+
+        if (!$request->user()) {
+            $this->akwaba->recordGuestEvent($data['type'], $request->session()->getId());
+        }
+
+        return response()->noContent();
+    }
+
+    /**
      * POST /jeux/akwaba/hint/use  {id}
      */
     public function useHint(Request $request)
