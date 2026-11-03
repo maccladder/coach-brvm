@@ -154,7 +154,7 @@
                                 @if($product->cover_image_path)
                                     <div class="vd-file-current">
                                         <div class="vd-file-current-label">Image actuelle</div>
-                                        <img src="{{ asset('storage/'.$product->cover_image_path) }}" alt="cover" style="max-height:100px;border-radius:3px;">
+                                        <img src="{{ $product->cover_url }}" alt="cover" style="max-height:100px;border-radius:3px;">
                                     </div>
                                 @endif
                                 <div class="vd-help">Obligatoire pour soumettre.</div>

@@ -349,8 +349,8 @@
                 @endif
 
                 @if($product->cover_image_path)
-                    <a href="{{ asset('storage/'.$product->cover_image_path) }}" target="_blank">
-                        <img src="{{ asset('storage/'.$product->cover_image_path) }}"
+                    <a href="{{ $product->cover_url }}" target="_blank">
+                        <img src="{{ $product->cover_url }}"
                              alt="{{ $product->title }}">
                     </a>
                 @else
@@ -659,7 +659,7 @@
                         <a href="{{ route('marketplace.show', $p->slug) }}" class="mp-related-card">
                             <div class="mp-related-img">
                                 @if($p->cover_image_path)
-                                    <img src="{{ asset('storage/'.$p->cover_image_path) }}" alt="{{ $p->title }}">
+                                    <img src="{{ $p->cover_url }}" alt="{{ $p->title }}">
                                 @else
                                     <div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--cb-muted);font-size:28px;">📦</div>
                                 @endif

@@ -173,8 +173,6 @@ class AkwabaTest extends TestCase
         // Appels API relatifs : la session suit, que l'on arrive par boursiv.com ou www.
         $this->assertStringContainsString(json_encode(route('akwaba.state', [], false)), $html);
         $this->assertStringNotContainsString(json_encode(route('akwaba.state')), $html);
-        // Produit encore en brouillon : pas d'indexation
-        $this->assertStringContainsString('name="robots" content="noindex"', $html);
     }
 
     public function test_la_page_hote_a_une_csp_stricte_avec_nonce(): void
@@ -208,11 +206,65 @@ class AkwabaTest extends TestCase
             ->assertHeader('X-Frame-Options', 'SAMEORIGIN');
     }
 
-    public function test_la_page_hote_publiee_est_indexable(): void
+    public function test_la_page_hote_est_indexable_avec_les_balises_de_partage(): void
     {
-        $this->product->update(['status' => 'published']);
+        $html = $this->get(route('akwaba.show'))->assertOk()->getContent();
 
-        $this->assertStringNotContainsString('noindex', $this->get(route('akwaba.show'))->getContent());
+        $this->assertStringNotContainsString('noindex', $html);
+
+        $expected = [
+            'property="og:title" content="Akwaba : le mystère de la lagune Ébrié"',
+            'property="og:description" content="Un jeu d&#039;énigmes à Abidjan. Gratuit pour commencer."',
+            'property="og:image" content="https://boursiv.com/img/jeux/akwaba-partage.jpg"',
+            'property="og:url" content="https://boursiv.com/jeux/akwaba"',
+            'property="og:image:width" content="1200"',
+            'property="og:image:height" content="630"',
+            'name="twitter:card" content="summary_large_image"',
+            'name="twitter:image" content="https://boursiv.com/img/jeux/akwaba-partage.jpg"',
+            'rel="canonical" href="https://boursiv.com/jeux/akwaba"',
+        ];
+        foreach ($expected as $tag) {
+            $this->assertStringContainsString(html_entity_decode($tag, ENT_QUOTES), html_entity_decode($html, ENT_QUOTES), $tag);
+        }
+    }
+
+    public function test_l_image_de_partage_est_dans_le_depot_au_bon_format(): void
+    {
+        $path = public_path('img/jeux/akwaba-partage.jpg');
+
+        $this->assertFileExists($path);
+        [$width, $height, $type] = getimagesize($path);
+        $this->assertSame([1200, 630, IMAGETYPE_JPEG], [$width, $height, $type]);
+    }
+
+    public function test_le_produit_est_publie_avec_sa_couverture(): void
+    {
+        $this->assertSame('published', $this->product->status);
+        $this->assertSame('img/jeux/akwaba-partage.jpg', $this->product->cover_image_path);
+        $this->assertSame(asset('img/jeux/akwaba-partage.jpg'), $this->product->cover_url);
+        // Couverture du dépôt : servie telle quelle comme miniature (pas de génération sur storage/)
+        $this->assertSame(asset('img/jeux/akwaba-partage.jpg'), $this->product->vignette_url);
+    }
+
+    public function test_la_couverture_s_affiche_sur_les_cartes_et_la_fiche(): void
+    {
+        $cover = asset('img/jeux/akwaba-partage.jpg');
+
+        $this->get(route('marketplace.index', ['type' => 'game']))->assertOk()->assertSee($cover, false);
+        $this->get(route('marketplace.show', 'akwaba'))->assertOk()->assertSee($cover, false);
+
+        $this->purchase();
+        $this->actingAs($this->player)->get(route('my.products'))->assertOk()->assertSee($cover, false);
+    }
+
+    public function test_les_couvertures_televersees_restent_sur_storage(): void
+    {
+        $other = MarketplaceProduct::create([
+            'title' => 'Autre jeu', 'slug' => 'autre-jeu', 'type' => 'game', 'status' => 'published',
+            'price' => 500, 'cover_image_path' => 'marketplace/covers/autre.jpg',
+        ]);
+
+        $this->assertSame(asset('storage/marketplace/covers/autre.jpg'), $other->cover_url);
     }
 
     public function test_connexion_depuis_le_cadenas_ramene_au_jeu(): void
@@ -292,8 +344,10 @@ class AkwabaTest extends TestCase
 
     // ─── Marketplace : pas d'achat ni de téléchargement standard ────────────
 
-    public function test_la_fiche_brouillon_reste_invisible(): void
+    public function test_la_fiche_repassee_en_brouillon_redevient_invisible(): void
     {
+        $this->product->update(['status' => 'draft']);
+
         $this->get(route('marketplace.show', 'akwaba'))->assertNotFound();
     }
 

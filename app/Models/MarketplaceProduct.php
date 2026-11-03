@@ -86,7 +86,8 @@ class MarketplaceProduct extends Model
     {
         // Nouvelle couverture : générer sa miniature légère tout de suite
         static::saved(function (MarketplaceProduct $p) {
-            if ($p->cover_image_path && ($p->wasRecentlyCreated || $p->wasChanged('cover_image_path'))) {
+            if ($p->cover_image_path && !$p->hasPublicAssetCover()
+                && ($p->wasRecentlyCreated || $p->wasChanged('cover_image_path'))) {
                 try {
                     app(VignetteService::class)->generer($p->cover_image_path, true);
                 } catch (\Throwable $e) {
@@ -96,9 +97,35 @@ class MarketplaceProduct extends Model
         });
     }
 
+    /**
+     * Couverture versionnée dans le dépôt (public/img/…, ex. Akwaba) plutôt que téléversée sur
+     * le disque public (storage/…, hors git).
+     */
+    public function hasPublicAssetCover(): bool
+    {
+        return str_starts_with((string) $this->cover_image_path, 'img/');
+    }
+
+    /** URL de la couverture, quel que soit son emplacement. */
+    public function getCoverUrlAttribute(): ?string
+    {
+        if (!$this->cover_image_path) {
+            return null;
+        }
+
+        return $this->hasPublicAssetCover()
+            ? asset($this->cover_image_path)
+            : asset('storage/' . $this->cover_image_path);
+    }
+
     /** URL de la miniature 400×300 (null si absente : ne jamais servir l'original lourd). */
     public function getVignetteUrlAttribute(): ?string
     {
+        // Couverture du dépôt : image déjà optimisée pour le web, servie telle quelle
+        if ($this->hasPublicAssetCover()) {
+            return $this->cover_url;
+        }
+
         return app(VignetteService::class)->url($this->cover_image_path);
     }
 }

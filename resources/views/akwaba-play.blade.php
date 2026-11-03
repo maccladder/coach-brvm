@@ -15,10 +15,25 @@
     <meta name="apple-mobile-web-app-title" content="Akwaba">
     <meta name="theme-color" content="#0B1426">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <meta name="description" content="Akwaba : le mystère de la lagune Ébrié. Gratuit pour commencer, histoire complète 1 000 FCFA.">
-    @if(!$product || $product->status !== 'published')
-        <meta name="robots" content="noindex">
-    @endif
+    <meta name="description" content="Un jeu d'énigmes à Abidjan. Gratuit pour commencer.">
+
+    {{-- Partage (WhatsApp, Facebook, X…) : URLs absolues de production, quel que soit le domaine d'arrivée --}}
+    <link rel="canonical" href="https://boursiv.com/jeux/akwaba">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Boursiv">
+    <meta property="og:locale" content="fr_FR">
+    <meta property="og:title" content="Akwaba : le mystère de la lagune Ébrié">
+    <meta property="og:description" content="Un jeu d'énigmes à Abidjan. Gratuit pour commencer.">
+    <meta property="og:url" content="https://boursiv.com/jeux/akwaba">
+    <meta property="og:image" content="https://boursiv.com/img/jeux/akwaba-partage.jpg">
+    <meta property="og:image:type" content="image/jpeg">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="Akwaba, le mystère de la lagune Ébrié : une femme de l'eau au foulard doré sous la pleine lune, sur la lagune d'Abidjan">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Akwaba : le mystère de la lagune Ébrié">
+    <meta name="twitter:description" content="Un jeu d'énigmes à Abidjan. Gratuit pour commencer.">
+    <meta name="twitter:image" content="https://boursiv.com/img/jeux/akwaba-partage.jpg">
     <title>🎮 Akwaba : le mystère de la lagune Ébrié · Boursiv</title>
     <style>
         :root {

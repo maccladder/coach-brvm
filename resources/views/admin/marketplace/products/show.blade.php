@@ -58,7 +58,7 @@
                 <div class="card-body">
                     <div class="ratio ratio-16x9 bg-light rounded overflow-hidden">
                         @if($product->cover_image_path)
-                            <img src="{{ asset('storage/'.$product->cover_image_path) }}" class="w-100 h-100" style="object-fit:cover;">
+                            <img src="{{ $product->cover_url }}" class="w-100 h-100" style="object-fit:cover;">
                         @else
                             <div class="d-flex align-items-center justify-content-center text-muted">Pas de cover</div>
                         @endif

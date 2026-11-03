@@ -16,8 +16,11 @@ class GenererVignettesMarketplace extends Command
 
     public function handle(VignetteService $vignettes): int
     {
+        // Les couvertures versionnées dans le dépôt (public/img/…) sont déjà légères et servies
+        // telles quelles : rien à générer sur le disque public
         $produits = MarketplaceProduct::query()
             ->whereNotNull('cover_image_path')
+            ->where('cover_image_path', 'not like', 'img/%')
             ->when(!$this->option('tous'), fn ($q) => $q->where('type', 'game'))
             ->get(['id', 'title', 'cover_image_path']);
 

@@ -143,7 +143,7 @@
 
                     @if($product->cover_image_path)
                         <div class="mb-2">
-                            <img src="{{ asset('storage/'.$product->cover_image_path) }}"
+                            <img src="{{ $product->cover_url }}"
                                  alt="cover"
                                  style="max-height:120px; border-radius:10px;"
                                  class="border">

@@ -15,6 +15,26 @@ class WelcomePageTest extends TestCase
     {
         parent::setUp();
         Http::preventStrayRequests(); // l'accueil ne doit appeler aucun service externe
+
+        // Les tests du bloc « Joue » maîtrisent leur liste de jeux : on retire Akwaba, publié
+        // par migration (couvert par test_play_block_shows_akwaba_as_free_to_start)
+        \App\Models\MarketplaceProduct::where('slug', 'akwaba')->delete();
+    }
+
+    public function test_play_block_shows_akwaba_as_free_to_start(): void
+    {
+        // État laissé par les migrations 2026_11_03_000003 et 000007
+        $this->jeu('Akwaba : le mystère de la lagune Ébrié', [
+            'slug' => 'akwaba', 'price' => 1000, 'game_html' => null,
+            'cover_image_path' => 'img/jeux/akwaba-partage.jpg',
+        ]);
+
+        $bloc = $this->blocJoue();
+
+        $this->assertStringContainsString(route('marketplace.show', 'akwaba'), $bloc);
+        $this->assertStringContainsString('Gratuit pour commencer', $bloc);
+        $this->assertStringNotContainsString('1 000 F', $bloc);
+        $this->assertStringContainsString('src="' . asset('img/jeux/akwaba-partage.jpg') . '"', $bloc);
     }
 
     public function test_response_starts_with_doctype_without_bom(): void

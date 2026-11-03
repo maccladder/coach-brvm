@@ -179,7 +179,7 @@
                             {{-- Miniature --}}
                             <div class="myp-card-thumb">
                                 @if($p->cover_image_path)
-                                    <img src="{{ asset('storage/'.$p->cover_image_path) }}"
+                                    <img src="{{ $p->cover_url }}"
                                          alt="{{ $p->title }}">
                                 @else
                                     📦
