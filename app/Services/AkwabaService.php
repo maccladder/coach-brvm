@@ -7,6 +7,7 @@ use App\Models\GameCreditLedger;
 use App\Models\GameProgress;
 use App\Models\MarketplaceProduct;
 use App\Models\User;
+use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -136,10 +137,14 @@ class AkwabaService
      */
     public function saveProgress(User $user, MarketplaceProduct $product, ?string $save, array $fins): array
     {
-        GameProgress::firstOrCreate(
-            ['user_id' => $user->id, 'product_id' => $product->id],
-            ['data' => ['save' => null, 'fins' => [], 'max' => null]]
-        );
+        try {
+            GameProgress::firstOrCreate(
+                ['user_id' => $user->id, 'product_id' => $product->id],
+                ['data' => ['save' => null, 'fins' => [], 'max' => null]]
+            );
+        } catch (UniqueConstraintViolationException) {
+            // Première sauvegarde envoyée deux fois en même temps : la ligne existe, on continue
+        }
 
         return DB::transaction(function () use ($user, $product, $save, $fins) {
             $progress = GameProgress::where('user_id', $user->id)

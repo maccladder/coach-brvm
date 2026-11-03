@@ -40,6 +40,7 @@ class AkwabaTest extends TestCase
         $this->paystack = new class extends PaystackService {
             public array $transactions = [];
             public array $initialized = [];
+            public array $verified = [];
 
             public function __construct() {}
 
@@ -51,6 +52,8 @@ class AkwabaTest extends TestCase
 
             public function verify(string $reference): ?array
             {
+                $this->verified[] = $reference;
+
                 return isset($this->transactions[$reference])
                     ? ['reference' => $reference] + $this->transactions[$reference]
                     : null;
@@ -172,6 +175,37 @@ class AkwabaTest extends TestCase
         $this->assertStringNotContainsString(json_encode(route('akwaba.state')), $html);
         // Produit encore en brouillon : pas d'indexation
         $this->assertStringContainsString('name="robots" content="noindex"', $html);
+    }
+
+    public function test_la_page_hote_a_une_csp_stricte_avec_nonce(): void
+    {
+        $response = $this->get(route('akwaba.show'))->assertOk();
+        $csp = $response->headers->get('Content-Security-Policy');
+
+        preg_match("/script-src 'nonce-([^']+)'/", $csp, $m);
+        $this->assertNotEmpty($m[1] ?? null);
+        $this->assertStringContainsString('<script nonce="' . $m[1] . '">', $response->getContent());
+        // Un seul script, et c'est celui qui porte le nonce
+        $this->assertSame(1, substr_count($response->getContent(), '<script'));
+        $this->assertStringNotContainsString('unsafe-inline', explode(';', explode('script-src', $csp)[1])[0]);
+
+        foreach (["default-src 'self'", "connect-src 'self'", "frame-src 'self'", "frame-ancestors 'self'", "object-src 'none'", "base-uri 'none'"] as $rule) {
+            $this->assertStringContainsString($rule, $csp);
+        }
+        $response->assertHeader('X-Frame-Options', 'SAMEORIGIN')
+            ->assertHeader('X-Content-Type-Options', 'nosniff')
+            ->assertHeader('Referrer-Policy', 'same-origin');
+
+        // Nouveau nonce à chaque affichage
+        $other = $this->get(route('akwaba.show'))->headers->get('Content-Security-Policy');
+        $this->assertNotSame($csp, $other);
+    }
+
+    public function test_le_jeu_ne_peut_pas_etre_encadre_par_un_autre_site(): void
+    {
+        $this->get(route('akwaba.file'))
+            ->assertHeader('Content-Security-Policy', "frame-ancestors 'self'")
+            ->assertHeader('X-Frame-Options', 'SAMEORIGIN');
     }
 
     public function test_la_page_hote_publiee_est_indexable(): void
@@ -681,6 +715,49 @@ class AkwabaTest extends TestCase
 
         $this->assertSame(5, $this->balance());
         $this->assertSame(0, $this->balance($intruder));
+    }
+
+    public function test_webhook_hints_refuse_un_montant_a_peine_inferieur(): void
+    {
+        // 499,51 F : un arrondi l'aurait accepté
+        $this->paystackHas('AKW-H-1-ROUND', 500, $this->hintsMetadata());
+        $this->paystack->transactions['AKW-H-1-ROUND']['amount'] = 49951;
+
+        $this->postWebhook('AKW-H-1-ROUND', 500)->assertOk();
+
+        $this->assertSame(0, $this->balance());
+    }
+
+    public function test_retour_ignore_une_reference_mal_formee_sans_appeler_paystack(): void
+    {
+        foreach (['', '../../x', 'AKW-H-1 OR 1=1', str_repeat('A', 121), 'AKW-H-<script>'] as $reference) {
+            $this->get(route('akwaba.payment.return', ['reference' => $reference]))
+                ->assertRedirect(route('akwaba.show', ['paid' => 1]));
+        }
+
+        $this->assertSame([], $this->paystack->verified);
+    }
+
+    public function test_retour_de_paiement_limite(): void
+    {
+        for ($i = 0; $i < 20; $i++) {
+            $this->get(route('akwaba.payment.return', ['reference' => 'AKW-H-1-X' . $i]))->assertRedirect();
+        }
+
+        $this->get(route('akwaba.payment.return', ['reference' => 'AKW-H-1-LAST']))->assertStatus(429);
+    }
+
+    public function test_state_limite_par_session_et_non_par_ip(): void
+    {
+        $guest = fn (string $id) => $this->withCredentials()->withCookie(config('session.cookie'), $id);
+
+        for ($i = 0; $i < 60; $i++) {
+            $guest(str_repeat('e', 40))->getJson(route('akwaba.state'))->assertOk();
+        }
+
+        $guest(str_repeat('e', 40))->getJson(route('akwaba.state'))->assertStatus(429);
+        // Autre joueur derrière la même IP (CGNAT) : pas bloqué
+        $guest(str_repeat('f', 40))->getJson(route('akwaba.state'))->assertOk();
     }
 
     public function test_parcours_complet_achat_puis_utilisation(): void

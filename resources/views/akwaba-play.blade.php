@@ -179,7 +179,7 @@
         <button type="button" id="ios-tip-close" aria-label="Fermer">✕</button>
     </div>
 
-    <script>
+    <script nonce="{{ $nonce }}">
     (function () {
         // URLs relatives : même origine que la page, que l'on arrive par boursiv.com ou www.
         const URLS = {

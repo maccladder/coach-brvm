@@ -35,6 +35,17 @@ class AppServiceProvider extends ServiceProvider
             ];
         });
 
+        // ✅ Akwaba — état du jeu (chargement, retour de paiement interrogé toutes les 2 s) :
+        //    par compte ou par session, plafond par IP large pour les IP partagées (CGNAT)
+        RateLimiter::for('akwaba-state', function (Request $request) {
+            return [
+                Limit::perMinute(60)->by($request->user()
+                    ? 'user:' . $request->user()->id
+                    : 'session:' . $request->session()->getId()),
+                Limit::perMinute(600)->by('ip:' . $request->ip()),
+            ];
+        });
+
         // ✅ Inscription — rate limit anti-bot : 5 tentatives / minute par IP
         RateLimiter::for('register', function (Request $request) {
             return Limit::perMinute(5)->by($request->ip());

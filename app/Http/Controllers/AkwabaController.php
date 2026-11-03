@@ -30,12 +30,33 @@ class AkwabaController extends Controller
     {
         abort_unless(is_file($this->gamePath()), 404);
 
-        return view('akwaba-play', [
-            'product'  => $this->akwaba->product(),
-            'version'  => $this->fileVersion(),
-            'paid'     => $request->boolean('paid'),
-            'whatsapp' => (string) config('checkout.whatsapp'),
-        ]);
+        $nonce = base64_encode(random_bytes(16));
+
+        return response()
+            ->view('akwaba-play', [
+                'product'  => $this->akwaba->product(),
+                'version'  => $this->fileVersion(),
+                'paid'     => $request->boolean('paid'),
+                'whatsapp' => (string) config('checkout.whatsapp'),
+                'nonce'    => $nonce,
+            ])
+            // La page n'a qu'un script (le pont, avec nonce) et des styles inline ; tout le reste
+            // vient du même domaine. Le jeu (iframe) a ses propres en-têtes, sur /fichier.
+            ->header('Content-Security-Policy', implode('; ', [
+                "default-src 'self'",
+                "script-src 'nonce-{$nonce}'",
+                "style-src 'self' 'unsafe-inline'",
+                "img-src 'self' data:",
+                "connect-src 'self'",
+                "frame-src 'self'",
+                "frame-ancestors 'self'",
+                "base-uri 'none'",
+                "form-action 'self'",
+                "object-src 'none'",
+            ]))
+            ->header('X-Frame-Options', 'SAMEORIGIN')
+            ->header('X-Content-Type-Options', 'nosniff')
+            ->header('Referrer-Policy', 'same-origin');
     }
 
     /**
@@ -68,11 +89,16 @@ class AkwabaController extends Controller
             ? 'public, max-age=31536000, immutable'
             : 'no-cache';
 
+        // Pas de CSP restrictive sur le jeu lui-même (scripts inline, data:, Web Audio : une règle
+        // trop stricte le casserait sans qu'on puisse le relire) : seulement l'interdiction d'être
+        // affiché dans un cadre d'un autre site.
         return response()->file($path, [
-            'Content-Type'           => 'text/html; charset=UTF-8',
-            'Cache-Control'          => $cache,
-            'X-Frame-Options'        => 'SAMEORIGIN',
-            'X-Content-Type-Options' => 'nosniff',
+            'Content-Type'            => 'text/html; charset=UTF-8',
+            'Cache-Control'           => $cache,
+            'Content-Security-Policy' => "frame-ancestors 'self'",
+            'X-Frame-Options'         => 'SAMEORIGIN',
+            'X-Content-Type-Options'  => 'nosniff',
+            'Referrer-Policy'         => 'same-origin',
         ]);
     }
 
@@ -268,6 +294,12 @@ class AkwabaController extends Controller
     public function paymentReturn(Request $request, PaystackService $paystack, PaystackMarketplaceService $marketplace, PaystackAkwabaHintsService $hints)
     {
         $reference = (string) ($request->query('reference') ?: $request->query('trxref', ''));
+
+        // Route publique qui déclenche un appel à l'API Paystack : référence au format attendu
+        // seulement (et throttle sur la route), le reste repart vers le jeu sans appel
+        if (!preg_match('/^[A-Za-z0-9-]{1,120}$/', $reference)) {
+            return redirect()->route('akwaba.show', ['paid' => 1]);
+        }
 
         if (str_starts_with($reference, PaystackAkwabaHintsService::PREFIX)) {
             $outcome = $hints->handle($reference);

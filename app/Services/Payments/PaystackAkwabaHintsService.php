@@ -51,7 +51,9 @@ class PaystackAkwabaHintsService
             return self::NOT_FOUND;
         }
 
-        $amountPaid = (int) round(((int) ($data['amount'] ?? 0)) / 100);
+        // Montant comparé en sous-unités exactes (un arrondi laisserait passer 499,51 F)
+        $amountSubunits = (int) ($data['amount'] ?? 0);
+        $amountPaid     = intdiv($amountSubunits, 100);
         $currency   = strtoupper((string) ($data['currency'] ?? ''));
         $status     = (string) ($data['status'] ?? '');
         $metadata   = $data['metadata'] ?? [];
@@ -61,7 +63,7 @@ class PaystackAkwabaHintsService
 
         if (($data['reference'] ?? $reference) !== $reference
             || $status !== 'success'
-            || $amountPaid !== AkwabaService::HINTS_PACK_PRICE
+            || $amountSubunits !== AkwabaService::HINTS_PACK_PRICE * 100
             || $currency !== 'XOF'
             || ($metadata['game'] ?? null) !== AkwabaService::SLUG
             || ($metadata['product'] ?? null) !== 'hints5') {
