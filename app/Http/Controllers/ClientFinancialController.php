@@ -59,7 +59,7 @@ class ClientFinancialController extends Controller
                                         : null;
         $financial->original_filename = $file->getClientOriginalName();
         $financial->stored_path       = $storedPath;
-        $financial->amount            = (int) env('PAYSTACK_PRICE_FINANCIAL', 1000);
+        $financial->amount            = (int) config('services.paystack.price_financial');
         $financial->status            = 'pending';
         $financial->transaction_id    = Str::uuid()->toString();
         $financial->save();

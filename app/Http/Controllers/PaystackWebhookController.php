@@ -22,7 +22,7 @@ class PaystackWebhookController extends Controller
     {
         $signature = $request->header('x-paystack-signature');
         $payload   = $request->getContent();
-        $secret    = config('services.paystack.secret') ?: env('PAYSTACK_SECRET_KEY');
+        $secret    = config('services.paystack.secret');
 
         if (!$signature || !$secret) {
             Log::warning('Paystack webhook missing signature or secret');

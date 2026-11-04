@@ -25,6 +25,8 @@ return [
     'paystack' => [
         'secret'   => env('PAYSTACK_SECRET_KEY'),
         'base_url' => env('PAYSTACK_BASE_URL', 'https://api.paystack.co'),
+        // Prix (FCFA) de l'analyse d'états financiers (ClientFinancialController, formulaire)
+        'price_financial' => (int) env('PAYSTACK_PRICE_FINANCIAL', 1000),
     ],
 
     'n8n' => [

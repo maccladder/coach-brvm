@@ -74,7 +74,7 @@
 
                 <div class="d-flex justify-content-between align-items-center">
                     <div class="text-muted small">
-                        Montant : {{ env('PAYSTACK_PRICE_FINANCIAL', 1000) }} FCFA
+                        Montant : {{ config('services.paystack.price_financial') }} FCFA
                     </div>
                     <button type="submit" class="btn btn-primary">
                         Payer et lancer l'analyse
