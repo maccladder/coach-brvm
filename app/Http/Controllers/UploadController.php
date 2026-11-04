@@ -23,7 +23,8 @@ class UploadController extends Controller
             'as_of_date' => ['required','date'],
             'title'      => ['required','string','max:255'],
             'notes'      => ['nullable','string'],
-            'file'       => ['nullable','file','max:20480'],
+            // PDF uniquement : le fichier atterrit sur le disque public (/storage/…)
+            'file'       => ['nullable','file','mimes:pdf','max:20480'],
         ]);
 
         $path = $r->file('file')?->store('analyses','public');
@@ -47,7 +48,8 @@ class UploadController extends Controller
             'statement_type' => ['required','in:income,balance,cashflow'],
             // ✅ la date métier est REQUISE
             'published_at'   => ['required','date'],
-            'file'           => ['required','file','max:30720'],
+            // PDF uniquement : le fichier atterrit sur le disque public (/storage/…)
+            'file'           => ['required','file','mimes:pdf','max:30720'],
         ]);
 
         $path = $r->file('file')->store('statements','public');

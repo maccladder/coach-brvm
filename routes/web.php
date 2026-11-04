@@ -152,9 +152,13 @@ Route::get('/welcome', [LandingController::class, 'index'])->name('landing');
 |--------------------------------------------------------------------------
 */
 
-Route::get('/uploads', [UploadController::class, 'index'])->name('uploads.index');
-Route::post('/uploads/analysis', [UploadController::class, 'storeAnalysis'])->name('uploads.analysis.store');
-Route::post('/uploads/statement', [UploadController::class, 'storeStatement'])->name('uploads.statement.store');
+// Outil interne d'envoi de fichiers sur le disque public : code admin obligatoire (il était
+// ouvert à tous, sans contrôle du type de fichier)
+Route::middleware('admin.code')->group(function () {
+    Route::get('/uploads', [UploadController::class, 'index'])->name('uploads.index');
+    Route::post('/uploads/analysis', [UploadController::class, 'storeAnalysis'])->name('uploads.analysis.store');
+    Route::post('/uploads/statement', [UploadController::class, 'storeStatement'])->name('uploads.statement.store');
+});
 
 /*
 |--------------------------------------------------------------------------
