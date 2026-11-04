@@ -35,6 +35,23 @@
     <meta name="twitter:description" content="Un jeu d'énigmes à Abidjan. Gratuit pour commencer.">
     <meta name="twitter:image" content="https://boursiv.com/img/jeux/akwaba-partage.jpg">
     <title>🎮 Akwaba : le mystère de la lagune Ébrié · Boursiv</title>
+
+    {{-- Mesure d'audience de la page hôte uniquement (jamais dans l'iframe du jeu) : GA4 page_view
+         et pixel Meta PageView, sans identifiant personnel. Mêmes identifiants que le reste du site. --}}
+    @php
+        $gaId    = config('services.ga.measurement_id');
+        $pixelId = config('services.facebook_pixel.id');
+    @endphp
+    @if(!empty($gaId))
+        <script async nonce="{{ $nonce }}" src="https://www.googletagmanager.com/gtag/js?id={{ $gaId }}"></script>
+        <script nonce="{{ $nonce }}">window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config',@json($gaId));</script>
+    @endif
+    @if(!empty($pixelId))
+        <script nonce="{{ $nonce }}">
+        !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');
+        fbq('init',@json($pixelId));fbq('track','PageView');
+        </script>
+    @endif
     <style>
         :root {
             --ak-navy: #0B1426;

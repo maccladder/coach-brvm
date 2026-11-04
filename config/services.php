@@ -93,6 +93,17 @@ return [
         'property_id'      => env('GA_PROPERTY_ID'),
     ],
 
+    // Tag GA4 des pages publiques (layout) et de /jeux/akwaba. Lu via config() : un env() dans
+    // une vue renvoie null quand la config est en cache (tag absent du 31/10 au 04/11/2026).
+    'ga' => [
+        'measurement_id' => env('GA_MEASUREMENT_ID'),
+    ],
+
+    // Pixel Meta (Facebook) : identifiant public, le même partout sur le site
+    'facebook_pixel' => [
+        'id' => env('FACEBOOK_PIXEL_ID', '875478145273445'),
+    ],
+
     'twilio' => [
         'account_sid'        => env('TWILIO_ACCOUNT_SID'),
         'auth_token'         => env('TWILIO_AUTH_TOKEN'),
