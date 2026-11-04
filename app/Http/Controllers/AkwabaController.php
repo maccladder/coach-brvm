@@ -101,19 +101,52 @@ class AkwabaController extends Controller
         ]);
     }
 
+    /**
+     * GET /jeux/akwaba/images?v={hash}
+     * Images du jeu au-delà du prologue (JSON), chargées par le jeu avec fetch à l'adresse
+     * relative « images » + sa propre query string : même version et même cache que /fichier.
+     * Compression : par nginx (gzip_types application/json), Laravel sert le fichier tel quel.
+     */
+    public function images(Request $request)
+    {
+        $path = $this->imagesPath();
+        abort_unless(is_file($path), 404);
+
+        $cache = $request->query('v') === $this->fileVersion()
+            ? 'public, max-age=31536000, immutable'
+            : 'no-cache';
+
+        return response()->file($path, [
+            'Content-Type'           => 'application/json; charset=UTF-8',
+            'Cache-Control'          => $cache,
+            'X-Content-Type-Options' => 'nosniff',
+            // Simple donnée : rien à exécuter ni à afficher dans un cadre
+            'Content-Security-Policy' => "default-src 'none'; frame-ancestors 'none'",
+        ]);
+    }
+
     private function gamePath(): string
     {
         return resource_path('games/akwaba.html');
     }
 
-    /** Hash du contenu, recalculé seulement quand le fichier change (date ou taille). */
+    private function imagesPath(): string
+    {
+        return resource_path('games/akwaba-images.json');
+    }
+
+    /**
+     * Version commune au jeu et à ses images : hash des DEUX fichiers, recalculé seulement quand
+     * l'un d'eux change (date ou taille). Une mise à jour de l'un ou l'autre change l'adresse.
+     */
     private function fileVersion(): string
     {
-        $path = $this->gamePath();
+        $paths = array_values(array_filter([$this->gamePath(), $this->imagesPath()], 'is_file'));
+        $key   = implode('.', array_map(fn ($p) => filemtime($p) . '-' . filesize($p), $paths));
 
         return Cache::rememberForever(
-            'akwaba.file.version.' . filemtime($path) . '.' . filesize($path),
-            fn () => substr(hash_file('sha256', $path), 0, 16)
+            'akwaba.file.version.' . md5($key),
+            fn () => substr(hash('sha256', implode('', array_map(fn ($p) => hash_file('sha256', $p), $paths))), 0, 16)
         );
     }
 
@@ -163,7 +196,31 @@ class AkwabaController extends Controller
             'type' => ['required', 'string', 'in:' . implode(',', AkwabaService::EVENTS)],
         ]);
 
-        $this->akwaba->recordEvent($data['type'], $request->session()->getId());
+        $this->akwaba->recordEvent($data['type'], $request->session()->getId(), $request->userAgent());
+
+        return response()->noContent();
+    }
+
+    /**
+     * POST /jeux/akwaba/error  {msg, line?, col?}
+     * Erreur JavaScript remontée par le jeu (message postMessage « error »), relayée par la page
+     * hôte. Anonyme : ni IP, ni compte, ni session stockés avec l'erreur.
+     */
+    public function logError(Request $request)
+    {
+        $data = $request->validate([
+            'msg'  => ['required', 'string', 'max:2000'],
+            'line' => ['nullable', 'integer', 'min:0', 'max:10000000'],
+            'col'  => ['nullable', 'integer', 'min:0', 'max:10000000'],
+        ]);
+
+        $this->akwaba->recordError(
+            $data['msg'],
+            isset($data['line']) ? (int) $data['line'] : null,
+            isset($data['col']) ? (int) $data['col'] : null,
+            $request->session()->getId(),
+            $request->userAgent()
+        );
 
         return response()->noContent();
     }

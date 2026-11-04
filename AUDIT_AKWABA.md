@@ -172,6 +172,18 @@ Après le déploiement :
   - un joueur qui se connecte change de session : il peut compter deux fois sur certaines étapes ;
   - les données d'avant le 03/11 n'ont que « jeu chargé » et « cadenas » (invités) : sur le total, les premiers % peuvent dépasser 100 %. **Regarde plutôt les colonnes 24 h et 7 jours.**
 
+## 5quinquies. Jeu en deux fichiers, erreurs, navigateurs, compression
+
+- **Jeu en deux temps** (`8aeb9f2`) : `akwaba.html` (2,8 Mo : écran titre + prologue) puis `akwaba-images.json` (3,5 Mo, 102 images), téléchargé par le jeu avec `fetch` à l'adresse `images` + sa propre query string.
+- **`GET /jeux/akwaba/images?v=…`** : fichier servi tel quel (`application/json`). La version `?v=` est **commune aux deux fichiers** : le hash des deux, donc modifier l'un change l'adresse des deux. Cache long `immutable` seulement sous la bonne version, `no-cache` sinon. La CSP du jeu (`frame-ancestors` seulement) n'empêche pas le `fetch`, et la page hôte a `connect-src 'self'`. Vérifié dans Chrome : le jeu télécharge `images?v=` (même `v` que `fichier`), sans erreur.
+- **Erreurs JavaScript** : message `{type:'error', msg, line, col}` relayé à `POST /jeux/akwaba/error`. Table `akwaba_errors` : message ramené à une ligne et tronqué à 200 caractères, ligne, colonne, catégorie de navigateur, date ; ni IP, ni compte, ni session. 20 erreurs au maximum par session (compteur en cache) et par page. /admin/akwaba montre les 50 dernières, regroupées par message (nombre, position, navigateurs, date).
+- **`wait_rest`** dans la liste blanche, affiché sous l'entonnoir (« a dû attendre la fin du chargement des images ») et dans le tableau par navigateur.
+- **Catégorie de navigateur** sur chaque événement, déduite du User-Agent (qui n'est pas conservé) : `facebook` (FBAN / FBAV / FB_IAB), `instagram`, `whatsapp`, `chrome`, `safari`, `autre`. Les navigateurs intégrés sont détectés en premier, car celui de Facebook se présente aussi comme Chrome ou Safari. Samsung, Edge, Opera et Firefox sont rangés dans « autre ».
+  - /admin/akwaba : filtre « navigateur » sur l'entonnoir des visiteurs (« Payé » affiche « — » quand un filtre est actif : un paiement n'est pas rattaché à un navigateur) ;
+  - tableau **par navigateur sur 7 jours** : pages ouvertes, jeux chargés, **% restés pendant le chargement** (en rouge sous 70 %), parties, chapitre 2, cadenas, % au cadenas, clics, attentes d'images ;
+  - « inconnu » = événements d'avant le 04/11/2026.
+- **Compression** : gain mesuré en gzip niveau 5 : HTML 2,76 → 1,94 Mo (−30 %), images 3,52 → 2,66 Mo (−25 %). C'est à activer dans nginx (configuration donnée à la livraison) : Laravel sert les fichiers tels quels.
+
 ## 6. Proposition v2 (non codée) : chapitres servis par le serveur
 Découper le jeu : le fichier public contient le moteur, le prologue et les chapitres 1-2. Les chapitres 3 à 7 et les fins (textes, énigmes, images) deviennent des paquets servis par `GET /jeux/akwaba/contenu/{chapitre}`, réservés aux joueurs qui ont débloqué l'histoire (`Cache-Control: private`). Le jeu les charge à la réception de `state.unlocked = true`. Les réponses des énigmes et le texte des indices sont vérifiés ou servis par le serveur (`POST /jeux/akwaba/indice` renvoie l'indice après décrément) : ils ne sont plus dans le client. Cela demande de modifier le jeu.
 

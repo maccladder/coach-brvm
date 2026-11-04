@@ -391,14 +391,99 @@ class AkwabaAdminTest extends TestCase
 
     // ─── Entonnoir des visiteurs (sessions anonymes) ────────────────────────
 
-    /** Une session (lettre répétée) passe par ces événements, à cette date. */
-    private function visit(string $letter, array $types, $at = null): void
+    /** Une session (lettre répétée) passe par ces événements, à cette date, avec ce navigateur. */
+    private function visit(string $letter, array $types, $at = null, ?string $browser = null): void
     {
         foreach ($types as $type) {
             DB::table('akwaba_events')->insert([
-                'type' => $type, 'session_hash' => str_repeat($letter, 64), 'created_at' => $at ?? now(),
+                'type' => $type, 'session_hash' => str_repeat($letter, 64), 'browser' => $browser,
+                'created_at' => $at ?? now(),
             ]);
         }
+    }
+
+    // ─── Navigateurs et erreurs ─────────────────────────────────────────────
+
+    public function test_l_entonnoir_filtre_par_navigateur(): void
+    {
+        // Facebook : 3 pages ouvertes, 1 seul jeu chargé ; Chrome : 2 ouvertes, 2 chargées, 1 au cadenas
+        $this->visit('a', ['page_open', 'page_loaded'], null, 'facebook');
+        $this->visit('b', ['page_open'], null, 'facebook');
+        $this->visit('c', ['page_open'], null, 'facebook');
+        $this->visit('d', ['page_open', 'page_loaded', 'paywall_open'], null, 'chrome');
+        $this->visit('e', ['page_open', 'page_loaded'], null, 'chrome');
+        $this->paidPurchase(User::factory()->create());
+
+        $facebook = $this->asAdmin()->get(route('admin.akwaba.index', ['navigateur' => 'facebook']))->assertOk()
+            ->assertSee('navigateur : Facebook (intégré)')
+            ->viewData('stats');
+        $this->assertSame([3, null], $this->steps($facebook, '7d')['page']);
+        $this->assertSame([1, 33.3], $this->steps($facebook, '7d')['loaded']);
+        $this->assertSame([null, null], $this->steps($facebook, 'all')['paid']);   // paiement non rattachable
+
+        $all = $this->asAdmin()->get(route('admin.akwaba.index'))->viewData('stats');
+        $this->assertSame(5, $this->steps($all, 'all')['page'][0]);
+        $this->assertSame(1, $this->steps($all, 'all')['paid'][0]);
+
+        // Valeur inconnue : pas de filtre
+        $this->assertSame(5, $this->steps($this->asAdmin()->get(route('admin.akwaba.index', ['navigateur' => 'nokia']))->viewData('stats'), 'all')['page'][0]);
+    }
+
+    public function test_la_comparaison_par_navigateur_sur_7_jours(): void
+    {
+        $this->visit('a', ['page_open', 'page_loaded'], null, 'facebook');
+        $this->visit('b', ['page_open'], null, 'facebook');
+        $this->visit('c', ['page_open', 'page_loaded', 'new_game', 'wait_rest', 'paywall_open'], null, 'chrome');
+        $this->visit('d', ['page_open'], now()->subDays(10), 'safari');   // hors période
+        $this->visit('z', ['play_start']);                                 // avant le 04/11 : inconnu
+
+        $rows = collect($this->asAdmin()->get(route('admin.akwaba.index'))->assertOk()
+            ->assertSee('Par navigateur')
+            ->viewData('browsers'))->keyBy('browser');
+
+        $this->assertSame([2, 1, 50.0], [$rows['facebook']['page'], $rows['facebook']['loaded'], $rows['facebook']['loaded_pct']]);
+        $this->assertSame([1, 1, 1, 1, 100.0], [$rows['chrome']['page'], $rows['chrome']['start'], $rows['chrome']['wait'], $rows['chrome']['lock'], $rows['chrome']['lock_pct']]);
+        $this->assertFalse($rows->has('safari'));
+        $this->assertSame(1, $rows['inconnu']['loaded']);
+    }
+
+    public function test_les_erreurs_du_jeu_regroupees_par_message(): void
+    {
+        foreach ([['TypeError: a', 'facebook'], ['TypeError: a', 'chrome'], ['TypeError: a', 'facebook'], ['ReferenceError: b', 'safari']] as [$msg, $browser]) {
+            DB::table('akwaba_errors')->insert(['msg' => $msg, 'line' => 10, 'col' => 4, 'browser' => $browser, 'created_at' => now()]);
+        }
+
+        $errors = $this->asAdmin()->get(route('admin.akwaba.index'))->assertOk()
+            ->assertSee('Erreurs du jeu')
+            ->assertSee('TypeError: a')
+            ->viewData('gameErrors');
+
+        $this->assertSame('TypeError: a', $errors[0]['msg']);
+        $this->assertSame(3, $errors[0]['count']);
+        $this->assertSame(['facebook' => 2, 'chrome' => 1], $errors[0]['browsers']);
+        $this->assertSame('10:4', $errors[0]['position']);
+        $this->assertSame(1, $errors[1]['count']);
+    }
+
+    public function test_seules_les_50_dernieres_erreurs_sont_affichees(): void
+    {
+        for ($i = 0; $i < 60; $i++) {
+            DB::table('akwaba_errors')->insert(['msg' => 'Erreur ' . $i, 'browser' => 'chrome', 'created_at' => now()]);
+        }
+
+        $errors = $this->asAdmin()->get(route('admin.akwaba.index'))->viewData('gameErrors');
+
+        $this->assertSame(50, array_sum(array_column($errors, 'count')));
+        $this->assertNotContains('Erreur 0', array_column($errors, 'msg'));
+        $this->assertContains('Erreur 59', array_column($errors, 'msg'));
+    }
+
+    public function test_les_erreurs_de_validation_admin_restent_affichees(): void
+    {
+        // $errors (validation) n'est pas écrasé par les erreurs du jeu
+        $this->asAdmin()->post(route('admin.akwaba.hints', $this->player), ['count' => 5, 'reason' => ''])
+            ->assertSessionHasErrors('reason');
+        $this->asAdmin()->get(route('admin.akwaba.index'))->assertOk()->assertSee('alert-danger', false);
     }
 
     private function steps(array $stats, string $period): array

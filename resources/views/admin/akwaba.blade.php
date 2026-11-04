@@ -14,6 +14,10 @@
     $pct = fn ($v) => $v === null ? '—' : $v . ' %';
     $sessionPeriods = ['all' => 'Total', '24h' => '24 h', '7d' => '7 jours'];
     $sessionTop = max(1, collect($stats['sessions']['all']['steps'])->max('count'));
+    $browserLabels = [
+        'facebook' => 'Facebook (intégré)', 'instagram' => 'Instagram (intégré)', 'whatsapp' => 'WhatsApp (intégré)',
+        'chrome' => 'Chrome', 'safari' => 'Safari', 'autre' => 'Autre', 'inconnu' => 'Inconnu (avant le 04/11)',
+    ];
     // Gestes manuels réservés au code admin ; le code stagiaire consulte seulement
     $canAct = (bool) session('is_admin');
 @endphp
@@ -109,7 +113,21 @@
 
     {{-- Entonnoir des sessions (invités et connectés) --}}
     <div class="card border-0 shadow-sm mb-4" id="entonnoir-sessions">
-        <div class="card-header fw-bold">👻 Entonnoir des visiteurs (sessions anonymes, invités et connectés)</div>
+        <div class="card-header fw-bold d-flex flex-wrap justify-content-between align-items-center gap-2">
+            <span>👻 Entonnoir des visiteurs (sessions anonymes, invités et connectés){{ $browser ? ' · navigateur : ' . $browserLabels[$browser] : '' }}</span>
+            <form method="GET" action="{{ route('admin.akwaba.index') }}#entonnoir-sessions" class="d-flex gap-2">
+                @foreach(request()->except(['navigateur', 'page', 'ledger_page']) as $name => $value)
+                    @if(is_string($value))<input type="hidden" name="{{ $name }}" value="{{ $value }}">@endif
+                @endforeach
+                <select name="navigateur" class="form-select form-select-sm" style="width:auto;" aria-label="Filtrer par navigateur">
+                    <option value="">Tous les navigateurs</option>
+                    @foreach($browserLabels as $key => $label)
+                        <option value="{{ $key }}" @selected($browser === $key)>{{ $label }}</option>
+                    @endforeach
+                </select>
+                <button class="btn btn-sm btn-outline-dark">Filtrer</button>
+            </form>
+        </div>
         <div class="card-body p-0">
             <div class="table-responsive">
                 <table class="table table-sm align-middle mb-0">
@@ -129,12 +147,12 @@
                                 <td class="{{ in_array($step['key'], ['lock', 'paid'], true) ? 'fw-bold' : '' }}">{{ $step['label'] }}</td>
                                 @foreach(array_keys($sessionPeriods) as $period)
                                     @php $s = $stats['sessions'][$period]['steps'][$i]; @endphp
-                                    <td class="text-end fw-semibold">{{ $s['count'] }}</td>
+                                    <td class="text-end fw-semibold">{{ $s['count'] ?? '—' }}</td>
                                     <td class="text-end small {{ $s['pct'] !== null && $s['pct'] < 50 ? 'text-danger' : 'text-muted' }}">{{ $pct($s['pct']) }}</td>
                                 @endforeach
                                 <td>
                                     <div class="progress" style="height:8px;">
-                                        <div class="progress-bar" style="width:{{ round($step['count'] * 100 / $sessionTop) }}%;background:{{ $step['key'] === 'lock' ? '#6f42c1' : ($step['key'] === 'paid' ? '#198754' : '#0dcaf0') }};"></div>
+                                        <div class="progress-bar" style="width:{{ round(($step['count'] ?? 0) * 100 / $sessionTop) }}%;background:{{ $step['key'] === 'lock' ? '#6f42c1' : ($step['key'] === 'paid' ? '#198754' : '#0dcaf0') }};"></div>
                                     </div>
                                 </td>
                             </tr>
@@ -146,7 +164,11 @@
         <div class="card-footer bg-white small text-muted">
             @php $d = $stats['sessions']['all']['details']; @endphp
             Détail (total) : « Continuer » {{ $d['continue'] }} · indice gratuit {{ $d['free_hint'] }} · boutique d'indices ouverte {{ $d['shop_open'] }} ·
-            clic « histoire complète » {{ $d['buy_click_full'] }} · clic « 5 indices » {{ $d['buy_click_hints5'] }}.<br>
+            clic « histoire complète » {{ $d['buy_click_full'] }} · clic « 5 indices » {{ $d['buy_click_hints5'] }} ·
+            <strong>a dû attendre la fin du chargement des images</strong> {{ $d['wait_rest'] }}.<br>
+            @if($browser)
+                « Payé » n'est pas rattaché à un navigateur : il n'est affiché que sans filtre.<br>
+            @endif
             Une session = un navigateur (au plus un événement par type ; un joueur qui se connecte change de session). Aucune IP ni donnée personnelle stockée.
             « Payé » compte des paiements (déblocages + packs), pas des sessions.
             @if($stats['sessions_since'])
@@ -155,6 +177,82 @@
             @endif
             <br>Conversion connectés : <strong>{{ $pct($stats['conversion']) }}</strong> ·
             globale (déblocages payés ÷ sessions au cadenas) : <strong>{{ $pct($stats['conversion_global']) }}</strong>
+        </div>
+    </div>
+
+    {{-- Comparaison par navigateur (7 jours) --}}
+    <div class="card border-0 shadow-sm mb-4" id="navigateurs">
+        <div class="card-header fw-bold">📱 Par navigateur (7 derniers jours, sessions)</div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-sm align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Navigateur</th>
+                            <th class="text-end">Page ouverte</th>
+                            <th class="text-end">Jeu chargé</th>
+                            <th class="text-end">% restés au chargement</th>
+                            <th class="text-end">Partie</th>
+                            <th class="text-end">Chapitre 2</th>
+                            <th class="text-end">Cadenas</th>
+                            <th class="text-end">% au cadenas</th>
+                            <th class="text-end">Clic acheter</th>
+                            <th class="text-end">Attente images</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse($browsers as $row)
+                            <tr>
+                                <td class="fw-semibold">{{ $browserLabels[$row['browser']] ?? $row['browser'] }}</td>
+                                <td class="text-end">{{ $row['page'] }}</td>
+                                <td class="text-end">{{ $row['loaded'] }}</td>
+                                <td class="text-end {{ $row['loaded_pct'] !== null && $row['loaded_pct'] < 70 ? 'text-danger fw-semibold' : '' }}">{{ $pct($row['loaded_pct']) }}</td>
+                                <td class="text-end">{{ $row['start'] }}</td>
+                                <td class="text-end">{{ $row['ch2'] }}</td>
+                                <td class="text-end">{{ $row['lock'] }}</td>
+                                <td class="text-end">{{ $pct($row['lock_pct']) }}</td>
+                                <td class="text-end">{{ $row['buy'] }}</td>
+                                <td class="text-end">{{ $row['wait'] }}</td>
+                                <td class="text-end"><a href="{{ route('admin.akwaba.index', ['navigateur' => $row['browser']]) }}#entonnoir-sessions" class="small">Entonnoir →</a></td>
+                            </tr>
+                        @empty
+                            <tr><td colspan="11" class="text-muted p-4">Aucune visite ces 7 derniers jours.</td></tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="card-footer bg-white small text-muted">
+            Catégorie déduite du User-Agent, qui n'est pas conservé. « Facebook » = navigateur intégré à l'application Facebook
+            (clic sur une pub ou une publication). « Inconnu » = visites d'avant le 04/11/2026.
+        </div>
+    </div>
+
+    {{-- Erreurs JavaScript du jeu --}}
+    <div class="card border-0 shadow-sm mb-4" id="erreurs">
+        <div class="card-header fw-bold">🐞 Erreurs du jeu (50 dernières, regroupées par message)</div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-sm align-middle mb-0">
+                    <thead class="table-light">
+                        <tr><th>Message</th><th class="text-end">Nombre</th><th>Position</th><th>Navigateurs</th><th>Dernière</th></tr>
+                    </thead>
+                    <tbody>
+                        @forelse($gameErrors as $e)
+                            <tr>
+                                <td class="font-monospace small text-break">{{ $e['msg'] }}</td>
+                                <td class="text-end fw-semibold">{{ $e['count'] }}</td>
+                                <td class="small text-muted">{{ $e['position'] ?? '—' }}</td>
+                                <td class="small">{{ collect($e['browsers'])->map(fn ($n, $b) => ($browserLabels[$b] ?? $b) . ' ' . $n)->join(', ') }}</td>
+                                <td class="small text-muted text-nowrap">{{ $e['last_at']->format('d/m/Y H:i') }}</td>
+                            </tr>
+                        @empty
+                            <tr><td colspan="5" class="text-muted p-4">Aucune erreur remontée par le jeu.</td></tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 

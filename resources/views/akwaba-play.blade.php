@@ -243,6 +243,7 @@
             buy:      @json(route('akwaba.buy', [], false)),
             login:    @json(route('akwaba.login', [], false)),
             event:    @json(route('akwaba.event', [], false)),
+            error:    @json(route('akwaba.error', [], false)),
         };
         const CSRF_TOKEN = document.querySelector('meta[name="csrf-token"]').content;
         const ORIGIN     = window.location.origin;
@@ -373,7 +374,7 @@
 
         // Entonnoir anonyme (invités et connectés) : chaque événement une fois par onglet, le
         // serveur dédoublonne aussi par session. Noms autorisés : même liste que le serveur.
-        const GAME_EVENTS = ['new_game', 'continue', 'free_hint', 'shop_open', 'paywall_open', 'buy_click_full', 'buy_click_hints5'];
+        const GAME_EVENTS = ['new_game', 'continue', 'free_hint', 'shop_open', 'paywall_open', 'buy_click_full', 'buy_click_hints5', 'wait_rest'];
         const SAVE_EVENTS = { '1': 'ch1_reached', '2': 'ch2_reached', '3': 'lock_reached' };
 
         function trackEvent(type) {
@@ -387,6 +388,16 @@
         // Dès l'ouverture, avant le chargement du jeu : comparé à page_loaded, combien partent
         // pendant le chargement
         trackEvent('page_open');
+
+        // Erreurs JavaScript du jeu (message « error ») : 20 par page au plus, le serveur limite
+        // aussi par session
+        let errorsSent = 0;
+        function reportError(data) {
+            if (errorsSent >= 20 || typeof data.msg !== 'string' || data.msg === '') return;
+            errorsSent++;
+            const pos = v => (Number.isInteger(v) && v >= 0 ? v : null);
+            api(URLS.error, { msg: data.msg.slice(0, 500), line: pos(data.line), col: pos(data.col) }).catch(() => {});
+        }
 
         // ── Écran de chargement ─────────────────────────────────
         const loading = document.getElementById('ak-loading');
@@ -549,6 +560,9 @@
                     break;
                 case 'event':
                     if (GAME_EVENTS.includes(data.name)) trackEvent(data.name);
+                    break;
+                case 'error':
+                    reportError(data);
                     break;
             }
         });

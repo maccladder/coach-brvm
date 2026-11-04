@@ -38,7 +38,10 @@ class AdminAkwabaController extends Controller
 
         return view('admin.akwaba', [
             'product'         => $product,
-            'stats'           => $this->stats($product),
+            'stats'           => $this->stats($product, $browser = $this->browserFilter($request)),
+            'browser'         => $browser,
+            'browsers'        => $this->browserComparison(),
+            'gameErrors'      => $this->recentErrors(),
             'players'         => $this->players($request, $product, $selected),
             'ledger'          => $this->ledger($request, $selected),
             'selected'        => $selected,
@@ -319,7 +322,15 @@ class AdminAkwabaController extends Controller
             ->withQueryString();
     }
 
-    private function stats(MarketplaceProduct $product): array
+    /** ?navigateur=facebook|…|inconnu (événements d'avant le 04/11/2026) ; autre valeur : aucun filtre. */
+    private function browserFilter(Request $request): ?string
+    {
+        $value = (string) $request->query('navigateur');
+
+        return in_array($value, [...AkwabaService::BROWSERS, 'inconnu'], true) ? $value : null;
+    }
+
+    private function stats(MarketplaceProduct $product, ?string $browser = null): array
     {
         $pid = $product->id;
 
@@ -391,9 +402,9 @@ class AdminAkwabaController extends Controller
 
         // Sessions anonymes (akwaba_events, invités et connectés) : total, 24 h, 7 jours
         $sessions = [
-            'all' => $this->sessionFunnel(null, $paidUnlocks, $packs),
-            '24h' => $this->sessionFunnel(now()->subDay(), $paidUnlocks, $packs),
-            '7d'  => $this->sessionFunnel(now()->subDays(7), $paidUnlocks, $packs),
+            'all' => $this->sessionFunnel(null, $paidUnlocks, $packs, $browser),
+            '24h' => $this->sessionFunnel(now()->subDay(), $paidUnlocks, $packs, $browser),
+            '7d'  => $this->sessionFunnel(now()->subDays(7), $paidUnlocks, $packs, $browser),
         ];
         $sessionLock = collect($sessions['all']['steps'])->firstWhere('key', 'lock')['count'];
 
@@ -425,7 +436,7 @@ class AdminAkwabaController extends Controller
      * événements de l'étape (depuis $since), % par rapport à l'étape précédente.
      * « Payé » = déblocages payés + packs d'indices vendus sur la période (paiements, pas sessions).
      */
-    private function sessionFunnel(?Carbon $since, \Closure $paidUnlocks, \Closure $packs): array
+    private function sessionFunnel(?Carbon $since, \Closure $paidUnlocks, \Closure $packs, ?string $browser = null): array
     {
         $stepsDef = [
             ['page',    'Page ouverte',                  ['page_open']],
@@ -440,6 +451,7 @@ class AdminAkwabaController extends Controller
         $sessions = fn (array $types) => DB::table('akwaba_events')
             ->whereIn('type', $types)
             ->when($since, fn ($q) => $q->where('created_at', '>=', $since))
+            ->when($browser, fn ($q) => $browser === 'inconnu' ? $q->whereNull('browser') : $q->where('browser', $browser))
             ->distinct()
             ->count('session_hash');
 
@@ -447,16 +459,17 @@ class AdminAkwabaController extends Controller
         foreach ($stepsDef as [$key, $label, $types]) {
             $steps[] = ['key' => $key, 'label' => $label, 'count' => $sessions($types)];
         }
+        // Paiements : non rattachés à un navigateur, donc sans valeur quand un filtre est actif
         $steps[] = [
             'key'   => 'paid',
             'label' => 'Payé (déblocages + packs)',
-            'count' => $paidUnlocks()->when($since, fn ($q) => $q->where('paid_at', '>=', $since))->count()
+            'count' => $browser ? null : $paidUnlocks()->when($since, fn ($q) => $q->where('paid_at', '>=', $since))->count()
                 + $packs()->when($since, fn ($q) => $q->where('created_at', '>=', $since))->count(),
         ];
 
         foreach ($steps as $i => $step) {
             $previous = $i > 0 ? $steps[$i - 1]['count'] : null;
-            $steps[$i]['pct'] = $previous ? round($step['count'] * 100 / $previous, 1) : null;
+            $steps[$i]['pct'] = $previous && $step['count'] !== null ? round($step['count'] * 100 / $previous, 1) : null;
         }
 
         return [
@@ -467,7 +480,73 @@ class AdminAkwabaController extends Controller
                 'buy_click_full'   => $sessions(['buy_click_full']),
                 'buy_click_hints5' => $sessions(['buy_click_hints5']),
                 'continue'         => $sessions(['continue']),
+                'wait_rest'        => $sessions(['wait_rest']),
             ],
         ];
+    }
+
+    /**
+     * Entonnoir par catégorie de navigateur, sur 7 jours : pour voir si le navigateur intégré
+     * de Facebook (pub) décroche plus que les autres. Sessions distinctes par étape.
+     */
+    private function browserComparison(): array
+    {
+        $since  = now()->subDays(7);
+        $stages = [
+            'page'   => ['page_open'],
+            'loaded' => ['page_loaded', 'play_start'],
+            'start'  => ['new_game', 'continue'],
+            'ch2'    => ['ch2_reached'],
+            'lock'   => ['paywall_open', 'lock_reached'],
+            'buy'    => ['buy_click_full', 'buy_click_hints5'],
+            'wait'   => ['wait_rest'],
+        ];
+
+        $counts = [];
+        foreach ($stages as $stage => $types) {
+            $counts[$stage] = DB::table('akwaba_events')
+                ->whereIn('type', $types)
+                ->where('created_at', '>=', $since)
+                ->selectRaw("COALESCE(browser, 'inconnu') as b, COUNT(DISTINCT session_hash) as n")
+                ->groupBy('b')
+                ->pluck('n', 'b');
+        }
+
+        $rows = [];
+        foreach ([...AkwabaService::BROWSERS, 'inconnu'] as $browser) {
+            $row = ['browser' => $browser];
+            foreach (array_keys($stages) as $stage) {
+                $row[$stage] = (int) ($counts[$stage][$browser] ?? 0);
+            }
+            if (array_sum(array_diff_key($row, ['browser' => 1])) === 0) {
+                continue;
+            }
+            $ratio = fn (int $a, int $b) => $b > 0 ? round($a * 100 / $b, 1) : null;
+            $row['loaded_pct'] = $ratio($row['loaded'], $row['page']);   // restés pendant le chargement
+            $row['lock_pct']   = $ratio($row['lock'], $row['page']);     // arrivés au cadenas
+            $rows[] = $row;
+        }
+
+        return $rows;
+    }
+
+    /** 50 dernières erreurs JavaScript du jeu, regroupées par message (nombre, dernière date, navigateurs). */
+    private function recentErrors(): array
+    {
+        return DB::table('akwaba_errors')
+            ->latest('id')
+            ->limit(50)
+            ->get()
+            ->groupBy('msg')
+            ->map(fn ($group, $msg) => [
+                'msg'      => $msg,
+                'count'    => $group->count(),
+                'last_at'  => Carbon::parse($group->max('created_at')),
+                'position' => $group->first()->line !== null ? $group->first()->line . ':' . ($group->first()->col ?? '?') : null,
+                'browsers' => $group->countBy('browser')->sortDesc()->all(),
+            ])
+            ->sortByDesc('count')
+            ->values()
+            ->all();
     }
 }

@@ -8,7 +8,9 @@ use App\Models\GameProgress;
 use App\Models\MarketplaceProduct;
 use App\Models\User;
 use Illuminate\Database\UniqueConstraintViolationException;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 /**
  * Akwaba : le mystère de la lagune Ébrié (resources/games/akwaba.html).
@@ -296,13 +298,45 @@ class AkwabaService
         'page_open', 'page_loaded', 'play_start',
         'new_game', 'continue', 'ch1_reached', 'ch2_reached', 'lock_reached',
         'free_hint', 'shop_open', 'paywall_open', 'buy_click_full', 'buy_click_hints5',
+        'wait_rest', // le joueur a dû attendre la fin du chargement des images
     ];
+
+    /** Catégories de navigateur (aucune autre information du User-Agent n'est gardée). */
+    public const BROWSERS = ['facebook', 'instagram', 'whatsapp', 'chrome', 'safari', 'autre'];
+
+    public const MAX_ERRORS_PER_SESSION = 20;
+
+    /**
+     * Catégorie de navigateur d'après le User-Agent. Les navigateurs intégrés passent avant
+     * les navigateurs classiques : celui de Facebook (FBAN, FBAV, FB_IAB) contient aussi
+     * « Chrome » ou « Safari ».
+     */
+    public static function browserFamily(?string $userAgent): string
+    {
+        $ua = (string) $userAgent;
+
+        return match (true) {
+            (bool) preg_match('/FBAN|FBAV|FB_IAB/', $ua)                    => 'facebook',
+            str_contains($ua, 'Instagram')                                   => 'instagram',
+            str_contains($ua, 'WhatsApp')                                    => 'whatsapp',
+            (bool) preg_match('/Edg\/|EdgA\/|EdgiOS|OPR\/|SamsungBrowser|Firefox|FxiOS/', $ua) => 'autre',
+            (bool) preg_match('/Chrome\/|CriOS/', $ua)                      => 'chrome',
+            (bool) preg_match('/Safari\//', $ua)                            => 'safari',
+            default                                                          => 'autre',
+        };
+    }
+
+    private function sessionHash(string $sessionId): string
+    {
+        return hash_hmac('sha256', $sessionId, (string) config('app.key'));
+    }
 
     /**
      * Compteur anonyme : au plus une ligne par session et par type (index unique). L'id de
-     * session n'est jamais stocké, seulement son HMAC avec la clé de l'application ; ni IP ni compte.
+     * session n'est jamais stocké, seulement son HMAC avec la clé de l'application ; ni IP ni
+     * compte ; du navigateur, seulement sa catégorie.
      */
-    public function recordEvent(string $type, string $sessionId): void
+    public function recordEvent(string $type, string $sessionId, ?string $userAgent = null): void
     {
         if (!in_array($type, self::EVENTS, true) || $sessionId === '') {
             return;
@@ -310,9 +344,40 @@ class AkwabaService
 
         DB::table('akwaba_events')->insertOrIgnore([
             'type'         => $type,
-            'session_hash' => hash_hmac('sha256', $sessionId, (string) config('app.key')),
+            'session_hash' => $this->sessionHash($sessionId),
+            'browser'      => self::browserFamily($userAgent),
             'created_at'   => now(),
         ]);
+    }
+
+    /**
+     * Erreur JavaScript du jeu : message tronqué à 200 caractères, position, catégorie de
+     * navigateur, date. Au plus MAX_ERRORS_PER_SESSION par session (compteur en cache, la
+     * session n'est pas stockée avec l'erreur).
+     *
+     * @return bool false si la limite de la session est atteinte
+     */
+    public function recordError(string $msg, ?int $line, ?int $col, string $sessionId, ?string $userAgent): bool
+    {
+        if ($sessionId === '') {
+            return false;
+        }
+
+        $key = 'akwaba.errors.' . $this->sessionHash($sessionId);
+        Cache::add($key, 0, now()->addDay());
+        if (Cache::increment($key) > self::MAX_ERRORS_PER_SESSION) {
+            return false;
+        }
+
+        DB::table('akwaba_errors')->insert([
+            'msg'        => Str::limit(trim(preg_replace('/\s+/', ' ', $msg)), 200, ''),
+            'line'       => $line,
+            'col'        => $col,
+            'browser'    => self::browserFamily($userAgent),
+            'created_at' => now(),
+        ]);
+
+        return true;
     }
 
     public function rank(string $save): int

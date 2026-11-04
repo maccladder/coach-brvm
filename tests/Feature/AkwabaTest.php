@@ -144,6 +144,130 @@ class AkwabaTest extends TestCase
         $this->assertSame(filesize(resource_path('games/akwaba.html')), $response->baseResponse->getFile()->getSize());
     }
 
+    // ─── Images du jeu (chargées en second temps) ───────────────────────────
+
+    /** Ce que le jeu appelle : « images » + la query string de sa propre URL. */
+    private function imagesUrl(): string
+    {
+        return '/jeux/akwaba/images?' . parse_url($this->iframeSrc(), PHP_URL_QUERY);
+    }
+
+    public function test_les_images_sont_servies_telles_quelles_en_json(): void
+    {
+        $response = $this->get($this->imagesUrl())->assertOk();
+
+        $this->assertStringStartsWith('application/json', $response->headers->get('Content-Type'));
+        $response->assertHeader('X-Content-Type-Options', 'nosniff');
+        $this->assertSame(filesize(resource_path('games/akwaba-images.json')), $response->baseResponse->getFile()->getSize());
+        $this->assertSame(md5_file(resource_path('games/akwaba-images.json')), md5_file($response->baseResponse->getFile()->getPathname()));
+    }
+
+    public function test_les_images_ne_sont_en_cache_long_que_sous_la_bonne_version(): void
+    {
+        $this->assertStringContainsString('immutable', $this->get($this->imagesUrl())->headers->get('Cache-Control'));
+        $this->assertStringContainsString('no-cache', $this->get(route('akwaba.images'))->headers->get('Cache-Control'));
+        $this->assertStringContainsString('no-cache', $this->get(route('akwaba.images', ['v' => '0000000000000000']))->headers->get('Cache-Control'));
+    }
+
+    public function test_la_version_couvre_le_jeu_et_ses_images(): void
+    {
+        $expected = substr(hash('sha256',
+            hash_file('sha256', resource_path('games/akwaba.html')) . hash_file('sha256', resource_path('games/akwaba-images.json'))
+        ), 0, 16);
+
+        $this->assertSame('/jeux/akwaba/fichier?v=' . $expected, $this->iframeSrc());
+        $this->assertStringContainsString('immutable', $this->get('/jeux/akwaba/fichier?v=' . $expected)->headers->get('Cache-Control'));
+    }
+
+    public function test_la_csp_de_la_page_autorise_le_chargement_des_images(): void
+    {
+        // Le fetch part du jeu (iframe) : sa CSP ne limite que l'encadrement…
+        $this->get(route('akwaba.file'))->assertHeader('Content-Security-Policy', "frame-ancestors 'self'");
+        // …et la page hôte autorise de toute façon les appels vers le même domaine
+        $this->assertStringContainsString("connect-src 'self'", $this->get(route('akwaba.show'))->headers->get('Content-Security-Policy'));
+    }
+
+    // ─── Erreurs JavaScript du jeu ──────────────────────────────────────────
+
+    public function test_erreur_du_jeu_enregistree_sans_donnee_personnelle(): void
+    {
+        $this->withHeader('User-Agent', 'Mozilla/5.0 (Linux; Android 13) [FB_IAB/FB4A;FBAV/440.0]')
+            ->postJson(route('akwaba.error'), ['msg' => "TypeError:\n  x is " . str_repeat('y', 400), 'line' => 12, 'col' => 345])
+            ->assertNoContent();
+
+        $row = (array) DB::table('akwaba_errors')->first();
+        $this->assertSame(['id', 'msg', 'line', 'col', 'browser', 'created_at'], array_keys($row));
+        $this->assertSame(200, mb_strlen($row['msg']));
+        $this->assertStringStartsWith('TypeError: x is yyy', $row['msg']);   // retours à la ligne aplatis
+        $this->assertSame([12, 345, 'facebook'], [(int) $row['line'], (int) $row['col'], $row['browser']]);
+    }
+
+    public function test_erreurs_limitees_a_20_par_session(): void
+    {
+        $sessionId = str_repeat('e', 40);
+        for ($i = 0; $i < 25; $i++) {
+            $this->guestBrowser($sessionId)->postJson(route('akwaba.error'), ['msg' => 'Erreur ' . $i])->assertNoContent();
+        }
+        $this->assertSame(20, DB::table('akwaba_errors')->count());
+
+        // Une autre session n'est pas concernée
+        $this->guestBrowser(str_repeat('f', 40))->postJson(route('akwaba.error'), ['msg' => 'Autre'])->assertNoContent();
+        $this->assertSame(21, DB::table('akwaba_errors')->count());
+    }
+
+    public function test_erreur_du_jeu_validee(): void
+    {
+        $this->postJson(route('akwaba.error'), [])->assertStatus(422);
+        $this->postJson(route('akwaba.error'), ['msg' => ['x']])->assertStatus(422);
+        $this->postJson(route('akwaba.error'), ['msg' => 'x', 'line' => -1])->assertStatus(422);
+        $this->postJson(route('akwaba.error'), ['msg' => 'x', 'col' => 'abc'])->assertStatus(422);
+        $this->postJson(route('akwaba.error'), ['msg' => str_repeat('x', 2001)])->assertStatus(422);
+
+        $this->assertSame(0, DB::table('akwaba_errors')->count());
+    }
+
+    public function test_la_page_hote_relaie_les_erreurs_et_wait_rest(): void
+    {
+        $html = $this->get(route('akwaba.show'))->getContent();
+
+        $this->assertStringContainsString(json_encode(route('akwaba.error', [], false)), $html);
+        $this->assertStringContainsString("case 'error':\n                    reportError(data);", $html);
+        $this->assertStringContainsString('if (errorsSent >= 20', $html);
+        $this->assertStringContainsString("'wait_rest'];", $html);
+    }
+
+    // ─── Catégorie de navigateur ────────────────────────────────────────────
+
+    public function test_categorie_de_navigateur(): void
+    {
+        $cases = [
+            'Mozilla/5.0 (Linux; Android 13; SM-A135F Build/TP1A; wv) AppleWebKit/537.36 Chrome/119.0 Mobile Safari/537.36 [FB_IAB/FB4A;FBAV/440.0.0.31.105;]' => 'facebook',
+            'Mozilla/5.0 (iPhone; CPU iPhone OS 17_1 like Mac OS X) AppleWebKit/605.1.15 Mobile/15E148 [FBAN/FBIOS;FBAV/440.0]' => 'facebook',
+            'Mozilla/5.0 (iPhone; CPU iPhone OS 17_1 like Mac OS X) AppleWebKit/605.1.15 Mobile/15E148 Instagram 305.0.0.24.110' => 'instagram',
+            'Mozilla/5.0 (Linux; Android 12) AppleWebKit/537.36 Chrome/118.0 Mobile Safari/537.36 WhatsApp/2.23' => 'whatsapp',
+            'Mozilla/5.0 (Linux; Android 13; Infinix X6833B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.6045.163 Mobile Safari/537.36' => 'chrome',
+            'Mozilla/5.0 (iPhone; CPU iPhone OS 17_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/119.0 Mobile/15E148 Safari/604.1' => 'chrome',
+            'Mozilla/5.0 (iPhone; CPU iPhone OS 17_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.1 Mobile/15E148 Safari/604.1' => 'safari',
+            'Mozilla/5.0 (Linux; Android 13) AppleWebKit/537.36 Chrome/119.0 SamsungBrowser/23.0 Mobile Safari/537.36' => 'autre',
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:120.0) Gecko/20100101 Firefox/120.0' => 'autre',
+            '' => 'autre',
+        ];
+
+        foreach ($cases as $ua => $expected) {
+            $this->assertSame($expected, AkwabaService::browserFamily($ua), $ua);
+        }
+    }
+
+    public function test_les_evenements_portent_la_categorie_de_navigateur_pas_le_user_agent(): void
+    {
+        $ua = 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_1 like Mac OS X) Mobile/15E148 [FBAN/FBIOS;FBAV/440.0]';
+        $this->withHeader('User-Agent', $ua)->postJson(route('akwaba.event'), ['type' => 'page_open'])->assertNoContent();
+
+        $row = (array) DB::table('akwaba_events')->first();
+        $this->assertSame('facebook', $row['browser']);
+        $this->assertStringNotContainsString('FBIOS', json_encode($row));
+    }
+
     public function test_le_fichier_n_est_mis_en_cache_longtemps_que_sous_sa_version(): void
     {
         $src = $this->iframeSrc();
@@ -298,7 +422,7 @@ class AkwabaTest extends TestCase
 
         // Ni id de session en clair, ni IP : seulement type, HMAC de session et date
         $row = (array) DB::table('akwaba_events')->first();
-        $this->assertSame(['id', 'type', 'session_hash', 'created_at'], array_keys($row));
+        $this->assertEqualsCanonicalizing(['id', 'type', 'session_hash', 'browser', 'created_at'], array_keys($row));
         $this->assertNotSame($sessionId, $row['session_hash']);
         $this->assertSame(hash_hmac('sha256', $sessionId, config('app.key')), $row['session_hash']);
         $this->assertStringNotContainsString('127.0.0.1', json_encode(DB::table('akwaba_events')->get()));
@@ -318,14 +442,14 @@ class AkwabaTest extends TestCase
 
         // Toujours anonyme : aucune colonne ne relie la ligne au compte
         $this->assertSame(1, DB::table('akwaba_events')->where('type', 'lock_reached')->count());
-        $this->assertSame(['id', 'type', 'session_hash', 'created_at'], array_keys((array) DB::table('akwaba_events')->first()));
+        $this->assertEqualsCanonicalizing(['id', 'type', 'session_hash', 'browser', 'created_at'], array_keys((array) DB::table('akwaba_events')->first()));
     }
 
     public function test_evenements_liste_blanche_stricte(): void
     {
         $allowed = [
             'page_open', 'page_loaded', 'play_start', 'new_game', 'continue', 'ch1_reached', 'ch2_reached',
-            'lock_reached', 'free_hint', 'shop_open', 'paywall_open', 'buy_click_full', 'buy_click_hints5',
+            'lock_reached', 'free_hint', 'shop_open', 'paywall_open', 'buy_click_full', 'buy_click_hints5', 'wait_rest',
         ];
         $this->assertSame($allowed, AkwabaService::EVENTS);
 
@@ -365,7 +489,7 @@ class AkwabaTest extends TestCase
         $this->assertStringContainsString(json_encode(route('akwaba.event', [], false)), $html);
         // Même liste blanche que le serveur pour les événements du jeu
         $this->assertStringContainsString(
-            "const GAME_EVENTS = ['new_game', 'continue', 'free_hint', 'shop_open', 'paywall_open', 'buy_click_full', 'buy_click_hints5'];",
+            "const GAME_EVENTS = ['new_game', 'continue', 'free_hint', 'shop_open', 'paywall_open', 'buy_click_full', 'buy_click_hints5', 'wait_rest'];",
             $html
         );
         $this->assertStringContainsString("const SAVE_EVENTS = { '1': 'ch1_reached', '2': 'ch2_reached', '3': 'lock_reached' };", $html);

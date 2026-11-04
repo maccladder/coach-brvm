@@ -118,9 +118,11 @@ Route::prefix('jeux/akwaba')->name('akwaba.')->controller(\App\Http\Controllers\
     Route::get('/', 'show')->name('show');
     Route::get('/connexion', 'login')->name('login');
     Route::get('/fichier', 'file')->name('file');
+    Route::get('/images', 'images')->name('images');
     Route::get('/state', 'state')->middleware('throttle:akwaba-state')->name('state');
     Route::get('/paiement/retour', 'paymentReturn')->middleware('throttle:20,1')->name('payment.return');
     Route::post('/event', 'event')->middleware('throttle:akwaba-events')->name('event');
+    Route::post('/error', 'logError')->middleware('throttle:akwaba-events')->name('error');
 
     Route::middleware('auth')->group(function () {
         Route::post('/progress', 'progress')->middleware('throttle:30,1')->name('progress');
