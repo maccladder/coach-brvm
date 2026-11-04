@@ -34,8 +34,8 @@ return [
             'fiche'             => 'bridge-bank-ci',
             'logo'              => 'img/logos/societes/bridge-bank.png',
             'accroche'          => "Cotée à la BRVM depuis le 24/09/2026, après une offre publique de vente de 20 % du capital (10 millions d'actions) visée par l'AMF-UMOA.",
-            // À renseigner (FCFA, ex. 6750) : vide = la ligne « Prix d'introduction » n'est pas affichée
-            'prix_introduction' => null,
+            // Prix de l'offre publique de vente (FCFA), comme config/cotations.php ; null = ligne masquée
+            'prix_introduction' => 6750,
         ],
     ],
 

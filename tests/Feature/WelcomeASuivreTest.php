@@ -92,11 +92,13 @@ class WelcomeASuivreTest extends TestCase
 
     public function test_prix_d_introduction_affiche_seulement_s_il_est_renseigne(): void
     {
-        $this->assertNull(config('vitrine.societes.1.prix_introduction'));   // laissé vide
-        $this->assertStringNotContainsString("Prix d'introduction", $this->accueil());
+        // Bridge Bank : prix de l'offre publique, le même que config/cotations.php
+        $this->assertSame(6750, config('vitrine.societes.1.prix_introduction'));
+        $this->assertSame(config('cotations.nouvelles.0.prix_opv'), config('vitrine.societes.1.prix_introduction'));
+        $this->assertSame(1, substr_count($this->accueil(), "Prix d'introduction : 6 750 F CFA"));   // Sonatel n'en a pas
 
-        config(['vitrine.societes.1.prix_introduction' => 6750]);
-        $this->assertStringContainsString("Prix d'introduction : 6 750 F CFA", $this->accueil());
+        config(['vitrine.societes.1.prix_introduction' => null]);
+        $this->assertStringNotContainsString("Prix d'introduction", $this->accueil());
     }
 
     public function test_mention_educative_et_aucun_conseil(): void
