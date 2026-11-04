@@ -84,7 +84,7 @@ Route::get('/test/brvm-actions-ai', function (BrvmActionsAiService $svc) {
         'count' => count($stocks),
         'stocks' => array_slice($stocks, 0, 10),
     ], 200, [], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
-});
+})->middleware('admin.code'); // route de test (appel externe) : code admin
 
 Route::redirect('/', '/welcome');
 
@@ -168,8 +168,9 @@ Route::middleware('admin.code')->group(function () {
 
 Route::get('/summaries/today', [SummaryController::class, 'showToday'])->name('summaries.today');
 Route::get('/summaries', [SummaryController::class, 'index'])->name('summaries.index');
-Route::get('/summaries/generate', [SummaryController::class, 'generateForm'])->name('summaries.generate.form');
-Route::post('/summaries/generate', [SummaryController::class, 'generateForDate'])->name('summaries.generate');
+// Génération IA (coûteuse) : code admin
+Route::get('/summaries/generate', [SummaryController::class, 'generateForm'])->middleware('admin.code')->name('summaries.generate.form');
+Route::post('/summaries/generate', [SummaryController::class, 'generateForDate'])->middleware('admin.code')->name('summaries.generate');
 
 Route::get('/summaries/{summary}/audio', [SummaryController::class, 'audio'])->name('summaries.audio');
 Route::get('/summaries/{date}', [SummaryController::class, 'showDate'])->name('summaries.show');
@@ -611,7 +612,7 @@ Route::get('/ssl-http-test', function () {
     }
 
     return response()->json($out, 200, [], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
-});
+})->middleware('admin.code'); // route de test (appels externes) : code admin
 
 /*
 |--------------------------------------------------------------------------
@@ -668,7 +669,7 @@ Route::get('/ga-test', function (\App\Services\GoogleAnalyticsService $ga) {
         'realtimeUsers' => $ga->realtimeUsers(),
         'topCountries' => $ga->topCountries(5),
     ];
-});
+})->middleware('admin.code'); // route de test : code admin
 
 /*
 |--------------------------------------------------------------------------
@@ -919,8 +920,9 @@ Route::get('/paystack-inline-mock.js', function () {
     return response($js, 200, ['Content-Type' => 'application/javascript', 'Cache-Control' => 'no-store']);
 })->name('paystack.mock-inline');
 
-Route::get('/test/paystack', [PaystackTestController::class, 'form'])->name('paystack.test');
-Route::post('/test/paystack/start', [PaystackTestController::class, 'start'])->name('paystack.start');
+// Formulaire de test Paystack : code admin (le retour /paystack/callback reste public)
+Route::get('/test/paystack', [PaystackTestController::class, 'form'])->middleware('admin.code')->name('paystack.test');
+Route::post('/test/paystack/start', [PaystackTestController::class, 'start'])->middleware('admin.code')->name('paystack.start');
 Route::get('/paystack/callback', [PaystackTestController::class, 'callback'])->name('paystack.callback');
 
 
