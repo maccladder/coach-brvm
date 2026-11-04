@@ -46,8 +46,9 @@
             --ak-danger: #E2675A;
         }
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-        html { height: 100%; height: -webkit-fill-available; }
-        body { background: var(--ak-navy); height: 100%; overflow: hidden;
+        /* Hauteur visible réelle sur mobile (barre d'adresse comprise) : 100dvh, 100vh en repli */
+        html { height: 100%; height: -webkit-fill-available; height: 100dvh; }
+        body { background: var(--ak-navy); height: 100vh; height: 100dvh; overflow: hidden;
                /* Bloque le scroll rebond iOS Safari */
                position: fixed; width: 100%;
                font-family: 'Syne', system-ui, -apple-system, 'Segoe UI', sans-serif; }
@@ -82,8 +83,9 @@
         #bar-toggle.up { top: 44px; }
 
         /* ── Iframe ── */
-        #game-frame { position: fixed; top: 44px; left: 0; right: 0; bottom: 0; width: 100%; height: calc(100% - 44px); border: none; background: var(--ak-navy); transition: top .3s, height .3s; }
-        #game-frame.bar-hidden { top: 0; height: 100%; }
+        /* Sous la barre (44 px) et jusqu'au bas visible de l'écran, jamais au-delà */
+        #game-frame { position: fixed; top: 44px; left: 0; right: 0; width: 100%; height: calc(100vh - 44px); height: calc(100dvh - 44px); border: none; background: var(--ak-navy); transition: top .3s, height .3s; }
+        #game-frame.bar-hidden { top: 0; height: 100vh; height: 100dvh; }
 
         /* ── Bandeau d'information (paiement, erreurs) ── */
         #ak-notice {
@@ -121,7 +123,7 @@
         @media (hover: none) and (pointer: coarse) {
             #game-bar { height: 36px; padding: 0 10px; }
             .game-bar-title { display: none; }
-            #game-frame { top: 36px; height: calc(100% - 36px); }
+            #game-frame { top: 36px; height: calc(100vh - 36px); height: calc(100dvh - 36px); }
             #bar-toggle.up { top: 36px; }
             #ak-notice { top: calc(44px + env(safe-area-inset-top, 0px)); }
         }
@@ -179,6 +181,29 @@
         #ios-tip.show { display: block; }
         #ios-tip b { color: var(--ak-gold); }
         #ios-tip button { position: absolute; top: 6px; right: 8px; background: none; border: 0; color: var(--ak-muted); font-size: 16px; cursor: pointer; }
+
+        /* ── Bandeau navigateur intégré (Facebook, Instagram…) : par-dessus la page, ne décale rien,
+              visible même pendant l'écran de chargement ── */
+        #inapp-banner {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 1004;
+            display: flex; align-items: center; gap: 10px;
+            padding: 8px 40px 8px 12px; padding-top: max(8px, env(safe-area-inset-top, 0px));
+            background: rgba(19, 32, 56, .97); border-bottom: 1px solid rgba(201,168,76,.45);
+            color: var(--ak-ink); font-size: 12.5px; line-height: 1.35;
+            box-shadow: 0 6px 18px rgba(0,0,0,.35);
+        }
+        #inapp-banner[hidden] { display: none; }
+        #inapp-banner .inapp-text { flex: 1 1 auto; min-width: 0; }
+        #inapp-banner .inapp-btn {
+            flex: 0 0 auto; display: inline-flex; align-items: center; min-height: 34px; padding: 6px 12px;
+            border-radius: 6px; background: var(--ak-gold); color: var(--ak-navy); font-weight: 700;
+            font-size: 12px; text-decoration: none; white-space: nowrap;
+        }
+        #inapp-close {
+            position: absolute; top: 50%; right: 6px; transform: translateY(-50%);
+            width: 30px; height: 30px; border: 0; background: none; color: var(--ak-muted);
+            font-size: 18px; line-height: 1; cursor: pointer;
+        }
     </style>
 </head>
 <body>
@@ -198,6 +223,26 @@
     </div>
 
     <div id="bar-toggle" title="Afficher/masquer la barre"></div>
+
+    @if($inApp['in_app'])
+        {{-- Navigateur intégré (pub Facebook…) : le jeu s'y charge mal, on propose le vrai navigateur.
+             Ne bloque jamais le jeu : bandeau par-dessus, fermable. --}}
+        <div id="inapp-banner" role="region" aria-label="Ouvrir dans le navigateur">
+            <span class="inapp-text">
+                Pour une meilleure expérience, ouvre le jeu dans ton navigateur.
+                @if($inApp['platform'] === 'ios')
+                    <br><strong>Appuie sur ··· puis « Ouvrir dans le navigateur ».</strong>
+                @elseif($inApp['platform'] !== 'android')
+                    <br><strong>boursiv.com/jeux/akwaba</strong>
+                @endif
+            </span>
+            @if($inApp['platform'] === 'android')
+                <a class="inapp-btn" id="inapp-open"
+                   href="intent://boursiv.com/jeux/akwaba#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url=https%3A%2F%2Fboursiv.com%2Fjeux%2Fakwaba;end">Ouvrir dans Chrome</a>
+            @endif
+            <button type="button" id="inapp-close" aria-label="Fermer">×</button>
+        </div>
+    @endif
 
     {{-- Même origine, sans sandbox : le jeu a besoin de localStorage et de Web Audio --}}
     <iframe
@@ -306,11 +351,13 @@
         document.getElementById('ak-notice-close').addEventListener('click', hideNotice);
 
         // ── Échanges avec le serveur ────────────────────────────
-        function api(url, body) {
+        // keepalive : la requête part même si la page s'en va juste après (clic vers Chrome)
+        function api(url, body, keepalive) {
             return fetch(url, {
                 method: body === undefined ? 'GET' : 'POST',
                 credentials: 'same-origin',
                 cache: 'no-store',
+                keepalive: !!keepalive,
                 headers: Object.assign(
                     { 'Accept': 'application/json' },
                     body === undefined ? {} : { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': CSRF_TOKEN }
@@ -377,12 +424,26 @@
         const GAME_EVENTS = ['new_game', 'continue', 'free_hint', 'shop_open', 'paywall_open', 'buy_click_full', 'buy_click_hints5', 'wait_rest'];
         const SAVE_EVENTS = { '1': 'ch1_reached', '2': 'ch2_reached', '3': 'lock_reached' };
 
-        function trackEvent(type) {
+        function trackEvent(type, keepalive) {
             try {
                 if (sessionStorage.getItem('akwaba_event_' + type)) return;
                 sessionStorage.setItem('akwaba_event_' + type, '1');
             } catch (e) {}
-            api(URLS.event, { type: type }).catch(() => {});
+            api(URLS.event, { type: type }, keepalive).catch(() => {});
+        }
+
+        // ── Bandeau navigateur intégré (Facebook, Instagram…) ───
+        const inappBanner = document.getElementById('inapp-banner');
+        if (inappBanner) {
+            try {
+                if (sessionStorage.getItem('akwaba_inapp_closed')) inappBanner.hidden = true;
+            } catch (e) {}
+            document.getElementById('inapp-close').addEventListener('click', () => {
+                inappBanner.hidden = true;
+                try { sessionStorage.setItem('akwaba_inapp_closed', '1'); } catch (e) {}
+            });
+            const openExternal = document.getElementById('inapp-open');
+            if (openExternal) openExternal.addEventListener('click', () => trackEvent('open_external', true));
         }
 
         // Dès l'ouverture, avant le chargement du jeu : comparé à page_loaded, combien partent

@@ -447,6 +447,20 @@ class AkwabaAdminTest extends TestCase
         $this->assertSame(1, $rows['inconnu']['loaded']);
     }
 
+    public function test_la_comparaison_affiche_les_ouvertures_dans_chrome(): void
+    {
+        $this->visit('a', ['page_open', 'open_external'], null, 'facebook');
+        $this->visit('b', ['page_open', 'open_external'], null, 'facebook');
+        $this->visit('c', ['page_open'], null, 'facebook');
+        $this->visit('d', ['page_open'], null, 'chrome');
+
+        $response = $this->asAdmin()->get(route('admin.akwaba.index'))->assertOk()->assertSee('Ouvert dans Chrome');
+        $rows = collect($response->viewData('browsers'))->keyBy('browser');
+
+        $this->assertSame(2, $rows['facebook']['external']);
+        $this->assertSame(0, $rows['chrome']['external']);
+    }
+
     public function test_les_erreurs_du_jeu_regroupees_par_message(): void
     {
         foreach ([['TypeError: a', 'facebook'], ['TypeError: a', 'chrome'], ['TypeError: a', 'facebook'], ['ReferenceError: b', 'safari']] as [$msg, $browser]) {

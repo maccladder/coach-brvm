@@ -236,6 +236,109 @@ class AkwabaTest extends TestCase
         $this->assertStringContainsString("'wait_rest'];", $html);
     }
 
+    // ─── Navigateurs intégrés : bandeau « ouvre le jeu dans ton navigateur » ─
+
+    private const UA_FB_ANDROID = 'Mozilla/5.0 (Linux; Android 13; SM-A135F Build/TP1A; wv) AppleWebKit/537.36 Chrome/119.0 Mobile Safari/537.36 [FB_IAB/FB4A;FBAV/440.0.0.31.105;]';
+    private const UA_FB_IOS     = 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 [FBAN/FBIOS;FBAV/440.0]';
+    private const UA_INSTA_IOS  = 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 Instagram 305.0.0.24.110';
+    private const UA_CHROME     = 'Mozilla/5.0 (Linux; Android 13; Infinix X6833B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.6045.163 Mobile Safari/537.36';
+    private const UA_SAFARI     = 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.1 Mobile/15E148 Safari/604.1';
+    private const INTENT        = 'intent://boursiv.com/jeux/akwaba#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url=https%3A%2F%2Fboursiv.com%2Fjeux%2Fakwaba;end';
+
+    public function test_detection_des_navigateurs_integres(): void
+    {
+        $cases = [
+            self::UA_FB_ANDROID => ['in_app' => true,  'platform' => 'android'],
+            self::UA_FB_IOS     => ['in_app' => true,  'platform' => 'ios'],
+            self::UA_INSTA_IOS  => ['in_app' => true,  'platform' => 'ios'],
+            // Webview Android quelconque (« ; wv) ») et webview iPhone (sans « Safari/ »)
+            'Mozilla/5.0 (Linux; Android 12; TECNO; wv) AppleWebKit/537.36 Version/4.0 Chrome/118.0 Mobile Safari/537.36' => ['in_app' => true, 'platform' => 'android'],
+            'Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148' => ['in_app' => true, 'platform' => 'ios'],
+            self::UA_CHROME     => ['in_app' => false, 'platform' => 'android'],
+            self::UA_SAFARI     => ['in_app' => false, 'platform' => 'ios'],
+            'Mozilla/5.0 (iPhone; CPU iPhone OS 17_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/119.0 Mobile/15E148 Safari/604.1' => ['in_app' => false, 'platform' => 'ios'],
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/119.0 Safari/537.36' => ['in_app' => false, 'platform' => 'other'],
+        ];
+
+        foreach ($cases as $ua => $expected) {
+            $this->assertSame($expected, AkwabaService::inAppBrowser($ua), $ua);
+        }
+    }
+
+    public function test_bandeau_facebook_android_avec_le_lien_vers_chrome(): void
+    {
+        $html = $this->withHeader('User-Agent', self::UA_FB_ANDROID)->get(route('akwaba.show'))->assertOk()->getContent();
+
+        $this->assertStringContainsString('id="inapp-banner"', $html);
+        $this->assertStringContainsString('Pour une meilleure expérience, ouvre le jeu dans ton navigateur.', $html);
+        $this->assertStringContainsString('href="' . self::INTENT . '"', $html);
+        $this->assertStringContainsString('>Ouvrir dans Chrome</a>', $html);
+        $this->assertStringContainsString('id="inapp-close" aria-label="Fermer">×</button>', $html);
+        $this->assertStringNotContainsString('Appuie sur ···', $html);
+    }
+
+    public function test_bandeau_facebook_iphone_avec_l_explication(): void
+    {
+        foreach ([self::UA_FB_IOS, self::UA_INSTA_IOS] as $ua) {
+            $html = $this->withHeader('User-Agent', $ua)->get(route('akwaba.show'))->assertOk()->getContent();
+
+            $this->assertStringContainsString('id="inapp-banner"', $html);
+            $this->assertStringContainsString('Appuie sur ··· puis « Ouvrir dans le navigateur ».', html_entity_decode($html));
+            $this->assertStringNotContainsString('intent://', $html);   // pas de lien automatique sur iPhone
+        }
+    }
+
+    public function test_pas_de_bandeau_dans_un_vrai_navigateur(): void
+    {
+        foreach ([self::UA_CHROME, self::UA_SAFARI] as $ua) {
+            $html = $this->withHeader('User-Agent', $ua)->get(route('akwaba.show'))->assertOk()->getContent();
+
+            $this->assertStringNotContainsString('id="inapp-banner"', $html);
+            $this->assertStringNotContainsString('intent://', $html);
+        }
+    }
+
+    public function test_le_bandeau_ne_bloque_pas_le_jeu(): void
+    {
+        $html = $this->withHeader('User-Agent', self::UA_FB_ANDROID)->get(route('akwaba.show'))->getContent();
+
+        // Par-dessus la page (position fixe), au-dessus de l'écran de chargement, fermable ;
+        // le jeu reste chargé dans l'iframe
+        $this->assertStringContainsString('#inapp-banner {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 1004;', $html);
+        $this->assertStringContainsString('id="game-frame"', $html);
+        $this->assertStringContainsString("inappBanner.hidden = true;", $html);
+        $this->assertStringContainsString("sessionStorage.setItem('akwaba_inapp_closed', '1')", $html);
+        // Clic sur « Ouvrir dans Chrome » : open_external, envoyé même si la page s'en va
+        $this->assertStringContainsString("trackEvent('open_external', true)", $html);
+        $this->assertStringContainsString('keepalive: !!keepalive', $html);
+    }
+
+    public function test_open_external_enregistre_avec_la_categorie_facebook(): void
+    {
+        $this->withHeader('User-Agent', self::UA_FB_ANDROID)->postJson(route('akwaba.event'), ['type' => 'open_external'])->assertNoContent();
+
+        $this->assertSame('facebook', DB::table('akwaba_events')->where('type', 'open_external')->value('browser'));
+    }
+
+    // ─── Hauteur du jeu sur mobile ──────────────────────────────────────────
+
+    public function test_le_jeu_tient_dans_la_hauteur_visible_de_l_ecran(): void
+    {
+        $html = $this->get(route('akwaba.show'))->getContent();
+
+        // 100dvh avec 100vh en repli (déclaré avant), sous la barre de 44 px (36 px au doigt)
+        $this->assertStringContainsString('height: calc(100vh - 44px); height: calc(100dvh - 44px);', $html);
+        $this->assertStringContainsString('height: calc(100vh - 36px); height: calc(100dvh - 36px);', $html);
+        $this->assertStringContainsString('#game-frame.bar-hidden { top: 0; height: 100vh; height: 100dvh; }', $html);
+        $this->assertStringContainsString('body { background: var(--ak-navy); height: 100vh; height: 100dvh;', $html);
+        // Plus de hauteur en % (100 % = écran sans la barre d'adresse sur mobile)
+        $this->assertStringNotContainsString('calc(100% - 44px)', $html);
+        $this->assertStringNotContainsString('calc(100% - 36px)', $html);
+        // Plein écran (paysage et pseudo plein écran iPhone) déjà en 100dvh
+        $this->assertSame(2, substr_count($html, 'width: 100vw; height: 100vh; height: 100dvh;'));
+    }
+
     // ─── Catégorie de navigateur ────────────────────────────────────────────
 
     public function test_categorie_de_navigateur(): void
@@ -449,7 +552,7 @@ class AkwabaTest extends TestCase
     {
         $allowed = [
             'page_open', 'page_loaded', 'play_start', 'new_game', 'continue', 'ch1_reached', 'ch2_reached',
-            'lock_reached', 'free_hint', 'shop_open', 'paywall_open', 'buy_click_full', 'buy_click_hints5', 'wait_rest',
+            'lock_reached', 'free_hint', 'shop_open', 'paywall_open', 'buy_click_full', 'buy_click_hints5', 'wait_rest', 'open_external',
         ];
         $this->assertSame($allowed, AkwabaService::EVENTS);
 

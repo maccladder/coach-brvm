@@ -198,6 +198,7 @@
                             <th class="text-end">% au cadenas</th>
                             <th class="text-end">Clic acheter</th>
                             <th class="text-end">Attente images</th>
+                            <th class="text-end">Ouvert dans Chrome</th>
                             <th></th>
                         </tr>
                     </thead>
@@ -214,10 +215,11 @@
                                 <td class="text-end">{{ $pct($row['lock_pct']) }}</td>
                                 <td class="text-end">{{ $row['buy'] }}</td>
                                 <td class="text-end">{{ $row['wait'] }}</td>
+                                <td class="text-end">{{ $row['external'] }}</td>
                                 <td class="text-end"><a href="{{ route('admin.akwaba.index', ['navigateur' => $row['browser']]) }}#entonnoir-sessions" class="small">Entonnoir →</a></td>
                             </tr>
                         @empty
-                            <tr><td colspan="11" class="text-muted p-4">Aucune visite ces 7 derniers jours.</td></tr>
+                            <tr><td colspan="12" class="text-muted p-4">Aucune visite ces 7 derniers jours.</td></tr>
                         @endforelse
                     </tbody>
                 </table>
@@ -225,7 +227,7 @@
         </div>
         <div class="card-footer bg-white small text-muted">
             Catégorie déduite du User-Agent, qui n'est pas conservé. « Facebook » = navigateur intégré à l'application Facebook
-            (clic sur une pub ou une publication). « Inconnu » = visites d'avant le 04/11/2026.
+            (clic sur une pub ou une publication). « Ouvert dans Chrome » = clic sur le bouton du bandeau proposé aux navigateurs intégrés (Android). « Inconnu » = visites d'avant le 04/11/2026.
         </div>
     </div>
 

@@ -184,6 +184,18 @@ Après le déploiement :
   - « inconnu » = événements d'avant le 04/11/2026.
 - **Compression** : gain mesuré en gzip niveau 5 : HTML 2,76 → 1,94 Mo (−30 %), images 3,52 → 2,66 Mo (−25 %). C'est à activer dans nginx (configuration donnée à la livraison) : Laravel sert les fichiers tels quels.
 
+## 5sexies. Navigateurs intégrés (pub Facebook) et hauteur du jeu
+
+- **Constat** : 76 % des visiteurs venus du navigateur intégré de Facebook partent pendant le chargement.
+- **Bandeau** affiché par le serveur quand le User-Agent est un navigateur intégré :
+  - lequel : Facebook (FBAN / FBAV / FB_IAB), Instagram, WhatsApp, webview Android (`; wv)`) ou webview iPhone (pas de `Safari/`) ;
+  - texte : « Pour une meilleure expérience, ouvre le jeu dans ton navigateur » ;
+  - **Android** : bouton « Ouvrir dans Chrome », lien `intent://boursiv.com/jeux/akwaba#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url=…;end` ;
+  - **iPhone** : « Appuie sur ··· puis « Ouvrir dans le navigateur » » (pas de lien automatique possible) ;
+  - placé par-dessus la page (position fixe, au-dessus de l'écran de chargement), il ne décale ni ne bloque le jeu ; bouton × (fermé pour l'onglet).
+- **`open_external`** : envoyé au clic sur « Ouvrir dans Chrome » (avec `keepalive`, car la page part aussitôt), dans la liste blanche, et dans la colonne « Ouvert dans Chrome » du tableau par navigateur.
+- **Hauteur** : l'iframe utilisait `calc(100% - 44px)`. Sur mobile, ces 100 % correspondent à l'écran **sans** la barre d'adresse : le bas du jeu pouvait passer sous l'écran. C'est maintenant `calc(100dvh - 44px)` (36 px au doigt), avec `100vh` en repli, de même pour `html`, `body` et la barre masquée. Le paysage et le pseudo plein écran étaient déjà en `100dvh`.
+
 ## 6. Proposition v2 (non codée) : chapitres servis par le serveur
 Découper le jeu : le fichier public contient le moteur, le prologue et les chapitres 1-2. Les chapitres 3 à 7 et les fins (textes, énigmes, images) deviennent des paquets servis par `GET /jeux/akwaba/contenu/{chapitre}`, réservés aux joueurs qui ont débloqué l'histoire (`Cache-Control: private`). Le jeu les charge à la réception de `state.unlocked = true`. Les réponses des énigmes et le texte des indices sont vérifiés ou servis par le serveur (`POST /jeux/akwaba/indice` renvoie l'indice après décrément) : ils ne sont plus dans le client. Cela demande de modifier le jeu.
 

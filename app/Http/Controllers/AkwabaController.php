@@ -38,6 +38,8 @@ class AkwabaController extends Controller
                 'paid'     => $request->boolean('paid'),
                 'whatsapp' => (string) config('checkout.whatsapp'),
                 'nonce'    => $nonce,
+                // Navigateur intégré (pub Facebook…) : bandeau « ouvre le jeu dans ton navigateur »
+                'inApp'    => AkwabaService::inAppBrowser($request->userAgent()),
             ])
             // La page n'a qu'un script (le pont, avec nonce) et des styles inline ; tout le reste
             // vient du même domaine. Le jeu (iframe) a ses propres en-têtes, sur /fichier.

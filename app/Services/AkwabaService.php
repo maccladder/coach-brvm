@@ -298,7 +298,8 @@ class AkwabaService
         'page_open', 'page_loaded', 'play_start',
         'new_game', 'continue', 'ch1_reached', 'ch2_reached', 'lock_reached',
         'free_hint', 'shop_open', 'paywall_open', 'buy_click_full', 'buy_click_hints5',
-        'wait_rest', // le joueur a dû attendre la fin du chargement des images
+        'wait_rest',     // le joueur a dû attendre la fin du chargement des images
+        'open_external', // clic « Ouvrir dans Chrome » du bandeau des navigateurs intégrés
     ];
 
     /** Catégories de navigateur (aucune autre information du User-Agent n'est gardée). */
@@ -324,6 +325,30 @@ class AkwabaService
             (bool) preg_match('/Safari\//', $ua)                            => 'safari',
             default                                                          => 'autre',
         };
+    }
+
+    /**
+     * Navigateur intégré à une application (Facebook, Instagram, WhatsApp, ou toute autre webview) ?
+     * Il charge souvent mal un gros jeu : la page propose alors de l'ouvrir dans le navigateur.
+     *
+     * @return array{in_app: bool, platform: string} platform : android | ios | other
+     */
+    public static function inAppBrowser(?string $userAgent): array
+    {
+        $ua = (string) $userAgent;
+
+        $platform = match (true) {
+            str_contains($ua, 'Android')                   => 'android',
+            (bool) preg_match('/iPhone|iPad|iPod/', $ua)   => 'ios',
+            default                                        => 'other',
+        };
+
+        $inApp = in_array(self::browserFamily($ua), ['facebook', 'instagram', 'whatsapp'], true)
+            // Webview Android générique (« ; wv) ») ; sur iPhone, une webview n'annonce pas Safari
+            || ($platform === 'android' && str_contains($ua, '; wv)'))
+            || ($platform === 'ios' && !str_contains($ua, 'Safari/'));
+
+        return ['in_app' => $inApp, 'platform' => $platform];
     }
 
     private function sessionHash(string $sessionId): string

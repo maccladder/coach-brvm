@@ -499,7 +499,8 @@ class AdminAkwabaController extends Controller
             'ch2'    => ['ch2_reached'],
             'lock'   => ['paywall_open', 'lock_reached'],
             'buy'    => ['buy_click_full', 'buy_click_hints5'],
-            'wait'   => ['wait_rest'],
+            'wait'     => ['wait_rest'],
+            'external' => ['open_external'],   // clic « Ouvrir dans Chrome » (navigateurs intégrés)
         ];
 
         $counts = [];
