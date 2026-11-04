@@ -5,7 +5,11 @@ namespace App\Http\Controllers;
 use App\Models\Document;
 use App\Models\DocumentPurchase;
 use App\Services\CinetpayService;
+use App\Services\PaystackService;
+use App\Services\Payments\PaystackDocumentService;
+use App\Services\Payments\PaystackMobileMoneyCheckout;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class DocumentPaymentController extends Controller
@@ -60,6 +64,96 @@ class DocumentPaymentController extends Controller
         }
 
         return redirect()->away($paymentUrl);
+    }
+
+    /**
+     * POST /documents/{document}/buy-paystack
+     * Montant fixé par le serveur (prix du document en base), jamais par la requête.
+     */
+    public function buyPaystack(Request $request, Document $document, PaystackService $paystack, PaystackDocumentService $documents)
+    {
+        $user = $request->user();
+
+        // Seuls les documents publiés et actifs s'achètent
+        abort_unless($document->is_active && $document->status === 'published', 404);
+
+        if ($document->isBoughtBy($user)) {
+            return redirect()
+                ->route('docs.public.show', $document->slug)
+                ->with('success', '✅ Document déjà acheté. Tu peux le télécharger.');
+        }
+
+        if ((int) $document->price <= 0) {
+            return back()->with('error', 'Ce document ne peut pas être acheté en ligne.');
+        }
+
+        // Checkout Mobile Money personnalisé si activé (CHECKOUT_MM_DOCUMENT) ; ?classic=1 = page Paystack
+        $mm = app(PaystackMobileMoneyCheckout::class);
+        if ($mm->shouldIntercept('document', $request)) {
+            return redirect()->to($mm->entryUrl('document', ['document' => $document->id]));
+        }
+
+        $reference = $documents->createPending($document, $user);
+
+        $authUrl = $paystack->initialize([
+            'email'        => $user->email,
+            'amount'       => (int) $document->price,
+            'currency'     => 'XOF',
+            'reference'    => $reference,
+            'callback_url' => route('paystack.documents.callback', [], true),
+            'metadata'     => [
+                'purpose'     => PaystackDocumentService::PURPOSE,
+                'document_id' => $document->id,
+                'user_id'     => $user->id,
+            ],
+        ]);
+
+        if (!$authUrl) {
+            $documents->markInitFailed($reference);
+            return back()->with('error', "❌ Impossible d'initialiser le paiement. Réessaie ou achète via WhatsApp.");
+        }
+
+        return redirect()->away($authUrl);
+    }
+
+    /**
+     * GET /documents/payment/paystack/callback (retour navigateur)
+     * Revérifie la transaction chez Paystack ; la validation est la même que celle du webhook.
+     */
+    public function paystackCallback(Request $request, PaystackService $paystack, PaystackDocumentService $documents)
+    {
+        $reference = (string) ($request->query('reference') ?: $request->query('trxref'));
+
+        if ($reference === '' || !str_starts_with($reference, PaystackDocumentService::PREFIX)) {
+            return redirect()->route('docs.public.index')->with('error', 'Référence de paiement manquante.');
+        }
+
+        $payment = \App\Models\Payment::where('transaction_id', $reference)->first();
+        $slug    = data_get($payment?->meta, 'document_slug');
+        $back    = $slug ? route('docs.public.show', $slug) : route('docs.public.index');
+
+        $data = $paystack->verify($reference);
+
+        if (!$data) {
+            return redirect($back)->with('error', 'Impossible de vérifier la transaction pour le moment. Si tu as payé, le document sera débloqué automatiquement.');
+        }
+
+        if (($data['status'] ?? null) !== 'success') {
+            return redirect($back)->with('error', 'Paiement non validé : ' . ($data['status'] ?? 'inconnu'));
+        }
+
+        $outcome = $documents->handleChargeSuccess($data);
+
+        if (in_array($outcome, [PaystackDocumentService::NOT_FOUND, PaystackDocumentService::IGNORED], true)) {
+            Log::error('[DOC][PAYSTACK] callback: paiement introuvable', ['reference' => $reference]);
+            return redirect()->route('docs.public.index')->with('error', 'Paiement introuvable.');
+        }
+
+        if ($outcome === PaystackDocumentService::MISMATCH) {
+            return redirect($back)->with('error', 'Montant du paiement invalide. Contacte-nous sur WhatsApp.');
+        }
+
+        return redirect($back)->with('success', '✅ Paiement confirmé. Document débloqué !');
     }
 
     /**

@@ -87,6 +87,14 @@
                 </div>
             </div>
 
+            @foreach(['success' => '#0FCFA4', 'info' => '#C9A84C', 'error' => '#FF6B6B'] as $flashKey => $flashColor)
+                @if(session($flashKey))
+                    <div role="status" style="margin-bottom:16px;padding:12px 16px;border:1px solid {{ $flashColor }}40;background:{{ $flashColor }}12;color:{{ $flashColor }};border-radius:3px;font-size:14px;">
+                        {{ session($flashKey) }}
+                    </div>
+                @endif
+            @endforeach
+
             <div class="d-flex flex-wrap gap-2">
                 @auth
                     @if($document->isBoughtBy(auth()->user()))
@@ -97,20 +105,20 @@
                             <i class="bi bi-folder2-open"></i> Mes documents
                         </a>
                     @else
-                        @feature('cinetpay')
-                            <form method="POST" action="{{ route('documents.buy', $document) }}" class="m-0">
+                        @if((int) $document->price > 0)
+                            {{-- Paystack : montant fixé par le serveur (prix en base) --}}
+                            <form method="POST" action="{{ route('paystack.documents.buy', $document) }}" class="m-0">
                                 @csrf
                                 <button type="submit" class="cb-btn-gold">
                                     <i class="bi bi-shield-check"></i> Acheter maintenant
                                 </button>
                             </form>
-                        @else
-                            {{-- Paiement en ligne des documents : CinetPay coupé, pas encore de flux Paystack --}}
-                            <a class="cb-btn-gold" target="_blank" rel="noopener"
-                               href="https://wa.me/{{ config('checkout.whatsapp') }}?text={{ rawurlencode('Bonjour, je souhaite acheter le document « ' . $document->title . ' » sur Boursiv.') }}">
-                                <i class="bi bi-whatsapp"></i> Acheter via WhatsApp
-                            </a>
-                        @endfeature
+                        @endif
+                        {{-- Secours : achat manuel via WhatsApp --}}
+                        <a class="cb-btn-outline" target="_blank" rel="noopener"
+                           href="https://wa.me/{{ config('checkout.whatsapp') }}?text={{ rawurlencode('Bonjour, je souhaite acheter le document « ' . $document->title . ' » sur Boursiv.') }}">
+                            <i class="bi bi-whatsapp"></i> Acheter via WhatsApp
+                        </a>
                     @endif
                 @endauth
                 @guest

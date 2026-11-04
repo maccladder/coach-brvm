@@ -195,21 +195,20 @@ class FeatureFlagsTest extends TestCase
         $this->assertNotSame(404, $this->post(route('courses.buy.paystack', $course))->status());
     }
 
-    public function test_cinetpay_coupe_le_document_s_achete_par_whatsapp(): void
+    public function test_le_document_s_achete_par_paystack_avec_whatsapp_en_secours(): void
     {
         $doc = Document::create(['title' => 'Étude marché', 'slug' => 'etude-marche', 'type' => 'etude', 'price' => 3000, 'file_path' => 'docs/e.pdf', 'is_active' => true, 'status' => 'published']);
         $this->actingAs(User::factory()->create());
 
-        config(['features.cinetpay' => false]);
-        $off = $this->get(route('docs.public.show', $doc->slug))->assertOk()->getContent();
-        $this->assertStringNotContainsString(route('documents.buy', $doc), $off);
-        $this->assertStringContainsString('Acheter via WhatsApp', $off);
-        $this->assertStringContainsString('https://wa.me/' . config('checkout.whatsapp'), $off);
-
-        config(['features.cinetpay' => true]);
-        $on = $this->get(route('docs.public.show', $doc->slug))->assertOk()->getContent();
-        $this->assertStringContainsString(route('documents.buy', $doc), $on);
-        $this->assertStringNotContainsString('Acheter via WhatsApp', $on);
+        // Avec ou sans CinetPay : bouton Paystack + WhatsApp, plus jamais le formulaire CinetPay
+        foreach ([false, true] as $cinetpay) {
+            config(['features.cinetpay' => $cinetpay]);
+            $html = $this->get(route('docs.public.show', $doc->slug))->assertOk()->getContent();
+            $this->assertStringNotContainsString('"' . route('documents.buy', $doc) . '"', $html);
+            $this->assertStringContainsString(route('paystack.documents.buy', $doc), $html);
+            $this->assertStringContainsString('Acheter via WhatsApp', $html);
+            $this->assertStringContainsString('https://wa.me/' . config('checkout.whatsapp'), $html);
+        }
     }
 
     // ─── Accueil ────────────────────────────────────────────────────────────

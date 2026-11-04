@@ -900,7 +900,14 @@ Route::get('/etudes-businessplans/{slug}', [DocumentController::class, 'show'])-
 Route::middleware('auth')->group(function () {
     Route::post('/documents/{document}/buy', [DocumentPaymentController::class, 'buy'])->middleware('feature:cinetpay')
         ->name('documents.buy');
+    // Paystack (montant fixé par le serveur) ; validation partagée avec le webhook (DOC-PS-)
+    Route::post('/documents/{document}/buy-paystack', [DocumentPaymentController::class, 'buyPaystack'])
+        ->middleware('throttle:10,1')->name('paystack.documents.buy');
 });
+
+// retour Paystack (navigateur) : public, la transaction est revérifiée chez Paystack
+Route::get('/documents/payment/paystack/callback', [DocumentPaymentController::class, 'paystackCallback'])
+    ->name('paystack.documents.callback');
 
 // retour user (public GET/POST)
 Route::match(['GET','POST'], '/documents/payment/cinetpay/return', [DocumentPaymentController::class, 'return'])->middleware('feature:cinetpay')
@@ -933,7 +940,7 @@ Route::post('/paystack/webhook', [PaystackWebhookController::class, 'handle'])
 // ✅ Checkout Mobile Money personnalisé (Paystack /charge), activé type par type
 //    dans config/checkout.php. Auth vérifiée dans le contrôleur : les dons sont ouverts aux invités.
 Route::prefix('paiement-mobile')->name('checkout.mm.')->group(function () {
-    $types = 'marketplace|course|pack|wallet|cauris|don|game_premium|akwaba';
+    $types = 'marketplace|course|pack|wallet|cauris|don|game_premium|akwaba|document';
 
     Route::get('/suivi/{reference}', [\App\Http\Controllers\MobileMoneyCheckoutController::class, 'status'])
         ->name('status');

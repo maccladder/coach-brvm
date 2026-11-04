@@ -45,6 +45,11 @@ return [
             'enabled'  => env('CHECKOUT_MM_AKWABA', false),
             'provider' => App\Checkout\Providers\AkwabaPayable::class,
         ],
+        // Études & Business plans (référence DOC-PS-)
+        'document'     => [
+            'enabled'  => env('CHECKOUT_MM_DOCUMENT', false),
+            'provider' => App\Checkout\Providers\DocumentPayable::class,
+        ],
     ],
 
     // Test en prod réservé : si rempli (emails séparés par des virgules), seuls ces comptes

@@ -8,6 +8,7 @@ use App\Models\Payment;
 use App\Services\CaurisService;
 use App\Services\Payments\PaystackAkwabaHintsService;
 use App\Services\Payments\PaystackCourseService;
+use App\Services\Payments\PaystackDocumentService;
 use App\Services\Payments\PaystackDonationService;
 use App\Services\Payments\PaystackGamePremiumService;
 use App\Services\Payments\PaystackMarketplaceService;
@@ -94,6 +95,13 @@ class PaystackWebhookController extends Controller
         if (str_starts_with($reference, 'MP-')) {
             $outcome = app(PaystackMarketplaceService::class)->handleChargeSuccess($data);
             Log::info('Paystack webhook MP', ['reference' => $reference, 'outcome' => $outcome]);
+            return;
+        }
+
+        // ✅ Études & Business plans
+        if (str_starts_with($reference, PaystackDocumentService::PREFIX)) {
+            $outcome = app(PaystackDocumentService::class)->handleChargeSuccess($data);
+            Log::info('Paystack webhook DOC', ['reference' => $reference, 'outcome' => $outcome]);
             return;
         }
 

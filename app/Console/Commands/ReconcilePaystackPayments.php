@@ -7,6 +7,7 @@ use App\Models\DocumentPurchase;
 use App\Models\Payment;
 use App\Services\CaurisService;
 use App\Services\Payments\PaystackCourseService;
+use App\Services\Payments\PaystackDocumentService;
 use App\Services\Payments\PaystackMarketplaceService;
 use App\Services\Payments\PaystackPackService;
 use App\Services\Payments\PaystackWalletTopupService;
@@ -178,14 +179,17 @@ class ReconcilePaystackPayments extends Command
                 ];
             });
 
-        // 4) document_purchases payés via Paystack (aujourd'hui tous en CinetPay)
+        // 4) document_purchases Paystack sans ligne payments correspondante (les DOC-PS- en ont une, vue en 1)
         DocumentPurchase::query()
             ->where('status', 'pending')
             ->where('provider', 'paystack')
             ->whereBetween('created_at', [$since, $until])
             ->orderBy('id')
             ->get()
-            ->each(function (DocumentPurchase $d) use (&$out) {
+            ->each(function (DocumentPurchase $d) use (&$out, &$refs) {
+                if (!$d->provider_ref || isset($refs[$d->provider_ref])) return;
+                if (Payment::where('transaction_id', $d->provider_ref)->exists()) return;
+
                 $out[] = [
                     'source'    => 'document_purchases',
                     'id'        => $d->id,
@@ -216,7 +220,7 @@ class ReconcilePaystackPayments extends Command
     private function canAutoValidate(array $c): bool
     {
         return $c['source'] === 'cauris_achats'
-            || ($c['source'] === 'payments' && in_array($c['purpose'], ['marketplace', 'course', 'pack_brvm', 'wallet_topup'], true));
+            || ($c['source'] === 'payments' && in_array($c['purpose'], ['marketplace', 'course', 'pack_brvm', 'wallet_topup', 'document'], true));
     }
 
     private function apply(array $c, string $psStatus, array $data): string
@@ -234,6 +238,7 @@ class ReconcilePaystackPayments extends Command
                 return match ($c['purpose']) {
                     'marketplace'  => app(PaystackMarketplaceService::class)->handleChargeSuccess($data),
                     'course'       => app(PaystackCourseService::class)->handleChargeSuccess($data),
+                    'document'     => app(PaystackDocumentService::class)->handleChargeSuccess($data),
                     'pack_brvm'    => $this->viaCreditedAt($c['id'], fn () => app(PaystackPackService::class)->handleChargeSuccess($data)),
                     'wallet_topup' => $this->viaCreditedAt($c['id'], fn () => app(PaystackWalletTopupService::class)->handleChargeSuccess($data)),
                 };
@@ -270,12 +275,18 @@ class ReconcilePaystackPayments extends Command
         switch ($c['source']) {
             case 'payments':
                 // Même casse que le reste de la ligne : minuscules pour le marketplace
-                $status = $c['purpose'] === 'marketplace' ? $psStatus : strtoupper($psStatus);
+                $status = in_array($c['purpose'], ['marketplace', 'document'], true) ? $psStatus : strtoupper($psStatus);
 
                 $updated = Payment::whereKey($c['id'])
                     ->whereRaw('LOWER(status) = ?', ['pending'])
                     ->whereNull('credited_at')
                     ->update(['status' => $status, 'updated_at' => now()]);
+
+                if ($c['purpose'] === 'document') {
+                    DocumentPurchase::where('provider_ref', $c['reference'])
+                        ->where('status', 'pending')
+                        ->update(['status' => 'failed']);
+                }
 
                 if ($c['purpose'] === 'marketplace') {
                     DB::table('marketplace_purchases')
