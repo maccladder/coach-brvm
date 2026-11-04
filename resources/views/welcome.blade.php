@@ -584,6 +584,58 @@
         letter-spacing: .08em; text-transform: uppercase; color: var(--cb-forest);
     }
 
+    /* À suivre à la BRVM (config/vitrine.php) */
+    .cb-suivre-sec { padding: clamp(20px,4vw,36px) 0 clamp(20px,4vw,36px); background: var(--cb-card); border-bottom: 1px solid var(--cb-border); }
+    .cb-suivre-grid { display: grid; grid-template-columns: 1fr; gap: 12px; margin-top: 12px; }
+    @media (min-width: 768px) { .cb-suivre-grid { grid-template-columns: 1fr 1fr; gap: 16px; } }
+    .cb-suivre {
+        display: flex; flex-direction: column; gap: 10px; text-decoration: none; color: inherit;
+        background: linear-gradient(135deg, rgba(176,134,46,.07) 0%, var(--cb-paper) 70%);
+        border: 1px solid rgba(176,134,46,.28); border-radius: 4px; padding: 16px 18px; transition: all .3s;
+    }
+    .cb-suivre:hover { border-color: var(--cb-gold); color: inherit; transform: translateY(-2px); }
+    .cb-suivre-head { display: flex; align-items: center; gap: 12px; min-width: 0; }
+    .cb-suivre-logo {
+        flex: 0 0 auto; width: 76px; height: 40px; background: #fff; border: 1px solid var(--cb-border);
+        border-radius: 4px; display: flex; align-items: center; justify-content: center; padding: 4px;
+    }
+    .cb-suivre-logo img { max-width: 100%; max-height: 100%; object-fit: contain; }
+    .cb-suivre-nom { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700; color: var(--cb-ink); line-height: 1.3; }
+    .cb-suivre-nom span { color: var(--cb-muted); font-weight: 600; }
+    .cb-suivre-secteur { font-size: 12px; color: var(--cb-muted); }
+    .cb-suivre-cours { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; }
+    .cb-suivre-prix { font-family: 'Playfair Display', serif; font-size: 26px; font-weight: 900; color: var(--cb-ink); line-height: 1; }
+    .cb-suivre-var { font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700; }
+    .cb-suivre-var.up { color: var(--cb-up); }
+    .cb-suivre-var.dn { color: var(--cb-down); }
+    .cb-suivre-var.eq { color: var(--cb-muted); }
+    .cb-suivre-date { flex-basis: 100%; font-size: 11px; color: var(--cb-muted); }
+    .cb-suivre-bientot { font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 600; color: var(--cb-muted); }
+    .cb-suivre-intro { font-size: 13px; color: var(--cb-ink); }
+    .cb-suivre-accroche { font-size: 14px; line-height: 1.55; color: var(--cb-muted); margin: 0; }
+    .cb-suivre-lien {
+        margin-top: auto; font-family: 'Syne', sans-serif; font-size: 11px; font-weight: 700;
+        letter-spacing: .08em; text-transform: uppercase; color: var(--cb-forest);
+    }
+    .cb-suivre-mention { font-size: 11px; color: var(--cb-muted); margin: 12px 0 0; }
+
+    /* Akwaba dans le hero */
+    .cb-akwaba {
+        display: block; position: relative; overflow: hidden; border-radius: 6px; text-decoration: none;
+        color: #fff; background: #0b2a22; border: 1px solid rgba(176,134,46,.4);
+        box-shadow: 0 12px 32px rgba(0,0,0,.18); transition: transform .3s, box-shadow .3s;
+    }
+    .cb-akwaba:hover { color: #fff; transform: translateY(-2px); box-shadow: 0 16px 40px rgba(0,0,0,.24); }
+    .cb-akwaba img { display: block; width: 100%; height: auto; }
+    .cb-akwaba-body { display: block; padding: 12px 16px 14px; background: #0b2a22; }
+    .cb-akwaba-tag { font-family: 'Syne', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: #E9C46A; }
+    .cb-akwaba-titre { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 900; line-height: 1.2; margin: 2px 0 4px; }
+    .cb-akwaba-desc { font-size: 13px; line-height: 1.45; color: rgba(255,255,255,.86); margin: 0 0 8px; }
+    .cb-akwaba-cta {
+        display: inline-block; font-family: 'Syne', sans-serif; font-size: 12px; font-weight: 800; letter-spacing: .06em;
+        text-transform: uppercase; background: linear-gradient(135deg, #E9C46A, #B0862E); color: #1a1200; padding: 8px 14px; border-radius: 3px;
+    }
+
     /* Social buttons */
     .cb-social-btn {
         display: inline-flex; align-items: center; gap: 7px;
@@ -852,9 +904,20 @@
                 </div>
             </div>
 
-            {{-- Card outils (desktop : sur mobile, ces liens sont dans le menu) --}}
-            <div class="col-lg-5 d-none d-lg-block">
-                <div class="cb-hero-card">
+            {{-- Akwaba (jeu) + card outils (desktop : sur mobile, ces liens sont dans le menu) --}}
+            <div class="col-lg-5">
+                <a href="{{ route('akwaba.show') }}" class="cb-akwaba mb-lg-3">
+                    <img src="{{ asset('img/jeux/akwaba/akwaba-hero.jpg') }}" width="1200" height="586"
+                         alt="Akwaba : le mystère de la lagune Ébrié">
+                    <span class="cb-akwaba-body">
+                        <span class="cb-akwaba-tag">Nouveau jeu · Gratuit pour commencer</span>
+                        <span class="cb-akwaba-titre d-block">Akwaba : le mystère de la lagune Ébrié</span>
+                        <span class="cb-akwaba-desc d-block">Une enquête au cœur d'Abidjan, jouable sur téléphone et ordinateur.</span>
+                        <span class="cb-akwaba-cta">Jouer maintenant →</span>
+                    </span>
+                </a>
+
+                <div class="cb-hero-card d-none d-lg-block">
                     <div class="cb-hero-card-header">
                         <span class="cb-hero-card-dot" style="background:#FF5F57;"></span>
                         <span class="cb-hero-card-dot" style="background:#FEBC2E;"></span>
@@ -926,6 +989,9 @@
         </div>
     </div>
 </section>
+
+{{-- À SUIVRE : Sonatel et Bridge Bank (config/vitrine.php), dernier cours en base --}}
+@include('partials.welcome.a-suivre')
 
 {{-- À LA UNE : actualités du Rédacteur en Chef (n8n), juste sous le hero --}}
 @include('partials.welcome.a-la-une')

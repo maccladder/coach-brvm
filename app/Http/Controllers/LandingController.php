@@ -9,11 +9,12 @@ use App\Models\MarketplaceProduct;
 use App\Models\News;
 use App\Models\Societe;
 use App\Services\NouvellesCotations;
+use App\Services\SocietesASuivre;
 use Carbon\Carbon;
 
 class LandingController extends Controller
 {
-    public function index(NouvellesCotations $cotations)
+    public function index(NouvellesCotations $cotations, SocietesASuivre $aSuivre)
     {
         $annonces = Announcement::published()
             ->orderByDesc('published_at')
@@ -49,6 +50,7 @@ class LandingController extends Controller
             'exampleVideoUrl'    => null,
             'nbSocietes'         => Societe::listedCount(),
             'nouvellesCotations' => $cotations->actives(),
+            'societesASuivre'    => $aSuivre->cartes(),
             'jeux'               => MarketplaceProduct::published()
                 ->where('type', 'game')
                 ->orderByDesc('is_featured')

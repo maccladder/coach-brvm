@@ -51,7 +51,7 @@ class WelcomePageTest extends TestCase
             ->assertOk()
             ->assertSee('prospérer</span> demain.', false)
             ->assertSeeInOrder(['cb-hero-ctas', route('register'), "S'inscrire gratuitement"], false)
-            ->assertSee('col-lg-5 d-none d-lg-block', false); // carte « Outils » masquée sur mobile
+            ->assertSee('cb-hero-card d-none d-lg-block', false); // carte « Outils » masquée sur mobile (Akwaba, lui, reste visible)
     }
 
     private function news(string $titre, array $attrs = []): News
