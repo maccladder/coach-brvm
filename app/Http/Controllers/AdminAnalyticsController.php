@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Services\GoogleAnalyticsService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
 use Throwable;
 
@@ -17,7 +18,8 @@ class AdminAnalyticsController extends Controller
         try {
             $data = $this->buildAnalyticsData($ga);
         } catch (Throwable $e) {
-            // Sécurité : en cas d'erreur GA, on ne casse pas l'admin
+            // Sécurité : en cas d'erreur GA, on ne casse pas l'admin (mais on la journalise)
+            Log::warning('AdminAnalytics : erreur GA4', ['error' => get_class($e) . ' : ' . $e->getMessage()]);
             $data = $this->emptyAnalyticsData();
         }
 
@@ -34,6 +36,7 @@ class AdminAnalyticsController extends Controller
                 $this->buildAnalyticsData($ga)
             );
         } catch (Throwable $e) {
+            Log::warning('AdminAnalytics : erreur GA4 (JSON)', ['error' => get_class($e) . ' : ' . $e->getMessage()]);
             return response()->json(
                 $this->emptyAnalyticsData(),
                 200

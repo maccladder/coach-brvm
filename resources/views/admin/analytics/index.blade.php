@@ -48,7 +48,7 @@ $deviceFr = [
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
             <h2 class="fw-bold mb-1">📊 Analytics</h2>
-            <div class="text-muted">Données Google Analytics 4 — Property {{ env('GA_PROPERTY_ID') }}</div>
+            <div class="text-muted">Données Google Analytics 4 — Property {{ config('services.google_analytics.property_id') }}</div>
         </div>
         <div class="d-flex gap-2 align-items-center">
             <span id="refresh-badge" class="badge bg-success-subtle text-success border border-success-subtle" style="font-size:.75rem;">

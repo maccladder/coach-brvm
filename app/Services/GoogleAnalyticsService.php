@@ -8,6 +8,8 @@ use Google\Analytics\Data\V1beta\RunRealtimeReportRequest;
 use Google\Analytics\Data\V1beta\DateRange;
 use Google\Analytics\Data\V1beta\Metric;
 use Google\Analytics\Data\V1beta\Dimension;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Log;
 use Throwable;
 
 class GoogleAnalyticsService
@@ -41,7 +43,7 @@ class GoogleAnalyticsService
 
             return (int) $this->firstMetricValue($response->getRows(), 0, 0);
         } catch (Throwable $e) {
-            return 0;
+            return $this->failed(__FUNCTION__, $e, 0);
         }
     }
 
@@ -59,7 +61,7 @@ class GoogleAnalyticsService
             // Realtime peut renvoyer 0 row => on sécurise
             return (int) $this->firstMetricValue($response->getRows(), 0, 0);
         } catch (Throwable $e) {
-            return 0;
+            return $this->failed(__FUNCTION__, $e, 0);
         }
     }
 
@@ -98,7 +100,7 @@ class GoogleAnalyticsService
 
             return $data;
         } catch (Throwable $e) {
-            return [];
+            return $this->failed(__FUNCTION__, $e, []);
         }
     }
 
@@ -129,7 +131,7 @@ class GoogleAnalyticsService
             // moyenne par utilisateur
             return (int) round($totalEngagement / $activeUsers);
         } catch (Throwable $e) {
-            return 0;
+            return $this->failed(__FUNCTION__, $e, 0);
         }
     }
 
@@ -166,7 +168,7 @@ class GoogleAnalyticsService
 
             return $data;
         } catch (Throwable $e) {
-            return [];
+            return $this->failed(__FUNCTION__, $e, []);
         }
     }
 
@@ -187,28 +189,20 @@ class GoogleAnalyticsService
                 ],
             ]));
 
-            $rows = $response->getRows();
-            if (!$rows || count($rows) === 0) return [];
-
-            $data = [];
-            foreach ($rows as $row) {
-                $rawDate = $row->getDimensionValues()[0]->getValue() ?? '';
-                $users   = (int) ($row->getMetricValues()[0]->getValue() ?? 0);
-                // Format YYYYMMDD → DD/MM
+            // GA4 ne renvoie aucune ligne pour un jour sans visiteur : on part des 7 jours (0 par
+            // défaut) pour que la courbe descende à 0 au lieu de s'arrêter au dernier jour actif,
+            // et on trie par vraie date (l'ancien tri texte « JJ/MM » mettait 01/11 avant 29/10)
+            $users = [];
+            foreach ($response->getRows() ?? [] as $row) {
+                $rawDate = (string) ($row->getDimensionValues()[0]->getValue() ?? '');
                 if (strlen($rawDate) === 8) {
-                    $label = substr($rawDate, 6, 2) . '/' . substr($rawDate, 4, 2);
-                } else {
-                    $label = $rawDate;
+                    $users[$rawDate] = (int) ($row->getMetricValues()[0]->getValue() ?? 0);
                 }
-                $data[] = ['date' => $label, 'users' => $users];
             }
 
-            // Trier par date brute croissante
-            usort($data, fn($a, $b) => strcmp($a['date'], $b['date']));
-
-            return $data;
+            return self::fillDays($users, Carbon::today());
         } catch (Throwable $e) {
-            return [];
+            return $this->failed(__FUNCTION__, $e, []);
         }
     }
 
@@ -243,7 +237,7 @@ class GoogleAnalyticsService
 
             return $data;
         } catch (Throwable $e) {
-            return [];
+            return $this->failed(__FUNCTION__, $e, []);
         }
     }
 
@@ -281,7 +275,7 @@ class GoogleAnalyticsService
 
             return $data;
         } catch (Throwable $e) {
-            return [];
+            return $this->failed(__FUNCTION__, $e, []);
         }
     }
 
@@ -316,7 +310,7 @@ class GoogleAnalyticsService
                 'bounceRate' => round((float) ($mv[3]->getValue() ?? 0) * 100, 1),
             ];
         } catch (Throwable $e) {
-            return ['users30' => 0, 'newUsers30' => 0, 'sessions30' => 0, 'bounceRate' => 0.0];
+            return $this->failed(__FUNCTION__, $e, ['users30' => 0, 'newUsers30' => 0, 'sessions30' => 0, 'bounceRate' => 0.0]);
         }
     }
 
@@ -338,5 +332,33 @@ class GoogleAnalyticsService
         }
 
         return $metricValues[$metricIndex]->getValue() ?? '0';
+    }
+
+    /**
+     * Les 7 derniers jours (6 jours avant $today jusqu'à $today), triés par date réelle, avec 0
+     * pour les jours absents. $users : visiteurs par date GA « YYYYMMDD ».
+     *
+     * @return array<int, array{date: string, users: int}>
+     */
+    public static function fillDays(array $users, Carbon $today): array
+    {
+        $days = [];
+        for ($i = 6; $i >= 0; $i--) {
+            $day    = $today->copy()->subDays($i);
+            $days[] = ['date' => $day->format('d/m'), 'users' => (int) ($users[$day->format('Ymd')] ?? 0)];
+        }
+
+        return $days;
+    }
+
+    /** Erreur de l'API GA4 : journalisée (Log::warning), puis valeur par défaut pour ne pas casser l'admin. */
+    private function failed(string $method, Throwable $e, mixed $default): mixed
+    {
+        Log::warning('GoogleAnalyticsService::' . $method . ' : erreur API GA4', [
+            'property' => $this->property,
+            'error'    => get_class($e) . ' : ' . $e->getMessage(),
+        ]);
+
+        return $default;
     }
 }
