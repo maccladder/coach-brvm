@@ -28,8 +28,9 @@ class LandingController extends Controller
             ->orderByDesc('date_boc')
             ->first();
 
-        // ✅ Dernier ClientBoc public J-1 (lié à daily si possible)
-        $latestPublicBoc = ClientBoc::query()
+        // ✅ Dernier ClientBoc public J-1 (lié à daily si possible) ; aucun si le module d'analyse
+        //    de BOC est masqué (FEATURE_BOC_ANALYSIS) : les liens « BOC gratuite » disparaissent
+        $latestPublicBoc = !config('features.boc_analysis') ? null : ClientBoc::query()
             ->where('is_public', 1)
             ->whereDate('boc_date', '<=', Carbon::yesterday())
             ->when($lastDaily, function ($q) use ($lastDaily) {

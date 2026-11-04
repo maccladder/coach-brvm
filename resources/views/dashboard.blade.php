@@ -337,6 +337,8 @@
                     <a href="{{ route('documents.mine') }}" class="dash-card-btn">Ouvrir →</a>
                 </div>
             </div>
+            {{-- Analyses BOC / états financiers : modules masquables (config/features.php) --}}
+            @if(config('features.boc_analysis') || config('features.financial_statements'))
             <div class="col-md-4 cbr cbr3">
                 <div class="dash-card">
                     <span class="dash-card-icon">📄</span>
@@ -350,6 +352,7 @@
                     <a href="{{ route('client-financials.index') }}" class="dash-card-btn">Ouvrir →</a>
                 </div>
             </div>
+            @endif
             <div class="col-md-4 cbr cbr4">
                 <div class="dash-card">
                     <span class="dash-card-icon">📡</span>

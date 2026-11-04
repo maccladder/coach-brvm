@@ -63,6 +63,8 @@ return Application::configure(basePath: dirname(__DIR__))
             'lettreci.access'  => \App\Http\Middleware\EnsureLettreCIAccess::class,
             'affiliate.active' => \App\Http\Middleware\EnsureAffiliateActive::class,
             'n8n.key'          => \App\Http\Middleware\N8nApiKeyMiddleware::class,
+            // Modules masquables (config/features.php) : feature:nom ou feature:nom,admin
+            'feature'          => \App\Http\Middleware\EnsureFeatureEnabled::class,
         ]);
 
         // $middleware->append(\App\Http\Middleware\TestMiddleware::class);

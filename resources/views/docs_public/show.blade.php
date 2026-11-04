@@ -97,12 +97,20 @@
                             <i class="bi bi-folder2-open"></i> Mes documents
                         </a>
                     @else
-                        <form method="POST" action="{{ route('documents.buy', $document) }}" class="m-0">
-                            @csrf
-                            <button type="submit" class="cb-btn-gold">
-                                <i class="bi bi-shield-check"></i> Acheter maintenant
-                            </button>
-                        </form>
+                        @feature('cinetpay')
+                            <form method="POST" action="{{ route('documents.buy', $document) }}" class="m-0">
+                                @csrf
+                                <button type="submit" class="cb-btn-gold">
+                                    <i class="bi bi-shield-check"></i> Acheter maintenant
+                                </button>
+                            </form>
+                        @else
+                            {{-- Paiement en ligne des documents : CinetPay coupé, pas encore de flux Paystack --}}
+                            <a class="cb-btn-gold" target="_blank" rel="noopener"
+                               href="https://wa.me/{{ config('checkout.whatsapp') }}?text={{ rawurlencode('Bonjour, je souhaite acheter le document « ' . $document->title . ' » sur Boursiv.') }}">
+                                <i class="bi bi-whatsapp"></i> Acheter via WhatsApp
+                            </a>
+                        @endfeature
                     @endif
                 @endauth
                 @guest

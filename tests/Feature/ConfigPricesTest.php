@@ -17,7 +17,8 @@ class ConfigPricesTest extends TestCase
     {
         $this->assertSame(1000, config('services.paystack.price_financial'));   // valeur par défaut
 
-        config(['services.paystack.price_financial' => 2500]);
+        // Module masqué par défaut (FEATURE_FINANCIAL_STATEMENTS) : activé pour lire le formulaire
+        config(['services.paystack.price_financial' => 2500, 'features.financial_statements' => true]);
 
         $this->actingAs(User::factory()->create())
             ->get(route('client-financials.create'))

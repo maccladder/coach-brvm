@@ -76,14 +76,14 @@
             ['q'=>"Investir à la BRVM, est-ce risqué ?",'a'=>"Oui, comme toute bourse. Mais le risque diminue fortement quand on comprend les fondamentaux, les BOC, et les états financiers. La meilleure protection, c'est la formation + la discipline.",'links'=>[['label'=>"Formation débutant",'url'=>$cta_debutant]]],
         ]],
         ['title'=>'Boursiv','icon'=>'🚀','items'=>[
-            ['q'=>"C'est quoi Boursiv ?",'a'=>"Boursiv est une plateforme qui aide à comprendre la BRVM, analyser les BOC, suivre l'actualité du marché, et apprendre à investir intelligemment.",'links'=>[['label'=>"Voir les annonces BRVM",'url'=>route('announcements.index')]]],
+            ['q'=>"C'est quoi Boursiv ?",'a'=>"Boursiv est une plateforme qui aide à comprendre la BRVM, " . (config('features.boc_analysis') ? "analyser les BOC, " : "") . "suivre l'actualité du marché, et apprendre à investir intelligemment.",'links'=>[['label'=>"Voir les annonces BRVM",'url'=>route('announcements.index')]]],
             ['q'=>"Boursiv remplace-t-il un SGI ?",'a'=>"Non. Un SGI exécute tes ordres de bourse. Boursiv t'aide à comprendre et analyser pour prendre de meilleures décisions.",'links'=>[['label'=>"Liste des SGI",'url'=>route('sgis.index')]]],
             ['q'=>"Boursiv donne-t-il des signaux d'achat/vente ?",'a'=>"Non. Nous fournissons des analyses et de l'éducation financière. La décision finale appartient toujours à l'investisseur.",'links'=>[['label'=>"Apprendre une stratégie",'url'=>$cta_intermediaire]]],
         ]],
         ['title'=>'BOC – Bulletins Officiels de Cote','icon'=>'🧾','items'=>[
             ['q'=>"C'est quoi un BOC ?",'a'=>"Le Bulletin Officiel de Cote (BOC) est le document officiel publié chaque jour de cotation, avec les cours, variations, volumes, indices et informations du marché.",'links'=>[['label'=>"Voir les analyses BOC",'url'=>route('announcements.index')]]],
             ['q'=>"Pourquoi le BOC est difficile à comprendre ?",'a'=>"Parce qu'il est technique et conçu pour les professionnels. Boursiv le transforme en résumé clair et compréhensible.",'links'=>[['label'=>"Voir un exemple",'url'=>route('announcements.index')]]],
-            ['q'=>"Comment Boursiv analyse les BOC ?",'a'=>"On extrait les informations clés (indices, hausses/baisses, volumes, tendances), puis on produit un résumé lisible + des explications utiles pour les investisseurs.",'links'=>[['label'=>"Page annonces",'url'=>route('announcements.index')]]],
+            ['feature'=>'boc_analysis','q'=>"Comment Boursiv analyse les BOC ?",'a'=>"On extrait les informations clés (indices, hausses/baisses, volumes, tendances), puis on produit un résumé lisible + des explications utiles pour les investisseurs.",'links'=>[['label'=>"Page annonces",'url'=>route('announcements.index')]]],
         ]],
         ['title'=>'États financiers & analyse fondamentale','icon'=>'📊','items'=>[
             ['q'=>"C'est quoi un état financier ?",'a'=>"C'est un document qui montre la santé d'une entreprise (chiffre d'affaires, bénéfice, dettes, trésorerie, etc.). C'est essentiel pour investir sur le long terme.",'links'=>[]],
@@ -129,6 +129,8 @@
                 </div>
                 <div class="faq-accordion">
                     @foreach($s['items'] as $item)
+                        {{-- Question liée à un module masqué (config/features.php) : non affichée --}}
+                        @continue(isset($item['feature']) && !config('features.' . $item['feature']))
                         @php $gi++; @endphp
                         <div class="faq-item" data-search="{{ Str::lower($item['q'].' '.$item['a'].' '.$s['title']) }}">
                             <button class="faq-btn" onclick="toggleFaq(this)">

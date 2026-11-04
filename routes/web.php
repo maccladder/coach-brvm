@@ -176,27 +176,34 @@ Route::get('/summaries/{date}', [SummaryController::class, 'showDate'])->name('s
 |--------------------------------------------------------------------------
 */
 
+// Module masquable (FEATURE_BOC_ANALYSIS) : création et BOC gratuite en 404 quand il est coupé ;
+// consultation des analyses existantes réservée alors à l'admin. Paiement : CinetPay (FEATURE_CINETPAY).
 Route::prefix('client-bocs')->name('client-bocs.')->group(function () {
 
-    Route::get('/', [ClientBocController::class, 'index'])->name('index');
-    Route::get('/create', [ClientBocController::class, 'create'])->name('create');
-    Route::post('/', [ClientBocController::class, 'store'])->name('store');
+    Route::middleware('feature:boc_analysis')->group(function () {
+        Route::get('/create', [ClientBocController::class, 'create'])->name('create');
+        Route::post('/', [ClientBocController::class, 'store'])->middleware('feature:cinetpay')->name('store');
 
-    Route::get('/latest/public', [ClientBocController::class, 'latestPublic'])
-    ->name('latest.public');
+        Route::get('/latest/public', [ClientBocController::class, 'latestPublic'])
+            ->name('latest.public');
 
+        Route::match(['GET', 'POST'], '/payment/return/{clientBoc}', [ClientBocController::class, 'paymentReturn'])
+            ->middleware('feature:cinetpay')
+            ->name('payment.return');
 
-    Route::match(['GET', 'POST'], '/payment/return/{clientBoc}', [ClientBocController::class, 'paymentReturn'])
-        ->name('payment.return');
+        Route::post('/payment/notify', [ClientBocController::class, 'paymentNotify'])
+            ->middleware('feature:cinetpay')
+            ->name('payment.notify');
+    });
 
-    Route::post('/payment/notify', [ClientBocController::class, 'paymentNotify'])
-        ->name('payment.notify');
+    Route::middleware('feature:boc_analysis,admin')->group(function () {
+        Route::get('/', [ClientBocController::class, 'index'])->name('index');
+        Route::get('/{clientBoc}/processing', [ClientBocController::class, 'processing'])->name('processing');
+        Route::get('/{clientBoc}/status', [ClientBocController::class, 'status'])->name('status');
+        Route::get('/{clientBoc}/bubbles', [ClientBocController::class, 'bubbles'])->name('bubbles');
 
-    Route::get('/{clientBoc}/processing', [ClientBocController::class, 'processing'])->name('processing');
-    Route::get('/{clientBoc}/status', [ClientBocController::class, 'status'])->name('status');
-    Route::get('/{clientBoc}/bubbles', [ClientBocController::class, 'bubbles'])->name('bubbles');
-
-    Route::get('/{clientBoc}', [ClientBocController::class, 'show'])->name('show');
+        Route::get('/{clientBoc}', [ClientBocController::class, 'show'])->name('show');
+    });
 });
 
 /*
@@ -205,19 +212,25 @@ Route::prefix('client-bocs')->name('client-bocs.')->group(function () {
 |--------------------------------------------------------------------------
 */
 
+// Module masquable (FEATURE_FINANCIAL_STATEMENTS) : création et paiement en 404 quand il est
+// coupé ; consultation des analyses existantes réservée alors à l'admin.
 Route::prefix('client-financials')->name('client-financials.')->group(function () {
 
-    Route::get('/', [ClientFinancialController::class, 'index'])->name('index');
-    Route::get('/create', [ClientFinancialController::class, 'create'])->name('create');
-    Route::post('/', [ClientFinancialController::class, 'store'])->name('store');
+    Route::middleware('feature:financial_statements')->group(function () {
+        Route::get('/create', [ClientFinancialController::class, 'create'])->name('create');
+        Route::post('/', [ClientFinancialController::class, 'store'])->name('store');
 
-    Route::get('/payment/callback', [ClientFinancialController::class, 'paystackCallback'])
-        ->name('payment.callback');
+        Route::get('/payment/callback', [ClientFinancialController::class, 'paystackCallback'])
+            ->name('payment.callback');
+    });
 
-    Route::get('/{clientFinancial}/processing', [ClientFinancialController::class, 'processing'])->name('processing');
-    Route::get('/{clientFinancial}/status', [ClientFinancialController::class, 'status'])->name('status');
+    Route::middleware('feature:financial_statements,admin')->group(function () {
+        Route::get('/', [ClientFinancialController::class, 'index'])->name('index');
+        Route::get('/{clientFinancial}/processing', [ClientFinancialController::class, 'processing'])->name('processing');
+        Route::get('/{clientFinancial}/status', [ClientFinancialController::class, 'status'])->name('status');
 
-    Route::get('/{clientFinancial}', [ClientFinancialController::class, 'show'])->name('show');
+        Route::get('/{clientFinancial}', [ClientFinancialController::class, 'show'])->name('show');
+    });
 });
 
 /*
@@ -243,16 +256,16 @@ Route::get('/mon-espace/cours/{slug}', [CourseController::class, 'show'])
     ->name('courses.show');
 
 // ✅ ACHAT : auth obligatoire
-Route::post('/formations/{course}/acheter', [CoursePaymentController::class, 'buy'])
+Route::post('/formations/{course}/acheter', [CoursePaymentController::class, 'buy'])->middleware('feature:cinetpay')
     ->middleware('auth')
     ->name('courses.buy');
 
 // ✅ RETOUR utilisateur : PAS auth (CinetPay peut faire GET/POST)
-Route::match(['GET','POST'], '/payment/cinetpay/return', [CoursePaymentController::class, 'return'])
+Route::match(['GET','POST'], '/payment/cinetpay/return', [CoursePaymentController::class, 'return'])->middleware('feature:cinetpay')
     ->name('cinetpay.return.course');
 
 // ✅ IPN serveur : PAS auth (CinetPay POST)
-Route::post('/paiement/cinetpay/ipn', [CoursePaymentController::class, 'ipn'])
+Route::post('/paiement/cinetpay/ipn', [CoursePaymentController::class, 'ipn'])->middleware('feature:cinetpay')
     ->name('cinetpay.ipn.course');
 
 
@@ -552,7 +565,7 @@ Route::middleware(['auth'])->group(function () {
 |--------------------------------------------------------------------------
 */
 
-Route::post('/{clientBoc}/pdf', [ClientBocController::class, 'downloadPdf'])->name('client-bocs.pdf');
+Route::post('/{clientBoc}/pdf', [ClientBocController::class, 'downloadPdf'])->middleware('feature:boc_analysis,admin')->name('client-bocs.pdf');
 
 /*
 |--------------------------------------------------------------------------
@@ -739,9 +752,9 @@ Route::get('/chocs-marche', [ChocsMarcheController::class, 'index'])->name('choc
 Route::get('/chocs-marche/{sector}', [ChocsMarcheController::class, 'show'])->name('chocs.show');
 
 // ✅ callback serveur (IPN) + retour utilisateur : PAS auth
-Route::post('/payments/cinetpay/ipn', [PaymentController::class, 'cinetpayIpn'])->name('cinetpay.ipn');
+Route::post('/payments/cinetpay/ipn', [PaymentController::class, 'cinetpayIpn'])->middleware('feature:cinetpay')->name('cinetpay.ipn');
 
-Route::match(['GET', 'POST'], '/payments/cinetpay/return', [PaymentController::class, 'cinetpayReturn'])
+Route::match(['GET', 'POST'], '/payments/cinetpay/return', [PaymentController::class, 'cinetpayReturn'])->middleware('feature:cinetpay')
     ->name('cinetpay.return');
 
 
@@ -843,16 +856,16 @@ Route::middleware(['auth'])->group(function () {
 
 
 // ✅ return spécifique marketplace (PUBLIC, GET/POST)
-Route::match(['GET','POST'], '/marketplace/payment/cinetpay/return', [\App\Http\Controllers\MarketplacePaymentController::class, 'return'])
+Route::match(['GET','POST'], '/marketplace/payment/cinetpay/return', [\App\Http\Controllers\MarketplacePaymentController::class, 'return'])->middleware('feature:cinetpay')
     ->name('cinetpay.return.marketplace');
 
 // ✅ notify spécifique marketplace (POST, sans auth)
-Route::post('/marketplace/payment/cinetpay/notify', [\App\Http\Controllers\MarketplacePaymentController::class, 'notify'])
+Route::post('/marketplace/payment/cinetpay/notify', [\App\Http\Controllers\MarketplacePaymentController::class, 'notify'])->middleware('feature:cinetpay')
     ->name('cinetpay.notify.marketplace');
 
 // buy reste protégé (normal)
 Route::middleware('auth')->group(function () {
-    Route::post('/marketplace/{product}/buy', [\App\Http\Controllers\MarketplacePaymentController::class, 'buy'])
+    Route::post('/marketplace/{product}/buy', [\App\Http\Controllers\MarketplacePaymentController::class, 'buy'])->middleware('feature:cinetpay')
         ->name('marketplace.buy');
 });
 
@@ -880,16 +893,16 @@ Route::get('/etudes-businessplans/{slug}', [DocumentController::class, 'show'])-
 
 
 Route::middleware('auth')->group(function () {
-    Route::post('/documents/{document}/buy', [DocumentPaymentController::class, 'buy'])
+    Route::post('/documents/{document}/buy', [DocumentPaymentController::class, 'buy'])->middleware('feature:cinetpay')
         ->name('documents.buy');
 });
 
 // retour user (public GET/POST)
-Route::match(['GET','POST'], '/documents/payment/cinetpay/return', [DocumentPaymentController::class, 'return'])
+Route::match(['GET','POST'], '/documents/payment/cinetpay/return', [DocumentPaymentController::class, 'return'])->middleware('feature:cinetpay')
     ->name('cinetpay.return.documents');
 
 // notify serveur (IPN) (public POST)
-Route::post('/documents/payment/cinetpay/notify', [DocumentPaymentController::class, 'notify'])
+Route::post('/documents/payment/cinetpay/notify', [DocumentPaymentController::class, 'notify'])->middleware('feature:cinetpay')
     ->name('cinetpay.notify.documents');
 
     //routes test pour paystack

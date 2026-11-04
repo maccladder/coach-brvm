@@ -3,7 +3,7 @@
 
 @php
     $seoTitre       = config('app.brand', 'Boursiv') . ' — Actualités de la BRVM et éducation financière';
-    $seoDescription = "Les actualités de la BRVM chaque matin, la BOC gratuite résumée par l'IA, "
+    $seoDescription = "Les actualités de la BRVM chaque matin, " . (config('features.boc_analysis') ? "la BOC gratuite résumée par l'IA, " : '')
                     . 'le radar du marché, un simulateur de portefeuille et des formations pour investir en bourse dans l\'UEMOA.';
 @endphp
 
@@ -911,6 +911,7 @@
                         </div>
                         <span class="cb-chip cb-chip-beta">Beta</span>
                     </a>
+                    @feature('boc_analysis')
                     <a href="{{ route('client-bocs.create') }}" class="cb-tool-item" style="text-decoration:none;">
                         <div>
                             <div class="cb-tool-name">🤖 IA — BOC & États financiers</div>
@@ -918,6 +919,7 @@
                         </div>
                         <span class="cb-chip cb-chip-ai">IA</span>
                     </a>
+                    @endfeature
                 </div>
             </div>
 
@@ -990,15 +992,16 @@
                 <span class="cb-feature-num">04</span>
                 <span class="cb-feature-emoji">📊</span>
                 <div class="cb-feature-title">Comprendre le marché</div>
-                <div class="cb-feature-desc">Annonces du marché, analyses IA des BOC, états financiers décryptés — toute l'info accessible.</div>
+                <div class="cb-feature-desc">Annonces du marché{{ config('features.boc_analysis') ? ', analyses IA des BOC' : '' }}{{ config('features.financial_statements') ? ', états financiers décryptés' : '' }} — toute l'info accessible.</div>
             </a>
         </div>
     </div>
 </section>
 
 {{-- ══════════════════════════════════════
-     BOC HIGHLIGHT
+     BOC HIGHLIGHT (module masquable : FEATURE_BOC_ANALYSIS)
 ══════════════════════════════════════ --}}
+@feature('boc_analysis')
 <section class="cb-sec cb-sec-alt">
     <div class="container" style="max-width:1100px;">
         <div class="cbr">
@@ -1032,11 +1035,14 @@
                 @else
                     <a href="{{ route('landing') }}" class="cb-cta-green">📄 BOC (J-1) bientôt disponible</a>
                 @endif
-                <a href="{{ route('client-financials.create') }}" class="cb-cta-outline">📊 Analyser un état financier</a>
+                @feature('financial_statements')
+                    <a href="{{ route('client-financials.create') }}" class="cb-cta-outline">📊 Analyser un état financier</a>
+                @endfeature
             </div>
         </div>
     </div>
 </section>
+@endfeature
 
 {{-- ══════════════════════════════════════
      RADAR SECTION
@@ -1190,7 +1196,7 @@
             <div class="cb-how-step">
                 <div class="cb-how-n">04</div>
                 <h3 class="cb-how-title">Aller plus loin</h3>
-                <p class="cb-how-desc">Analyse d'états financiers, marketplace de contenus, stratégies avancées pour l'investisseur sérieux.</p>
+                <p class="cb-how-desc">{{ config('features.financial_statements') ? "Analyse d'états financiers, marketplace" : 'Marketplace' }} de contenus, stratégies avancées pour l'investisseur sérieux.</p>
             </div>
         </div>
     </div>
@@ -1535,7 +1541,8 @@
             <h2 class="cb-sec-title">Commence <em>gratuitement,</em> va plus loin si besoin</h2>
             <div class="cb-divider"></div>
         </div>
-        <div class="row g-3 mt-2 cbr cbr2">
+        <div class="row g-3 mt-2 cbr cbr2 justify-content-center">
+            @feature('boc_analysis')
             <div class="col-md-4">
                 <div class="cb-price-card">
                     <div class="cb-price-label">Pour débuter</div>
@@ -1554,6 +1561,8 @@
                     @endif
                 </div>
             </div>
+            @endfeature
+            @feature('financial_statements')
             <div class="col-md-4">
                 <div class="cb-price-card featured">
                     <div class="cb-price-label">Pour aller plus loin</div>
@@ -1569,6 +1578,7 @@
                     <a href="{{ route('client-financials.create') }}" class="cb-cta-primary d-block text-center">Analyser →</a>
                 </div>
             </div>
+            @endfeature
             <div class="col-md-4">
                 <div class="cb-price-card">
                     <div class="cb-price-label">Contenus premium</div>
@@ -1724,7 +1734,7 @@
             <span class="g">d'investisseur</span>
         </h2>
         <p style="font-size:clamp(15px,2vw,17px);color:var(--cb-muted);max-width:420px;margin:20px auto 40px;line-height:1.75;font-weight:300;">
-            Boursiv t'accompagne à chaque étape. Commence avec la BOC gratuite, puis va aussi loin que tu veux.
+            Boursiv t'accompagne à chaque étape. {{ config('features.boc_analysis') ? 'Commence avec la BOC gratuite' : 'Commence gratuitement' }}, puis va aussi loin que tu veux.
         </p>
         <div class="d-flex gap-3 justify-content-center flex-wrap">
             <a href="{{ route('register') }}" class="cb-cta-primary" style="font-size:15px;padding:16px 36px;">✦ S'inscrire — c'est gratuit</a>

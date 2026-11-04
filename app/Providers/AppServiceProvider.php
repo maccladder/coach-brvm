@@ -5,6 +5,7 @@ namespace App\Providers;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\Paginator;
+use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
@@ -20,6 +21,9 @@ class AppServiceProvider extends ServiceProvider
 
         // ✅ Ticker BRVM — vrais cours injectés dans le layout
         View::composer('layouts.app', TickerComposer::class);
+
+        // ✅ Modules masquables : @feature('boc_analysis') … @endfeature (config/features.php)
+        Blade::if('feature', fn (string $name) => (bool) config('features.' . $name));
 
         // ✅ LettreCI — rate limit : 20 générations / heure par user
         RateLimiter::for('letter-generation', function (Request $request) {

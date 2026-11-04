@@ -369,9 +369,15 @@
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">Analyses</a>
                     <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="{{ route('client-bocs.create') }}">📄 Analyser une BOC</a></li>
-                        <li><a class="dropdown-item" href="{{ route('client-financials.create') }}">📊 Analyser un état financier</a></li>
-                        <li><hr class="dropdown-divider"></li>
+                        @feature('boc_analysis')
+                            <li><a class="dropdown-item" href="{{ route('client-bocs.create') }}">📄 Analyser une BOC</a></li>
+                        @endfeature
+                        @feature('financial_statements')
+                            <li><a class="dropdown-item" href="{{ route('client-financials.create') }}">📊 Analyser un état financier</a></li>
+                        @endfeature
+                        @if(config('features.boc_analysis') || config('features.financial_statements'))
+                            <li><hr class="dropdown-divider"></li>
+                        @endif
                         <li>
                             <a class="dropdown-item d-flex justify-content-between align-items-center" href="{{ route('pnd.brvm') }}">
                                 <span>🏛️ PND 2026-2030 × BRVM</span><span class="cb-badge-new">Nouveau</span>
@@ -497,7 +503,9 @@
                             <li><a class="dropdown-item" href="{{ route('my.products') }}?type=game">🎮 Mes jeux</a></li>
                             <li><a class="dropdown-item" href="{{ route('documents.mine') }}">🧾 Mes documents</a></li>
                             <li><a class="dropdown-item" href="{{ route('wallet.index') }}">💼 Mon portefeuille</a></li>
-                            <li><a class="dropdown-item" href="{{ route('client-financials.index') }}">📄 Mes analyses</a></li>
+                            @if(config('features.boc_analysis') || config('features.financial_statements'))
+                                <li><a class="dropdown-item" href="{{ route('client-financials.index') }}">📄 Mes analyses</a></li>
+                            @endif
                             @if(\App\Models\LettreCIAccess::hasActiveAccess(auth()->user()))
                             <li><a class="dropdown-item" href="{{ route('lettreci.dashboard') }}">✉️ Mes lettres</a></li>
                             @endif

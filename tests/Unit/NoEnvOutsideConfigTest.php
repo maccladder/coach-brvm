@@ -14,12 +14,14 @@ use RecursiveIteratorIterator;
 class NoEnvOutsideConfigTest extends TestCase
 {
     /**
-     * Exceptions volontaires : le flux CinetPay, abandonné au profit de Paystack et laissé tel
-     * quel à la demande du propriétaire (04/11/2026). À retirer d'ici si on le remet en service.
+     * Exceptions volontaires : module désactivé. Le flux CinetPay est remplacé par Paystack et
+     * coupé (FEATURE_CINETPAY=false), l'analyse de BOC client aussi (FEATURE_BOC_ANALYSIS=false) ;
+     * code laissé tel quel à la demande du propriétaire (04/11/2026). À corriger avant de les
+     * réactiver (passer par config()), puis à retirer d'ici.
      */
     private const ALLOWED = [
-        'app/Services/CinetpayService.php',
-        'app/Http/Controllers/ClientBocController.php',
+        'app/Services/CinetpayService.php',            // module désactivé (FEATURE_CINETPAY)
+        'app/Http/Controllers/ClientBocController.php', // module désactivé (FEATURE_BOC_ANALYSIS + FEATURE_CINETPAY)
     ];
 
     private const SCANNED = ['app', 'resources/views', 'routes'];
