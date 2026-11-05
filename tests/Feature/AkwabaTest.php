@@ -427,36 +427,64 @@ class AkwabaTest extends TestCase
         $this->assertNotSame($csp, $other);
     }
 
-    // ─── Mesure d'audience de la page hôte (GA4 + pixel Meta) ──────────────
+    // ─── Mesure d'audience de la page hôte (pixel Meta seulement, différé) ──
 
-    public function test_la_page_hote_envoie_ga4_et_le_pixel_avec_le_nonce(): void
+    public function test_pas_de_google_analytics_sur_la_page_du_jeu(): void
     {
         config(['services.ga.measurement_id' => 'G-TEST12345', 'services.facebook_pixel.id' => '875478145273445']);
 
         $response = $this->get(route('akwaba.show'))->assertOk();
-        $html = $response->getContent();
+        $html     = $response->getContent();
+
+        $this->assertStringNotContainsString('G-TEST12345', $html);
+        $this->assertStringNotContainsString('googletagmanager', $html);
+        $this->assertStringNotContainsString('gtag(', $html);
+        $this->assertStringNotContainsString('google', $response->headers->get('Content-Security-Policy'));
+
+        // Le reste du site garde GA4
+        $this->assertStringContainsString('googletagmanager.com/gtag/js?id=G-TEST12345', $this->get(route('landing'))->getContent());
+    }
+
+    public function test_le_pixel_est_charge_3_secondes_apres_le_ready_du_jeu_avec_le_nonce(): void
+    {
+        config(['services.facebook_pixel.id' => '875478145273445']);
+
+        $response = $this->get(route('akwaba.show'))->assertOk();
+        $html     = $response->getContent();
         preg_match("/script-src 'nonce-([^']+)'/", $response->headers->get('Content-Security-Policy'), $m);
         $nonce = $m[1];
 
-        // GA4 : chargeur + page_view par défaut, sans identifiant personnel (pas de user_id ni de 3e argument)
-        $this->assertStringContainsString('<script async nonce="' . $nonce . '" src="https://www.googletagmanager.com/gtag/js?id=G-TEST12345"></script>', $html);
-        $this->assertStringContainsString("gtag('config',\"G-TEST12345\");", $html);
-        $this->assertStringNotContainsString('user_id', $html);
-        // Pixel Meta : même identifiant que le reste du site, PageView uniquement
-        $this->assertStringContainsString("fbq('init',\"875478145273445\");fbq('track','PageView');", $html);
+        // Aucun chargement direct du pixel dans la page : ni balise, ni appel au premier rendu
+        $this->assertStringNotContainsString('<script async nonce="' . $nonce . '" src="https://connect.facebook.net', $html);
+        $head = substr($html, 0, strpos($html, '</head>'));
+        $this->assertStringNotContainsString('fbevents.js', $head);
+        $this->assertStringNotContainsString('fbq(', $head);
+
+        // Script créé dynamiquement, avec le nonce de la page, 3 s après le ready, une seule fois
+        $this->assertStringContainsString('const PIXEL_ID = "875478145273445";', $html);
+        $this->assertStringContainsString('const NONCE    = ' . json_encode($nonce) . ';', $html);
+        $this->assertStringContainsString('t.nonce=NONCE;', $html);
+        $this->assertStringContainsString("'https://connect.facebook.net/en_US/fbevents.js'", $html);
+        $this->assertMatchesRegularExpression("/fbq\('track', 'PageView'\);\s*\}, 3000\);/", $html);
         $this->assertSame(1, substr_count($html, "fbq('track'"));
-        $this->assertStringContainsString('<script nonce="' . $nonce . '">', $html);
+        $this->assertStringContainsString('if (!PIXEL_ID || pixelArmed) return;', $html);
+
+        // Déclenché par le message « ready » du jeu, et seulement là
+        $ready = substr($html, strpos($html, "case 'ready':"), 300);
+        $this->assertStringContainsString('loadPixel();', $ready);
+        $this->assertSame(2, substr_count($html, 'loadPixel('));   // définition + appel dans « ready »
+        $this->assertStringNotContainsString('user_id', $html);
     }
 
-    public function test_la_csp_de_la_page_hote_autorise_seulement_ga4_et_meta(): void
+    public function test_la_csp_de_la_page_hote_autorise_seulement_meta(): void
     {
         config(['services.ga.measurement_id' => 'G-TEST12345', 'services.facebook_pixel.id' => '875478145273445']);
         $csp = collect(explode(';', $this->get(route('akwaba.show'))->headers->get('Content-Security-Policy')))
             ->mapWithKeys(fn ($rule) => [strtok(trim($rule), ' ') => trim($rule)]);
 
-        $this->assertMatchesRegularExpression("#^script-src 'nonce-[^']+' https://www\.googletagmanager\.com https://connect\.facebook\.net$#", $csp['script-src']);
-        $this->assertSame("img-src 'self' data: https://*.google-analytics.com https://*.analytics.google.com https://www.googletagmanager.com https://www.facebook.com", $csp['img-src']);
-        $this->assertSame("connect-src 'self' https://*.google-analytics.com https://*.analytics.google.com https://www.googletagmanager.com https://www.facebook.com https://connect.facebook.net", $csp['connect-src']);
+        $this->assertMatchesRegularExpression("#^script-src 'nonce-[^']+' https://connect\.facebook\.net$#", $csp['script-src']);
+        $this->assertSame("img-src 'self' data: https://www.facebook.com", $csp['img-src']);
+        $this->assertSame("connect-src 'self' https://www.facebook.com https://connect.facebook.net", $csp['connect-src']);
         $this->assertSame("frame-src 'self'", $csp['frame-src']);
     }
 
@@ -468,7 +496,8 @@ class AkwabaTest extends TestCase
         $csp = $response->headers->get('Content-Security-Policy');
 
         $this->assertStringNotContainsString('googletagmanager', $response->getContent());
-        $this->assertStringNotContainsString('fbq(', $response->getContent());
+        $this->assertStringNotContainsString('fbevents.js', $response->getContent());
+        $this->assertStringContainsString('const PIXEL_ID = null;', $response->getContent());
         $this->assertStringNotContainsString('google', $csp);
         $this->assertStringNotContainsString('facebook', $csp);
         $this->assertStringContainsString("connect-src 'self';", $csp);

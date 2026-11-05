@@ -36,22 +36,12 @@
     <meta name="twitter:image" content="https://boursiv.com/img/jeux/akwaba-partage.jpg">
     <title>🎮 Akwaba : le mystère de la lagune Ébrié · Boursiv</title>
 
-    {{-- Mesure d'audience de la page hôte uniquement (jamais dans l'iframe du jeu) : GA4 page_view
-         et pixel Meta PageView, sans identifiant personnel. Mêmes identifiants que le reste du site. --}}
+    {{-- Mesure d'audience : pas de Google Analytics sur cette page (l'entonnoir akwaba_events suffit).
+         Pixel Meta (PageView, sans identifiant personnel) chargé seulement 3 s après le « ready » du jeu :
+         voir loadPixel() plus bas. Jamais dans l'iframe du jeu. --}}
     @php
-        $gaId    = config('services.ga.measurement_id');
         $pixelId = config('services.facebook_pixel.id');
     @endphp
-    @if(!empty($gaId))
-        <script async nonce="{{ $nonce }}" src="https://www.googletagmanager.com/gtag/js?id={{ $gaId }}"></script>
-        <script nonce="{{ $nonce }}">window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config',@json($gaId));</script>
-    @endif
-    @if(!empty($pixelId))
-        <script nonce="{{ $nonce }}">
-        !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');
-        fbq('init',@json($pixelId));fbq('track','PageView');
-        </script>
-    @endif
     <style>
         :root {
             --ak-navy: #0B1426;
@@ -477,6 +467,24 @@
             api(URLS.error, { msg: data.msg.slice(0, 500), line: pos(data.line), col: pos(data.col) }).catch(() => {});
         }
 
+        // ── Pixel Meta : chargé 3 s après le « ready » du jeu ──────
+        // Aucune bande passante prise pendant le téléchargement du jeu ; script créé ici avec le
+        // nonce de la page (CSP), une seule fois, puis PageView comme sur le reste du site.
+        const PIXEL_ID = @json(!empty($pixelId) ? (string) $pixelId : null);
+        const NONCE    = @json($nonce);
+        let pixelArmed = false;
+        function loadPixel() {
+            if (!PIXEL_ID || pixelArmed) return;
+            pixelArmed = true;
+            @if(!empty($pixelId))
+            setTimeout(function () {
+                !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.nonce=NONCE;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');
+                fbq('init', PIXEL_ID);
+                fbq('track', 'PageView');
+            }, 3000);
+            @endif
+        }
+
         // ── Écran de chargement ─────────────────────────────────
         const loading = document.getElementById('ak-loading');
         function hideLoading() {
@@ -617,6 +625,7 @@
                     gameReady = true;
                     hideLoading();
                     trackEvent('page_loaded');
+                    loadPixel();
                     firstState.then(pushState);
                     break;
                 case 'progress':

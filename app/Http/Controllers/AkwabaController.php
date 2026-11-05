@@ -41,8 +41,9 @@ class AkwabaController extends Controller
                 // Navigateur intégré (pub Facebook…) : bandeau « ouvre le jeu dans ton navigateur »
                 'inApp'    => AkwabaService::inAppBrowser($request->userAgent()),
             ])
-            // Scripts : seulement ceux de la page (nonce) et, si configurés, GA4 et le pixel Meta ;
-            // tout le reste vient du même domaine. Le jeu (iframe) a ses propres en-têtes, sur /fichier.
+            // Scripts : seulement ceux de la page (nonce) et, s'il est configuré, le pixel Meta ;
+            // pas de Google Analytics sur cette page. Tout le reste vient du même domaine.
+            // Le jeu (iframe) a ses propres en-têtes, sur /fichier.
             ->header('Content-Security-Policy', implode('; ', [
                 "default-src 'self'",
                 trim("script-src 'nonce-{$nonce}' " . $this->trackingSources('script')),
@@ -61,31 +62,21 @@ class AkwabaController extends Controller
     }
 
     /**
-     * Domaines de mesure d'audience autorisés par la CSP de la page hôte, au strict nécessaire
-     * (guides CSP de Google Analytics 4 et de Meta), et seulement si le tag est configuré.
+     * Domaines autorisés par la CSP de la page hôte pour le pixel Meta (guide CSP de Meta),
+     * et seulement s'il est configuré. Aucun domaine Google : GA4 n'est pas chargé ici.
      */
     private function trackingSources(string $directive): string
     {
-        $ga    = !empty(config('services.ga.measurement_id'));
-        $pixel = !empty(config('services.facebook_pixel.id'));
+        if (empty(config('services.facebook_pixel.id'))) {
+            return '';
+        }
 
-        $sources = match ($directive) {
-            'script'  => [
-                $ga ? 'https://www.googletagmanager.com' : null,
-                $pixel ? 'https://connect.facebook.net' : null,
-            ],
-            'img'     => [
-                $ga ? 'https://*.google-analytics.com https://*.analytics.google.com https://www.googletagmanager.com' : null,
-                $pixel ? 'https://www.facebook.com' : null,
-            ],
-            'connect' => [
-                $ga ? 'https://*.google-analytics.com https://*.analytics.google.com https://www.googletagmanager.com' : null,
-                $pixel ? 'https://www.facebook.com https://connect.facebook.net' : null,
-            ],
-            default   => [],
+        return match ($directive) {
+            'script'  => 'https://connect.facebook.net',
+            'img'     => 'https://www.facebook.com',
+            'connect' => 'https://www.facebook.com https://connect.facebook.net',
+            default   => '',
         };
-
-        return implode(' ', array_filter($sources));
     }
 
     /**
