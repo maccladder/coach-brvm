@@ -59,8 +59,8 @@
                                         @endif
                                     </span>
                                     <span class="cb-jeu-nom">{{ $nomCourt($jeu->title) }}</span>
-                                    {{-- Akwaba : gratuit jusqu'au chapitre 2, la suite s'achète dans le jeu --}}
-                                    <span class="cb-jeu-prix">{{ $jeu->slug === 'akwaba' ? 'Gratuit pour commencer' : ((float) $jeu->price > 0 ? number_format((float) $jeu->price, 0, ',', ' ') . ' F' : 'Gratuit') }}</span>
+                                    {{-- Jeux à histoire (Akwaba, Le Pacte) : gratuit jusqu'au chapitre 2, la suite s'achète dans le jeu --}}
+                                    <span class="cb-jeu-prix">{{ \App\Services\Games\StoryGames::is($jeu->slug) ? 'Gratuit pour commencer' : ((float) $jeu->price > 0 ? number_format((float) $jeu->price, 0, ',', ' ') . ' F' : 'Gratuit') }}</span>
                                 </a>
                             @endforeach
                         </div>

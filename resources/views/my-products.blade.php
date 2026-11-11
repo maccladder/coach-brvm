@@ -202,8 +202,8 @@
                                             <a href="{{ route('jeu') }}" class="cb-btn-purple">
                                                 🎮 Jouer
                                             </a>
-                                        @elseif($p->slug === 'akwaba')
-                                            <a href="{{ route('akwaba.show') }}" class="cb-btn-purple">
+                                        @elseif(\App\Services\Games\StoryGames::is($p->slug))
+                                            <a href="{{ \App\Services\Games\StoryGames::playUrl($p->slug) }}" class="cb-btn-purple">
                                                 🎮 Jouer
                                             </a>
                                         @else

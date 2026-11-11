@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\AdminGrant;
 use App\Models\GamePremiumUnlock;
 use App\Models\MarketplaceProduct;
-use App\Services\AkwabaService;
+use App\Services\Games\StoryGames;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -63,9 +63,9 @@ class MarketplaceMyProductsController extends Controller
             abort(403, "Téléchargement indisponible : ce produit est une vidéo.");
         }
 
-        // Akwaba se joue en ligne uniquement, jamais en téléchargement
-        if ($product->slug === AkwabaService::SLUG) {
-            return redirect()->route('akwaba.show');
+        // Jeux à histoire (Akwaba, Le Pacte) : en ligne uniquement, jamais en téléchargement
+        if (StoryGames::is($product->slug)) {
+            return redirect(StoryGames::playUrl($product->slug));
         }
 
         // Fichiers multiples : l'ancienne URL mène au premier fichier approuvé du produit
@@ -116,8 +116,8 @@ class MarketplaceMyProductsController extends Controller
             abort(403);
         }
 
-        // Akwaba est servi par /jeux/akwaba/fichier, jamais depuis game_html
-        if ($product->type !== 'game' || empty($product->game_html) || $product->slug === AkwabaService::SLUG) {
+        // Jeux à histoire : servis par leur page (/jeux/akwaba, /jeux/le-pacte), jamais depuis game_html
+        if ($product->type !== 'game' || empty($product->game_html) || StoryGames::is($product->slug)) {
             abort(404);
         }
 
@@ -171,9 +171,9 @@ class MarketplaceMyProductsController extends Controller
             return redirect()->route('jeu');
         }
 
-        // Akwaba : page hôte publique dédiée (le produit ne sert qu'à enregistrer l'achat)
-        if ($product->slug === AkwabaService::SLUG) {
-            return redirect()->route('akwaba.show');
+        // Jeux à histoire : page hôte publique dédiée (le produit ne sert qu'à enregistrer l'achat)
+        if (StoryGames::is($product->slug)) {
+            return redirect(StoryGames::playUrl($product->slug));
         }
 
         if (empty($product->game_html)) {

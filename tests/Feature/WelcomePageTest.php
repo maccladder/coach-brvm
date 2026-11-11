@@ -16,9 +16,9 @@ class WelcomePageTest extends TestCase
         parent::setUp();
         Http::preventStrayRequests(); // l'accueil ne doit appeler aucun service externe
 
-        // Les tests du bloc « Joue » maîtrisent leur liste de jeux : on retire Akwaba, publié
-        // par migration (couvert par test_play_block_shows_akwaba_as_free_to_start)
-        \App\Models\MarketplaceProduct::where('slug', 'akwaba')->delete();
+        // Les tests du bloc « Joue » maîtrisent leur liste de jeux : on retire Akwaba et Le Pacte,
+        // publiés par migration (Akwaba couvert par test_play_block_shows_akwaba_as_free_to_start)
+        \App\Models\MarketplaceProduct::whereIn('slug', ['akwaba', 'le-pacte'])->delete();
     }
 
     public function test_play_block_shows_akwaba_as_free_to_start(): void

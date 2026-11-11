@@ -467,13 +467,13 @@
 
                                 <div class="mp-card-footer">
                                     <div>
-                                        @if($p->slug === 'akwaba')
-                                            {{-- Gratuit jusqu'au chapitre 2, la suite s'achète dans le jeu --}}
+                                        @if(\App\Services\Games\StoryGames::is($p->slug))
+                                            {{-- Jeux à histoire : gratuit jusqu'au chapitre 2, la suite s'achète dans le jeu --}}
                                             @if($isOwnedCard)
                                                 <span class="mp-card-price owned">✓ Histoire complète</span>
                                             @else
                                                 <span class="mp-card-price free" style="font-size:14px;">Gratuit pour commencer</span>
-                                                <div style="font-size:11px;color:var(--cb-muted);">Histoire complète 1 000 FCFA</div>
+                                                <div style="font-size:11px;color:var(--cb-muted);">Histoire complète {{ number_format($p->price, 0, ',', ' ') }} FCFA</div>
                                             @endif
                                         @elseif($isOwnedCard)
                                             <span class="mp-card-price owned">✓ Payé</span>
@@ -484,8 +484,8 @@
                                         @endif
                                     </div>
                                     <div class="mp-card-actions">
-                                        @if($p->slug === 'akwaba')
-                                            <a href="{{ route('akwaba.show') }}" class="mp-btn-sm mp-btn-dl">
+                                        @if(\App\Services\Games\StoryGames::is($p->slug))
+                                            <a href="{{ \App\Services\Games\StoryGames::playUrl($p->slug) }}" class="mp-btn-sm mp-btn-dl">
                                                 🎮 Jouer
                                             </a>
                                         @elseif($isOwnedCard)

@@ -132,6 +132,27 @@ Route::prefix('jeux/akwaba')->name('akwaba.')->controller(\App\Http\Controllers\
     });
 });
 
+// ✅ Le Pacte avec les caïmans : gratuit jusqu'au chapitre 2. Le jeu (dossier index.html + img/)
+//    est servi sous /v/{version}/ pour que ses chemins relatifs « img/... » marchent tels quels ;
+//    ces deux routes tournent sans session ni cookies (simples fichiers, ~70 images).
+Route::prefix('jeux/le-pacte')->name('pacte.')->controller(\App\Http\Controllers\PacteController::class)->group(function () {
+    Route::get('/', 'show')->name('show');
+    Route::get('/connexion', 'login')->name('login');
+
+    Route::withoutMiddleware([
+        \Illuminate\Cookie\Middleware\EncryptCookies::class,
+        \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,
+        \Illuminate\Session\Middleware\StartSession::class,
+        \Illuminate\View\Middleware\ShareErrorsFromSession::class,
+        \Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class,
+    ])->where(['version' => '[a-f0-9]{16}'])->group(function () {
+        Route::get('/v/{version}/index.html', 'file')->name('file');
+        Route::get('/v/{version}/img/{file}', 'image')
+            ->where('file', '[A-Za-z0-9_-]+\.(?:jpg|png)')
+            ->name('image');
+    });
+});
+
 // ✅ URN Studio — générateur d'affiche d'adhésion (PUBLIC, sans auth)
 Route::get('/urn', function () {
     return view('urn.index');
