@@ -137,13 +137,26 @@ class PacteTest extends TestCase
         $this->get($base . 'yao.png')->assertOk()->assertHeader('Content-Type', 'image/png');
     }
 
+    public function test_les_gros_plans_ajoutes_sont_servis_par_la_route_versionnee(): void
+    {
+        $base = '/jeux/le-pacte/v/' . $this->version() . '/img/';
+
+        foreach (['gp_tantie_figee', 'gp_tantie_colere', 'gp_attieke', 'gp_bananes', 'gp_petit', 'gp_yao', 'gp_ama', 'gp_kouassi'] as $nom) {
+            $response = $this->get($base . $nom . '.jpg');
+            $response->assertOk()
+                ->assertHeader('Content-Type', 'image/jpeg')
+                ->assertHeader('Cache-Control', 'immutable, max-age=31536000, public');
+            $this->assertSame(filesize(resource_path("games/le-pacte/img/{$nom}.jpg")), $response->baseResponse->getFile()->getSize(), $nom);
+        }
+    }
+
     public function test_toutes_les_images_du_jeu_existent(): void
     {
         $html = file_get_contents(resource_path('games/le-pacte/index.html'));
         preg_match_all('#img/([A-Za-z0-9_-]+\.(?:jpg|png))#', $html, $m);
 
-        // img/xxx_vide.jpg : exemple dans un commentaire du jeu, pas une image
-        $missing = array_filter(array_unique($m[1]), fn ($f) => $f !== 'xxx_vide.jpg'
+        // img/x.jpg, img/xxx_vide.jpg : exemples dans des commentaires du jeu, pas des images
+        $missing = array_filter(array_unique($m[1]), fn ($f) => !in_array($f, ['x.jpg', 'xxx_vide.jpg'], true)
             && !is_file(resource_path('games/le-pacte/img/' . $f)));
 
         $this->assertSame([], array_values($missing));

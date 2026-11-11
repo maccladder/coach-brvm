@@ -23,6 +23,9 @@ Toutes les méthodes sont facultatives.
 | `utiliserIndice()` | `Promise<number>` | Consomme un indice côté serveur, renvoie le reste |
 | `acheterIndices()` | `Promise<number>` | Lance l'achat du pack de 5 ; renvoie le nouveau solde (0 si échec) |
 | `fin(cle, choix)` | — | Fin obtenue (`pacte`, `justice`, `argent`, `gardien`, `sacrifice`) et liste des choix, pour les statistiques |
+| `lang` (propriété) | `'fr'` ou `'en'` | Langue par défaut si le joueur n'a encore rien choisi |
+| `langue(code)` | — | Appelée quand le joueur change de langue dans le jeu (avant le rechargement) |
+| `test` (propriété) | `boolean` | Vrai seulement en local : autorise les raccourcis `#test-…` et `#debug` |
 
 `data.point` vaut `gare`, `villa`, `funerailles`, `chap3` … `chap7`. `data.etat` est un objet JSON (environ 5 à 10 Ko) à stocker tel quel.
 
@@ -36,3 +39,19 @@ Ils sont lus dans la constante `TEST`, à la fin du script.
 
 ## Constantes utiles dans le script
 `PRIX_SUITE`, `PRIX_INDICES`, `PACK_INDICES`, `CLE_SAUVE`.
+
+## Langues (français / anglais)
+Le jeu est écrit en français. La version anglaise est un dictionnaire embarqué dans `index.html`
+(`<script type="application/json" id="i18nEn">`, entre les repères `I18N:DEBUT` et `I18N:FIN`), suivi d'un petit moteur
+qui remplace à l'écran chaque texte français par son équivalent anglais. Un texte absent du dictionnaire reste en français :
+rien ne casse si on modifie un dialogue sans mettre le dictionnaire à jour.
+
+- Choix de la langue, par ordre de priorité : `?lang=en` dans l'adresse du jeu, puis `localStorage['pacte-caimans-lang']`,
+  puis `PacteHost.lang`, puis la langue du navigateur (`en…` donne l'anglais, tout le reste le français).
+- Le bouton « English / Français » de l'écran titre enregistre le choix et recharge le jeu.
+- La sauvegarde (`etat`) reste en français quelle que soit la langue : une partie commencée en français se reprend en anglais, et inversement.
+- `?lang=audit` : le moteur tourne sans rien remplacer et écrit dans la console (`I18N-MISS|…`) les textes sans traduction.
+
+## Images
+Les images des scènes sont en `data-src` dans le HTML : elles ne sont demandées que quand la scène ou le gros plan s'ouvre,
+puis le jeu précharge discrètement les deux scènes suivantes. Les JPEG sont progressifs. Aucun nom de fichier n'a changé.

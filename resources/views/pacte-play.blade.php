@@ -214,7 +214,9 @@
          chargement (script ajouté en tête du jeu par PacteController::HOST_BRIDGE).
          Invité : estDebloque (toujours faux), debloquer / acheterIndices (qui mènent à la
          connexion) ; le jeu garde son localStorage pour la sauvegarde et l'indice gratuit.
-         Connecté : tout passe par le serveur. « test » : raccourcis de test du jeu, en local seulement. --}}
+         Connecté : tout passe par le serveur. « test » : raccourcis de test du jeu, en local seulement.
+         « lang » : langue par défaut du jeu (null = celle du navigateur). Objet gelé : le jeu lit
+         test et lang sans pouvoir les modifier. --}}
     <script nonce="{{ $nonce }}">
     (function () {
         const URLS = {
@@ -229,6 +231,10 @@
         const LOGGED     = @json(auth()->check());
         // Raccourcis de test du jeu (#test-…, ?chap=…, #debug) : en local seulement
         const TEST_MODE  = @json(app()->environment('local'));
+        // Langue du jeu : Boursiv ne connaît pas celle du joueur (pas de réglage par compte, et
+        // APP_LOCALE vaut pour tout le site) → null : le jeu suit son choix enregistré, sinon la
+        // langue du navigateur. Pas de langue() : rien à enregistrer côté serveur.
+        const GAME_LANG  = null;
         const CSRF_TOKEN = @json(csrf_token());
         const INTENT_KEY = 'pacte_purchase_intent';
         const LOCAL_HINTS_KEY = 'pacte-caimans-indices'; // CLE_IND du jeu
@@ -337,6 +343,7 @@
         // Gelé : impossible de remplacer estDebloque (ou autre) depuis la console
         window.PacteHost = Object.freeze(LOGGED ? {
             test:        TEST_MODE,
+            lang:        GAME_LANG,
             charger:     () => firstState.then(s => (s && s.save ? s.save : null)),
             sauver:      data => { saveGame(data); },
             estDebloque: () => refreshState().then(s => !!(s && s.unlocked)),
@@ -351,6 +358,7 @@
             fin: (cle, choix) => { api(URLS.fin, { cle: cle, choix: Array.isArray(choix) ? choix : [] }, true).catch(() => {}); },
         } : {
             test:           TEST_MODE,
+            lang:           GAME_LANG,
             // Un invité n'a jamais la suite : une sauvegarde locale « chap3 » … ne se reprend pas
             estDebloque:    () => Promise.resolve(false),
             debloquer:      goLogin,

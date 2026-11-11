@@ -432,6 +432,32 @@ class PacteApiTest extends TestCase
         $this->assertStringContainsString("if ((!window.PacteHost || window.PacteHost.test) && (new URLSearchParams(location.search).has('debug')", $game);
     }
 
+    public function test_le_pont_gele_donne_la_langue_par_defaut(): void
+    {
+        foreach ([null, $this->player] as $viewer) {
+            $html = ($viewer ? $this->actingAs($viewer) : $this)->get(route('pacte.show'))->getContent();
+
+            $this->assertStringContainsString('const GAME_LANG  = null;', $html);
+            $this->assertMatchesRegularExpression('/Object\.freeze\(LOGGED \? \{\s+test:\s+TEST_MODE,\s+lang:\s+GAME_LANG,/', $html);
+            $this->assertMatchesRegularExpression('/\} : \{\s+test:\s+TEST_MODE,\s+lang:\s+GAME_LANG,/', $html);
+        }
+    }
+
+    public function test_le_pont_arrive_avant_le_script_de_langue_et_le_jeu(): void
+    {
+        preg_match('/<iframe[^>]+src="([^"]+)"/', $this->get(route('pacte.show'))->getContent(), $m);
+        $content = $this->get(html_entity_decode($m[1]))->assertOk()->getContent();
+
+        $pont   = strpos($content, PacteController::HOST_BRIDGE);
+        $langue = strpos($content, '<!-- I18N:DEBUT -->');
+        $moteur = strpos($content, 'window.PacteLang =');
+        $jeu    = strpos($content, 'const HOTE = window.PacteHost');
+
+        $this->assertSame(0, $pont);
+        $this->assertNotFalse($langue);
+        $this->assertTrue($pont < $langue && $langue < $moteur && $moteur < $jeu);
+    }
+
     public function test_l_achat_marketplace_standard_renvoie_au_jeu(): void
     {
         config(['checkout.types.marketplace.enabled' => true]);
