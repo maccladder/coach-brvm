@@ -141,7 +141,8 @@ class PacteTest extends TestCase
     {
         $base = '/jeux/le-pacte/v/' . $this->version() . '/img/';
 
-        foreach (['gp_tantie_figee', 'gp_tantie_colere', 'gp_attieke', 'gp_bananes', 'gp_petit', 'gp_yao', 'gp_ama', 'gp_kouassi'] as $nom) {
+        foreach (['gp_tantie_figee', 'gp_tantie_colere', 'gp_attieke', 'gp_bananes', 'gp_petit', 'gp_yao', 'gp_ama', 'gp_kouassi',
+            'gp_wei', 'gp_tantie_trouble', 'gp_mur_photos'] as $nom) {
             $response = $this->get($base . $nom . '.jpg');
             $response->assertOk()
                 ->assertHeader('Content-Type', 'image/jpeg')
