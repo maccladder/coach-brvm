@@ -410,9 +410,13 @@
     font-size: clamp(12px, 1.6vw, 19px); line-height: 1.5; display: flex; flex-direction: column; gap: .7em;
     background-image: radial-gradient(ellipse at 80% 90%, rgba(120,80,30,.18), transparent 55%);
   }
-  .t-tete { font-family: 'Alegreya SC', Georgia, serif; font-weight: 800; text-align: center; letter-spacing: .2em; font-size: 1.4em; color: #5a2d14; }
-  .t-sign { text-align: right; font-style: italic; }
-  .t-sign span { font-family: 'Caveat', cursive; font-size: 1.6em; color: #1b3a8c; }
+  .testament { font-family: 'Caveat', 'Comic Sans MS', cursive; font-weight: 500; color: #1f2d5c; font-size: clamp(16px, 2.3vw, 27px); line-height: 1.22; gap: .55em;
+    background-image: repeating-linear-gradient(180deg, transparent 0 1.2em, rgba(60,90,160,.16) 1.2em calc(1.2em + 1px)), radial-gradient(ellipse at 80% 90%, rgba(120,80,30,.18), transparent 55%); }
+  .testament p, .testament .t-tete, .testament .t-sign { filter: url(#tremble); }
+  .testament b { font-weight: 700; }
+  .t-tete { font-family: 'Caveat', cursive; font-weight: 700; text-align: center; font-size: 1.45em; color: #1f2d5c; text-decoration: underline; text-underline-offset: .15em; }
+  .t-sign { text-align: right; }
+  .t-sign span { font-size: 1.3em; font-weight: 700; }
 
   /* ---------- chapitre 2 ---------- */
   #perso {
@@ -471,6 +475,9 @@
 
   #btnSon { position: absolute; right: 2.5%; bottom: 3%; z-index: 45; padding: .3em .6em; font-size: clamp(14px, 1.8vw, 20px); line-height: 1; }
   body:has(#dialog.on) #btnSon, body:has(.zoom.on) #btnSon, body:has(#recap.active) #btnSon { display: none; }
+  #btnMenu { position: absolute; right: calc(2.5% + 4.4em); bottom: 3%; z-index: 45; padding: .3em .8em; font-size: clamp(12px, 1.5vw, 17px); line-height: 1.2; }
+  body:has(#dialog.on) #btnMenu, body:has(.zoom.on) #btnMenu, body:has(#titre.active) #btnMenu, body:has(#promesse.active) #btnMenu,
+  body:has(#carton.active) #btnMenu, body:has(#chapitre.active) #btnMenu { display: none; }
   /* « caméra » : zoom sur la personne à qui on parle */
   .scene { transition: opacity .8s ease, transform .8s cubic-bezier(.3,.7,.3,1); }
   .scene.camera { transform: scale(var(--zc, 1.9)); transform-origin: var(--ox, 50%) var(--oy, 50%); }
@@ -614,14 +621,29 @@
   .tc-actions { display: flex; flex-wrap: wrap; gap: .4em; justify-content: center; }
   .tc-actions .btn { font-size: clamp(11px, 1.4vw, 16px); padding: .45em 1em; }
   .tel-clavier.secoue { animation: secoue .4s; }
-  .menu-utt { width: 40%; background: #141414; color: #e9dcc0; border: 2px solid #c9a24a; border-radius: 6px; padding: 3% 4%;
-    box-shadow: 0 18px 60px rgba(0,0,0,.8); display: flex; flex-direction: column; gap: .55em; font-size: clamp(12px, 1.6vw, 18px); }
-  .mu-logo { font-family: 'Alegreya SC', Georgia, serif; font-weight: 800; color: #d8b25a; text-align: center; font-size: 1.6em; letter-spacing: .1em; }
-  .mu-logo i { font-family: 'Alegreya', Georgia, serif; font-weight: 500; font-size: .6em; }
-  .mu-lieu { text-align: center; font-style: italic; opacity: .75; margin-bottom: .4em; }
-  .mu-l { display: flex; justify-content: space-between; border-bottom: 1px dashed rgba(201,162,74,.35); padding-bottom: .25em; }
-  .mu-l b { color: #d8b25a; font-variant-numeric: tabular-nums; }
-  .mu-pied { text-align: center; font-style: italic; font-size: .85em; opacity: .7; margin-top: .4em; }
+  #stage { container-type: inline-size; }
+  .plaque-utt { display: flex; flex-direction: column; align-items: center; justify-content: center; pointer-events: none; transform: rotate(-1.5deg) skewX(-6deg);
+    font-family: 'Alegreya SC', 'Alegreya', Georgia, serif; font-weight: 800; color: #4a3612; line-height: .95; letter-spacing: .04em;
+    text-shadow: 0 1px 0 rgba(255,240,190,.55), 0 -1px 0 rgba(40,25,5,.35); }
+  .plaque-utt span:first-child { font-size: 1.55cqw; } .plaque-utt span:last-child { font-size: 1.2cqw; font-style: italic; }
+  .menu-utt { position: relative; height: 94%; aspect-ratio: 574 / 1020; max-width: 100%; display: flex; flex-direction: column; overflow: hidden; border-radius: 4px;
+    box-shadow: 0 18px 60px rgba(0,0,0,.8); font-family: 'Alegreya', Georgia, serif; font-size: clamp(9px, 1.15vw, 16px); font-size: 1.15cqw;
+    background: #3a2a1c url(img/gp_menu.jpg) center / cover; }
+  .menu-utt::before { content: ''; position: absolute; inset: 0; background: inherit; filter: blur(6px) brightness(.9); transform: scale(1.1); }
+  .mu-panneau { position: relative; flex: 1; margin: 4.5% 4% 0; background: rgba(250,248,244,.86); color: #2b2b2b; padding: 6% 7% 4%;
+    display: flex; flex-direction: column; align-items: center; min-height: 0; }
+  .mu-logo-img { position: absolute; left: 3%; top: 1.5%; width: 3.6em; height: 3.6em; object-fit: cover; box-shadow: 0 2px 6px rgba(0,0,0,.4); }
+  .mu-titre { font-family: 'Alegreya SC', Georgia, serif; font-weight: 800; text-transform: uppercase; text-align: center; font-size: 2.35em; line-height: 1.02; letter-spacing: .03em; color: #2b2b2b; margin-top: 1.3em; }
+  .mu-sous { font-family: 'Alegreya SC', Georgia, serif; font-weight: 800; text-transform: uppercase; color: #c08a4a; font-size: 1.35em; letter-spacing: .08em; margin: .55em 0 .5em; }
+  .mu-liste { list-style: none; width: 100%; display: flex; flex-direction: column; justify-content: space-between; flex: 1; gap: .1em; }
+  .mu-liste li { display: flex; justify-content: space-between; align-items: baseline; gap: .8em; font-size: 1.12em; }
+  .mu-liste li span::before { content: '●'; color: #c9924f; font-size: .5em; vertical-align: middle; margin-right: .5em; }
+  .mu-liste li b { font-weight: 500; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .mu-bande { position: relative; display: flex; justify-content: space-around; align-items: center; gap: .4em; background: #141414; color: #f0e6d2; padding: 3% 2.5%; margin-top: 4.5%; font-size: .78em; }
+  .mu-bande > div { display: flex; align-items: center; gap: .45em; line-height: 1.1; }
+  .mu-bande > div + div { border-left: 1px solid rgba(201,146,79,.5); padding-left: .6em; }
+  .mu-bande small { display: block; font-size: 1em; }
+  .mu-ico { color: #c9924f; font-size: 1.6em; }
 
   #fermerZoom { position: absolute; top: 3%; right: 3%; z-index: 36; display: none; font-size: clamp(13px, 1.7vw, 18px); background: rgba(6,10,18,.8); }
   body.zoom-libre #fermerZoom { display: block; }
@@ -726,7 +748,9 @@
   #souvenir.on { opacity: 1; transform: translate(-50%, 0); }
   #inventaire .slot.slot-outil { background: rgba(226,184,92,.18); }
   .journal.histoire { width: 74%; } .journal.histoire p { line-height: 1.4; }
-  #zHistoire { z-index: 40; }
+  #zHistoire { z-index: 40; flex-direction: column; gap: 2.5%; }
+  #zHistoire .journal { max-height: 78%; }
+  #zHistoire .close { position: static; flex: none; }
   .journal {
     width: 62%; max-height: 86%; overflow: auto; background: #efe6cf; color: #2a2116; border-radius: 4px; padding: 3% 4%;
     box-shadow: 0 18px 60px rgba(0,0,0,.8); display: flex; flex-direction: column; gap: 1em; font-size: clamp(12px, 1.5vw, 17px);
@@ -1232,6 +1256,9 @@
     </div>
   </div>
 
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <filter id="tremble"><feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="7"/><feDisplacementMap in="SourceGraphic" scale="2.6"/></filter>
+  </svg>
   <div class="zoom" id="zTestament">
     <div class="testament">
       <div class="t-tete">Testament</div>
@@ -1293,13 +1320,29 @@
 
   <div class="zoom" id="zMenu">
     <div class="menu-utt">
-      <div class="mu-logo">UNDER <i>the</i> TREE</div>
-      <div class="mu-lieu">Riviera Golf · 7 j/7 · 9 h – 2 h</div>
-      <div class="mu-l"><span>Sauce feuille avec riz</span><b>3 000 F</b></div>
-      <div class="mu-l"><span>Tchep</span><b>2 500 F</b></div>
-      <div class="mu-l"><span>Brochettes de poulet</span><b></b></div>
-      <div class="mu-l"><span>Saucisses grillées</span><b></b></div>
-      <div class="mu-pied">« Faites une pause, passez chez Under the Tree. »</div>
+      <div class="mu-panneau">
+        <img class="mu-logo-img" src="img/utt_logo.jpg" alt="Logo Under the Tree">
+        <div class="mu-titre">Menu<br>du jour</div>
+        <div class="mu-sous">Plats</div>
+        <ul class="mu-liste">
+          <li><span>Sauce djoumblé</span><b>3 000</b></li>
+          <li><span>Tchep poulet / poisson</span><b>3 000</b></li>
+          <li><span>Sauce feuille bœuf / poisson</span><b>3 000</b></li>
+          <li><span>Kedjenou de poulet (entier)</span><b>6 000</b></li>
+          <li><span>Kedjenou de pintade</span><b>15 000</b></li>
+          <li><span>Soupe de carpe</span><b>4 000</b></li>
+          <li><span>Soupe de pondeuse</span><b>12 000 / 6 000</b></li>
+          <li><span>Soupe de mouton</span><b>4 000</b></li>
+          <li><span>Soupe pattes de bœuf</span><b>4 000</b></li>
+          <li><span>Spaghetti côtelette</span><b>4 000</b></li>
+          <li><span>Under Burger</span><b>5 000</b></li>
+        </ul>
+      </div>
+      <div class="mu-bande">
+        <div><span class="mu-ico" aria-hidden="true">⌖</span><span><small>Localisation</small>Riviéra Golf</span></div>
+        <div><span class="mu-ico" aria-hidden="true">◷</span><span><small>Horaire</small>09h – 02h</span></div>
+        <div><span class="mu-ico" aria-hidden="true">✆</span><span><small>Contact</small>+225 07 59 09 36 86</span></div>
+      </div>
     </div>
     <button class="btn ghost close" data-close>Fermer ✕</button>
   </div>
@@ -1364,6 +1407,7 @@
   <div id="souvenir" role="status" aria-live="polite"></div>
   <div id="tourne">↻ Tourne ton téléphone à l'horizontale pour jouer en grand.</div>
   <button class="btn ghost" id="btnSon" aria-label="Couper le son">🔊</button>
+  <button class="btn ghost" id="btnMenu" aria-label="Menu principal">☰ Menu</button>
   <div id="inventaire"><button class="slot slot-outil" id="btnJournal" data-nom="Journal de Konan" aria-label="Journal de Konan">📖</button><button class="slot slot-outil" id="btnOeil" data-nom="Observer la scène" aria-label="Observer la scène">👁</button><button class="slot slot-outil" id="btnIndice" data-nom="Demander un indice" aria-label="Demander un indice">💡</button></div>
   <button id="objectifBar" aria-label="Objectif en cours"></button>
   <div id="bourse" hidden>Poche : <b id="bourseVal">0</b> FCFA</div>
@@ -2009,7 +2053,8 @@
   }
   function sceneGare() {
     sauver('gare'); objectif("Réunir 4 500 FCFA pour le car de Yakro. Sans toucher au billet mouillé.");
-    etat.poche = 0; aller('gare'); $('#bourse').hidden = false; $('#bourseVal').textContent = '0';
+    if (etat.poche == null) etat.poche = 0;
+    aller('gare'); $('#bourse').hidden = false; $('#bourseVal').textContent = etat.poche.toLocaleString('fr-FR');
     ajouter('chargeurs');
     dire([
       ['', "Gare routière d'Adjamé. Klaxons, apprentis qui crient, odeur de gasoil."],
@@ -2153,7 +2198,7 @@
     if (etat.coffreOuvert) return;
     if (valCoffre.every((v, i) => v === CODE_COFFRE[i])) {
       etat.coffreOuvert = true; sOuvert(); sGrince();
-      setTimeout(() => { ouvrirZoom('zCoffreOuvert'); dire([['', "Le coffre s'ouvre avec un long grincement. Une odeur de vase en sort."]]); }, 700);
+      setTimeout(() => { ouvrirCoffreOuvert(); dire([['', "Le coffre s'ouvre avec un long grincement. Une odeur de vase en sort."]]); }, 700);
     } else {
       sErreur();
       const c = $('#coffreCadran'); c.classList.remove('secoue'); void c.offsetWidth; c.classList.add('secoue');
@@ -2164,9 +2209,18 @@
         : "1, 9, 9, 8. L'année du calendrier. L'année du billet."]]);
     }
   };
-  document.querySelectorAll('[data-objet2]').forEach(o => o.onclick = e => {
-    e.stopPropagation();
-    const id = o.dataset.objet2;
+  function ouvrirCoffreOuvert() {
+    const pris = etat.inventaire.includes('testament') || etat.luTestament;
+    plan('img/gp_coffreouvert.jpg', [
+      { s: 'left:35%;top:36.5%;width:10%;height:13%;z-index:2;', cls: pris ? 'fait' : '', f: el => objetCoffre('testament', el) },
+      { s: 'left:43.5%;top:37%;width:12.5%;height:12.5%;', f: el => objetCoffre('liasses', el) },
+      { s: 'left:34.5%;top:55%;width:22%;height:19%;', f: el => objetCoffre('liasses', el) },
+      { s: 'left:20.5%;top:15%;width:14%;height:72%;', f: () => dire([['Konan', "Une porte d'acier de dix centimètres. Papa avait peur de quelqu'un."]]) },
+      { s: 'left:36%;top:74%;width:22%;height:5%;', f: () => dire([['Konan', "Une flaque au fond du coffre. L'eau goutte des liasses, sans s'arrêter."]]) },
+    ]);
+  }
+  document.querySelectorAll('[data-objet2]').forEach(o => o.onclick = e => { e.stopPropagation(); objetCoffre(o.dataset.objet2, o); });
+  function objetCoffre(id, o) {
     if (id === 'liasses') {
       if (etat.choixLiasse) return dire([['Konan', etat.choixLiasse === 'prise' ? "Il en reste des centaines. Personne ne verra qu'il en manque une." : "Je n'y touche pas."]]);
       return dire([['Konan', "Des liasses et des liasses de 10 000. Toutes trempées, comme le mien."], ['Konan', "Une seule liasse, c'est un million. De quoi payer Bamba trois fois. Ce soir, 18 h…"]],
@@ -2178,11 +2232,12 @@
             dire([['', "La liasse est froide. Lourde. De l'eau coule entre les doigts de Konan."], ['Konan', "Bamba sera payé. Le reste… on verra."]]); }],
         ]));
     }
-    sPrendre(); o.classList.add('pris'); ajouter('testament');
+    if (etat.inventaire.includes('testament')) return dire([['Konan', "Le testament est déjà dans ma poche."]]);
+    sPrendre(); o.classList.add(o.classList.contains('zone') ? 'fait' : 'pris'); ajouter('testament');
     ouvrirZoom('zTestament');
     dire([['Konan', "L'écriture de papa. Tremblante."]], () => { etat.luTestament = true; fermerZooms();
       dire([['Konan', "« L'engagement du 7 juillet »… Le même jour que sur son vieux calendrier de 1998."], ['Konan', "Et aujourd'hui on est le 21."]], verifChap1); });
-  });
+  }
 
   // ================== CHAPITRE 2 : LES FUNÉRAILLES ==================
   const sTambour = () => [0, .25, .5, .62].forEach((t, i) => bip(i === 3 ? 90 : 70, .18, 'sine', .12, t));
@@ -2546,7 +2601,7 @@
       ['Le carnet', "7 juillet 1998. Je l'ai réveillé. Je lui ai dit qu'on allait voir les caïmans dormir.", () => { $('#zImg').src = 'img/flashback.jpg'; ouvrirZoom('zImage'); ambiance('nuit'); sMenace(); }],
       ['Le carnet', "Il m'a tenu la main jusqu'au muret. Zié attendait. La lune était pleine."],
       ['Le carnet', "Il m'a demandé : « Papa, pourquoi tu pleures ? »", () => { $('#zImg').src = 'img/pere1998.jpg'; sMenace(); }],
-      ['Le carnet', "Je suis rentré seul.", () => { ouvrirZoom('zCarnet'); ambiance('interieur'); }]] },
+      ['Le carnet', "Je suis rentré seul."]] },
     { id: 'D', date: 'Le lendemain', court: "Le coffre est plein. Des billets trempés, qui ne sèchent pas.", lignes: [
       ['Le carnet', "Le lendemain. Le coffre était vide hier. Ce matin il est plein. Des billets de 10 000, trempés, qui ne sèchent pas."],
       ['Le carnet', "On a dit à Konan que son frère s'était noyé en jouant. On a laissé une sandale au bord de l'eau."]] },
@@ -2574,7 +2629,7 @@
         etat.c3Lues++; b.remove(); sPapier();
         $('#cnGauche').insertAdjacentHTML('beforeend', `<div>${p.date}</div>`);
         $('#cnDroite').innerHTML = `<b>${p.date}</b>${p.court}`;
-        dire(p.lignes, () => { if (etat.c3Lues === pages.length) finCarnet(); });
+        dire(p.lignes, () => { if ($('#zImage').classList.contains('on')) { ouvrirZoom('zCarnet'); ambiance('interieur'); } if (etat.c3Lues === pages.length) finCarnet(); });
       };
       zone.appendChild(b);
     });
@@ -3080,7 +3135,7 @@
       ['Owell Brown', "Goûte la sauce feuille, mon frère. Ça, c'est le vrai goût de chez nous."]]),
     bambaTel: () => appelBamba(),
     gardes: () => dire([['', "Les deux gros bras de Bamba mangent en silence. Ils ont l'air de se demander à quoi ressemble un uniforme."]]),
-    tableUtt: () => plan('img/gp_menu.jpg', [{ s: 'left:18.5%;top:24%;width:18%;height:43%;', cls: 'pulse', f: () => { sClic(); ouvrirZoom('zMenu'); } }]),
+    tableUtt: () => plan('img/gp_menu.jpg', [{ s: 'left:29.3%;top:31%;width:12.8%;height:12.6%;', cls: 'plaque-utt', html: '<span>Under</span><span>the Tree</span>' }, { s: 'left:18.5%;top:22%;width:29.5%;height:46%;', cls: 'pulse', f: () => { sClic(); ouvrirZoom('zMenu'); } }]),
     arbre: () => dire([['', "Le grand arbre couvre toute la terrasse. Le soir, les guirlandes s'allument dans ses branches."]]),
     serveurs: () => dire([['Un serveur', "Bonsoir ! Vous prenez quoi ? Le tchep est très bon ce soir."]]),
     // --- bord du lac ---
@@ -3237,8 +3292,8 @@
     tiroir: () => dire([['Konan', "Le tiroir est fermé à clé. Plus tard."]]),
     corbeille: () => dire([['Konan', "Des papiers froissés. Des brouillons de lettres jamais envoyées, toutes adressées à moi."]]),
     // --- coffre ---
-    cadranCoffre: () => { if (etat.coffreOuvert) return ouvrirZoom('zCoffreOuvert'); sClic(); ouvrirZoom('zCoffre'); },
-    poignee: () => etat.coffreOuvert ? ouvrirZoom('zCoffreOuvert') : (sErreur(), dire([['Konan', "Bloquée. Il faut la combinaison à quatre chiffres."]])),
+    cadranCoffre: () => { if (etat.coffreOuvert) return ouvrirCoffreOuvert(); sClic(); ouvrirZoom('zCoffre'); },
+    poignee: () => etat.coffreOuvert ? ouvrirCoffreOuvert() : (sErreur(), dire([['Konan', "Bloquée. Il faut la combinaison à quatre chiffres."]])),
     dostableau: () => { sClic(); aller('bureau'); },
     // --- gare ---
     tableau: () => { sClic(); ouvrirZoom('zTableau');
@@ -3426,7 +3481,7 @@
       villa: () => e.porteOuverte ? "Entre dans la villa par la grande porte." : "Écoute d'abord Tantie Adjoua.",
       bureau: () => !e.luTestament ? (e.vuTableau ? "Clique encore sur le tableau du lac : il cache quelque chose." : "Le tableau du lac est de travers. Regarde-le de plus près.")
         : !e.vuPhoto ? "Un cadre est retourné face contre le bureau, près du téléphone." : "Tu as tout vu ici.",
-      coffre: () => e.coffreOuvert ? "Prends l'enveloppe scellée dans le coffre." : e.vuCal1998 ? "Quatre chiffres : une année. La même que sur le billet mouillé et sur le vieux calendrier." : "Retourne au bureau et regarde le vieux calendrier, près de l'étagère.",
+      coffre: () => e.coffreOuvert ? "Clique sur la poignée du coffre pour le rouvrir, puis prends l'enveloppe scellée sur l'étagère du haut." : e.vuCal1998 ? "Quatre chiffres : une année. La même que sur le billet mouillé et sur le vieux calendrier." : "Retourne au bureau et regarde le vieux calendrier, près de l'étagère.",
       funerailles: () => !e.iYao ? "Parle aux vieux assis au premier rang." : !e.iCorps ? "Yao se cache derrière les voitures, à droite." : !e.iNoyade ? "Le docteur est debout près de la table, à droite du portrait."
         : !e.iRegistre ? "Le registre des condoléances est sur la table des boissons. Cherche la ligne dont l'heure est impossible."
         : !e.vuWei ? "Un homme au casque de chantier attend au premier plan, à droite." : !e.affaireWei ? "Clique sur la carte de M. Wei dans l'inventaire pour appeler Bamba."
@@ -3498,6 +3553,16 @@
   };
   $('#btnRejouer3').onclick = () => location.reload();
   $('#fpHistoire').onclick = e => { e.stopPropagation(); sClic(); ouvrirZoom('zHistoire'); };
+  $('#btnMenu').onclick = e => {
+    e.stopPropagation(); if ($('#dialog').classList.contains('on')) return;
+    const fin = ['finale', 'fin', 'fin3'].includes($('.scene.active').id), s = lireSauvegarde();
+    choisir('Menu', fin ? "Revenir au menu principal ?"
+      : s ? "Revenir au menu principal ? Tu pourras reprendre au début du chapitre en cours avec « Continuer »."
+      : "Revenir au menu principal ? Ta partie n'a pas encore de point de sauvegarde : il faudra recommencer.", [
+      ["Revenir au menu principal", () => { try { history.replaceState(null, '', location.pathname + location.search); } catch (er) {} location.reload(); }],
+      ["Continuer à jouer", () => {}],
+    ]);
+  };
   $('#fpRejouer').onclick = () => { try { history.replaceState(null, '', location.pathname + location.search); } catch (e) {} location.reload(); };
   $('#retour').onclick = e => {
     e.stopPropagation(); if ($('#dialog').classList.contains('on')) return;
