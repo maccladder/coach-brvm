@@ -27,6 +27,9 @@ abstract class StoryGameService
     public const HINTS_PACK_SIZE = 5;
     public const HINTS_PACK_PRICE = 500; // XOF
 
+    /** Catégories de navigateur (aucune autre information du User-Agent n'est gardée). */
+    public const BROWSERS = ['facebook', 'instagram', 'whatsapp', 'chrome', 'safari', 'autre'];
+
     /** Slug du produit marketplace, aussi game_slug des crédits. */
     public function slug(): string
     {
@@ -180,5 +183,49 @@ abstract class StoryGameService
 
             return $this->hints($user);
         });
+    }
+
+    /**
+     * Catégorie de navigateur d'après le User-Agent. Les navigateurs intégrés passent avant
+     * les navigateurs classiques : celui de Facebook (FBAN, FBAV, FB_IAB) contient aussi
+     * « Chrome » ou « Safari ».
+     */
+    public static function browserFamily(?string $userAgent): string
+    {
+        $ua = (string) $userAgent;
+
+        return match (true) {
+            (bool) preg_match('/FBAN|FBAV|FB_IAB/', $ua)                    => 'facebook',
+            str_contains($ua, 'Instagram')                                   => 'instagram',
+            str_contains($ua, 'WhatsApp')                                    => 'whatsapp',
+            (bool) preg_match('/Edg\/|EdgA\/|EdgiOS|OPR\/|SamsungBrowser|Firefox|FxiOS/', $ua) => 'autre',
+            (bool) preg_match('/Chrome\/|CriOS/', $ua)                      => 'chrome',
+            (bool) preg_match('/Safari\//', $ua)                            => 'safari',
+            default                                                          => 'autre',
+        };
+    }
+
+    /**
+     * Navigateur intégré à une application (Facebook, Instagram, WhatsApp, ou toute autre webview) ?
+     * Il charge souvent mal un gros jeu : la page propose alors de l'ouvrir dans le navigateur.
+     *
+     * @return array{in_app: bool, platform: string} platform : android | ios | other
+     */
+    public static function inAppBrowser(?string $userAgent): array
+    {
+        $ua = (string) $userAgent;
+
+        $platform = match (true) {
+            str_contains($ua, 'Android')                   => 'android',
+            (bool) preg_match('/iPhone|iPad|iPod/', $ua)   => 'ios',
+            default                                        => 'other',
+        };
+
+        $inApp = in_array(self::browserFamily($ua), ['facebook', 'instagram', 'whatsapp'], true)
+            // Webview Android générique (« ; wv) ») ; sur iPhone, une webview n'annonce pas Safari
+            || ($platform === 'android' && str_contains($ua, '; wv)'))
+            || ($platform === 'ios' && !str_contains($ua, 'Safari/'));
+
+        return ['in_app' => $inApp, 'platform' => $platform];
     }
 }
