@@ -392,7 +392,9 @@ class PacteApiTest extends TestCase
     public function test_la_page_definit_le_pont_avant_l_iframe(): void
     {
         $guest = $this->get(route('pacte.show'))->getContent();
-        $this->assertLessThan(strpos($guest, '<iframe'), strpos($guest, 'window.PacteHost = LOGGED'));
+        $pont  = strpos($guest, 'window.PacteHost = Object.freeze(');
+        $this->assertNotFalse($pont);
+        $this->assertLessThan(strpos($guest, '<iframe'), $pont);
         $this->assertStringContainsString('const LOGGED     = false', $guest);
 
         $logged = $this->actingAs($this->player)->get(route('pacte.show'))->getContent();
@@ -438,8 +440,9 @@ class PacteApiTest extends TestCase
             $html = ($viewer ? $this->actingAs($viewer) : $this)->get(route('pacte.show'))->getContent();
 
             $this->assertStringContainsString('const GAME_LANG  = null;', $html);
-            $this->assertMatchesRegularExpression('/Object\.freeze\(LOGGED \? \{\s+test:\s+TEST_MODE,\s+lang:\s+GAME_LANG,/', $html);
-            $this->assertMatchesRegularExpression('/\} : \{\s+test:\s+TEST_MODE,\s+lang:\s+GAME_LANG,/', $html);
+            // test, lang, langue et evenement communs aux deux variantes, posés avant le gel
+            $this->assertMatchesRegularExpression('/const common = \{\s+test:\s+TEST_MODE,\s+lang:\s+GAME_LANG,\s+langue:.+\n\s+evenement:/', $html);
+            $this->assertStringContainsString('window.PacteHost = Object.freeze(Object.assign({}, common, LOGGED ? {', $html);
         }
     }
 

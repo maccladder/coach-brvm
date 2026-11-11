@@ -167,6 +167,21 @@ class PacteController extends Controller
     }
 
     /**
+     * POST /jeux/le-pacte/event  {type: un nom de PacteService::EVENTS}
+     * Compteur anonyme de l'entonnoir, invités et connectés (une ligne par session et par type).
+     */
+    public function event(Request $request)
+    {
+        $data = $request->validate([
+            'type' => ['required', 'string', 'in:' . implode(',', PacteService::EVENTS)],
+        ]);
+
+        $this->pacte->recordEvent($data['type'], $request->session()->getId(), $request->userAgent());
+
+        return response()->noContent();
+    }
+
+    /**
      * POST /jeux/le-pacte/progress  {save: {point, etat} | null}
      */
     public function progress(Request $request)

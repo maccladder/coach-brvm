@@ -39,6 +39,92 @@ abstract class StoryGameService
     /** Contenu de game_progress.data à la création de la ligne. */
     abstract protected function emptyProgress(): array;
 
+    /** Rang d'un point de sauvegarde dans l'ordre de l'histoire (statistiques). */
+    abstract public function rank(string $save): int;
+
+    /** Point de sauvegarde en cours d'après game_progress.data. */
+    abstract protected function savePoint(array $data): ?string;
+
+    // ─── Événements anonymes de l'entonnoir ─────────────────────────────
+
+    /**
+     * Table des événements anonymes. Par défaut game_events, partagée entre les jeux
+     * (colonne game_slug) ; Akwaba garde akwaba_events.
+     */
+    public function eventsTable(): string
+    {
+        return 'game_events';
+    }
+
+    /** Colonnes qui rattachent un événement au jeu dans sa table. */
+    protected function eventColumns(): array
+    {
+        return ['game_slug' => $this->slug()];
+    }
+
+    /** Événements de ce jeu (requête prête à filtrer par type, date, navigateur). */
+    public function events(): \Illuminate\Database\Query\Builder
+    {
+        return DB::table($this->eventsTable())->where($this->eventColumns());
+    }
+
+    protected function sessionHash(string $sessionId): string
+    {
+        return hash_hmac('sha256', $sessionId, (string) config('app.key'));
+    }
+
+    /**
+     * Compteur anonyme : au plus une ligne par session et par type (index unique). L'id de
+     * session n'est jamais stocké, seulement son HMAC avec la clé de l'application ; ni IP ni
+     * compte ; du navigateur, seulement sa catégorie. Types : liste blanche static::EVENTS.
+     */
+    public function recordEvent(string $type, string $sessionId, ?string $userAgent = null): void
+    {
+        if (!in_array($type, static::EVENTS, true) || $sessionId === '') {
+            return;
+        }
+
+        DB::table($this->eventsTable())->insertOrIgnore($this->eventColumns() + [
+            'type'         => $type,
+            'session_hash' => $this->sessionHash($sessionId),
+            'browser'      => self::browserFamily($userAgent),
+            'created_at'   => now(),
+        ]);
+    }
+
+    // ─── Vue admin d'un joueur ──────────────────────────────────────────
+
+    /**
+     * Origine du déblocage, solde, point en cours et le plus loin atteint, fins.
+     *
+     * @return array{unlocked: bool, via: ?string, hints: int, save: ?string, max: ?string, fins: array, updated_at: mixed}
+     */
+    public function playerSummary(User $user): array
+    {
+        $product = $this->product();
+
+        $paid = $product && $user->purchasedProducts()
+            ->where('marketplace_products.id', $product->id)
+            ->wherePivot('status', 'paid')
+            ->exists();
+        $granted = $product && $product->isGrantedTo($user);
+
+        $progress = $product
+            ? GameProgress::where('user_id', $user->id)->where('product_id', $product->id)->first()
+            : null;
+        $data = (array) ($progress?->data ?? []);
+
+        return [
+            'unlocked'   => $paid || $granted,
+            'via'        => $paid ? 'purchase' : ($granted ? 'grant' : null),
+            'hints'      => $this->hints($user),
+            'save'       => $this->savePoint($data),
+            'max'        => $data['max'] ?? null,
+            'fins'       => array_values($data['fins'] ?? []),
+            'updated_at' => $progress?->updated_at,
+        ];
+    }
+
     public function product(): ?MarketplaceProduct
     {
         return MarketplaceProduct::where('slug', $this->slug())->where('type', 'game')->first();

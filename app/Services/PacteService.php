@@ -29,6 +29,23 @@ class PacteService extends StoryGameService
     public const FREE_POINTS = ['gare', 'villa', 'funerailles', 'finGratuite'];
     public const FINS = ['pacte', 'justice', 'argent', 'gardien', 'sacrifice'];
 
+    /**
+     * Événements anonymes de l'entonnoir (liste blanche stricte), invités et connectés,
+     * tous envoyés par la page hôte (table game_events) :
+     *  - page : page_open, page_loaded (iframe chargée), open_external (bandeau navigateur intégré) ;
+     *  - pont PacteHost : ch1_reached / ch2_reached / lock_reached (sauvegarde villa / funerailles /
+     *    finGratuite), buy_click_full (debloquer), buy_click_hints5 (acheterIndices), shop_open
+     *    (plus d'indice : la boutique s'ouvre), free_hint, lang_fr / lang_en (langue()) ;
+     *  - jeu, par PacteHost.evenement() : new_game, continue, paywall_open (écran de fin
+     *    gratuite réaffiché à la reprise).
+     */
+    public const EVENTS = [
+        'page_open', 'page_loaded', 'open_external',
+        'new_game', 'continue', 'ch1_reached', 'ch2_reached', 'lock_reached', 'paywall_open',
+        'free_hint', 'shop_open', 'buy_click_full', 'buy_click_hints5',
+        'lang_fr', 'lang_en',
+    ];
+
     /** Taille maximale de l'état sauvegardé (JSON), le jeu en produit 5 à 10 Ko. */
     public const MAX_ETAT_BYTES = 65536;
     /** Taille maximale de la liste des choix envoyée avec une fin. */
@@ -87,6 +104,14 @@ class PacteService extends StoryGameService
         $etat = json_decode($save['etat']);
 
         return $etat instanceof \stdClass ? ['point' => $save['point'], 'etat' => $etat] : null;
+    }
+
+    /** Point de sauvegarde en cours : data.save = {point, etat}. */
+    protected function savePoint(array $data): ?string
+    {
+        $point = $data['save']['point'] ?? null;
+
+        return is_string($point) ? $point : null;
     }
 
     public function isFreePoint(string $point): bool

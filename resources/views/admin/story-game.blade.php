@@ -1,10 +1,12 @@
+{{-- Admin d'un jeu à histoire (Akwaba, Le Pacte) : $cfg vient de StoryGameAdminController::config() --}}
 @extends('layouts.admin')
-@section('title', '🌙 Akwaba — Admin')
+@section('title', $cfg['page_title'])
 @section('content')
 @php
     $fcfa = fn ($n) => number_format((int) $n, 0, ',', ' ') . ' F';
-    $chapter = fn ($s) => $s === null ? '—' : ($s === 'P' ? 'Prologue' : 'Ch. ' . $s);
-    $finLabels = ['oubli' => "Fin de l'oubli", 'gardien' => 'Fin du gardien'];
+    $chapter = fn ($s) => $s === null ? '—' : ($cfg['short_labels'][$s] ?? $s);
+    $finLabels = $cfg['fins'];
+    $r = $cfg['route'];
     $reasonBadges = [
         'purchase' => ['bg-success', '💳 Achat'],
         'use'      => ['bg-secondary', '💡 Utilisé'],
@@ -25,7 +27,7 @@
 
     <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
         <div>
-            <h2 class="mb-1">🌙 Akwaba : le mystère de la lagune Ébrié</h2>
+            <h2 class="mb-1">{{ $cfg['title'] }}</h2>
             <div class="text-muted small">
                 Produit #{{ $product->id }} ·
                 @if($product->status === 'published')
@@ -33,7 +35,7 @@
                 @else
                     <span class="badge bg-secondary">{{ ucfirst($product->status) }}</span>
                 @endif
-                · <a href="{{ route('akwaba.show') }}" target="_blank" rel="noopener">Ouvrir le jeu ↗</a>
+                · <a href="{{ route($cfg['play_route']) }}" target="_blank" rel="noopener">Ouvrir le jeu ↗</a>
             </div>
         </div>
     </div>
@@ -68,7 +70,7 @@
                                     <td class="small text-muted text-nowrap">{{ $d->credited_at?->format('d/m/Y H:i') ?? $d->updated_at?->format('d/m/Y H:i') }}</td>
                                     <td class="small">
                                         @if($d->user)
-                                            <a href="{{ route('admin.akwaba.index', ['user' => $d->user_id]) }}">{{ $d->user->name }}</a>
+                                            <a href="{{ route($r . '.index', ['user' => $d->user_id]) }}">{{ $d->user->name }}</a>
                                             <div class="text-muted">{{ $d->user->email }}</div>
                                         @else
                                             #{{ $d->user_id }}
@@ -115,7 +117,7 @@
     <div class="card border-0 shadow-sm mb-4" id="entonnoir-sessions">
         <div class="card-header fw-bold d-flex flex-wrap justify-content-between align-items-center gap-2">
             <span>👻 Entonnoir des visiteurs (sessions anonymes, invités et connectés){{ $browser ? ' · navigateur : ' . $browserLabels[$browser] : '' }}</span>
-            <form method="GET" action="{{ route('admin.akwaba.index') }}#entonnoir-sessions" class="d-flex gap-2">
+            <form method="GET" action="{{ route($r . '.index') }}#entonnoir-sessions" class="d-flex gap-2">
                 @foreach(request()->except(['navigateur', 'page', 'ledger_page']) as $name => $value)
                     @if(is_string($value))<input type="hidden" name="{{ $name }}" value="{{ $value }}">@endif
                 @endforeach
@@ -163,15 +165,17 @@
         </div>
         <div class="card-footer bg-white small text-muted">
             @php $d = $stats['sessions']['all']['details']; @endphp
-            Détail (total) : « Continuer » {{ $d['continue'] }} · indice gratuit {{ $d['free_hint'] }} · boutique d'indices ouverte {{ $d['shop_open'] }} ·
-            clic « histoire complète » {{ $d['buy_click_full'] }} · clic « 5 indices » {{ $d['buy_click_hints5'] }} ·
-            <strong>a dû attendre la fin du chargement des images</strong> {{ $d['wait_rest'] }}.<br>
+            Détail (total) :
+            @foreach($cfg['details'] as [$key, $label, , $strong])
+                @if($strong)<strong>{{ $label }}</strong>@else{{ $label }}@endif {{ $d[$key] }}{{ $loop->last ? '.' : ' ·' }}
+            @endforeach
+            <br>
             @if($browser)
                 « Payé » n'est pas rattaché à un navigateur : il n'est affiché que sans filtre.<br>
             @endif
             Une session = un navigateur (au plus un événement par type ; un joueur qui se connecte change de session). Aucune IP ni donnée personnelle stockée.
             « Payé » compte des paiements (déblocages + packs), pas des sessions.
-            @if($stats['sessions_since'])
+            @if($cfg['sessions_note'] && $stats['sessions_since'])
                 Étapes détaillées mesurées depuis le {{ \Illuminate\Support\Carbon::parse($stats['sessions_since'])->format('d/m/Y H:i') }} :
                 avant, seuls « Jeu chargé » et « Cadenas » existaient (invités uniquement), d'où des % au-dessus de 100 % sur le total.
             @endif
@@ -189,16 +193,11 @@
                     <thead class="table-light">
                         <tr>
                             <th>Navigateur</th>
-                            <th class="text-end">Page ouverte</th>
-                            <th class="text-end">Jeu chargé</th>
-                            <th class="text-end">% restés au chargement</th>
-                            <th class="text-end">Partie</th>
-                            <th class="text-end">Chapitre 2</th>
-                            <th class="text-end">Cadenas</th>
-                            <th class="text-end">% au cadenas</th>
-                            <th class="text-end">Clic acheter</th>
-                            <th class="text-end">Attente images</th>
-                            <th class="text-end">Ouvert dans Chrome</th>
+                            @foreach($cfg['browser_stages'] as [$key, $label])
+                                <th class="text-end">{{ $label }}</th>
+                                @if($key === 'loaded')<th class="text-end">% restés au chargement</th>@endif
+                                @if($key === 'lock')<th class="text-end">% au cadenas</th>@endif
+                            @endforeach
                             <th></th>
                         </tr>
                     </thead>
@@ -206,20 +205,17 @@
                         @forelse($browsers as $row)
                             <tr>
                                 <td class="fw-semibold">{{ $browserLabels[$row['browser']] ?? $row['browser'] }}</td>
-                                <td class="text-end">{{ $row['page'] }}</td>
-                                <td class="text-end">{{ $row['loaded'] }}</td>
-                                <td class="text-end {{ $row['loaded_pct'] !== null && $row['loaded_pct'] < 70 ? 'text-danger fw-semibold' : '' }}">{{ $pct($row['loaded_pct']) }}</td>
-                                <td class="text-end">{{ $row['start'] }}</td>
-                                <td class="text-end">{{ $row['ch2'] }}</td>
-                                <td class="text-end">{{ $row['lock'] }}</td>
-                                <td class="text-end">{{ $pct($row['lock_pct']) }}</td>
-                                <td class="text-end">{{ $row['buy'] }}</td>
-                                <td class="text-end">{{ $row['wait'] }}</td>
-                                <td class="text-end">{{ $row['external'] }}</td>
-                                <td class="text-end"><a href="{{ route('admin.akwaba.index', ['navigateur' => $row['browser']]) }}#entonnoir-sessions" class="small">Entonnoir →</a></td>
+                                @foreach($cfg['browser_stages'] as [$key])
+                                    <td class="text-end">{{ $row[$key] }}</td>
+                                    @if($key === 'loaded')
+                                        <td class="text-end {{ $row['loaded_pct'] !== null && $row['loaded_pct'] < 70 ? 'text-danger fw-semibold' : '' }}">{{ $pct($row['loaded_pct']) }}</td>
+                                    @endif
+                                    @if($key === 'lock')<td class="text-end">{{ $pct($row['lock_pct']) }}</td>@endif
+                                @endforeach
+                                <td class="text-end"><a href="{{ route($r . '.index', ['navigateur' => $row['browser']]) }}#entonnoir-sessions" class="small">Entonnoir →</a></td>
                             </tr>
                         @empty
-                            <tr><td colspan="12" class="text-muted p-4">Aucune visite ces 7 derniers jours.</td></tr>
+                            <tr><td colspan="{{ count($cfg['browser_stages']) + 4 }}" class="text-muted p-4">Aucune visite ces 7 derniers jours.</td></tr>
                         @endforelse
                     </tbody>
                 </table>
@@ -227,11 +223,12 @@
         </div>
         <div class="card-footer bg-white small text-muted">
             Catégorie déduite du User-Agent, qui n'est pas conservé. « Facebook » = navigateur intégré à l'application Facebook
-            (clic sur une pub ou une publication). « Ouvert dans Chrome » = clic sur le bouton du bandeau proposé aux navigateurs intégrés (Android). « Inconnu » = visites d'avant le 04/11/2026.
+            (clic sur une pub ou une publication). « Ouvert dans Chrome » = clic sur le bouton du bandeau proposé aux navigateurs intégrés (Android).@if($cfg['browser_unknown_note']) « Inconnu » = visites d'avant le 04/11/2026.@endif
         </div>
     </div>
 
     {{-- Erreurs JavaScript du jeu --}}
+    @if($cfg['errors'])
     <div class="card border-0 shadow-sm mb-4" id="erreurs">
         <div class="card-header fw-bold">🐞 Erreurs du jeu (50 dernières, regroupées par message)</div>
         <div class="card-body p-0">
@@ -257,6 +254,7 @@
             </div>
         </div>
     </div>
+    @endif
 
     <div class="row g-4 mb-4">
         {{-- Entonnoir --}}
@@ -278,12 +276,14 @@
                     @endforeach
                     <hr>
                     <div class="small text-muted">
-                        Fins découvertes : {{ $finLabels['oubli'] }} <strong>{{ $stats['fins']['oubli'] }}</strong>
-                        · {{ $finLabels['gardien'] }} <strong>{{ $stats['fins']['gardien'] }}</strong>
+                        Fins découvertes :
+                        @foreach($finLabels as $key => $label)
+                            {{ $label }} <strong>{{ $stats['fins'][$key] }}</strong>{{ $loop->last ? '' : ' ·' }}
+                        @endforeach
                     </div>
                     <div class="small text-muted mt-2">
                         Seuls les joueurs connectés sont comptés (les invités jouent sans sauvegarde serveur).
-                        Cadenas = a cliqué « Continuer l'aventure » en étant connecté, a l'accès, ou a dépassé le chapitre 2.
+                        {{ $cfg['lock_help'] }}
                     </div>
                 </div>
             </div>
@@ -349,15 +349,15 @@
                 <div class="card-body">
                     <p class="small text-muted">
                         Le joueur a payé 500 F mais n'a pas reçu ses indices ? Saisis la référence Paystack
-                        (<code>AKW-H-…</code>) : elle est revérifiée chez Paystack, puis +5 indices sont crédités
+                        (<code>{{ $cfg['hints_prefix'] }}…</code>) : elle est revérifiée chez Paystack, puis +5 indices sont crédités
                         au joueur qui a payé, une seule fois.
                     </p>
                     @if($canAct)
-                    <form method="POST" action="{{ route('admin.akwaba.recover') }}" class="js-confirm"
+                    <form method="POST" action="{{ route($r . '.recover') }}" class="js-confirm"
                           data-confirm="Vérifier cette référence chez Paystack et créditer +5 indices si elle est valide ?">
                         @csrf
                         <input type="text" name="reference" class="form-control form-control-sm font-monospace mb-2"
-                               placeholder="AKW-H-…" value="{{ old('reference') }}" required maxlength="120">
+                               placeholder="{{ $cfg['hints_prefix'] }}…" value="{{ old('reference') }}" required maxlength="120">
                         <button type="submit" class="btn btn-sm btn-dark w-100">Vérifier et créditer</button>
                     </form>
                     @else
@@ -375,7 +375,7 @@
                 <span>👤 {{ $selected->name }} <span class="text-muted fw-normal">· {{ $selected->email }}</span></span>
                 <span class="d-flex gap-2">
                     <a href="{{ route('admin.users.show', $selected) }}" class="btn btn-sm btn-outline-secondary">Fiche utilisateur</a>
-                    <a href="{{ route('admin.akwaba.index') }}" class="btn btn-sm btn-outline-secondary">✕ Tous les joueurs</a>
+                    <a href="{{ route($r . '.index') }}" class="btn btn-sm btn-outline-secondary">✕ Tous les joueurs</a>
                 </span>
             </div>
             <div class="card-body">
@@ -406,7 +406,7 @@
                         <div class="border rounded p-3 h-100">
                             <div class="fw-bold mb-2">Déblocage de l'histoire</div>
                             @if(!$selectedSummary['unlocked'])
-                                <form method="POST" action="{{ route('admin.akwaba.unlock', $selected) }}" class="js-confirm"
+                                <form method="POST" action="{{ route($r . '.unlock', $selected) }}" class="js-confirm"
                                       data-confirm="Débloquer l'histoire complète pour {{ $selected->name }} ?">
                                     @csrf
                                     <input type="text" name="reason" class="form-control form-control-sm mb-2" required maxlength="300"
@@ -419,7 +419,7 @@
                                     <button class="btn btn-sm btn-success w-100">🎁 Débloquer</button>
                                 </form>
                             @elseif($selectedSummary['via'] === 'grant')
-                                <form method="POST" action="{{ route('admin.akwaba.lock', $selected) }}" class="js-confirm"
+                                <form method="POST" action="{{ route($r . '.lock', $selected) }}" class="js-confirm"
                                       data-confirm="Retirer le déblocage offert à {{ $selected->name }} ?">
                                     @csrf
                                     <input type="text" name="reason" class="form-control form-control-sm mb-2" required maxlength="300"
@@ -434,7 +434,7 @@
                     <div class="col-md-7">
                         <div class="border rounded p-3 h-100">
                             <div class="fw-bold mb-2">Ajouter des indices</div>
-                            <form method="POST" action="{{ route('admin.akwaba.hints', $selected) }}" class="row g-2 js-confirm"
+                            <form method="POST" action="{{ route($r . '.hints', $selected) }}" class="row g-2 js-confirm"
                                   data-confirm="Ajouter ces indices à {{ $selected->name }} ?">
                                 @csrf
                                 <div class="col-sm-3">
@@ -467,7 +467,7 @@
     <div class="card border-0 shadow-sm mb-4">
         <div class="card-header fw-bold d-flex flex-wrap justify-content-between align-items-center gap-2">
             <span>🎮 Joueurs ({{ $players->total() }})</span>
-            <form method="GET" action="{{ route('admin.akwaba.index') }}" class="d-flex gap-2">
+            <form method="GET" action="{{ route($r . '.index') }}" class="d-flex gap-2">
                 <input type="text" name="q" value="{{ request('q') }}" class="form-control form-control-sm" placeholder="Nom ou e-mail" style="min-width:220px;">
                 <button class="btn btn-sm btn-outline-dark">Rechercher</button>
             </form>
@@ -515,7 +515,7 @@
                                 <td class="small">{{ collect($p->fins)->map(fn ($f) => $finLabels[$f] ?? $f)->join(', ') ?: '—' }}</td>
                                 <td class="small text-muted">{{ $p->last_activity?->format('d/m/Y H:i') ?? '—' }}</td>
                                 <td class="text-end">
-                                    <a href="{{ route('admin.akwaba.index', ['user' => $p->id]) }}" class="btn btn-sm btn-outline-primary">Gérer</a>
+                                    <a href="{{ route($r . '.index', ['user' => $p->id]) }}" class="btn btn-sm btn-outline-primary">Gérer</a>
                                 </td>
                             </tr>
                         @empty
@@ -534,7 +534,7 @@
     <div class="card border-0 shadow-sm mb-4">
         <div class="card-header fw-bold d-flex flex-wrap justify-content-between align-items-center gap-2">
             <span>📜 Historique des indices{{ $selected ? ' · ' . $selected->name : '' }} ({{ $ledger->total() }})</span>
-            <form method="GET" action="{{ route('admin.akwaba.index') }}" class="d-flex flex-wrap gap-2">
+            <form method="GET" action="{{ route($r . '.index') }}" class="d-flex flex-wrap gap-2">
                 @if($selected)<input type="hidden" name="user" value="{{ $selected->id }}">@endif
                 <input type="text" name="ledger_q" value="{{ request('ledger_q') }}" class="form-control form-control-sm" placeholder="Joueur ou référence" style="min-width:200px;">
                 <select name="reason" class="form-select form-select-sm" style="width:auto;">
@@ -567,7 +567,7 @@
                                 <td class="small text-muted text-nowrap">{{ $line->created_at?->format('d/m/Y H:i') }}</td>
                                 <td class="small">
                                     @if($line->user)
-                                        <a href="{{ route('admin.akwaba.index', ['user' => $line->user_id]) }}">{{ $line->user->name }}</a>
+                                        <a href="{{ route($r . '.index', ['user' => $line->user_id]) }}">{{ $line->user->name }}</a>
                                     @else
                                         #{{ $line->user_id }}
                                     @endif
