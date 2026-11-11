@@ -139,6 +139,7 @@ Route::prefix('jeux/le-pacte')->name('pacte.')->controller(\App\Http\Controllers
     Route::get('/', 'show')->name('show');
     Route::get('/connexion', 'login')->name('login');
     Route::get('/state', 'state')->middleware('throttle:pacte-state')->name('state');
+    Route::post('/event', 'event')->middleware('throttle:pacte-events')->name('event');
     Route::get('/paiement/retour', 'paymentReturn')->middleware('throttle:20,1')->name('payment.return');
 
     Route::middleware('auth')->group(function () {
@@ -1124,6 +1125,16 @@ Route::middleware('auth')->group(function () {
 // 🎮 Akwaba — joueurs, ventes, indices et gestes manuels
 Route::middleware(['admin.code', 'stagiaire.log'])->prefix('admin/akwaba')->name('admin.akwaba.')
     ->controller(\App\Http\Controllers\Admin\AdminAkwabaController::class)->group(function () {
+        Route::get('/', 'index')->name('index');
+        Route::post('/users/{user}/unlock', 'unlock')->name('unlock');
+        Route::post('/users/{user}/lock', 'lock')->name('lock');
+        Route::post('/users/{user}/hints', 'addHints')->name('hints');
+        Route::post('/recover', 'recover')->name('recover');
+    });
+
+// 🐊 Le Pacte — même page qu'Akwaba (StoryGameAdminController)
+Route::middleware(['admin.code', 'stagiaire.log'])->prefix('admin/le-pacte')->name('admin.pacte.')
+    ->controller(\App\Http\Controllers\Admin\AdminPacteController::class)->group(function () {
         Route::get('/', 'index')->name('index');
         Route::post('/users/{user}/unlock', 'unlock')->name('unlock');
         Route::post('/users/{user}/lock', 'lock')->name('lock');

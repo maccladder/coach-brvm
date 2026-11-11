@@ -51,35 +51,10 @@ class AkwabaService extends StoryGameService
         ];
     }
 
-    /**
-     * Vue admin d'un joueur : origine du déblocage, solde, chapitres, fins.
-     *
-     * @return array{unlocked: bool, via: ?string, hints: int, save: ?string, max: ?string, fins: array, updated_at: mixed}
-     */
-    public function playerSummary(User $user): array
+    /** Point de sauvegarde en cours : data.save est le chapitre ('P', '1'…'7'). */
+    protected function savePoint(array $data): ?string
     {
-        $product = $this->product();
-
-        $paid = $product && $user->purchasedProducts()
-            ->where('marketplace_products.id', $product->id)
-            ->wherePivot('status', 'paid')
-            ->exists();
-        $granted = $product && $product->isGrantedTo($user);
-
-        $progress = $product
-            ? GameProgress::where('user_id', $user->id)->where('product_id', $product->id)->first()
-            : null;
-        $data = (array) ($progress?->data ?? []);
-
-        return [
-            'unlocked'   => $paid || $granted,
-            'via'        => $paid ? 'purchase' : ($granted ? 'grant' : null),
-            'hints'      => $this->hints($user),
-            'save'       => $data['save'] ?? null,
-            'max'        => $data['max'] ?? null,
-            'fins'       => array_values($data['fins'] ?? []),
-            'updated_at' => $progress?->updated_at,
-        ];
+        return isset($data['save']) && is_string($data['save']) ? $data['save'] : null;
     }
 
     /** Message « state » du contrat postMessage. */
@@ -158,28 +133,15 @@ class AkwabaService extends StoryGameService
 
     public const MAX_ERRORS_PER_SESSION = 20;
 
-    private function sessionHash(string $sessionId): string
+    /** Akwaba garde sa table d'origine (créée avant la base commune), sans colonne de jeu. */
+    public function eventsTable(): string
     {
-        return hash_hmac('sha256', $sessionId, (string) config('app.key'));
+        return 'akwaba_events';
     }
 
-    /**
-     * Compteur anonyme : au plus une ligne par session et par type (index unique). L'id de
-     * session n'est jamais stocké, seulement son HMAC avec la clé de l'application ; ni IP ni
-     * compte ; du navigateur, seulement sa catégorie.
-     */
-    public function recordEvent(string $type, string $sessionId, ?string $userAgent = null): void
+    protected function eventColumns(): array
     {
-        if (!in_array($type, self::EVENTS, true) || $sessionId === '') {
-            return;
-        }
-
-        DB::table('akwaba_events')->insertOrIgnore([
-            'type'         => $type,
-            'session_hash' => $this->sessionHash($sessionId),
-            'browser'      => self::browserFamily($userAgent),
-            'created_at'   => now(),
-        ]);
+        return [];
     }
 
     /**

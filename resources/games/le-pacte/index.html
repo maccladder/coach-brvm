@@ -3663,7 +3663,7 @@
     cibles.forEach(h => { h.classList.add('montre'); setTimeout(() => h.classList.remove('montre'), 1700); });
   };
   $('#btnJournal').onclick = e => { e.stopPropagation(); if ($('#dialog').classList.contains('on')) return; ouvrirJournal(); };
-  $('#btnJouer').onclick = () => { audio(); sClic(); try { localStorage.removeItem(CLE_SAUVE); } catch (e) {} aller('promesse'); };
+  $('#btnJouer').onclick = () => { audio(); sClic(); HOTE && HOTE.evenement && HOTE.evenement('new_game'); try { localStorage.removeItem(CLE_SAUVE); } catch (e) {} aller('promesse'); };
   $('#btnPromesse').onclick = () => {
     sClic(); aller('carton');
     const spans = [...document.querySelectorAll('#carton .txt span')];
@@ -3714,13 +3714,13 @@
   };
 
   // Reprendre une partie sauvegardée
-  const POINTS = { gare: () => sceneGare(), villa: () => sceneVilla(), funerailles: () => sceneFunerailles(), finGratuite: async () => { if (HOTE && HOTE.estDebloque && await HOTE.estDebloque()) return chapitre('Chapitre 3', 'Le carnet', sceneChap3); aller('fin'); },
+  const POINTS = { gare: () => sceneGare(), villa: () => sceneVilla(), funerailles: () => sceneFunerailles(), finGratuite: async () => { if (HOTE && HOTE.estDebloque && await HOTE.estDebloque()) return chapitre('Chapitre 3', 'Le carnet', sceneChap3); HOTE && HOTE.evenement && HOTE.evenement('paywall_open'); aller('fin'); },
     chap3: () => sceneChap3(), chap4: () => sceneChap4(), chap5: () => sceneChap5(), chap6: () => sceneChap6(), chap7: () => sceneChap7() };
   function proposerReprise(sauvegarde) {
     if (!(sauvegarde && POINTS[sauvegarde.point])) return;
     $('#btnContinuer').hidden = false;
     $('#btnContinuer').onclick = async () => {
-      audio(); sClic();
+      audio(); sClic(); HOTE && HOTE.evenement && HOTE.evenement('continue');
       if (/^chap[3-7]$/.test(sauvegarde.point) && HOTE && HOTE.estDebloque && !(await HOTE.estDebloque())) return toast("La suite n'est pas débloquée sur ce compte.");
       const inv = sauvegarde.etat.inventaire || [];
       Object.assign(etat, sauvegarde.etat, { inventaire: [], enMain: null });

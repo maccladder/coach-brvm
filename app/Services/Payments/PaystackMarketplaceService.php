@@ -230,7 +230,11 @@ class PaystackMarketplaceService
                 'type'    => 'payment_duplicate',
                 'title'   => 'Paiement en double à rembourser',
                 'message' => $title . ' — ' . number_format((int) $payment->amount_paid, 0, ',', ' ') . ' FCFA · ' . $payment->transaction_id,
-                'url'     => data_get($payment->meta, 'product_slug') === 'akwaba' ? route('admin.akwaba.index') : route('admin.dashboard'),
+                'url'     => match (data_get($payment->meta, 'product_slug')) {
+                    'akwaba'   => route('admin.akwaba.index'),
+                    'le-pacte' => route('admin.pacte.index'),
+                    default    => route('admin.dashboard'),
+                },
                 'read_at' => null,
             ]);
         } catch (\Throwable $e) {

@@ -213,7 +213,7 @@
     {{-- Pont avec le jeu : window.PacteHost, défini ici, AVANT l'iframe. Le jeu le reprend au
          chargement (script ajouté en tête du jeu par PacteController::HOST_BRIDGE).
          Invité : estDebloque (toujours faux), debloquer / acheterIndices (qui mènent à la
-         connexion) ; le jeu garde son localStorage pour la sauvegarde et l'indice gratuit.
+         connexion), sauver / indices / utiliserIndice (localStorage du jeu, plus l'entonnoir).
          Connecté : tout passe par le serveur. « test » : raccourcis de test du jeu, en local seulement.
          « lang » : langue par défaut du jeu (null = celle du navigateur). Objet gelé : le jeu lit
          test et lang sans pouvoir les modifier. --}}
@@ -227,13 +227,14 @@
             freeHint: @json(route('pacte.hint.free', [], false)),
             buy:      @json(route('pacte.buy', [], false)),
             login:    @json(route('pacte.login', [], false)),
+            event:    @json(route('pacte.event', [], false)),
         };
         const LOGGED     = @json(auth()->check());
         // Raccourcis de test du jeu (#test-…, ?chap=…, #debug) : en local seulement
         const TEST_MODE  = @json(app()->environment('local'));
         // Langue du jeu : Boursiv ne connaît pas celle du joueur (pas de réglage par compte, et
         // APP_LOCALE vaut pour tout le site) → null : le jeu suit son choix enregistré, sinon la
-        // langue du navigateur. Pas de langue() : rien à enregistrer côté serveur.
+        // langue du navigateur. langue() sert seulement à compter les changements (entonnoir).
         const GAME_LANG  = null;
         const CSRF_TOKEN = @json(csrf_token());
         const INTENT_KEY = 'pacte_purchase_intent';
@@ -269,6 +270,23 @@
                 body: body === undefined ? undefined : JSON.stringify(body),
             }).then(r => r.json().catch(() => ({})).then(data => ({ status: r.status, ok: r.ok, data })));
         }
+
+        // ── Entonnoir anonyme (invités et connectés), comme Akwaba : chaque événement une fois
+        //    par onglet, le serveur dédoublonne aussi par session. Aucune donnée personnelle. ──
+        const EVENTS = @json(\App\Services\PacteService::EVENTS);
+        function trackEvent(type, keepalive) {
+            if (!EVENTS.includes(type)) return;
+            try {
+                if (sessionStorage.getItem('pacte_event_' + type)) return;
+                sessionStorage.setItem('pacte_event_' + type, '1');
+            } catch (e) {}
+            api(URLS.event, { type: type }, keepalive).catch(() => {});
+        }
+        // Sauvegardes du jeu → chapitre 1, chapitre 2, écran « Fin de la partie gratuite »
+        const SAVE_EVENTS = { villa: 'ch1_reached', funerailles: 'ch2_reached', finGratuite: 'lock_reached' };
+        const trackSave = data => { if (data && SAVE_EVENTS[data.point]) trackEvent(SAVE_EVENTS[data.point]); };
+        const trackHints = n => { if (n === 0) trackEvent('shop_open'); return n; }; // plus d'indice : la boutique s'ouvre
+        const GAME_EVENTS = ['new_game', 'continue', 'paywall_open'];
 
         let state = null; // dernier état serveur connu (connecté seulement)
         function refreshState() {
@@ -340,33 +358,58 @@
 
         const hintsNow = () => (state && Number.isInteger(state.hints) ? state.hints : 0);
 
+        // Invité : mêmes règles que les indices locaux du jeu (CLE_IND, 1 offert, jamais sous 0),
+        // reprises ici pour voir l'indice gratuit et l'ouverture de la boutique
+        const localHints = {
+            read: () => { try { const v = localStorage.getItem(LOCAL_HINTS_KEY); return v == null ? 1 : +v; } catch (e) { return 1; } },
+            write: n => { try { localStorage.setItem(LOCAL_HINTS_KEY, n); } catch (e) {} return n; },
+        };
+
+        // Communs aux deux variantes du pont
+        const common = {
+            test:      TEST_MODE,
+            lang:      GAME_LANG,
+            langue:    l => { if (l === 'fr' || l === 'en') trackEvent('lang_' + l, true); }, // le jeu recharge juste après
+            evenement: nom => { if (GAME_EVENTS.includes(nom)) trackEvent(nom); },
+        };
+
         // Gelé : impossible de remplacer estDebloque (ou autre) depuis la console
-        window.PacteHost = Object.freeze(LOGGED ? {
-            test:        TEST_MODE,
-            lang:        GAME_LANG,
+        window.PacteHost = Object.freeze(Object.assign({}, common, LOGGED ? {
             charger:     () => firstState.then(s => (s && s.save ? s.save : null)),
-            sauver:      data => { saveGame(data); },
+            sauver:      data => { trackSave(data); saveGame(data); },
             estDebloque: () => refreshState().then(s => !!(s && s.unlocked)),
-            debloquer:   () => buy('full').then(r => r === 'already'),
-            indices:     () => freeHintSync.then(refreshState).then(hintsNow),
-            utiliserIndice: () => api(URLS.hint, {}).then(res => {
-                if (!res.ok || !res.data || !Number.isInteger(res.data.hints)) throw new Error('indice');
-                if (state) state.hints = res.data.hints;
-                return res.data.hints;
-            }),
-            acheterIndices: () => buy('hints5').then(r => (r === 'already' ? hintsNow() : 0)),
+            debloquer:   () => { trackEvent('buy_click_full'); return buy('full').then(r => r === 'already'); },
+            indices:     () => freeHintSync.then(refreshState).then(hintsNow).then(trackHints),
+            utiliserIndice: () => {
+                const gratuit = !!(state && state.logged && !state.freeUsed);
+                return api(URLS.hint, {}).then(res => {
+                    if (!res.ok || !res.data || !Number.isInteger(res.data.hints)) throw new Error('indice');
+                    if (state) { state.hints = res.data.hints; state.freeUsed = true; }
+                    if (gratuit && res.data.ok) trackEvent('free_hint');
+                    return res.data.hints;
+                });
+            },
+            acheterIndices: () => { trackEvent('buy_click_hints5'); return buy('hints5').then(r => (r === 'already' ? hintsNow() : 0)); },
             fin: (cle, choix) => { api(URLS.fin, { cle: cle, choix: Array.isArray(choix) ? choix : [] }, true).catch(() => {}); },
         } : {
-            test:           TEST_MODE,
-            lang:           GAME_LANG,
+            // Sauvegarde : le jeu la garde dans son localStorage ; ici, seulement l'entonnoir
+            sauver:         trackSave,
             // Un invité n'a jamais la suite : une sauvegarde locale « chap3 » … ne se reprend pas
             estDebloque:    () => Promise.resolve(false),
-            debloquer:      goLogin,
-            acheterIndices: goLogin,
-        });
+            debloquer:      () => { trackEvent('buy_click_full', true); return goLogin(); },
+            indices:        () => Promise.resolve(trackHints(localHints.read())),
+            utiliserIndice: () => {
+                const avant = localHints.read();
+                if (avant > 0) trackEvent('free_hint'); // un invité n'a que l'indice offert
+                return Promise.resolve(localHints.write(Math.max(0, avant - 1)));
+            },
+            acheterIndices: () => { trackEvent('buy_click_hints5', true); return goLogin(); },
+        }));
+
+        trackEvent('page_open');
 
         // Pour le script de la page (retour de paiement)
-        window.__pacte = { firstState, refreshState, buy, showNotice, hideNotice, INTENT_KEY, getState: () => state };
+        window.__pacte = { firstState, refreshState, buy, showNotice, hideNotice, trackEvent, INTENT_KEY, getState: () => state };
     })();
     </script>
 </head>
@@ -491,6 +534,8 @@
                 inappBanner.hidden = true;
                 try { sessionStorage.setItem('pacte_inapp_closed', '1'); } catch (e) {}
             });
+            const openExternal = document.getElementById('inapp-open');
+            if (openExternal) openExternal.addEventListener('click', () => window.__pacte.trackEvent('open_external', true));
         }
 
         // ── Bandeau d'information (fonctions du pont, dans le head) ──
@@ -631,6 +676,7 @@
             loaded = true;
             loading.classList.add('done');
             loading.setAttribute('aria-hidden', 'true');
+            window.__pacte.trackEvent('page_loaded');
             loadPixel();
         }
         frame.addEventListener('load', gameLoaded);
