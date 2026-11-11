@@ -44,14 +44,44 @@ class WelcomeASuivreTest extends TestCase
         return $this->get(route('landing'))->assertOk()->getContent();
     }
 
-    public function test_akwaba_est_dans_le_hero(): void
+    /** Contenu HTML de la section hero (de <section class="cb-hero"> à sa fermeture). */
+    private function hero(): string
     {
-        $html = $this->accueil();
+        $html  = $this->accueil();
+        $debut = strpos($html, '<section class="cb-hero"');
+        $this->assertNotFalse($debut, 'Hero absent');
 
-        $hero = substr($html, strpos($html, 'class="cb-hero"'), strpos($html, 'À suivre à la BRVM') - strpos($html, 'class="cb-hero"'));
-        $this->assertStringContainsString(route('akwaba.show'), $hero);
-        $this->assertStringContainsString('img/jeux/akwaba/akwaba-hero.jpg', $hero);
-        $this->assertStringContainsString('Akwaba : le mystère de la lagune Ébrié', $hero);
+        return substr($html, $debut, strpos($html, '</section>', $debut) - $debut);
+    }
+
+    public function test_le_pacte_est_le_nouveau_jeu_du_hero(): void
+    {
+        $hero = $this->hero();
+
+        $this->assertStringContainsString('class="cb-jeu-une"', $hero);
+        $this->assertStringContainsString('href="' . route('pacte.show') . '"', $hero);
+        $this->assertStringContainsString('img/jeux/le-pacte/le-pacte-partage.jpg', $hero);
+        $this->assertStringContainsString('Nouveau jeu · Gratuit pour commencer', $hero);
+        $this->assertStringContainsString('Le Pacte avec les caïmans de Yamoussoukro', $hero);
+        $this->assertStringContainsString('Une enveloppe trempée, un héritage, un lac qui réclame son dû. Tes choix changent la fin. Jouable sur téléphone et ordinateur.', html_entity_decode($hero, ENT_QUOTES));
+        $this->assertStringContainsString('Jouer maintenant →', $hero);
+    }
+
+    public function test_akwaba_reste_visible_juste_en_dessous(): void
+    {
+        $hero = $this->hero();
+
+        $pacte  = strpos($hero, 'class="cb-jeu-une"');
+        $akwaba = strpos($hero, 'class="cb-jeu-aussi');
+        $this->assertNotFalse($akwaba);
+        $this->assertGreaterThan($pacte, $akwaba);
+
+        $bloc = substr($hero, $akwaba);
+        $this->assertStringContainsString('À découvrir aussi', $bloc);
+        $this->assertStringContainsString('Akwaba : le mystère de la lagune Ébrié', $bloc);
+        $this->assertStringContainsString('img/jeux/akwaba/akwaba-hero.jpg', $bloc);
+        $this->assertStringContainsString(route('akwaba.show'), substr($hero, $akwaba - 200, 200));   // lien du bloc compact
+        $this->assertStringNotContainsString('Nouveau jeu', $bloc);
     }
 
     public function test_dernier_cours_variation_et_date(): void

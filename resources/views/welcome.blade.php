@@ -619,22 +619,33 @@
     }
     .cb-suivre-mention { font-size: 11px; color: var(--cb-muted); margin: 12px 0 0; }
 
-    /* Akwaba dans le hero */
-    .cb-akwaba {
+    /* Nouveau jeu dans le hero (Le Pacte), puis « À découvrir aussi » (Akwaba) */
+    .cb-jeu-une {
         display: block; position: relative; overflow: hidden; border-radius: 6px; text-decoration: none;
-        color: #fff; background: #0b2a22; border: 1px solid rgba(176,134,46,.4);
+        color: #fff; background: #0a1220; border: 1px solid rgba(176,134,46,.4);
         box-shadow: 0 12px 32px rgba(0,0,0,.18); transition: transform .3s, box-shadow .3s;
     }
-    .cb-akwaba:hover { color: #fff; transform: translateY(-2px); box-shadow: 0 16px 40px rgba(0,0,0,.24); }
-    .cb-akwaba img { display: block; width: 100%; height: auto; }
-    .cb-akwaba-body { display: block; padding: 12px 16px 14px; background: #0b2a22; }
-    .cb-akwaba-tag { font-family: 'Syne', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: #E9C46A; }
-    .cb-akwaba-titre { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 900; line-height: 1.2; margin: 2px 0 4px; }
-    .cb-akwaba-desc { font-size: 13px; line-height: 1.45; color: rgba(255,255,255,.86); margin: 0 0 8px; }
-    .cb-akwaba-cta {
+    .cb-jeu-une:hover { color: #fff; transform: translateY(-2px); box-shadow: 0 16px 40px rgba(0,0,0,.24); }
+    .cb-jeu-une img { display: block; width: 100%; height: auto; }
+    .cb-jeu-une-body { display: block; padding: 12px 16px 14px; background: #0a1220; }
+    .cb-jeu-une-tag { font-family: 'Syne', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: #E9C46A; }
+    .cb-jeu-une-titre { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 900; line-height: 1.2; margin: 2px 0 4px; }
+    .cb-jeu-une-desc { font-size: 13px; line-height: 1.45; color: rgba(255,255,255,.86); margin: 0 0 8px; }
+    .cb-jeu-une-cta {
         display: inline-block; font-family: 'Syne', sans-serif; font-size: 12px; font-weight: 800; letter-spacing: .06em;
         text-transform: uppercase; background: linear-gradient(135deg, #E9C46A, #B0862E); color: #1a1200; padding: 8px 14px; border-radius: 3px;
     }
+    .cb-jeu-aussi {
+        display: flex; align-items: center; gap: 12px; margin-top: 10px; padding: 8px; border-radius: 6px;
+        text-decoration: none; color: #fff; background: #0b2a22; border: 1px solid rgba(176,134,46,.3);
+        transition: transform .3s;
+    }
+    .cb-jeu-aussi:hover { color: #fff; transform: translateY(-1px); }
+    .cb-jeu-aussi img { flex: 0 0 auto; width: 96px; height: 64px; object-fit: cover; border-radius: 4px; }
+    .cb-jeu-aussi-body { display: block; min-width: 0; }
+    .cb-jeu-aussi-tag { display: block; font-family: 'Syne', sans-serif; font-size: 9px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: #E9C46A; }
+    .cb-jeu-aussi-titre { display: block; font-family: 'Playfair Display', serif; font-size: 15px; font-weight: 800; line-height: 1.25; margin: 1px 0 2px; }
+    .cb-jeu-aussi-lien { display: block; font-family: 'Syne', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: rgba(255,255,255,.75); }
 
     /* Social buttons */
     .cb-social-btn {
@@ -904,16 +915,26 @@
                 </div>
             </div>
 
-            {{-- Akwaba (jeu) + card outils (desktop : sur mobile, ces liens sont dans le menu) --}}
+            {{-- Nouveau jeu (Le Pacte), Akwaba à découvrir aussi, card outils (desktop : sur mobile, ces liens sont dans le menu) --}}
             <div class="col-lg-5">
-                <a href="{{ route('akwaba.show') }}" class="cb-akwaba mb-lg-3">
-                    <img src="{{ asset('img/jeux/akwaba/akwaba-hero.jpg') }}" width="1200" height="586"
+                <a href="{{ route('pacte.show') }}" class="cb-jeu-une">
+                    <img src="{{ asset('img/jeux/le-pacte/le-pacte-partage.jpg') }}" width="1200" height="630"
+                         alt="Le Pacte avec les caïmans de Yamoussoukro">
+                    <span class="cb-jeu-une-body">
+                        <span class="cb-jeu-une-tag">Nouveau jeu · Gratuit pour commencer</span>
+                        <span class="cb-jeu-une-titre d-block">Le Pacte avec les caïmans de Yamoussoukro</span>
+                        <span class="cb-jeu-une-desc d-block">Une enveloppe trempée, un héritage, un lac qui réclame son dû. Tes choix changent la fin. Jouable sur téléphone et ordinateur.</span>
+                        <span class="cb-jeu-une-cta">Jouer maintenant →</span>
+                    </span>
+                </a>
+
+                <a href="{{ route('akwaba.show') }}" class="cb-jeu-aussi mb-lg-3">
+                    <img src="{{ asset('img/jeux/akwaba/akwaba-hero.jpg') }}" width="1200" height="586" loading="lazy"
                          alt="Akwaba : le mystère de la lagune Ébrié">
-                    <span class="cb-akwaba-body">
-                        <span class="cb-akwaba-tag">Nouveau jeu · Gratuit pour commencer</span>
-                        <span class="cb-akwaba-titre d-block">Akwaba : le mystère de la lagune Ébrié</span>
-                        <span class="cb-akwaba-desc d-block">Une enquête au cœur d'Abidjan, jouable sur téléphone et ordinateur.</span>
-                        <span class="cb-akwaba-cta">Jouer maintenant →</span>
+                    <span class="cb-jeu-aussi-body">
+                        <span class="cb-jeu-aussi-tag">À découvrir aussi</span>
+                        <span class="cb-jeu-aussi-titre">Akwaba : le mystère de la lagune Ébrié</span>
+                        <span class="cb-jeu-aussi-lien">Jouer →</span>
                     </span>
                 </a>
 

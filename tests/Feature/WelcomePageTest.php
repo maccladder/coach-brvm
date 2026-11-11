@@ -37,6 +37,21 @@ class WelcomePageTest extends TestCase
         $this->assertStringContainsString('src="' . asset('img/jeux/akwaba-partage.jpg') . '"', $bloc);
     }
 
+    public function test_play_block_shows_le_pacte_as_free_to_start(): void
+    {
+        // État laissé par la migration 2026_11_11_000001
+        $this->jeu('Le Pacte avec les caïmans de Yamoussoukro', [
+            'slug' => 'le-pacte', 'price' => 1000, 'game_html' => null,
+            'cover_image_path' => 'img/jeux/le-pacte/le-pacte-hero.jpg',
+        ]);
+
+        $bloc = $this->blocJoue();
+
+        $this->assertStringContainsString(route('marketplace.show', 'le-pacte'), $bloc);
+        $this->assertStringContainsString('Gratuit pour commencer', $bloc);
+        $this->assertStringNotContainsString('1 000 F', $bloc);
+    }
+
     public function test_response_starts_with_doctype_without_bom(): void
     {
         $html = $this->get('/welcome')->assertOk()->getContent();
