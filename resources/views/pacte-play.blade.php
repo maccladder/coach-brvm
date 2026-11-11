@@ -209,6 +209,150 @@
             font-size: 18px; line-height: 1; cursor: pointer;
         }
     </style>
+
+    {{-- Pont avec le jeu : window.PacteHost, défini ici, AVANT l'iframe. Le jeu le reprend au
+         chargement (script ajouté en tête du jeu par PacteController::HOST_BRIDGE).
+         Invité : seulement debloquer / acheterIndices (qui mènent à la connexion), le jeu garde
+         son localStorage pour la sauvegarde et l'indice gratuit. Connecté : tout passe par le serveur. --}}
+    <script nonce="{{ $nonce }}">
+    (function () {
+        const URLS = {
+            state:    @json(route('pacte.state', [], false)),
+            progress: @json(route('pacte.progress', [], false)),
+            fin:      @json(route('pacte.fin', [], false)),
+            hint:     @json(route('pacte.hint.use', [], false)),
+            freeHint: @json(route('pacte.hint.free', [], false)),
+            buy:      @json(route('pacte.buy', [], false)),
+            login:    @json(route('pacte.login', [], false)),
+        };
+        const LOGGED     = @json(auth()->check());
+        const CSRF_TOKEN = @json(csrf_token());
+        const INTENT_KEY = 'pacte_purchase_intent';
+        const LOCAL_HINTS_KEY = 'pacte-caimans-indices'; // CLE_IND du jeu
+
+        // ── Bandeau d'information (éléments du body, cherchés au moment de l'appel) ──
+        let noticeTimer = null;
+        function showNotice(html, kind, autoHideMs) {
+            const notice = document.getElementById('pc-notice');
+            if (!notice) return;
+            clearTimeout(noticeTimer);
+            document.getElementById('pc-notice-text').innerHTML = html;
+            notice.className = 'show' + (kind ? ' ' + kind : '');
+            if (autoHideMs) noticeTimer = setTimeout(hideNotice, autoHideMs);
+        }
+        function hideNotice() {
+            const notice = document.getElementById('pc-notice');
+            if (notice) notice.className = '';
+        }
+
+        // ── Échanges avec le serveur ────────────────────────────
+        // keepalive : la sauvegarde part même si la page s'en va juste après (paiement)
+        function api(url, body, keepalive) {
+            return fetch(url, {
+                method: body === undefined ? 'GET' : 'POST',
+                credentials: 'same-origin',
+                cache: 'no-store',
+                keepalive: !!keepalive,
+                headers: Object.assign(
+                    { 'Accept': 'application/json' },
+                    body === undefined ? {} : { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': CSRF_TOKEN }
+                ),
+                body: body === undefined ? undefined : JSON.stringify(body),
+            }).then(r => r.json().catch(() => ({})).then(data => ({ status: r.status, ok: r.ok, data })));
+        }
+
+        let state = null; // dernier état serveur connu (connecté seulement)
+        function refreshState() {
+            return api(URLS.state).then(res => {
+                if (res.ok && res.data && typeof res.data.logged === 'boolean') state = res.data;
+                return state;
+            }).catch(() => state);
+        }
+        const firstState = LOGGED ? refreshState() : Promise.resolve(null);
+
+        // Invité qui avait déjà utilisé son indice gratuit sur ce téléphone (jeu sans compte) :
+        // on le signale au compte, pour qu'il n'en retrouve pas un second
+        const freeHintSync = firstState.then(s => {
+            let localUsed = false;
+            try { localUsed = localStorage.getItem(LOCAL_HINTS_KEY) === '0'; } catch (e) {}
+            if (!s || !s.logged || s.freeUsed || !localUsed) return;
+            return api(URLS.freeHint, {}).then(refreshState).catch(() => {});
+        });
+
+        // Sauvegardes envoyées une par une, dans l'ordre ; un paiement attend la dernière
+        let saveChain = Promise.resolve();
+        function saveGame(data) {
+            const body = { save: data };
+            const small = JSON.stringify(body).length < 60000; // limite de keepalive : 64 Ko
+            saveChain = saveChain.then(() => api(URLS.progress, body, small).catch(() => {}));
+            return saveChain;
+        }
+
+        function goLogin() {
+            window.location.href = URLS.login;
+            return new Promise(() => {}); // la page s'en va
+        }
+
+        // Paiement : la page entière part vers le checkout (pas l'iframe), comme Akwaba.
+        // Résout false / 0 si le paiement n'a pas pu démarrer ; ne résout jamais sinon.
+        let buying = false;
+        function buy(product, classic) {
+            if (product !== 'full' && product !== 'hints5') return Promise.resolve(null);
+            if (!LOGGED) return goLogin();
+            if (buying) return new Promise(() => {});
+            buying = true;
+            showNotice('<span class="spinner"></span>Ouverture du paiement Mobile Money…');
+
+            return saveChain.then(() => api(URLS.buy, classic ? { product: product, classic: 1 } : { product: product })).then(res => {
+                if (res.ok && res.data && res.data.url) {
+                    try {
+                        sessionStorage.setItem(INTENT_KEY, JSON.stringify({ product: product, hints: state ? state.hints : 0, at: Date.now() }));
+                    } catch (e) {}
+                    window.location.href = res.data.url;
+                    return new Promise(() => {});
+                }
+                buying = false;
+                if (res.status === 409) { // déjà débloquée (achat validé entre-temps)
+                    hideNotice();
+                    return refreshState().then(() => 'already');
+                }
+                if (res.status === 401 || res.status === 419) {
+                    showNotice('Ta session a expiré. <a href="' + URLS.login + '">Reconnecte-toi</a> pour continuer.', 'error');
+                } else {
+                    showNotice("Le paiement n'a pas pu démarrer. Réessaie dans un instant.", 'error', 6000);
+                }
+                return null;
+            }).catch(() => {
+                buying = false;
+                showNotice('Connexion impossible. Vérifie ton réseau et réessaie.', 'error', 6000);
+                return null;
+            });
+        }
+
+        const hintsNow = () => (state && Number.isInteger(state.hints) ? state.hints : 0);
+
+        window.PacteHost = LOGGED ? {
+            charger:     () => firstState.then(s => (s && s.save ? s.save : null)),
+            sauver:      data => { saveGame(data); },
+            estDebloque: () => refreshState().then(s => !!(s && s.unlocked)),
+            debloquer:   () => buy('full').then(r => r === 'already'),
+            indices:     () => freeHintSync.then(refreshState).then(hintsNow),
+            utiliserIndice: () => api(URLS.hint, {}).then(res => {
+                if (!res.ok || !res.data || !Number.isInteger(res.data.hints)) throw new Error('indice');
+                if (state) state.hints = res.data.hints;
+                return res.data.hints;
+            }),
+            acheterIndices: () => buy('hints5').then(r => (r === 'already' ? hintsNow() : 0)),
+            fin: (cle, choix) => { api(URLS.fin, { cle: cle, choix: Array.isArray(choix) ? choix : [] }, true).catch(() => {}); },
+        } : {
+            debloquer:      goLogin,
+            acheterIndices: goLogin,
+        };
+
+        // Pour le script de la page (retour de paiement)
+        window.__pacte = { firstState, refreshState, buy, showNotice, hideNotice, INTENT_KEY, getState: () => state };
+    })();
+    </script>
 </head>
 <body>
 
@@ -333,18 +477,117 @@
             });
         }
 
-        // ── Bandeau d'information ───────────────────────────────
-        const notice     = document.getElementById('pc-notice');
-        const noticeText = document.getElementById('pc-notice-text');
-        let noticeTimer  = null;
-        function showNotice(html, kind, autoHideMs) {
-            clearTimeout(noticeTimer);
-            noticeText.innerHTML = html;
-            notice.className = 'show' + (kind ? ' ' + kind : '');
-            if (autoHideMs) noticeTimer = setTimeout(hideNotice, autoHideMs);
+        // ── Bandeau d'information (fonctions du pont, dans le head) ──
+        const P = window.__pacte;
+        document.getElementById('pc-notice-close').addEventListener('click', P.hideNotice);
+
+        // Raccourcis de test du jeu (#test-chap3…) : transmis à l'iframe. Retiré à l'étape 3,
+        // quand le jeu ignorera ces raccourcis sur Boursiv.
+        if (/^#test-[\w]+$/.test(window.location.hash)) {
+            frame.src = frame.getAttribute('src').split('#')[0] + window.location.hash;
         }
-        function hideNotice() { notice.className = ''; }
-        document.getElementById('pc-notice-close').addEventListener('click', hideNotice);
+
+        // ── Retour de paiement : le webhook peut arriver quelques secondes après ──
+        const PAID     = @json($paid);
+        const WHATSAPP = @json($whatsapp);
+        const PRODUCT_LABELS = { full: 'Le Pacte · Histoire complète', hints5: 'Le Pacte · 5 indices' };
+        const okText = product => product === 'hints5'
+            ? '✅ Paiement validé : 5 indices ajoutés.'
+            : "✅ Paiement validé : la suite est débloquée. Touche « Continuer » pour jouer le chapitre 3.";
+
+        function readIntent() {
+            try {
+                const raw = sessionStorage.getItem(P.INTENT_KEY);
+                sessionStorage.removeItem(P.INTENT_KEY);
+                const intent = raw ? JSON.parse(raw) : null;
+                return intent && Date.now() - intent.at < 3600 * 1000 ? intent : null;
+            } catch (e) { return null; }
+        }
+
+        function watchPayment() {
+            const intent = readIntent();
+            history.replaceState(null, '', window.location.pathname);
+
+            const isDone = s => {
+                if (!s || !intent) return false;
+                return intent.product === 'full' ? !!s.unlocked : s.hints > intent.hints;
+            };
+            const success = () => P.showNotice(okText(intent && intent.product), 'ok', 7000);
+
+            P.firstState.then(initial => {
+                if (!initial || !initial.logged) return;
+                if (isDone(initial)) return success();
+
+                P.showNotice('<span class="spinner"></span>Paiement en cours de validation…');
+                const baseline = JSON.stringify(initial);
+                const started  = Date.now();
+
+                const timer = setInterval(() => {
+                    P.refreshState().then(s => {
+                        if (isDone(s) || (!intent && JSON.stringify(s) !== baseline)) {
+                            clearInterval(timer);
+                            success();
+                        } else if (Date.now() - started >= 30000) {
+                            clearInterval(timer);
+                            P.showNotice(
+                                "Le paiement n'est pas encore confirmé. S'il a bien été débité, il s'affichera automatiquement dans quelques minutes."
+                                + (WHATSAPP ? ' Besoin d\'aide ? <a href="https://wa.me/' + WHATSAPP + '" target="_blank" rel="noopener">WhatsApp</a>' : ''),
+                                'error'
+                            );
+                        }
+                    });
+                }, 2000);
+            });
+        }
+
+        // Retour du checkout Mobile Money sans paiement validé (?paiement=echec|annule)
+        function showRetry(product, kind) {
+            P.showNotice('', 'error');
+            const text = document.getElementById('pc-notice-text');
+            text.textContent = '';
+
+            const title = document.createElement('strong');
+            title.textContent = kind === 'echec' ? "Le paiement n'est pas passé." : 'Paiement interrompu.';
+            const detail = document.createElement('div');
+            detail.textContent = PRODUCT_LABELS[product] + (kind === 'echec'
+                ? " : si tu as validé sur ton téléphone, l'achat s'activera tout seul dans quelques minutes."
+                : ' : tu peux réessayer quand tu veux.');
+
+            const actions = document.createElement('div');
+            actions.className = 'pc-actions';
+            [['Réessayer', 'pc-btn pc-btn-gold', false], ['Payer par la page Paystack', 'pc-btn', true]].forEach(([label, cls, classic]) => {
+                const b = document.createElement('button');
+                b.type = 'button';
+                b.className = cls;
+                b.textContent = label;
+                b.addEventListener('click', () => P.buy(product, classic));
+                actions.appendChild(b);
+            });
+
+            text.append(title, detail, actions);
+        }
+
+        function watchFailedPayment(product, kind) {
+            const intent = readIntent();
+            history.replaceState(null, '', window.location.pathname);
+
+            // Validé entre-temps (webhook en retard, ancienne tentative) : on le dit plutôt
+            P.firstState.then(s => {
+                const done = s && (product === 'full' ? !!s.unlocked : (intent && s.hints > intent.hints));
+                if (done) P.showNotice(okText(product), 'ok', 7000);
+                else if (s && s.logged) showRetry(product, kind);
+            });
+        }
+
+        const query = new URLSearchParams(window.location.search);
+        const failKind = query.get('paiement');
+        const failProduct = query.get('produit');
+
+        if (PAID) {
+            watchPayment();
+        } else if ((failKind === 'echec' || failKind === 'annule') && (failProduct === 'full' || failProduct === 'hints5')) {
+            watchFailedPayment(failProduct, failKind);
+        }
 
         // ── Pixel Meta : chargé 3 s après le chargement du jeu (comme Akwaba) ──
         const PIXEL_ID = @json(!empty($pixelId) ? (string) $pixelId : null);

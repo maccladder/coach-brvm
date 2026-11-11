@@ -45,6 +45,11 @@ return [
             'enabled'  => env('CHECKOUT_MM_AKWABA', false),
             'provider' => App\Checkout\Providers\AkwabaPayable::class,
         ],
+        // Le Pacte avec les caïmans : histoire complète (MP-) et packs de 5 indices (PCT-H-)
+        'pacte'        => [
+            'enabled'  => env('CHECKOUT_MM_PACTE', false),
+            'provider' => App\Checkout\Providers\PactePayable::class,
+        ],
         // Études & Business plans (référence DOC-PS-)
         'document'     => [
             'enabled'  => env('CHECKOUT_MM_DOCUMENT', false),

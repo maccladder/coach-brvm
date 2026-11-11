@@ -1668,7 +1668,9 @@
   //   PacteHost.fin(cle, choix)    → statistiques de fin (facultatif)
   const HOTE = window.PacteHost || null;
   const PRIX_SUITE = 1000, PRIX_INDICES = 500, PACK_INDICES = 5;
+  let dernierPoint = null;
   function sauver(point) {
+    dernierPoint = point;
     const data = { point, etat };
     try { localStorage.setItem(CLE_SAUVE, JSON.stringify(data)); } catch (e) {}
     if (HOTE && HOTE.sauver) { try { HOTE.sauver(JSON.parse(JSON.stringify(data))); } catch (e) {} }
@@ -2133,6 +2135,7 @@
   const valCoffre = [0, 0, 0, 0];
   const sGrince = () => { bip(220, .4, 'sawtooth', .04); bip(180, .5, 'sawtooth', .035, .2); };
   function sceneVilla() {
+    if (etat.porteOuverte) { sauver('villa'); aller('villa'); $('#bourse').hidden = true; objectif(etat.objectif); return; }
     sauver('villa'); objectif("Saluer Tantie Adjoua, puis fouiller le bureau de papa.");
     aller('villa'); $('#bourse').hidden = true;
     etat.chap1 = true;
@@ -2491,7 +2494,7 @@
           ['Le vieil homme', "Le 7 juillet est passé. Ton père n'a pas payé. Alors le lac a commencé à se servir."],
           ['Le vieil homme', "Rentre, petit. Et ne touche jamais à cet argent mouillé."],
           ['', "Quand Konan relève la tête, le muret est vide. Il ne reste que les billets qui flottent, et les yeux dorés."],
-        ], () => { flash(); setTimeout(() => recap('Chapitre 2', () => aller('fin')), 600); });
+        ], () => { flash(); setTimeout(() => recap('Chapitre 2', () => { sauver('finGratuite'); aller('fin'); }), 600); });
       }, 300);
     }
   }
@@ -3518,6 +3521,7 @@
     }
     choisir('Indice', `Tu n'as plus d'indice. Un pack de ${PACK_INDICES} indices coûte ${PRIX_INDICES} FCFA.`, [
       [`Acheter ${PACK_INDICES} indices · ${PRIX_INDICES} FCFA` + (HOTE ? '' : ' (test : gratuit)'), async () => {
+        if (dernierPoint) sauver(dernierPoint);
         let solde = 0; try { solde = await acheterIndices(); } catch (er) {}
         solde > 0 ? demanderIndice() : toast("Le paiement n'a pas abouti."); }],
       ["Continuer sans indice", () => {}],
@@ -3583,7 +3587,8 @@
   };
 
   // Reprendre une partie sauvegardée
-  const POINTS = { gare: () => sceneGare(), villa: () => sceneVilla(), funerailles: () => sceneFunerailles(), chap3: () => sceneChap3(), chap4: () => sceneChap4(), chap5: () => sceneChap5(), chap6: () => sceneChap6(), chap7: () => sceneChap7() };
+  const POINTS = { gare: () => sceneGare(), villa: () => sceneVilla(), funerailles: () => sceneFunerailles(), finGratuite: async () => { if (HOTE && HOTE.estDebloque && await HOTE.estDebloque()) return chapitre('Chapitre 3', 'Le carnet', sceneChap3); aller('fin'); },
+    chap3: () => sceneChap3(), chap4: () => sceneChap4(), chap5: () => sceneChap5(), chap6: () => sceneChap6(), chap7: () => sceneChap7() };
   function proposerReprise(sauvegarde) {
     if (!(sauvegarde && POINTS[sauvegarde.point])) return;
     $('#btnContinuer').hidden = false;

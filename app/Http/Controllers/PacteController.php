@@ -2,9 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Payment;
 use App\Services\PacteService;
+use App\Services\Payments\PactePurchaseService;
+use App\Services\Payments\PaystackMarketplaceService;
+use App\Services\Payments\PaystackMobileMoneyCheckout;
+use App\Services\Payments\PaystackPacteHintsService;
+use App\Services\PaystackService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Le Pacte avec les caïmans : page hôte publique (/jeux/le-pacte) et fichiers du jeu.
@@ -36,6 +43,8 @@ class PacteController extends Controller
             ->view('pacte-play', [
                 'product'  => $this->pacte->product(),
                 'version'  => $this->fileVersion(),
+                'paid'     => $request->boolean('paid'),
+                'whatsapp' => (string) config('checkout.whatsapp'),
                 'nonce'    => $nonce,
                 // Navigateur intégré (pub Facebook…) : bandeau « ouvre le jeu dans ton navigateur »
                 'inApp'    => PacteService::inAppBrowser($request->userAgent()),
@@ -88,9 +97,18 @@ class PacteController extends Controller
     }
 
     /**
+     * Ajouté en tête du jeu servi, donc avant son script : le jeu lit window.PacteHost au
+     * chargement. Il reprend celui de la page hôte (/jeux/le-pacte, même origine). Ouvert seul,
+     * hors de la page, il y renvoie : sans pont, le jeu tournerait en mode test (suite gratuite).
+     */
+    public const HOST_BRIDGE = '<script>(function(){try{var p=window.parent;'
+        . 'if(p!==window&&p.PacteHost){window.PacteHost=p.PacteHost;return;}}catch(e){}'
+        . "if(window.top===window)location.replace('/jeux/le-pacte');})();</script>\n";
+
+    /**
      * GET /jeux/le-pacte/v/{version}/index.html
-     * Le jeu tel quel. Cache long seulement sous la version courante ; une autre version
-     * (ancienne page encore ouverte) est servie quand même, mais toujours revalidée.
+     * Le jeu, précédé du pont HOST_BRIDGE. Cache long seulement sous la version courante ; une
+     * autre version (ancienne page encore ouverte) est servie quand même, mais revalidée.
      */
     public function file(string $version)
     {
@@ -99,7 +117,7 @@ class PacteController extends Controller
 
         // Pas de CSP restrictive sur le jeu lui-même (scripts inline, Google Fonts, Web Audio) :
         // seulement l'interdiction d'être affiché dans un cadre d'un autre site.
-        return response()->file($path, [
+        return response(self::HOST_BRIDGE . file_get_contents($path), 200, [
             'Content-Type'            => 'text/html; charset=UTF-8',
             'Cache-Control'           => $this->cacheControl($version),
             'Content-Security-Policy' => "frame-ancestors 'self'",
@@ -125,6 +143,198 @@ class PacteController extends Controller
             'X-Content-Type-Options' => 'nosniff',
         ]);
     }
+
+    // ─── API de la page hôte (pont window.PacteHost) ───────────────────────
+
+    /**
+     * Corps JSON tel qu'envoyé : TrimStrings et ConvertEmptyStringsToNull modifieraient les
+     * textes de l'état du jeu, qui doit être stocké tel quel.
+     */
+    private function rawJson(Request $request): array
+    {
+        $data = json_decode($request->getContent(), true);
+
+        return is_array($data) ? $data : [];
+    }
+
+    /**
+     * GET /jeux/le-pacte/state
+     */
+    public function state(Request $request)
+    {
+        return response()->json($this->pacte->state($request->user()))
+            ->header('Cache-Control', 'no-store');
+    }
+
+    /**
+     * POST /jeux/le-pacte/progress  {save: {point, etat} | null}
+     */
+    public function progress(Request $request)
+    {
+        $product = $this->pacte->product();
+        abort_unless($product, 404);
+
+        // Objets PHP (et non tableaux) : {} et [] restent distincts dans l'état réencodé
+        $body = json_decode($request->getContent());
+
+        if (!$body instanceof \stdClass || !property_exists($body, 'save')) {
+            return response()->json(['error' => 'Sauvegarde absente'], 422);
+        }
+
+        $save = $body->save;
+
+        if ($save !== null) {
+            if (!$save instanceof \stdClass
+                || !is_string($save->point ?? null)
+                || !in_array($save->point, PacteService::POINTS, true)
+                || !(($save->etat ?? null) instanceof \stdClass)) {
+                return response()->json(['error' => 'Sauvegarde invalide'], 422);
+            }
+
+            $etat = json_encode($save->etat, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRESERVE_ZERO_FRACTION);
+
+            if ($etat === false || strlen($etat) > PacteService::MAX_ETAT_BYTES) {
+                return response()->json(['error' => 'Sauvegarde trop volumineuse'], 422);
+            }
+
+            // Sans déblocage, seule la partie gratuite est atteignable
+            if (!$this->pacte->isFreePoint($save->point) && !$this->pacte->isUnlocked($request->user(), $product)) {
+                return response()->json(['error' => 'Histoire non débloquée'], 403);
+            }
+
+            $save = ['point' => $save->point, 'etat' => $etat];
+        }
+
+        $this->pacte->saveGame($request->user(), $product, $save);
+
+        return response()->json(['saved' => true]);
+    }
+
+    /**
+     * POST /jeux/le-pacte/fin  {cle, choix: [...]}
+     * Fin obtenue (statistiques). Les fins sont dans la partie payante.
+     */
+    public function fin(Request $request)
+    {
+        $product = $this->pacte->product();
+        abort_unless($product, 404);
+
+        $body  = $this->rawJson($request);
+        $cle   = $body['cle'] ?? null;
+        $choix = $body['choix'] ?? [];
+
+        if (!is_string($cle) || !in_array($cle, PacteService::FINS, true)
+            || !is_array($choix) || !array_is_list($choix)
+            || strlen(json_encode($choix)) > PacteService::MAX_CHOIX_BYTES) {
+            return response()->json(['error' => 'Fin invalide'], 422);
+        }
+
+        if (!$this->pacte->isUnlocked($request->user(), $product)) {
+            return response()->json(['error' => 'Histoire non débloquée'], 403);
+        }
+
+        $this->pacte->recordFin($request->user(), $product, $cle, $choix);
+
+        return response()->json(['recorded' => true]);
+    }
+
+    /**
+     * POST /jeux/le-pacte/hint/use
+     * Consomme un indice (le gratuit d'abord) et renvoie le nombre d'indices restants.
+     */
+    public function useHint(Request $request)
+    {
+        $product = $this->pacte->product();
+        abort_unless($product, 404);
+
+        return response()->json($this->pacte->consumeHint($request->user(), $product));
+    }
+
+    /**
+     * POST /jeux/le-pacte/hint/free
+     * L'invité avait déjà utilisé son indice gratuit sur ce téléphone avant de se connecter
+     * (localStorage « pacte-caimans-indices » à 0) : il n'en retrouve pas un second. Idempotent.
+     */
+    public function useFreeHint(Request $request)
+    {
+        $product = $this->pacte->product();
+        abort_unless($product, 404);
+
+        $this->pacte->markFreeHintUsed($request->user(), $product);
+
+        return response()->json(['freeUsed' => true]);
+    }
+
+    /**
+     * POST /jeux/le-pacte/buy  {product: 'full'|'hints5', classic?: 1}
+     * Renvoie l'URL de paiement : checkout Mobile Money si CHECKOUT_MM_PACTE est activé, sinon
+     * (ou avec classic=1) la page Paystack hébergée, Mobile Money seulement. Comme Akwaba.
+     */
+    public function buy(Request $request, PactePurchaseService $purchases, PaystackMobileMoneyCheckout $mm)
+    {
+        $data = $request->validate([
+            'product' => ['required', 'string', 'in:' . implode(',', PactePurchaseService::PRODUCTS)],
+        ]);
+
+        $product = $this->pacte->product();
+        abort_unless($product, 404);
+
+        $user = $request->user();
+
+        if ($data['product'] === 'full') {
+            if ($this->pacte->isUnlocked($user, $product)) {
+                return response()->json(['error' => 'Histoire déjà débloquée', 'already' => true], 409);
+            }
+
+            if ((int) $product->price <= 0) {
+                Log::error('Le Pacte buy: prix du produit invalide', ['product_id' => $product->id]);
+                return response()->json(['error' => 'Produit indisponible'], 503);
+            }
+        }
+
+        if ($mm->shouldIntercept('pacte', $request)) {
+            return response()->json(['url' => $mm->entryUrl('pacte', ['product' => $data['product']])]);
+        }
+
+        $url = $purchases->startHosted($data['product'], $user, $product, $request);
+
+        if (!$url) {
+            return response()->json(['error' => "Impossible d'initialiser le paiement."], 502);
+        }
+
+        return response()->json(['url' => $url]);
+    }
+
+    /**
+     * GET /jeux/le-pacte/paiement/retour?reference=…
+     * Retour Paystack (filet si le webhook tarde ; il reste la source de vérité). Idempotent.
+     */
+    public function paymentReturn(Request $request, PaystackService $paystack, PaystackMarketplaceService $marketplace, PaystackPacteHintsService $hints)
+    {
+        $reference = (string) ($request->query('reference') ?: $request->query('trxref', ''));
+
+        // Route publique qui appelle l'API Paystack : référence au format attendu seulement
+        if (!preg_match('/^[A-Za-z0-9-]{1,120}$/', $reference)) {
+            return redirect()->route('pacte.show', ['paid' => 1]);
+        }
+
+        if (str_starts_with($reference, PaystackPacteHintsService::PREFIX)) {
+            $outcome = $hints->handle($reference);
+            Log::info('Le Pacte retour hints', ['reference' => $reference, 'outcome' => $outcome]);
+        } elseif (str_starts_with($reference, 'MP-')) {
+            $isPacte = data_get(Payment::where('transaction_id', $reference)->first()?->meta, 'product_slug') === PacteService::SLUG;
+            $data    = $isPacte ? $paystack->verify($reference) : null;
+
+            if ($data && ($data['status'] ?? null) === 'success') {
+                $outcome = $marketplace->handleChargeSuccess($data);
+                Log::info('Le Pacte retour full', ['reference' => $reference, 'outcome' => $outcome]);
+            }
+        }
+
+        return redirect()->route('pacte.show', ['paid' => 1]);
+    }
+
+    // ─── Fichiers du jeu ───────────────────────────────────────────────────
 
     private function cacheControl(string $version): string
     {
@@ -163,11 +373,14 @@ class PacteController extends Controller
         }
 
         $paths = $this->gameFiles();
-        $key   = implode('|', array_map(fn ($p) => basename($p) . '.' . filemtime($p) . '-' . filesize($p), $paths));
+        $key   = md5(self::HOST_BRIDGE) . '|'
+            . implode('|', array_map(fn ($p) => basename($p) . '.' . filemtime($p) . '-' . filesize($p), $paths));
 
+        // Le pont ajouté au jeu compte aussi : le changer change l'adresse
         return $this->version = Cache::rememberForever(
             'pacte.file.version.' . md5($key),
-            fn () => substr(hash('sha256', implode('', array_map(fn ($p) => hash_file('sha256', $p), $paths))), 0, 16)
+            fn () => substr(hash('sha256', hash('sha256', self::HOST_BRIDGE)
+                . implode('', array_map(fn ($p) => hash_file('sha256', $p), $paths))), 0, 16)
         );
     }
 }

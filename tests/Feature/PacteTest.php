@@ -110,7 +110,7 @@ class PacteTest extends TestCase
 
     // ─── Fichiers du jeu ────────────────────────────────────────────────────
 
-    public function test_le_jeu_est_servi_tel_quel_avec_cache_long(): void
+    public function test_le_jeu_est_servi_avec_le_pont_et_cache_long(): void
     {
         $response = $this->get($this->iframeSrc());
 
@@ -118,7 +118,11 @@ class PacteTest extends TestCase
             ->assertHeader('X-Frame-Options', 'SAMEORIGIN')
             ->assertHeader('Cache-Control', 'immutable, max-age=31536000, public');
         $this->assertStringStartsWith('text/html', $response->headers->get('Content-Type'));
-        $this->assertSame(filesize(resource_path('games/le-pacte/index.html')), $response->baseResponse->getFile()->getSize());
+        // Le jeu tel quel, précédé du pont PacteHost (cf. PacteApiTest)
+        $this->assertSame(
+            \App\Http\Controllers\PacteController::HOST_BRIDGE . file_get_contents(resource_path('games/le-pacte/index.html')),
+            $response->getContent()
+        );
     }
 
     public function test_les_images_sont_servies_par_chemin_relatif(): void
@@ -157,7 +161,7 @@ class PacteTest extends TestCase
     public function test_une_ancienne_version_est_servie_mais_revalidee(): void
     {
         $this->get('/jeux/le-pacte/v/0123456789abcdef/index.html')
-            ->assertOk()->assertHeader('Cache-Control', 'no-cache, public');
+            ->assertOk()->assertHeader('Cache-Control', 'no-cache, private');
         $this->get('/jeux/le-pacte/v/0123456789abcdef/img/hero.jpg')
             ->assertOk()->assertHeader('Cache-Control', 'no-cache, public');
     }

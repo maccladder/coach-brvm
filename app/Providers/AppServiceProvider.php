@@ -42,6 +42,16 @@ class AppServiceProvider extends ServiceProvider
 
         // ✅ Akwaba — état du jeu (chargement, retour de paiement interrogé toutes les 2 s) :
         //    par compte ou par session, plafond par IP large pour les IP partagées (CGNAT)
+        // ✅ Le Pacte — même règle que l'état d'Akwaba, compteurs séparés
+        RateLimiter::for('pacte-state', function (Request $request) {
+            return [
+                Limit::perMinute(60)->by($request->user()
+                    ? 'user:' . $request->user()->id
+                    : 'session:' . $request->session()->getId()),
+                Limit::perMinute(600)->by('ip:' . $request->ip()),
+            ];
+        });
+
         RateLimiter::for('akwaba-state', function (Request $request) {
             return [
                 Limit::perMinute(60)->by($request->user()

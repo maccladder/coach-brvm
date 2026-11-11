@@ -12,6 +12,7 @@ use App\Services\Payments\PaystackDocumentService;
 use App\Services\Payments\PaystackDonationService;
 use App\Services\Payments\PaystackGamePremiumService;
 use App\Services\Payments\PaystackMarketplaceService;
+use App\Services\Payments\PaystackPacteHintsService;
 use App\Services\Payments\PaystackPackService;
 use App\Services\Payments\PaystackWalletTopupService;
 use Illuminate\Http\Request;
@@ -88,6 +89,13 @@ class PaystackWebhookController extends Controller
         if (str_starts_with($reference, PaystackAkwabaHintsService::PREFIX)) {
             $outcome = app(PaystackAkwabaHintsService::class)->handle($reference);
             Log::info('Paystack webhook AKW-H', ['reference' => $reference, 'outcome' => $outcome]);
+            return;
+        }
+
+        // ✅ Le Pacte : pack d'indices (le déblocage de l'histoire passe par MP- ci-dessous)
+        if (str_starts_with($reference, PaystackPacteHintsService::PREFIX)) {
+            $outcome = app(PaystackPacteHintsService::class)->handle($reference);
+            Log::info('Paystack webhook PCT-H', ['reference' => $reference, 'outcome' => $outcome]);
             return;
         }
 
