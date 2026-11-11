@@ -1424,7 +1424,7 @@
   // ================== CONFIG ==================
   const CODE = [4, 1, 2]; // 4, 13, 21 → premier chiffre de chaque date
   const DATES_ENTOUREES = [4, 13, 21];
-  if (new URLSearchParams(location.search).has('debug') || location.hash === '#debug') document.body.classList.add('debug');
+  if ((!window.PacteHost || window.PacteHost.test) && (new URLSearchParams(location.search).has('debug') || location.hash === '#debug')) document.body.classList.add('debug');
 
   // ================== ÉTAT ==================
   const etat = { cadenasOuvert: false, vuCalendrier: false, inventaire: [], fini: false,
@@ -3605,7 +3605,7 @@
   proposerReprise(lireSauvegarde());
   if (HOTE && HOTE.charger) Promise.resolve(HOTE.charger()).then(d => d && proposerReprise(d)).catch(() => {});
   // Raccourcis de test : #test-gare, #test-chap1, #test-chap2, #test-maquis (ou ?chap=… en local)
-  const TEST = new URLSearchParams(location.search).get('chap') || ((location.hash.match(/^#test-(?:chap)?([\w]+)$/) || [])[1]);
+  const TEST = HOTE && !HOTE.test ? null : new URLSearchParams(location.search).get('chap') || ((location.hash.match(/^#test-(?:chap)?([\w]+)$/) || [])[1]);
   if (TEST === 'maquis') {
     ['carnet', 'billet', 'mot', 'ticket', 'photo', 'testament', 'carte'].forEach(ajouter);
     etat.dette = 310000; etat.vuWei = true; etat.choixBamba = 'donne';

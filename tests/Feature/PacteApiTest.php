@@ -400,6 +400,38 @@ class PacteApiTest extends TestCase
         $this->assertStringContainsString(json_encode(route('pacte.progress', [], false)), $logged);
     }
 
+    public function test_hors_local_les_raccourcis_de_test_sont_coupes(): void
+    {
+        // Environnement de test = hors local, comme la production
+        $html = $this->actingAs($this->player)->get(route('pacte.show'))->getContent();
+
+        $this->assertStringContainsString('const TEST_MODE  = false', $html);
+        $this->assertStringNotContainsString('test-[\w]+|debug', $html); // pas de transmission du hash à l'iframe
+        $this->assertStringContainsString('window.PacteHost = Object.freeze(', $html);
+
+        // Invité : estDebloque toujours faux, une sauvegarde locale « chap3 » ne se reprend pas
+        $guest = $this->get(route('pacte.show'))->getContent();
+        $this->assertStringContainsString('estDebloque:    () => Promise.resolve(false)', $guest);
+    }
+
+    public function test_en_local_les_raccourcis_de_test_restent(): void
+    {
+        $this->app['env'] = 'local';
+
+        $html = $this->get(route('pacte.show'))->getContent();
+
+        $this->assertStringContainsString('const TEST_MODE  = true', $html);
+        $this->assertStringContainsString('test-[\w]+|debug', $html);
+    }
+
+    public function test_le_jeu_coupe_ses_raccourcis_quand_le_pont_le_demande(): void
+    {
+        $game = file_get_contents(resource_path('games/le-pacte/index.html'));
+
+        $this->assertStringContainsString('const TEST = HOTE && !HOTE.test ? null :', $game);
+        $this->assertStringContainsString("if ((!window.PacteHost || window.PacteHost.test) && (new URLSearchParams(location.search).has('debug')", $game);
+    }
+
     public function test_l_achat_marketplace_standard_renvoie_au_jeu(): void
     {
         config(['checkout.types.marketplace.enabled' => true]);

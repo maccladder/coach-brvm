@@ -212,8 +212,9 @@
 
     {{-- Pont avec le jeu : window.PacteHost, défini ici, AVANT l'iframe. Le jeu le reprend au
          chargement (script ajouté en tête du jeu par PacteController::HOST_BRIDGE).
-         Invité : seulement debloquer / acheterIndices (qui mènent à la connexion), le jeu garde
-         son localStorage pour la sauvegarde et l'indice gratuit. Connecté : tout passe par le serveur. --}}
+         Invité : estDebloque (toujours faux), debloquer / acheterIndices (qui mènent à la
+         connexion) ; le jeu garde son localStorage pour la sauvegarde et l'indice gratuit.
+         Connecté : tout passe par le serveur. « test » : raccourcis de test du jeu, en local seulement. --}}
     <script nonce="{{ $nonce }}">
     (function () {
         const URLS = {
@@ -226,6 +227,8 @@
             login:    @json(route('pacte.login', [], false)),
         };
         const LOGGED     = @json(auth()->check());
+        // Raccourcis de test du jeu (#test-…, ?chap=…, #debug) : en local seulement
+        const TEST_MODE  = @json(app()->environment('local'));
         const CSRF_TOKEN = @json(csrf_token());
         const INTENT_KEY = 'pacte_purchase_intent';
         const LOCAL_HINTS_KEY = 'pacte-caimans-indices'; // CLE_IND du jeu
@@ -331,7 +334,9 @@
 
         const hintsNow = () => (state && Number.isInteger(state.hints) ? state.hints : 0);
 
-        window.PacteHost = LOGGED ? {
+        // Gelé : impossible de remplacer estDebloque (ou autre) depuis la console
+        window.PacteHost = Object.freeze(LOGGED ? {
+            test:        TEST_MODE,
             charger:     () => firstState.then(s => (s && s.save ? s.save : null)),
             sauver:      data => { saveGame(data); },
             estDebloque: () => refreshState().then(s => !!(s && s.unlocked)),
@@ -345,9 +350,12 @@
             acheterIndices: () => buy('hints5').then(r => (r === 'already' ? hintsNow() : 0)),
             fin: (cle, choix) => { api(URLS.fin, { cle: cle, choix: Array.isArray(choix) ? choix : [] }, true).catch(() => {}); },
         } : {
+            test:           TEST_MODE,
+            // Un invité n'a jamais la suite : une sauvegarde locale « chap3 » … ne se reprend pas
+            estDebloque:    () => Promise.resolve(false),
             debloquer:      goLogin,
             acheterIndices: goLogin,
-        };
+        });
 
         // Pour le script de la page (retour de paiement)
         window.__pacte = { firstState, refreshState, buy, showNotice, hideNotice, INTENT_KEY, getState: () => state };
@@ -481,11 +489,12 @@
         const P = window.__pacte;
         document.getElementById('pc-notice-close').addEventListener('click', P.hideNotice);
 
-        // Raccourcis de test du jeu (#test-chap3…) : transmis à l'iframe. Retiré à l'étape 3,
-        // quand le jeu ignorera ces raccourcis sur Boursiv.
-        if (/^#test-[\w]+$/.test(window.location.hash)) {
+        @if(app()->environment('local'))
+        // Local seulement : raccourcis de test du jeu (#test-chap3…, #debug) transmis à l'iframe
+        if (/^#(test-[\w]+|debug)$/.test(window.location.hash)) {
             frame.src = frame.getAttribute('src').split('#')[0] + window.location.hash;
         }
+        @endif
 
         // ── Retour de paiement : le webhook peut arriver quelques secondes après ──
         const PAID     = @json($paid);
