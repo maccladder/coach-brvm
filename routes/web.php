@@ -132,6 +132,37 @@ Route::prefix('jeux/akwaba')->name('akwaba.')->controller(\App\Http\Controllers\
     });
 });
 
+// ✅ Le Pacte avec les caïmans : gratuit jusqu'au chapitre 2. Le jeu (dossier index.html + img/)
+//    est servi sous /v/{version}/ pour que ses chemins relatifs « img/... » marchent tels quels ;
+//    ces deux routes tournent sans session ni cookies (simples fichiers, ~70 images).
+Route::prefix('jeux/le-pacte')->name('pacte.')->controller(\App\Http\Controllers\PacteController::class)->group(function () {
+    Route::get('/', 'show')->name('show');
+    Route::get('/connexion', 'login')->name('login');
+    Route::get('/state', 'state')->middleware('throttle:pacte-state')->name('state');
+    Route::get('/paiement/retour', 'paymentReturn')->middleware('throttle:20,1')->name('payment.return');
+
+    Route::middleware('auth')->group(function () {
+        Route::post('/progress', 'progress')->middleware('throttle:30,1')->name('progress');
+        Route::post('/fin', 'fin')->middleware('throttle:10,1')->name('fin');
+        Route::post('/hint/use', 'useHint')->middleware('throttle:30,1')->name('hint.use');
+        Route::post('/hint/free', 'useFreeHint')->middleware('throttle:10,1')->name('hint.free');
+        Route::post('/buy', 'buy')->middleware('throttle:6,1')->name('buy');
+    });
+
+    Route::withoutMiddleware([
+        \Illuminate\Cookie\Middleware\EncryptCookies::class,
+        \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,
+        \Illuminate\Session\Middleware\StartSession::class,
+        \Illuminate\View\Middleware\ShareErrorsFromSession::class,
+        \Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class,
+    ])->where(['version' => '[a-f0-9]{16}'])->group(function () {
+        Route::get('/v/{version}/index.html', 'file')->name('file');
+        Route::get('/v/{version}/img/{file}', 'image')
+            ->where('file', '[A-Za-z0-9_-]+\.(?:jpg|png)')
+            ->name('image');
+    });
+});
+
 // ✅ URN Studio — générateur d'affiche d'adhésion (PUBLIC, sans auth)
 Route::get('/urn', function () {
     return view('urn.index');
@@ -940,7 +971,7 @@ Route::post('/paystack/webhook', [PaystackWebhookController::class, 'handle'])
 // ✅ Checkout Mobile Money personnalisé (Paystack /charge), activé type par type
 //    dans config/checkout.php. Auth vérifiée dans le contrôleur : les dons sont ouverts aux invités.
 Route::prefix('paiement-mobile')->name('checkout.mm.')->group(function () {
-    $types = 'marketplace|course|pack|wallet|cauris|don|game_premium|akwaba|document';
+    $types = 'marketplace|course|pack|wallet|cauris|don|game_premium|akwaba|pacte|document';
 
     Route::get('/suivi/{reference}', [\App\Http\Controllers\MobileMoneyCheckoutController::class, 'status'])
         ->name('status');

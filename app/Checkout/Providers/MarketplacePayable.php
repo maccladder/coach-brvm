@@ -10,7 +10,7 @@ use App\Models\MarketplaceProduct;
 use App\Models\Payment;
 use App\Models\User;
 use App\Services\Affiliate\AffiliateCommissionService;
-use App\Services\AkwabaService;
+use App\Services\Games\StoryGames;
 use App\Services\Payments\PaystackMarketplaceService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -32,9 +32,9 @@ class MarketplacePayable extends BasePayable implements StartsClassicFlow
             throw CheckoutRedirect::to(route('marketplace.index'), 'error', 'Produit introuvable.');
         }
 
-        // Akwaba s'achète depuis le jeu (type de checkout « akwaba », retour sur /jeux/akwaba)
-        if ($product->slug === AkwabaService::SLUG) {
-            throw CheckoutRedirect::to(route('akwaba.show'));
+        // Jeux à histoire (Akwaba, Le Pacte) : achat depuis le jeu (checkout propre, retour sur le jeu)
+        if (StoryGames::is($product->slug)) {
+            throw CheckoutRedirect::to(StoryGames::playUrl($product->slug));
         }
 
         // Les articles gratuits gardent leur flux "claim gratuit"
