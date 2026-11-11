@@ -2513,8 +2513,7 @@
       ['Owell Brown', "Konan, quand tu rentres à Abidjan, passe me voir. Under the Tree, Riviera Golf, 7 jours sur 7, de 9 h à 2 h du matin."],
       ['Owell Brown', "La sauce feuille, c'est moi qui t'invite !"],
     ], () => { flash(); setTimeout(() => { aller('funerailles'); etat.portraits = true; objectif("Comprendre comment papa est mort : parler aux invités, lire le registre des condoléances.");
-      cameraSur('funerailles', 86, 62, 1.7);
-      dire([['M. Wei', "M. Bamba vient de m'appeler. Ses hommes commencent lundi. Merci, M. Konan."], ['M. Wei', "Votre père serait fier de vous. 再见. Au revoir."], ['', "Il s'incline, remet son casque et s'éloigne vers les voitures."]],
+      dire([['M. Wei', "M. Bamba vient de m'appeler. Ses hommes commencent lundi. Merci, M. Konan.", gros('img/gp_wei.jpg', { lignes: 2 })], ['M. Wei', "Votre père serait fier de vous. 再见. Au revoir."], ['', "Il s'incline, remet son casque et s'éloigne vers les voitures."]],
         () => { $('[data-id=wei]').style.display = 'none'; finCamera(); verifIndices(); }); }, 400); });
   }
 
@@ -2989,7 +2988,7 @@
       ['Tantie Adjoua', "Je n'ai tué personne. J'ai emmené Kouamé devant son créancier. C'est le lac qui a fait le reste."],
       ['Tantie Adjoua', "Vingt-huit ans de camions, de plantations, d'écoles payées. Tu crois que ça tombe du ciel ? Tout se paie, Konan. Ton père a signé. Il a voulu tricher deux fois."],
       ['Konan', "Le lac n'a jamais rien reçu. Kouassi est vivant. Je l'ai vu cet après-midi."],
-      ['', "Pour la première fois, quelque chose bouge dans son visage.", () => { cameraSur('confrontation', 50, 22, 2.4); sMenace(); }],
+      ['', "Pour la première fois, quelque chose bouge dans son visage.", gros('img/gp_tantie_trouble.jpg', { avant: sMenace, lignes: 2 })],
       ['Tantie Adjoua', "…Alors c'est pour ça. Vingt-huit ans de dette. Voilà pourquoi le lac a pris Kouamé. Et voilà pourquoi il faut payer ce soir, et payer le double."],
       ['Tantie Adjoua', "Donne-moi ce que tu as pris chez moi. Et le carnet.", () => finCamera()],
     ], () => {
@@ -3345,11 +3344,11 @@
     murphotos: () => {
       if (etat.c5Frere) return dire([['Konan', "Vingt-huit ans de photos. Le vieux n'en a raté aucune."]]);
       if (!(etat.c5Nattes && etat.c5Cahiers && etat.c5Jouet)) return dire([['Konan', "Des dizaines de photos épinglées. Il fait trop sombre… Je regarde d'abord le reste de la pièce."]]);
-      etat.c5Mur = true; cameraSur('cabaneint', 88, 34, 2.3);
+      etat.c5Mur = true;
       dire([
-        ['Konan', "Toujours le même garçon. À huit ans, avec un poulet blanc. À douze, avec un filet."],
+        ['Konan', "Toujours le même garçon. À huit ans, avec un poulet blanc. À douze, avec un filet.", gros('img/gp_mur_photos.jpg', { avant: sPapier, lignes: 4 })],
         ['Konan', "À seize ans, à côté du vieux. À vingt-deux, sur le muret, au milieu des caïmans."],
-        ['Konan', "Et la dernière. Un homme de mon âge. Crâne rasé, une cicatrice au sourcil.", () => { finCamera(); $('#polaroid').classList.add('on'); sPapier(); }],
+        ['Konan', "Et la dernière. Un homme de mon âge. Crâne rasé, une cicatrice au sourcil.", () => sPapier()],
         ['Konan', "…Il a mon visage.", () => sMenace()],
         ['', "Derrière Konan, le plancher craque.", () => { $('#polaroid').classList.remove('on'); $('#kouassi').classList.add('on'); sMenace(); }],
         ['Kouassi', "Le vieux a dit que tu viendrais. Il a dit : « Il aura ton visage, mais ça ne prouve rien. »", gros('img/gp_kouassi.jpg', { lignes: 2 })],
@@ -3566,7 +3565,7 @@
     stylo: () => dire([['Konan', "Mon stylo. Je note tout. Les ventes, les dettes, les codes…"]]),
   };
   // Hotspots où la caméra zoome sur la personne qui parle
-  const CAMERA = ['yao4', 'wei', 'attieke', 'cireur', 'porteuse', 'femmes', 'vieux', 'gardes', 'serveurs', 'bambaTel', 'zie', 'bananes', 'pain'];
+  const CAMERA = [];   // zoom caméra retiré sur les personnages du décor : il grossissait trop l'image
   function cameraSur(sc, x, y, z) {
     if (typeof sc === 'string') sc = $('#' + sc);
     sc.style.setProperty('--ox', x + '%'); sc.style.setProperty('--oy', y + '%'); sc.style.setProperty('--zc', z); sc.classList.add('camera');
@@ -3755,7 +3754,7 @@
     function preparer(sc) {
       queue.length = 0;
       sc.querySelectorAll('[data-id]').forEach(h => { const f = ACTIONS[h.dataset.id]; (f ? String(f).match(/img\/\w+\.(?:jpg|png)/g) || [] : []).forEach(prevoir); });
-      ({ marche: ['img/gp_attieke.jpg', 'img/gp_petit.jpg'], table: ['img/gp_petit.jpg'], villa: ['img/gp_tantie_figee.jpg'], confrontation: ['img/gp_tantie_colere.jpg'], muret: ['img/gp_ama.jpg'], cabaneint: ['img/gp_kouassi.jpg'] }[sc.id] || []).forEach(prevoir);
+      ({ marche: ['img/gp_attieke.jpg', 'img/gp_petit.jpg'], table: ['img/gp_petit.jpg'], villa: ['img/gp_tantie_figee.jpg'], funerailles: ['img/gp_wei.jpg'], confrontation: ['img/gp_tantie_colere.jpg', 'img/gp_tantie_trouble.jpg'], muret: ['img/gp_ama.jpg'], cabaneint: ['img/gp_mur_photos.jpg', 'img/gp_kouassi.jpg'] }[sc.id] || []).forEach(prevoir);
       let n = sc.nextElementSibling, k = 0;
       while (n && k < 2) { if (n.matches('.scene')) { n.querySelectorAll('img').forEach(i => prevoir(i.dataset.src || i.getAttribute('src'))); k++; } n = n.nextElementSibling; }
       setTimeout(pompe, 1200);
