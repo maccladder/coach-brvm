@@ -55,3 +55,12 @@ rien ne casse si on modifie un dialogue sans mettre le dictionnaire à jour.
 ## Images
 Les images des scènes sont en `data-src` dans le HTML : elles ne sont demandées que quand la scène ou le gros plan s'ouvre,
 puis le jeu précharge discrètement les deux scènes suivantes. Les JPEG sont progressifs. Aucun nom de fichier n'a changé.
+
+## Téléphone
+- Téléphone tenu debout (fenêtre du jeu en portrait, moins de 700 px de large) : l'écran titre a une mise en page verticale.
+  Dès que la partie commence, la scène est couchée (rotation de 90°) et prend tout l'écran : le joueur tient son téléphone
+  à l'horizontale, même si la rotation de l'écran est verrouillée. Classe `pivot` sur `<body>`.
+- Pour désactiver ce mode : `PacteHost.pivot = false` (la scène reste alors droite et petite en portrait).
+- L'iframe du jeu doit occuper toute la hauteur disponible sous la barre du site, en portrait comme en paysage.
+- Petite scène (moins de 760 px de large) : l'objectif s'efface après 7 secondes, Menu et Son deviennent des icônes,
+  « Fermer » devient une croix, l'inventaire tient sur une ligne.
